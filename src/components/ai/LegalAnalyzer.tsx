@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, Button, CircularProgress, Paper, TextField, Typography } from '@mui/material';
-import aiService from '../../services/aiService';
+import aiService from '@/services/aiService';
 
 interface LegalAnalyzerProps {
   projectId?: string;
@@ -38,7 +38,7 @@ export default function LegalAnalyzer({ projectId, onAnalysisComplete }: LegalAn
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', p: 3, borderRadius: 3, boxShadow: 3 }}>
       <TextField
         label="Enter legal text to analyze"
         multiline
@@ -61,7 +61,7 @@ export default function LegalAnalyzer({ projectId, onAnalysisComplete }: LegalAn
       </Button>
 
       {error && (
-        <Paper sx={{ p: 2, mb: 2, bgcolor: 'error.lightest' }}>
+        <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 3, mb: 2, bgcolor: 'error.lightest' }}>
           <Typography color="error" variant="body2">
             Error: {error}
           </Typography>
@@ -69,7 +69,7 @@ export default function LegalAnalyzer({ projectId, onAnalysisComplete }: LegalAn
       )}
 
       {analysis && (
-        <Paper sx={{ p: 2 }}>
+        <Paper sx={{ p: 3, borderRadius: 3, boxShadow: 3 }}>
           <Typography variant="h6" gutterBottom>
             Analysis Results
           </Typography>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Avatar, Container } from '@mui/material';
+import { Box, AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Avatar, Container, Tooltip, CircularProgress } from '@mui/material';
 import { Menu as MenuIcon, DarkMode, LightMode, Logout } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,6 +10,41 @@ import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
 import ResizablePanels from '../components/ResizablePanels';
+
+// Add a custom NavLink component with loading indicator
+const NavLink = ({ to, label, icon, onClick }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  
+  const handleNavigation = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Call the onClick handler if provided
+    if (onClick) onClick();
+    
+    // Slight delay for visual feedback
+    setTimeout(() => {
+      navigate(to);
+      setLoading(false);
+    }, 100);
+  };
+  
+  return (
+    <Tooltip title={label} placement="right">
+      <IconButton
+        color="inherit"
+        onClick={handleNavigation}
+        disabled={loading}
+        sx={{ position: 'relative' }}
+      >
+        {loading ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : icon}
+      </IconButton>
+    </Tooltip>
+  );
+};
 
 const MainLayout = () => {
   const navigate = useNavigate();

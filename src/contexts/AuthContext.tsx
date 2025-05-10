@@ -17,6 +17,8 @@ interface AuthContextType {
   }>;
   signOut: () => Promise<{ error: Error | null }>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  /** Inject a user manually (demo / tests) */
+  setUserManually: (u: Partial<User> | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,37 +48,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  // Add setUserManually function for demo login
+  const setUserManually = useCallback((u: Partial<User> | null) => {
+    setUser(u as User | null);
+  }, []);
+
   useEffect(() => {
     let mounted = true;
     
-    // Get initial session
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      setSession(session);
-      setUser(session?.user || null);
-      
-      if (session?.user) {
-        setStoreUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          avatar_url: session.user.user_metadata?.avatar_url,
-          full_name: session.user.user_metadata?.full_name,
-        });
-      }
-      
-      setLoading(false);
-    });
+    // 1️⃣ Hydrate from cached session *after* the promise resolves
+    supabaseClient.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (!mounted) return;
+        if (error) console.error('getSession error:', error.message);
+        
+        const currentSession = data.session;
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        if (currentSession?.user) {
+          setStoreUser({
+            id: currentSession.user.id,
+            email: currentSession.user.email || '',
+            avatar_url: currentSession.user.user_metadata?.avatar_url,
+            full_name: currentSession.user.user_metadata?.full_name,
+          });
+        }
+        
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error getting session:', error);
+        if (mounted) setLoading(false);
+      });
 
     // Listen for auth changes
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user || null);
         
         if (session?.user) {
+          console.log('Setting user in store:', session.user.id);
           setStoreUser({
             id: session.user.id,
             email: session.user.email || '',
@@ -106,7 +123,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signUp,
     signOut,
     resetPassword,
-  }), [session, user, loading, signIn, signUp, signOut, resetPassword]);
+    setUserManually,
+  }), [session, user, loading, signIn, signUp, signOut, resetPassword, setUserManually]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

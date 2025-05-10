@@ -5,7 +5,8 @@ import { resolve } from 'path'
 // https://vite.dev/config/
 export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const devPort = Number(env.VITE_DEV_PORT) || 3000;
+  // Always use port 5173 and override any env setting to avoid conflicts
+  const devPort = 5173;
   
   return defineConfig({
     plugins: [react()],
@@ -14,38 +15,51 @@ export default ({ mode }: { mode: string }) => {
     resolve: {
       alias: {
         // Alias for TinyMCE resources
-        tinymce: resolve(__dirname, 'node_modules/tinymce')
+        tinymce: resolve(__dirname, 'node_modules/tinymce'),
+        '@': resolve(__dirname, 'src'),
       }
     },
     
-    // Configure server settings with dynamic port
+    // Configure server settings with fixed port
     server: {
+      host: 'localhost',
       port: devPort,
-      strictPort: false,
+      strictPort: true, // Force this port, don't try alternatives
       open: true,
       hmr: {
-        protocol: 'ws',
-        host: 'localhost',
+        host: 'localhost',       // force exact host
+        clientPort: devPort,     // ensure matching port
+        protocol: 'ws',          // stay on ws in http dev
       },
     },
     
-    // Configure build options
+    // Add customized build configuration
     build: {
-      // Ensure TinyMCE skins are included in the build
-      // This copies TinyMCE resources to the public directory
+      outDir: 'dist',
+      sourcemap: mode === 'development',
+      // Optimize chunks
       rollupOptions: {
         output: {
           manualChunks: {
-            // Split TinyMCE into its own chunk to improve loading performance
-            tinymce: ['tinymce', '@tinymce/tinymce-react']
-          }
-        }
-      }
+            vendor: ['react', 'react-dom', 'react-router-dom'],
+            ui: ['@mui/material', '@mui/icons-material'],
+            editor: ['tinymce'],
+          },
+        },
+      },
+      // Ensure service worker is copied to dist
+      assetsDir: 'assets',
+      emptyOutDir: true,
     },
     
-    // Add optimizeDeps configuration to handle problematic dependencies
+    // Handle PWA configuration
+    define: {
+      'import.meta.env.APP_VERSION': JSON.stringify(process.env.npm_package_version || '1.0.0'),
+    },
+    
+    // Optimized dependencies
     optimizeDeps: {
-      include: ['@tinymce/tinymce-react', 'tinymce']
-    }
+      include: ['react', 'react-dom', 'react-router-dom', '@mui/material'],
+    },
   });
 }

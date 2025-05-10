@@ -1,59 +1,65 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from "../_shared/cors.ts";
 import { getNextExhibitId } from "../utils/database.ts";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+import { handleCors, handleError } from "../_shared/cors.ts";
 
 interface RequestParams {
   projectId: string;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  const corsResponse = handleCors(req);
+  if (corsResponse) {
+    return corsResponse;
   }
 
   try {
-    // Parse request body
+    // Only allow POST requests
+    if (req.method !== 'POST') {
+      return new Response(
+        JSON.stringify({ error: 'Method not allowed' }),
+        { status: 405, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get the request body
     const { projectId } = await req.json() as RequestParams;
 
+    // Validate required parameters
     if (!projectId) {
       return new Response(
-        JSON.stringify({ error: "Project ID is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ error: 'Missing required parameter: projectId' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     // Get the next exhibit ID
-    const nextExhibitId = await getNextExhibitId(projectId);
+    const exhibitId = await getNextExhibitId(projectId);
 
     // Return the result
-    return new Response(
+    const response = new Response(
       JSON.stringify({ 
-        exhibitId: nextExhibitId 
+        exhibitId,
+        success: true,
+        timestamp: new Date().toISOString()
       }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
+
+    // Add CORS headers to the response
+    return handleCors(req, response) || response;
   } catch (error) {
-    console.error("Error in get-next-exhibit-id function:", error);
+    // Handle errors using our improved error handler
+    const errorResponse = handleError(error, 'get-next-exhibit-id');
     
-    return new Response(
-      JSON.stringify({ 
-        error: "Failed to get next exhibit ID",
-        details: error.message 
-      }),
+    const response = new Response(
+      JSON.stringify(errorResponse.body),
       {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: errorResponse.status,
+        headers: { 'Content-Type': 'application/json' }
       }
     );
+    
+    return handleCors(req, response) || response;
   }
 }); 

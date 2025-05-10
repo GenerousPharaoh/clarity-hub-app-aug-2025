@@ -36,7 +36,7 @@ const DEMO_USER = {
 const Login = memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn } = useAuth();
+  const { signIn, setUserManually } = useAuth();
   const setStoreUser = useAppStore((state) => state.setUser);
   
   const [email, setEmail] = useState('');
@@ -63,17 +63,22 @@ const Login = memo(() => {
   const handleForceDemoLogin = useCallback(() => {
     setLoading(true);
     
-    // Set the demo user directly in the store
+    // 1️⃣ Set the demo user directly in the store
     setStoreUser(DEMO_USER);
     
-    // Short timeout to ensure the store is updated before navigation
+    // 2️⃣ Tell AuthContext we're authenticated
+    setUserManually(DEMO_USER);
+    
+    // 3️⃣ Redirect directly - no setTimeout needed
+    const state = location.state as LocationState;
+    const from = state?.from || '/';
+    console.log('Navigating to:', from);
+    // Wait one tick for the store update to propagate
     setTimeout(() => {
-      // Redirect to appropriate page
-      const state = location.state as LocationState;
-      const from = state?.from || '/';
-      navigate(from);
-    }, 100);
-  }, [navigate, location.state, setStoreUser]);
+      console.log('Executing delayed demo navigation to:', from);
+      navigate(from, { replace: true });
+    }, 0);
+  }, [navigate, location.state, setStoreUser, setUserManually]);
   
   const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,16 +99,19 @@ const Login = memo(() => {
     }
     
     try {
-      const { error } = await signIn(email, password, {
-        redirectTo: location.state?.from || '/'
-      });
+      const { error } = await signIn(email, password);
       
       if (error) throw error;
       
       // Redirect to appropriate page
       const state = location.state as LocationState;
       const from = state?.from || '/';
-      navigate(from);
+      console.log('Login successful, navigating to:', from);
+      // Wait one tick for the AuthContext to update with the new auth state
+      setTimeout(() => {
+        console.log('Executing delayed navigation to:', from);
+        navigate(from, { replace: true });
+      }, 0);
     } catch (error: any) {
       console.error('Login error:', error);
       

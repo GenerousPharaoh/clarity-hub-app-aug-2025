@@ -5,6 +5,7 @@ import useAppStore from '../store';
 import supabase from '../services/supabaseClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface WelcomePlaceholderProps {
   title?: string;
@@ -19,12 +20,13 @@ const WelcomePlaceholder: React.FC<WelcomePlaceholderProps> = ({
   const [newProjectName, setNewProjectName] = useState('');
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   
   // Get projects from store
   const setProjects = useAppStore(state => state.setProjects);
   const setSelectedProject = useAppStore(state => state.setSelectedProject);
   
-  // Fetch projects using React Query
+  // Fetch projects using React Query - guarded with user authentication
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
@@ -41,7 +43,9 @@ const WelcomePlaceholder: React.FC<WelcomePlaceholderProps> = ({
       // Update store with projects
       setProjects(data || []);
       return data || [];
-    }
+    },
+    // Only run the query when we have a user and not loading
+    enabled: !loading && !!user,
   });
   
   // Create project mutation
@@ -201,7 +205,11 @@ const WelcomePlaceholder: React.FC<WelcomePlaceholderProps> = ({
             Your Projects
           </Typography>
           
-          {projects.length > 0 ? (
+          {loading ? (
+            <Typography color="text.secondary" sx={{ mb: 4 }}>
+              Loading projects...
+            </Typography>
+          ) : projects.length > 0 ? (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 4 }}>
               {projects.map((project) => (
                 <Button

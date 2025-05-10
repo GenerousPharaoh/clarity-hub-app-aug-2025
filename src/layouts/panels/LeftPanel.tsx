@@ -59,7 +59,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 // File type icons are now handled by the FileTypeIcon component
 
 const LeftPanel = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { showNotification } = useNotification();
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
   const setSelectedProject = useAppStore((state) => state.setSelectedProject);
@@ -117,12 +117,12 @@ const LeftPanel = () => {
     }
   }, [files, setFiles]);
 
-  // Fetch projects on mount
+  // Fetch projects on mount - only when auth is loaded and user exists
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user) {
       fetchProjects();
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -185,6 +185,12 @@ const LeftPanel = () => {
   const fetchProjects = async () => {
     try {
       setProjectsLoading(true);
+      // Guard against fetching when user is not available
+      if (!user) {
+        console.log('Skipping project fetch - no authenticated user');
+        return;
+      }
+      
       const { data, error } = await supabaseClient
         .from('projects')
         .select('*')
@@ -517,7 +523,7 @@ const LeftPanel = () => {
         </Box>
         
         {/* Project List */}
-        {projectsLoading ? (
+        {authLoading || projectsLoading ? (
           <List>
             {[1, 2, 3].map((i) => (
               <ListItem key={i} disablePadding>

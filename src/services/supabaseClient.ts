@@ -2,7 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from '../types/supabase';
 
 // Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string || '')
+  .trim()
+  .replace(/\/+$/, '');
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 const allowLocalStorageFallback = import.meta.env.VITE_ALLOW_LOCAL_STORAGE_FALLBACK === 'true';
 
@@ -10,6 +12,13 @@ const allowLocalStorageFallback = import.meta.env.VITE_ALLOW_LOCAL_STORAGE_FALLB
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Supabase URL or Anon Key not found. Please check your environment variables.');
   throw new Error('Missing Supabase credentials');
+}
+
+// Validate Supabase URL format to prevent DNS resolution issues
+if (!/^https:\/\/[a-z0-9]{20}\.supabase\.co$/i.test(supabaseUrl)) {
+  throw new Error(
+    `VITE_SUPABASE_URL looks wrong → "${supabaseUrl}". Copy the exact Project URL from the Supabase dashboard.`,
+  );
 }
 
 // Log the Supabase URL being used (for debugging)
@@ -51,11 +60,11 @@ const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
         }
       }
       
-      // Enhanced fetch with CORS settings
+      // Enhanced fetch with CORS settings - FIXED: Removed credentials: 'include' to fix CORS issues
       const [resource, options = {}] = args;
       const fetchOptions = {
         ...options,
-        credentials: 'include',
+        // credentials: 'include', // REMOVED - causes CORS issues with wildcard origins
         mode: 'cors',
         headers: {
           ...options.headers,

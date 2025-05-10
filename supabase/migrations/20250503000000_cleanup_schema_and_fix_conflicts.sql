@@ -12,6 +12,14 @@ BEGIN
         ALTER TABLE notes ADD COLUMN user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
     END IF;
     
+    -- Check if created_by column exists on notes table, add if missing
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'notes' AND column_name = 'created_by'
+    ) THEN
+        ALTER TABLE notes ADD COLUMN created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+    END IF;
+    
     -- Check if project_id column exists and has proper constraint
     IF EXISTS (
         SELECT 1 FROM information_schema.columns
@@ -80,7 +88,7 @@ DROP POLICY IF EXISTS "Users can view files in projects they collaborate on" ON 
 -- Create simplified policies that don't rely on recursive checks
 CREATE POLICY "Users can view their own files" 
     ON files FOR SELECT 
-    USING (owner_id = auth.uid() OR uploaded_by_user_id = auth.uid());
+    USING (uploaded_by_user_id = auth.uid());
     
 CREATE POLICY "Users can insert files" 
     ON files FOR INSERT 
@@ -90,16 +98,34 @@ CREATE POLICY "Users can insert files"
 DROP POLICY IF EXISTS "Users can view notes in their projects" ON notes;
 DROP POLICY IF EXISTS "allow_all_notes" ON notes;
 
--- Create simplified policy for notes
+-- Create simplified policy for notes - fixed to use created_by instead of owner_id
 CREATE POLICY "Notes access for users" 
     ON notes FOR ALL 
-    USING (user_id = auth.uid() OR owner_id = auth.uid());
+    USING (user_id = auth.uid() OR created_by = auth.uid());
 
 -- 7. Ensure we have all necessary configuration for TinyMCE
 -- No database changes needed for this, but added here for documentation 
 
 -- 8. Ensure unique constraint for notes on project_id and user_id
-ALTER TABLE notes
-ADD CONSTRAINT notes_project_user_unique UNIQUE (project_id, user_id);
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'notes' AND column_name = 'project_id'
+    ) AND EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'notes' AND column_name = 'user_id'
+    ) THEN
+        -- Only add constraint if both columns exist
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.table_constraints
+            WHERE constraint_name = 'notes_project_user_unique'
+            AND table_name = 'notes'
+        ) THEN
+            ALTER TABLE notes
+            ADD CONSTRAINT notes_project_user_unique UNIQUE (project_id, user_id);
+        END IF;
+    END IF;
+END $$;
 
 -- End of migration file 

@@ -64,7 +64,7 @@ export const useAppStore = create<AppState>()(
   devtools(
     persist(
       (...a) => ({
-        // Include panel state slice
+        // Include panel state slice with updated default sizes
         ...createPanelSlice(...a),
         
         // User state

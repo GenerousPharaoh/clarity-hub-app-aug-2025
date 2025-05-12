@@ -3,6 +3,7 @@ import { handleCors } from '../_shared/cors.ts';
 import { generateText, generateEmbeddings } from '../utils/googleai.ts';
 import { getFile, saveDocumentChunks } from '../utils/database.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
+import { corsHeaders } from '../_shared/cors.ts';
 
 interface RequestParams {
   fileId: string;
@@ -62,10 +63,35 @@ function chunkText(text: string, chunkSize = 1000, overlapSize = 200) {
   return chunks;
 }
 
-serve(async (req) => {
-  // Handle CORS preflight and attach headers
-  const preflightResponse = handleCors(req);
-  if (preflightResponse) return preflightResponse;
+// Main handler function
+Deno.serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { 
+      headers: new Headers({
+        ...corsHeaders,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+        'Access-Control-Max-Age': '86400', // 24 hours
+        'Vary': 'Origin', // Important for caching responses with different CORS headers
+      })
+    });
+  }
+  
+  // Ensure origin is set properly for all responses
+  const headers = new Headers({
+    ...corsHeaders,
+    'Content-Type': 'application/json',
+    'Vary': 'Origin'
+  });
+  
+  // Check that the request is a POST
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { status: 405, headers }
+    );
+  }
 
   // Call main logic and then attach CORS headers
   const response = await (async () => {

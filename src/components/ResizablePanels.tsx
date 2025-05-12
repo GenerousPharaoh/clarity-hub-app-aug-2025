@@ -339,11 +339,13 @@ export const ResizablePanels = ({
               flexDirection: 'column',
               overflow: 'hidden',
               maxWidth: '100%',
+              minHeight: 0, // Critical fix for flexbox nested scrollable content
               transition: `all ${TRANSITION_DURATION} ease`,
               bgcolor: 'background.paper',
               borderRight: 1,
-                borderColor: 'divider',
+              borderColor: 'divider',
               boxShadow: (theme) => `inset -2px 0 5px ${alpha(theme.palette.common.black, 0.02)}`,
+              pt: 2.5, // Increased top padding to prevent content from being cut off by menu bar
             }}
           >
             {cloneElement(childrenArray[0], {
@@ -378,12 +380,14 @@ export const ResizablePanels = ({
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
+              minHeight: 0, // Critical fix for flexbox nested scrollable content
               transition: `all ${TRANSITION_DURATION} ease`,
               backgroundColor: 'background.paper',
               boxShadow: (theme) => `0 0 8px ${alpha(theme.palette.common.black, 0.08)}`,
               position: 'relative',
               zIndex: 2,
               border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.05)}`,
+              pt: 2.5, // Increased top padding to prevent content from being cut off by menu bar
             }}
           >
             {cloneElement(childrenArray[1], {
@@ -412,11 +416,13 @@ export const ResizablePanels = ({
               flexDirection: 'column',
               overflow: 'hidden',
               maxWidth: '100%',
+              minHeight: 0, // Critical fix for flexbox nested scrollable content
               transition: `all ${TRANSITION_DURATION} ease`,
               bgcolor: 'background.paper',
               borderLeft: 1,
-                borderColor: 'divider',
+              borderColor: 'divider',
               boxShadow: (theme) => `inset 2px 0 5px ${alpha(theme.palette.common.black, 0.02)}`,
+              pt: 2.5, // Increased top padding to prevent content from being cut off by menu bar
             }}
           >
             {cloneElement(childrenArray[2], {

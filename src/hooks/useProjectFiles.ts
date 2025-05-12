@@ -1,5 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import supabaseClient, { getStorageUrl, getSupabaseKey } from '../supabase-client-wrapper';
+import { supabase } from '../lib/supabaseClient';
+import { uploadFile, getPublicUrl } from '../services/storageService';
+import fileProcessingService from '../services/fileProcessingService';
+
+// Define common file categories and their extensions
+const FILE_TYPES = {
+  DOCUMENT: ['pdf', 'doc', 'docx', 'odt', 'rtf', 'txt', 'md'],
+  SPREADSHEET: ['xls', 'xlsx', 'csv', 'ods', 'numbers'],
+  PRESENTATION: ['ppt', 'pptx', 'odp', 'key'],
+  IMAGE: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'heic', 'heif'],
+  VIDEO: ['mp4', 'webm', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'm4v'],
+  AUDIO: ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'wma'],
+  CODE: ['html', 'css', 'js', 'ts', 'jsx', 'tsx', 'json', 'xml', 'py', 'java', 'c', 'cpp', 'php', 'rb', 'go', 'swift'],
+  ARCHIVE: ['zip', 'rar', '7z', 'tar', 'gz', 'bz2'],
+  OTHER: [],
+};
 
 export interface FileRecord {
   id: string;
@@ -15,6 +30,12 @@ export interface FileRecord {
     tags?: string[];
     fileType?: string;
     uploadTimestamp?: number;
+    originalFileName?: string;
+    fileExtension?: string;
+    mimeType?: string;
+    textContent?: string; 
+    processingStatus?: 'pending' | 'processing' | 'completed' | 'failed';
+    extractedData?: Record<string, any>;
   };
   added_at: string;
   owner_id: string;
@@ -24,6 +45,27 @@ export interface FileRecord {
 export interface UploadProgressEvent {
   loaded: number;
   total: number;
+}
+
+// Determine file type based on extension and MIME type
+export function determineFileType(fileName: string, mimeType: string): string {
+  const fileExt = fileName.split('.').pop()?.toLowerCase() || '';
+  
+  // First check by MIME type
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('video/')) return 'video';
+  if (mimeType.startsWith('audio/')) return 'audio';
+  if (mimeType === 'application/pdf') return 'pdf';
+  
+  // Then check by extension
+  for (const [type, extensions] of Object.entries(FILE_TYPES)) {
+    if (extensions.includes(fileExt)) {
+      return type.toLowerCase();
+    }
+  }
+  
+  // Default file type
+  return 'document';
 }
 
 /**
@@ -36,7 +78,7 @@ export function useProjectFiles(projectId: string | null) {
     queryFn: async () => {
       if (!projectId) return [];
       
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('files')
         .select('*')
         .eq('project_id', projectId)
@@ -70,7 +112,7 @@ export function useProjectFiles(projectId: string | null) {
 
 /**
  * Custom hook to upload a file to Supabase storage and add its record to the files table
- * Enhanced with progress reporting and better error handling
+ * Enhanced with progress reporting, better error handling, and AI file analysis
  */
 export function useFileUpload() {
   const queryClient = useQueryClient();
@@ -92,170 +134,220 @@ export function useFileUpload() {
       }
       
       try {
-        // Extract the file extension and type
+        // Validate that we have API connection before attempting upload
+        const { data: testConnection, error: testError } = await supabase.auth.getSession();
+        
+        if (testError) {
+          console.error('Session validation failed:', testError);
+          throw new Error(`API connection error: ${testError.message}`);
+        }
+        
+        if (!testConnection?.session?.access_token) {
+          console.error('No valid session token found');
+          throw new Error('Authentication error: No API key found in request');
+        }
+        
+        console.log('Starting file upload process', { 
+          name: file.name, 
+          size: file.size, 
+          type: file.type,
+          projectId: projectId 
+        });
+        
+        // Extract the file extension
         const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
         
-        // Determine file type more accurately based on MIME type and extension
-        let fileType = 'document'; // Default file type
+        // Determine file type using our helper function
+        const fileType = determineFileType(file.name, file.type);
         
-        if (file.type.startsWith('image/')) {
-          fileType = 'image';
-        } else if (file.type.startsWith('video/')) {
-          fileType = 'video';
-        } else if (file.type.startsWith('audio/')) {
-          fileType = 'audio';
-        } else if (file.type === 'application/pdf') {
-          fileType = 'pdf';
-        } else if (['doc', 'docx', 'odt', 'rtf'].includes(fileExt)) {
-          fileType = 'document';
-        } else if (['xls', 'xlsx', 'csv', 'ods'].includes(fileExt)) {
-          fileType = 'spreadsheet';
-        } else if (['ppt', 'pptx', 'odp'].includes(fileExt)) {
-          fileType = 'presentation';
-        } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(fileExt)) {
-          fileType = 'archive';
-        } else if (['html', 'css', 'js', 'ts', 'json', 'xml', 'py', 'java', 'c', 'cpp', 'php'].includes(fileExt)) {
-          fileType = 'code';
-        }
+        // Generate a unique ID for the file
+        const fileId = crypto.randomUUID();
         
-        // Create a storage path with timestamp to avoid name conflicts
-        const timestamp = new Date().getTime();
-        const storagePath = `users/${userId}/projects/${projectId}/${timestamp}_${file.name}`;
+        // Create a storage path with the unique ID to avoid name conflicts
+        // Format: {bucket}/projects/{projectId}/{fileId}_{fileName}
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const storagePath = `projects/${projectId}/${fileId}_${safeFileName}`;
+        const bucket = 'files';
         
-        console.log('Starting file upload process:', { name: file.name, storagePath, fileType });
+        // Upload to storage using our enhanced storage service
+        console.log(`Uploading file to ${bucket}/${storagePath}`);
         
-        // Set up a custom fetch with progress monitoring
-        const uploadWithProgress = async () => {
-          // Prepare the form data for upload
-          const formData = new FormData();
-          formData.append('file', file);
-          
-          // Create a custom controller to manage upload
-          const controller = new AbortController();
-          
-          // Set up an XMLHttpRequest for progress tracking
-          return new Promise<{ path: string }>((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            
-            // Use the wrapper function to get storage URL safely
-            const supabaseURL = `${getStorageUrl()}/object/files/${storagePath}`;
-            
-            xhr.open('POST', supabaseURL, true);
-            
-            // Get authentication headers using public methods
-            const authToken = supabaseClient.auth.getSession()
-              .then(session => session.data.session?.access_token)
-              .catch(() => null);
-            
-            // Set headers when auth token is available
-            authToken.then(token => {
-              if (token) {
-                xhr.setRequestHeader('Authorization', `Bearer ${token}`);
-              }
-              
-              // Use the wrapper function to get api key safely
-              xhr.setRequestHeader('apikey', getSupabaseKey());
-              xhr.setRequestHeader('x-upsert', 'true');
-              
-              // Track upload progress
-              xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable && onProgress) {
-                  onProgress({
-                    loaded: event.loaded,
-                    total: event.total
-                  });
-                }
-              };
-              
-              // Handle completion
-              xhr.onload = () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                  resolve({ path: storagePath });
-                } else {
-                  reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.responseText}`));
-                }
-              };
-              
-              // Handle errors
-              xhr.onerror = () => {
-                reject(new Error('Network error occurred during upload'));
-              };
-              
-              xhr.onabort = () => {
-                reject(new Error('Upload was aborted'));
-              };
-              
-              // Send the file
-              xhr.send(formData);
-            });
-          });
-        };
-        
-        // Step 1: Upload file to storage with progress tracking
         try {
-          const { path } = await uploadWithProgress();
-          console.log('File uploaded successfully to path:', path);
-        } catch (uploadError) {
-          console.error('Error during file upload:', uploadError);
-          throw new Error(`Storage upload failed: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
-        }
-        
-        // Call onProgress one last time to ensure 100%
-        if (onProgress) {
-          onProgress({ loaded: file.size, total: file.size });
-        }
-        
-        // Create metadata with enhanced information
-        const fileMetadata = {
-          thumbnailUrl: fileType === 'image' ? storagePath : null,
-          tags: [],
-          fileType: fileType,
-          uploadTimestamp: timestamp,
-          originalFileName: file.name,
-          fileExtension: fileExt,
-          mimeType: file.type,
-        };
-        
-        // Step 2: Create database record
-        const insertData = {
-          name: file.name,
-          project_id: projectId,
-          owner_id: userId,
-          storage_path: storagePath,
-          content_type: file.type,
-          size: file.size,
-          file_type: fileType,
-          metadata: fileMetadata,
-          uploaded_by_user_id: userId,
-        };
-        
-        // Step 3: Insert file record, returning the new record
-        const { data: fileData, error: fileError } = await supabaseClient
-          .from('files')
-          .insert(insertData)
-          .select('*')
-          .single();
-        
-        if (fileError) {
-          // Attempt to clean up the storage file if database insert fails
-          try {
-            await supabaseClient.storage.from('files').remove([storagePath]);
-            console.log('Cleaned up storage file after database insert failed');
-          } catch (cleanupError) {
-            console.error('Failed to clean up storage file:', cleanupError);
+          // Upload the file using our enhanced storage service
+          const uploadResult = await uploadFile(bucket, storagePath, file, {
+            onProgress,
+            upsert: true,
+            cacheControl: '3600'
+          });
+          
+          // Get the public URL
+          const publicUrl = uploadResult.publicUrl || getPublicUrl(bucket, storagePath);
+          
+          console.log('File uploaded successfully', { 
+            path: uploadResult.path, 
+            publicUrl 
+          });
+          
+          // Call onProgress one last time to ensure 100%
+          if (onProgress) {
+            onProgress({ loaded: file.size, total: file.size });
           }
           
-          throw new Error(`Database insert failed: ${fileError.message}`);
+          // Get AI-based file analysis and title suggestions
+          let suggestedTitle = file.name;
+          let suggestedTags = [];
+          let fileDescription = '';
+          
+          try {
+            console.log('Requesting AI analysis for file naming and organization');
+            
+            const aiResponse = await supabase.functions.invoke('suggest-filename', {
+              body: {
+                fileId: fileId,
+                storagePath,
+                contentType: file.type,
+                fileName: file.name,
+                fileType: fileType
+              }
+            });
+            
+            if (!aiResponse.error && aiResponse.data?.suggestions) {
+              const { suggestions } = aiResponse.data;
+              suggestedTitle = suggestions.suggestedTitle || file.name;
+              suggestedTags = suggestions.suggestedTags || [];
+              fileDescription = suggestions.description || '';
+              
+              console.log('Received AI suggestions:', {
+                title: suggestedTitle,
+                tags: suggestedTags,
+                description: fileDescription
+              });
+            } else if (aiResponse.error) {
+              console.warn('Error getting file name suggestions:', aiResponse.error);
+            }
+          } catch (aiError) {
+            console.error('Error analyzing file with AI:', aiError);
+            // Continue with upload even if AI analysis fails
+          }
+          
+          // Create enhanced metadata
+          const fileMetadata = {
+            thumbnailUrl: fileType === 'image' ? publicUrl : null,
+            tags: suggestedTags,
+            fileType: fileType,
+            uploadTimestamp: Date.now(),
+            originalFileName: file.name,
+            suggestedTitle: suggestedTitle,
+            description: fileDescription,
+            fileExtension: fileExt,
+            mimeType: file.type,
+            processingStatus: 'pending',
+          };
+          
+          // Check if we are in demo mode (projectId not a valid UUID)
+          const isDemoMode = userId === 'demo-user-123';
+          
+          if (isDemoMode) {
+            console.log('Creating local file record (demo mode)');
+            // Create a client-side file record with a UUID
+            const mockFileData = {
+              id: fileId,
+              name: suggestedTitle, // Use AI-suggested title if available
+              project_id: projectId,
+              owner_id: userId,
+              uploaded_by_user_id: userId,
+              storage_path: storagePath,
+              content_type: file.type,
+              size: file.size,
+              file_type: fileType,
+              metadata: fileMetadata,
+              added_at: new Date().toISOString(),
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            };
+            
+            // Update the query cache directly in demo mode
+            queryClient.setQueryData(['files', projectId], (oldData: any) => 
+              [mockFileData, ...(oldData || [])]
+            );
+            
+            return mockFileData;
+          }
+          
+          // For non-demo mode, create database record
+          console.log('Creating database record for file');
+          
+          // Create database record or use fallback object
+          let fileData = null;
+          
+          try {
+            const result = await supabase
+              .from('files')
+              .insert([
+                {
+                  name: suggestedTitle, // Use AI-suggested title if available
+                  project_id: projectId,
+                  storage_path: storagePath,
+                  content_type: file.type,
+                  size: file.size,
+                  file_type: fileType,
+                  metadata: fileMetadata,
+                  owner_id: userId,
+                  uploaded_by_user_id: userId,
+                  id: fileId // Use our generated UUID for consistency
+                }
+              ])
+              .select('*')
+              .single();
+            
+            if (result.error) {
+              console.error('Error creating file record:', result.error);
+              throw result.error;
+            } 
+            
+            fileData = result.data;
+            
+            // Trigger file processing for analysis in the background
+            setTimeout(() => {
+              fileProcessingService.processFile(
+                fileData.id,
+                fileData.storage_path,
+                fileData.file_type,
+                fileData.content_type
+              ).catch(err => {
+                console.error('Background file processing error:', err);
+              });
+            }, 100);
+            
+            console.log('File record created successfully:', fileData?.id);
+          } catch (dbError) {
+            console.error('Exception creating file record:', dbError);
+            
+            // Attempt to clean up the storage file if database insert fails
+            try {
+              await supabase.storage.from(bucket).remove([storagePath]);
+              console.log('Cleaned up storage file after database insert failed');
+            } catch (cleanupError) {
+              console.error('Failed to clean up storage file:', cleanupError);
+            }
+            
+            throw new Error(`Failed to create file record: ${dbError.message}`);
+          }
+          
+          return fileData;
+        } catch (uploadError: any) {
+          console.error('Error during file upload:', uploadError);
+          
+          // Make sure we provide a useful error message
+          const errorMessage = uploadError?.message || 'Unknown upload error';
+          throw new Error(`Storage upload failed: ${errorMessage}`);
         }
-        
-        console.log('File record created in database:', fileData);
-        
-        return fileData;
-      } catch (error) {
-        console.error('File upload error:', error);
+      } catch (error: any) {
+        console.error('File upload process error:', error);
         throw error;
       }
     },
+    
     // Invalidate and refetch files query after successful upload
     onSuccess: (data) => {
       if (data && data.project_id) {

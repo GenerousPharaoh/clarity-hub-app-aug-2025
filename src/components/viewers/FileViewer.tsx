@@ -1,7 +1,8 @@
-import React, { useState, useEffect, forwardRef, useMemo } from 'react';
+import React, { useState, useEffect, forwardRef, useMemo, useCallback } from 'react';
 import { Box, CircularProgress, Typography, Alert, Button, Paper } from '@mui/material';
-import { FileDownload as DownloadIcon } from '@mui/icons-material';
-import EnhancedPdfViewer from './EnhancedPdfViewer';
+import { FileDownload as DownloadIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+// import EnhancedPdfViewer from './EnhancedPdfViewer';
+import PDFViewer from './PDFViewer';
 import { getErrorMessage, logError } from '../../utils/errorHandler';
 
 // File types supported by the viewer
@@ -25,6 +26,9 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
   ({ url, fileName, fileType, mimeType, onError }, ref) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [loadTimeout, setLoadTimeout] = useState<NodeJS.Timeout | null>(null);
+    const [loadRetryCount, setLoadRetryCount] = useState(0);
+    const [currentUrl, setCurrentUrl] = useState<string | null>(null);
     
     // Determine file type if not provided
     const determinedType = useMemo<SupportedFileType>(() => {
@@ -74,32 +78,149 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
       return 'unknown';
     }, [url, fileType, mimeType, fileName]);
     
+    // Reset loading state when URL changes and set up timeout handling
     useEffect(() => {
       if (url) {
         setLoading(true);
         setError(null);
-      } else {
-        setLoading(false);
+        
+        // Clear previous timeout to avoid memory leaks
+        if (loadTimeout) {
+          clearTimeout(loadTimeout);
+          setLoadTimeout(null);
+        }
+        
+        // Longer timeout (20 seconds)
+        const timeoutId = setTimeout(() => {
+          if (loading) {
+            console.log('[FileViewer] Loading timed out, attempting to use alternative URL...');
+            
+            // Create fallback URL with cache buster
+            const cacheBuster = `?cb=${Date.now()}`;
+            const altUrl = url.includes('?') 
+              ? `${url.split('?')[0]}${cacheBuster}&original=1` 
+              : `${url}${cacheBuster}`;
+              
+            console.log('[FileViewer] Trying alternative URL:', altUrl);
+            setCurrentUrl(altUrl);
+            
+            // Set a final timeout
+            const finalTimeoutId = setTimeout(() => {
+              console.error('[FileViewer] Final loading attempt timed out');
+              setLoading(false);
+              setError(new Error('File loading timed out. Please try again later.'));
+            }, 10000);
+            
+            setLoadTimeout(finalTimeoutId);
+          }
+        }, 20000);
+        
+        setLoadTimeout(timeoutId);
+        setCurrentUrl(url);
       }
+      
+      return () => {
+        if (loadTimeout) {
+          clearTimeout(loadTimeout);
+        }
+      };
     }, [url]);
+
+    // Add a new useEffect to handle the retry URL changes
+    useEffect(() => {
+      if (currentUrl && currentUrl !== url && loadRetryCount > 0) {
+        setLoading(true);
+        setError(null);
+        
+        // Reset timeout for retry
+        if (loadTimeout) {
+          clearTimeout(loadTimeout);
+        }
+        
+        const timeoutId = setTimeout(() => {
+          // If we reach the timeout again after retrying
+          if (loadRetryCount >= 3) {
+            setError('File loading timed out after multiple attempts');
+            setLoading(false);
+          }
+        }, 15000);
+        
+        setLoadTimeout(timeoutId);
+      }
+    }, [currentUrl, loadRetryCount]);
     
     // Handle loading/error states
-    const handleLoad = () => {
+    const handleLoad = useCallback(() => {
+      console.log('[FileViewer] File loaded successfully:', fileName);
+      
+      // Clear any pending timeouts immediately
+      if (loadTimeout) {
+        clearTimeout(loadTimeout);
+        setLoadTimeout(null);
+      }
+      
       setLoading(false);
       setError(null);
-    };
+    }, [fileName, loadTimeout]);
     
-    const handleError = (err: Error | string) => {
-      const errorMessage = typeof err === 'string' ? err : err.message || 'Failed to load file';
-      setLoading(false);
-      setError(errorMessage);
-      logError(err, 'FileViewer');
+    const handleError = useCallback((error: Error | string) => {
+      console.error('[FileViewer] Error loading file:', error);
       
-      if (onError && err instanceof Error) {
-        onError(err);
-      } else if (onError) {
+      // Clear any pending timeouts
+      if (loadTimeout) {
+        clearTimeout(loadTimeout);
+        setLoadTimeout(null);
+      }
+      
+      // Handle both string and Error objects
+      const errorMessage = typeof error === 'string' 
+        ? error 
+        : error instanceof Error ? error.message : 'Unknown error occurred';
+        
+      setError(errorMessage);
+      setLoading(false);
+      
+      // Add special handling for certain errors with suggested actions
+      if (errorMessage.includes('CORS') || errorMessage.includes('origin') || errorMessage.includes('cross-origin')) {
+        setError(`CORS error: The file server isn't allowing access to this file. Try refreshing or using a direct link. (${errorMessage})`);
+      } else if (errorMessage.includes('network') || errorMessage.includes('Network Error') || errorMessage.includes('failed to fetch')) {
+        setError(`Network error: Could not reach the file server. Check your internet connection. (${errorMessage})`);
+      } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+        setError(`File not found: The file "${fileName || 'requested'}" could not be found on the server. (${errorMessage})`);
+      }
+      
+      // Propagate error to parent component
+      if (onError) {
         onError(new Error(errorMessage));
       }
+    }, [loadTimeout, onError, fileName]);
+    
+    // Handle retry
+    const handleRetry = () => {
+      if (!url) return;
+      
+      setLoading(true);
+      setError(null);
+      setLoadRetryCount(prev => prev + 1);
+      
+      // Clear any pending timeouts
+      if (loadTimeout) {
+        clearTimeout(loadTimeout);
+      }
+      
+      // Set a new timeout for this retry attempt
+      const timeoutId = setTimeout(() => {
+        if (loading) {
+          handleError('Loading timed out during retry attempt. Please try again later.');
+        }
+      }, 20000);
+      
+      setLoadTimeout(timeoutId);
+      
+      // Force reload by creating a cache-busting URL
+      const timestamp = Date.now();
+      const cacheBuster = `${url.includes('?') ? '&' : '?'}_t=${timestamp}&retry=${loadRetryCount + 1}`;
+      setCurrentUrl(url + cacheBuster);
     };
     
     // Handle file download
@@ -114,7 +235,11 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
         link.click();
         document.body.removeChild(link);
       } catch (error) {
-        logError(error, 'FileViewer.download');
+        console.error('[FileViewer] Download error:', error);
+        // Don't use logError since it might be causing the reference to path
+        if (onError && error instanceof Error) {
+          onError(error);
+        }
       }
     };
     
@@ -132,19 +257,27 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
         return (
           <Box sx={{ p: 3, textAlign: 'center' }}>
             <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
+              {typeof error === 'string' ? error : error instanceof Error ? error.message : 'An unknown error occurred'}
             </Alert>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              The file could not be displayed. You can try downloading it instead.
+              The file could not be displayed. You can try again or download it directly.
             </Typography>
-            <Button 
-              variant="outlined" 
-              startIcon={<DownloadIcon />}
-              onClick={handleDownload}
-              sx={{ mt: 1 }}
-            >
-              Download
-            </Button>
+            <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Button 
+                variant="outlined" 
+                startIcon={<RefreshIcon />}
+                onClick={handleRetry}
+              >
+                Retry
+              </Button>
+              <Button 
+                variant="outlined" 
+                startIcon={<DownloadIcon />}
+                onClick={handleDownload}
+              >
+                Download
+              </Button>
+            </Box>
           </Box>
         );
       }
@@ -171,9 +304,11 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
       switch (determinedType) {
         case 'pdf':
           return (
-            <EnhancedPdfViewer 
+            <PDFViewer 
               url={url} 
               fileName={fileName}
+              onLoad={handleLoad}
+              onError={handleError}
             />
           );
           
@@ -203,12 +338,33 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
                   p: 1,
                 }}
               >
+                {/* Add loading state specifically for images */}
+                {loading && (
+                  <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10 }}>
+                    <CircularProgress size={40} />
+                  </Box>
+                )}
                 <img 
                   src={url} 
                   alt={fileName || 'Image'} 
                   style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                   onLoad={handleLoad}
-                  onError={() => handleError('Failed to load image')}
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    console.error('[FileViewer] Image load error:', e);
+                    // Try with cache buster as fallback
+                    const imgElement = e.target as HTMLImageElement;
+                    const originalSrc = imgElement.src;
+                    
+                    if (!originalSrc.includes('?cb=')) {
+                      // Add cache buster and try again
+                      const cacheBuster = `?cb=${Date.now()}`;
+                      console.log('[FileViewer] Trying image with cache buster:', originalSrc + cacheBuster);
+                      imgElement.src = originalSrc + cacheBuster;
+                    } else {
+                      handleError('Failed to load image');
+                    }
+                  }}
                 />
               </Box>
               
@@ -250,6 +406,7 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
                   controls 
                   style={{ maxWidth: '100%', maxHeight: '100%' }}
                   onLoadedData={handleLoad}
+                  crossOrigin="anonymous"
                   onError={() => handleError('Failed to load video')}
                 >
                   <source src={url} type={mimeType} />
@@ -301,6 +458,7 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
                     controls 
                     style={{ width: '100%' }}
                     onLoadedData={handleLoad}
+                    crossOrigin="anonymous"
                     onError={() => handleError('Failed to load audio')}
                   >
                     <source src={url} type={mimeType} />
@@ -409,16 +567,22 @@ export const FileViewer = forwardRef<HTMLDivElement, FileViewerProps>(
       }
     };
     
+    // Ensure loading state is cleared after PDFViewer mounts and loads
+    useEffect(() => {
+      if (!loading && !error && url) {
+        // Clear any pending timeouts
+        if (loadTimeout) {
+          clearTimeout(loadTimeout);
+          setLoadTimeout(null);
+        }
+      }
+    }, [loading, error, url, loadTimeout]);
+    
     return (
       <Box 
         ref={ref}
-        sx={{ 
-          height: '100%', 
-          width: '100%', 
-          display: 'flex', 
-          flexDirection: 'column',
-          bgcolor: 'background.default',
-        }}
+        sx={{ height: '100%', position: 'relative' }}
+        data-testid="file-viewer"
       >
         {renderFileViewer()}
       </Box>

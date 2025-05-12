@@ -3,6 +3,9 @@ import { Session, User } from '@supabase/supabase-js';
 import supabaseClient from '../services/supabaseClient';
 import { useAppStore } from '../store';
 
+// Admin user ID for special handling
+const ADMIN_EMAIL = 'kareem.hassanein@gmail.com';
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -30,9 +33,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const setStoreUser = useAppStore((state) => state.setUser);
 
   // Memoize functions to prevent unnecessary re-renders
-  const signIn = useCallback((email: string, password: string) => {
-    return supabaseClient.auth.signInWithPassword({ email, password });
-  }, []);
+  const signIn = useCallback(async (email: string, password: string) => {
+    // For admin account, use extended session duration
+    const options = email === ADMIN_EMAIL ? { 
+      expiresIn: 30 * 24 * 60 * 60 // 30 days 
+    } : undefined;
+
+    const response = await supabaseClient.auth.signInWithPassword({ 
+      email, 
+      password
+    });
+
+    // For admin login, ensure store is updated correctly
+    if (!response.error && response.data.user && email === ADMIN_EMAIL) {
+      console.log('Admin signed in, ensuring store is synced');
+      setStoreUser({
+        id: response.data.user.id,
+        email: response.data.user.email || '',
+        avatar_url: response.data.user.user_metadata?.avatar_url,
+        full_name: response.data.user.user_metadata?.full_name || 'Admin User',
+        is_admin: true
+      });
+    }
+
+    return response;
+  }, [setStoreUser]);
 
   const signUp = useCallback((email: string, password: string) => {
     return supabaseClient.auth.signUp({ email, password });
@@ -56,7 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let mounted = true;
     
-    // 1️⃣ Hydrate from cached session *after* the promise resolves
+    // Hydrate from cached session
     supabaseClient.auth
       .getSession()
       .then(({ data, error }) => {
@@ -68,11 +93,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentSession?.user ?? null);
         
         if (currentSession?.user) {
+          const isAdmin = currentSession.user.email === ADMIN_EMAIL;
           setStoreUser({
             id: currentSession.user.id,
             email: currentSession.user.email || '',
             avatar_url: currentSession.user.user_metadata?.avatar_url,
-            full_name: currentSession.user.user_metadata?.full_name,
+            full_name: currentSession.user.user_metadata?.full_name || (isAdmin ? 'Admin User' : ''),
+            is_admin: isAdmin
           });
         }
         
@@ -94,11 +121,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (session?.user) {
           console.log('Setting user in store:', session.user.id);
+          const isAdmin = session.user.email === ADMIN_EMAIL;
           setStoreUser({
             id: session.user.id,
             email: session.user.email || '',
             avatar_url: session.user.user_metadata?.avatar_url,
-            full_name: session.user.user_metadata?.full_name,
+            full_name: session.user.user_metadata?.full_name || (isAdmin ? 'Admin User' : ''),
+            is_admin: isAdmin
           });
         } else {
           setStoreUser(null);

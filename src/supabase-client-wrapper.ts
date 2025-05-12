@@ -1,13 +1,11 @@
-import supabaseClient from './services/supabaseClient';
+import { supabase } from './lib/supabaseClient';
 
-// Wrapper to safely access storage URL
-export function getStorageUrl(): string {
-  return `${import.meta.env.VITE_SUPABASE_URL || ''}/storage/v1`;
-}
+// Wrapper to safely access storage URL is now deprecated
+// The SDK methods should be used directly instead
 
 export function getSupabaseKey(): string {
   // Safe way to access the Supabase key without direct property access
   return import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 }
 
-export default supabaseClient; 
+export default supabase; 

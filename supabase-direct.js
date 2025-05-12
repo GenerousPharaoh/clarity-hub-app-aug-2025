@@ -1,87 +1,98 @@
 // Direct Supabase API access using fetch
 // This script applies the migration directly without dependencies
 
-// Load the .env file manually
-const fs = require('fs');
-const path = require('path');
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 
-// Parse .env file
-function parseEnv() {
-  const envPath = path.join(__dirname, '.env');
-  const content = fs.readFileSync(envPath, 'utf8');
-  const envVars = {};
-  
-  content.split('\n').forEach(line => {
-    const match = line.match(/^([^=]+)=(.*)$/);
-    if (match) {
-      const key = match[1].trim();
-      const value = match[2].trim().replace(/^["'](.*)["']$/, '$1');
-      envVars[key] = value;
-    }
-  });
-  
-  return envVars;
-}
+// Initialize dotenv
+dotenv.config();
 
-// Get environment variables
-const env = parseEnv();
-const supabaseUrl = env.VITE_SUPABASE_URL;
-const serviceKey = env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+// ES Module equivalent for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-if (!supabaseUrl || !serviceKey) {
-  console.error('Missing Supabase credentials in .env');
+// Get file path argument
+const filePath = process.argv[2];
+
+if (!filePath) {
+  console.error('Please provide a SQL file path.');
   process.exit(1);
 }
 
-// Log connection info
-console.log(`Connecting to Supabase at ${supabaseUrl}`);
+const sqlFilePath = path.resolve(process.cwd(), filePath);
 
-// Load migration SQL
-const migrationPath = path.join(__dirname, 'supabase/migrations/20250503000000_cleanup_schema_and_fix_conflicts.sql');
-const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+if (!fs.existsSync(sqlFilePath)) {
+  console.error(`SQL file not found: ${sqlFilePath}`);
+  process.exit(1);
+}
 
-// Function to execute SQL query via REST API
-async function executeSQLonSupabase() {
+// Get Supabase credentials from environment
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Error: Missing required environment variables.');
+  console.error('Make sure VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are defined in your .env file.');
+  process.exit(1);
+}
+
+// Create Supabase client with service role key for admin access
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Read the SQL file
+const sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
+
+// Execute SQL
+async function executeSql() {
   try {
-    // Create the SQL endpoint URL
-    const endpoint = `${supabaseUrl}/rest/v1/rpc/pgconfig_sql`;
+    console.log(`Executing SQL file: ${sqlFilePath}`);
     
-    // Make API request
-    console.log('Executing migration via Supabase API...');
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': serviceKey,
-        'Authorization': `Bearer ${serviceKey}`
-      },
-      body: JSON.stringify({
-        sql_query: migrationSQL
-      })
+    // Extract Supabase project ID from URL
+    const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)[1];
+    
+    console.log(`Project ref: ${projectRef}`);
+    
+    // Execute SQL statement directly (this bypasses RLS policies)
+    const { error } = await supabase.rpc('pgconfig.execute_sql', {
+      query: sqlContent
     });
     
-    // Check response
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`API error: ${JSON.stringify(error)}`);
+    if (error) {
+      console.error('Error executing SQL:', error);
+      
+      // Try alternative method if the first one fails
+      console.log('Trying alternative execution method...');
+      
+      const response = await fetch(`${supabaseUrl}/rest/v1/rpc/pgconfig.execute_sql`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseServiceKey,
+          'Authorization': `Bearer ${supabaseServiceKey}`
+        },
+        body: JSON.stringify({
+          query: sqlContent
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`SQL execution failed: ${errorText}`);
+      }
+      
+      console.log('SQL executed successfully via REST API');
+    } else {
+      console.log('SQL executed successfully via RPC');
     }
-    
-    console.log('Migration applied successfully!');
-    console.log('Response:', await response.json());
-    
-    return true;
   } catch (error) {
-    console.error('Error executing SQL:', error);
-    return false;
+    console.error('Error:', error.message);
+    process.exit(1);
   }
 }
 
-// Execute the migration
-executeSQLonSupabase().then(success => {
-  if (success) {
-    console.log('Database migration completed successfully.');
-  } else {
-    console.error('Database migration failed. Check the logs for details.');
-    process.exit(1);
-  }
+executeSql().then(() => {
+  console.log('SQL migration completed successfully.');
 }); 

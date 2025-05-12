@@ -5,8 +5,6 @@ import { resolve } from 'path'
 // https://vite.dev/config/
 export default ({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  // Always use port 5173 and override any env setting to avoid conflicts
-  const devPort = 5173;
   
   return defineConfig({
     plugins: [react()],
@@ -20,16 +18,17 @@ export default ({ mode }: { mode: string }) => {
       }
     },
     
-    // Configure server settings with fixed port
+    // Configure server settings with more flexible port handling
     server: {
       host: 'localhost',
-      port: devPort,
-      strictPort: true, // Force this port, don't try alternatives
+      port: 5175, // Updated port from 5173 to 5175
+      strictPort: false,
       open: true,
       hmr: {
-        host: 'localhost',       // force exact host
-        clientPort: devPort,     // ensure matching port
-        protocol: 'ws',          // stay on ws in http dev
+        protocol: "ws",
+        host: "localhost",
+        port: 5175, // Match HMR port with server port
+        overlay: true, // Show errors as overlay
       },
     },
     

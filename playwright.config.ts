@@ -1,15 +1,16 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Resolve port from env or default (match Vite HMR port)
-const port = Number(process.env.VITE_DEV_PORT) || 3008;
+// Resolve port dynamically from environment variables
+// Fallback chain: VITE_TEST_PORT -> VITE_DEV_PORT -> 'auto' (meaning use any available port)
+const port = process.env.VITE_TEST_PORT || process.env.VITE_DEV_PORT || 'auto';
 
 export default defineConfig({
   testDir: './tests',
   timeout: 60_000,
   expect: { timeout: 5000 },
   use: {
-    // Allow overriding via APP_URL env var, fallback to localhost and matching port
-    baseURL: process.env.APP_URL || `http://localhost:${port}`,
+    // Allow overriding via APP_URL env var, fallback to localhost with dynamic port
+    baseURL: process.env.APP_URL || (port === 'auto' ? 'http://localhost' : `http://localhost:${port}`),
     headless: true,
     viewport: { width: 1280, height: 720 },
     video: 'retain-on-failure',

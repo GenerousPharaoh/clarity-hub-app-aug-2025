@@ -27,12 +27,14 @@ import {
   RotateRight as RotateRightIcon,
   Search as SearchIcon,
   FindInPage as FindInPageIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import useAppStore from '../../store';
 import supabaseClient from '../../services/supabaseClient';
 import { File as FileType, FileWithUrl, LinkActivation } from '../../types';
 import FileViewer, { SupportedFileType } from '../../components/viewers/FileViewer';
 import { getErrorMessage, logError } from '../../utils/errorHandler';
+import storageService from '../../services/storageService';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -73,6 +75,7 @@ const RightPanel = () => {
   const [projectAnswer, setProjectAnswer] = useState('');
   const [isAnalyzingProject, setIsAnalyzingProject] = useState(false);
   const [linkCopySuccess, setLinkCopySuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   // Viewer control states
   const [zoom, setZoom] = useState(1);
@@ -113,66 +116,100 @@ const RightPanel = () => {
     }
   }, [linkActivation]);
 
-  // Fetch file details
-  const fetchFileDetails = async (fileId: string) => {
+  // Fetch file details with better error handling and retries
+  const fetchFileDetails = async (fileId: string, retryCount = 0) => {
+    console.log('Fetching file details for ID:', fileId);
+    setLoading(true);
+    setErrorMessage('');
+    
     try {
-      setLoading(true);
-      
-      console.log('Fetching file details for ID:', fileId);
-      
+      // Get basic file metadata
       const { data, error } = await supabaseClient
         .from('files')
         .select('*')
         .eq('id', fileId)
         .single();
-
+      
       if (error) {
-        console.error('Error fetching file record:', error);
-        throw error;
+        console.error('Error fetching file details:', error);
+        throw new Error(`Failed to fetch file details: ${error.message}`);
       }
+      
+      if (!data) {
+        throw new Error('File not found');
+      }
+      
+      console.log('File metadata retrieved:', { 
+        id: data.id, 
+        name: data.name, 
+        content_type: data.content_type, 
+        storage_path: data.storage_path 
+      });
+      
+      // Generate URL for storage file using robust helper
+      const { url: resolvedUrl, error: urlError } = await storageService.getFileUrl(data.storage_path);
 
-      if (data) {
-        console.log('File record retrieved:', data);
+      if (!resolvedUrl) {
+        console.error('Error generating URL:', urlError);
         
-        // Generate URL for the file
-        const { data: urlData, error: urlError } = await supabaseClient.storage
-          .from('files')
-          .createSignedUrl(data.storage_path, 3600); // 1 hour expiry
-
-        if (urlError) {
-          console.error('Error generating signed URL:', urlError);
-          // Continue anyway so we can at least show file info
-        } else {
-          console.log('Signed URL generated successfully');
-        }
-
-        // Get metadata with thumbnail URL
-        const metadata = data.metadata as { thumbnailUrl?: string };
+        // If the helper fails, try direct URL construction as a last resort
+        const projectId = 'swtkpfpyjjkkemmvkhmz';
+        const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}`;
+        console.log('Using direct URL as last resort:', directUrl);
         
-        // Generate thumbnail URL if it exists
-        let thumbnailUrl = undefined;
-        if (metadata?.thumbnailUrl) {
-          const { data: thumbUrlData, error: thumbUrlError } = await supabaseClient.storage
-            .from('thumbnails')
-            .createSignedUrl(metadata.thumbnailUrl, 3600);
-
-          if (thumbUrlError) {
-            console.error('Error generating thumbnail URL:', thumbUrlError);
-          } else if (thumbUrlData) {
-            thumbnailUrl = thumbUrlData.signedUrl;
-            console.log('Thumbnail URL generated successfully');
-          }
-        }
-
         setSelectedFile({
           ...data,
-          url: urlData?.signedUrl,
-          thumbnailUrl,
+          url: directUrl,
         });
+        return;
       }
+
+      console.log('Resolved file URL:', resolvedUrl);
+      
+      // Try fetching with a HEAD request to verify URL accessibility
+      try {
+        const checkResponse = await fetch(resolvedUrl, { method: 'HEAD' });
+        if (!checkResponse.ok) {
+          console.warn('URL accessibility check failed, status:', checkResponse.status);
+          
+          if (retryCount < 2) {
+            // If HEAD fails, try with a cache buster
+            const cacheBuster = `?cb=${Date.now()}`;
+            const altUrl = resolvedUrl.includes('?') 
+              ? `${resolvedUrl.split('?')[0]}${cacheBuster}` 
+              : `${resolvedUrl}${cacheBuster}`;
+              
+            console.log('Trying with cache buster:', altUrl);
+            
+            setSelectedFile({
+              ...data,
+              url: altUrl,
+            });
+            return;
+          }
+        }
+      } catch (checkError) {
+        console.warn('URL accessibility check error:', checkError);
+        // Continue anyway as the browser might still be able to load it
+      }
+
+      setSelectedFile({
+        ...data,
+        url: resolvedUrl,
+      });
     } catch (error) {
-      console.error('Error fetching file details:', error);
-      // Show error message to user
+      console.error('Error in fetchFileDetails:', error);
+      
+      if (retryCount < 2) {
+        // Wait briefly before retrying
+        setTimeout(() => {
+          console.log(`Retrying fetchFileDetails (${retryCount + 1}/2)...`);
+          fetchFileDetails(fileId, retryCount + 1);
+        }, 1000);
+        return;
+      }
+      
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
       setSelectedFile(null);
     } finally {
       setLoading(false);
@@ -191,12 +228,23 @@ const RightPanel = () => {
     }
   };
 
-  // Fetch file summary
-  const fetchFileSummary = async () => {
+  // Updated fetchFileSummary with option to run in background
+  const fetchFileSummary = async (inBackground = false) => {
     if (!selectedFile) return;
     
-    try {
+    if (!inBackground) {
       setIsLoadingSummary(true);
+    }
+    
+    try {
+      // Check if we already have a summary cached in metadata
+      if (selectedFile.metadata?.summary) {
+        setFileSummary(selectedFile.metadata.summary);
+        if (!inBackground) {
+          setIsLoadingSummary(false);
+        }
+        return;
+      }
       
       const response = await supabaseClient.functions.invoke('analyze-file', {
         body: {
@@ -210,34 +258,65 @@ const RightPanel = () => {
         throw new Error(response.error.message);
       }
 
-      setFileSummary(response.data?.summary || 'No summary was generated.');
+      const summary = response.data?.summary || 'No summary was generated.';
+      setFileSummary(summary);
+      
+      // Update the file metadata to cache the summary
+      if (!inBackground) {
+        try {
+          await supabaseClient
+            .from('files')
+            .update({
+              metadata: {
+                ...selectedFile.metadata,
+                summary
+              }
+            })
+            .eq('id', selectedFile.id);
+        } catch (updateError) {
+          console.error('Error caching summary in metadata:', updateError);
+        }
+      }
     } catch (error) {
       console.error('Error getting file summary:', error);
       setFileSummary('An error occurred while generating the summary.');
     } finally {
-      setIsLoadingSummary(false);
+      if (!inBackground) {
+        setIsLoadingSummary(false);
+      }
     }
   };
 
-  // Fetch extracted entities
-  const fetchExtractedEntities = async () => {
+  // Updated fetchExtractedEntities with option to run in background
+  const fetchExtractedEntities = async (inBackground = false) => {
     if (!selectedFile) return;
     
-    try {
+    if (!inBackground) {
       setIsLoadingEntities(true);
+    }
+    
+    try {
+      // Check if we already have entities in the metadata
+      if (selectedFile.metadata?.entities && Array.isArray(selectedFile.metadata.entities) && selectedFile.metadata.entities.length > 0) {
+        setExtractedEntities(selectedFile.metadata.entities);
+        if (!inBackground) {
+          setIsLoadingEntities(false);
+        }
+        return;
+      }
       
       // First check if we already have entities in the database
       try {
-      const { data: entitiesData, error: entitiesError } = await supabaseClient
-        .from('entities')
-        .select('entity_text, entity_type')
-        .eq('source_file_id', selectedFile.id);
+        const { data: entitiesData, error: entitiesError } = await supabaseClient
+          .from('entities')
+          .select('entity_text, entity_type')
+          .eq('source_file_id', selectedFile.id);
       
-      if (entitiesError) {
-        throw entitiesError;
-      }
+        if (entitiesError) {
+          throw entitiesError;
+        }
       
-      if (entitiesData && entitiesData.length > 0) {
+        if (entitiesData && entitiesData.length > 0) {
           // Cast the data to the correct type
           const entities = entitiesData.map(entity => ({
             entity_text: entity.entity_text as string,
@@ -245,7 +324,28 @@ const RightPanel = () => {
           }));
           
           setExtractedEntities(entities);
-        return;
+          
+          // Update the file metadata to cache entities
+          if (!inBackground) {
+            try {
+              await supabaseClient
+                .from('files')
+                .update({
+                  metadata: {
+                    ...selectedFile.metadata,
+                    entities
+                  }
+                })
+                .eq('id', selectedFile.id);
+            } catch (updateError) {
+              console.error('Error caching entities in metadata:', updateError);
+            }
+          }
+          
+          if (!inBackground) {
+            setIsLoadingEntities(false);
+          }
+          return;
         }
       } catch (error) {
         console.error('Error fetching entities:', error);
@@ -268,7 +368,25 @@ const RightPanel = () => {
       }
 
       if (response.data?.entities) {
-        setExtractedEntities(response.data.entities);
+        const entities = response.data.entities;
+        setExtractedEntities(entities);
+        
+        // Update the file metadata to cache entities
+        if (!inBackground) {
+          try {
+            await supabaseClient
+              .from('files')
+              .update({
+                metadata: {
+                  ...selectedFile.metadata,
+                  entities
+                }
+              })
+              .eq('id', selectedFile.id);
+          } catch (updateError) {
+            console.error('Error caching entities in metadata:', updateError);
+          }
+        }
       } else {
         setExtractedEntities([]);
       }
@@ -276,7 +394,9 @@ const RightPanel = () => {
       console.error('Error extracting entities:', error);
       setExtractedEntities([]);
     } finally {
-      setIsLoadingEntities(false);
+      if (!inBackground) {
+        setIsLoadingEntities(false);
+      }
     }
   };
 
@@ -484,31 +604,97 @@ const RightPanel = () => {
 
   // Render file viewer
   const renderFileViewer = () => {
-    if (!selectedFile || !selectedFile.url) {
+    if (loading) {
       return (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100%',
-          p: 3,
-        }}>
-          <Typography color="text.secondary" align="center">
-            {loading ? 'Loading file...' : 'Select a file to view its contents.'}
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <CircularProgress />
+          <Typography variant="body2" sx={{ ml: 2 }}>
+            Loading file...
           </Typography>
         </Box>
       );
     }
 
-          return (
+    if (errorMessage) {
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {typeof errorMessage === 'string' ? errorMessage : errorMessage instanceof Error ? errorMessage.message : 'An unknown error occurred'}
+          </Alert>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2, alignItems: 'center' }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              startIcon={<RefreshIcon />} 
+              onClick={() => selectedFileId && fetchFileDetails(selectedFileId)}
+              sx={{ mb: 1 }}
+            >
+              Retry Loading
+            </Button>
+            
+            {selectedFileId && (
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  if (!selectedFileId) return;
+                  
+                  // Try with a direct public URL approach
+                  const projectId = 'swtkpfpyjjkkemmvkhmz';
+                  
+                  supabaseClient
+                    .from('files')
+                    .select('storage_path')
+                    .eq('id', selectedFileId)
+                    .single()
+                    .then(({ data }) => {
+                      if (data?.storage_path) {
+                        const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
+                        console.log('Trying alternative URL method:', directUrl);
+                        
+                        // Open in new tab to test access
+                        window.open(directUrl, '_blank');
+                      }
+                    });
+                }}
+              >
+                Open in New Tab
+              </Button>
+            )}
+          </Box>
+        </Box>
+      );
+    }
+
+    if (!selectedFile || !selectedFile.url) {
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="body1" color="text.secondary">
+            {selectedFileId ? 'Failed to load file' : 'No file selected'}
+          </Typography>
+          {selectedFileId && (
+            <Button 
+              variant="contained" 
+              color="primary" 
+              startIcon={<RefreshIcon />} 
+              onClick={() => fetchFileDetails(selectedFileId)}
+              sx={{ mt: 2 }}
+            >
+              Retry
+            </Button>
+          )}
+        </Box>
+      );
+    }
+
+    return (
       <FileViewer
-        ref={pdfViewerRef as React.RefObject<HTMLDivElement>}
-              url={selectedFile.url} 
+        url={selectedFile.url}
         fileName={selectedFile.name}
         fileType={selectedFile.file_type}
-        mimeType={selectedFile.content_type}
+        contentType={selectedFile.content_type}
         onError={(error) => {
-          logError(error, 'FileViewer');
+          console.error('File viewer error:', error);
+          setErrorMessage(`Error viewing file: ${error.message || 'Unknown error'}`);
         }}
       />
     );
@@ -625,7 +811,7 @@ const RightPanel = () => {
       </Box>
 
       {/* File Viewer Tab */}
-      <TabPanel value={tabValue} index={0} sx={{ flexGrow: 1, overflow: 'hidden' }}>
+      <TabPanel value={tabValue} index={0} sx={{ flexGrow: 1, overflow: 'hidden', minHeight: 0 }}>
         <Box sx={{ height: '100%' }}>
           {renderFileViewer()}
         </Box>
@@ -653,8 +839,8 @@ const RightPanel = () => {
                   <Button 
                     variant="outlined" 
                     size="small" 
-                    onClick={fetchFileSummary}
-                    startIcon={<FindInPageIcon />}
+                    onClick={() => fetchFileSummary()}
+                    startIcon={<SearchIcon />}
                   >
                     Generate Summary
                   </Button>
@@ -772,7 +958,7 @@ const RightPanel = () => {
                   <Button 
                     variant="outlined" 
                     size="small" 
-                    onClick={fetchExtractedEntities}
+                    onClick={() => fetchExtractedEntities()}
                     startIcon={<SearchIcon />}
                   >
                     Extract Entities

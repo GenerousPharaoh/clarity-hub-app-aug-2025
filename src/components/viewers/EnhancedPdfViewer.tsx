@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Box, CircularProgress, Typography, TextField, IconButton, Tooltip, Paper, Alert, Button } from '@mui/material';
 import {
   NavigateBefore as PrevIcon,
@@ -10,17 +10,61 @@ import {
   Rotate90DegreesCw as RotateRightIcon,
   Refresh as RefreshIcon,
   FileDownload as DownloadIcon,
+  ChevronLeft,
+  ChevronRight,
 } from '@mui/icons-material';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import storageService from '../../services/storageService';
 
-// Set up the PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  '/pdf/pdf.worker.min.js',
-  window.location.origin
-).href;
+// Set worker path with multiple fallbacks to ensure it works
+(async () => {
+  try {
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      // Define multiple fallback sources with most reliable first
+      const workerSrcFallbacks = [
+        // CDN fallbacks first (most reliable)
+        'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js',
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/build/pdf.worker.min.js',
+        // Local fallbacks next
+        `${window.location.origin}/pdf/pdf.worker.min.js`,
+        `${window.location.origin}/public/pdf/pdf.worker.min.js`,
+        '/pdf/pdf.worker.min.js',
+        '/public/pdf/pdf.worker.min.js'
+      ];
+      
+      // Try to find a working source
+      let workerFound = false;
+      
+      for (const src of workerSrcFallbacks) {
+        try {
+          console.log('[PDF Viewer] Trying worker source:', src);
+          const response = await fetch(src, { method: 'HEAD' });
+          if (response.ok) {
+            console.log('[PDF Viewer] Worker found at:', src);
+            pdfjs.GlobalWorkerOptions.workerSrc = src;
+            workerFound = true;
+            break;
+          }
+        } catch (error) {
+          console.warn(`[PDF Viewer] Failed to load worker from ${src}:`, error);
+        }
+      }
+      
+      // If no worker is found after trying all sources, set a default
+      if (!workerFound) {
+        console.warn('[PDF Viewer] Could not find PDF.js worker, using CDN as last resort');
+        pdfjs.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+      }
+    }
+  } catch (error) {
+    console.error('[PDF Viewer] Error initializing PDF worker:', error);
+    // Final fallback if everything else fails
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js';
+  }
+})();
 
 // Interface for component props
 interface EnhancedPdfViewerProps {
@@ -28,6 +72,14 @@ interface EnhancedPdfViewerProps {
   fileName?: string;
   onPageChange?: (pageNumber: number) => void;
   initialPage?: number;
+  /**
+   * Callback fired when the PDF has been fully loaded and rendered.
+   */
+  onLoad?: () => void;
+  /**
+   * Callback fired when an unrecoverable load error occurs.
+   */
+  onLoadError?: (error: Error) => void;
 }
 
 // Export handle interface so parent components can control the viewer
@@ -42,7 +94,7 @@ export interface PdfViewerHandle {
 
 // Internal component that will receive the forwarded ref
 const EnhancedPdfViewerInner = (
-  { url, fileName, onPageChange, initialPage = 1 }: EnhancedPdfViewerProps,
+  { url, fileName, onPageChange, initialPage = 1, onLoad, onLoadError }: EnhancedPdfViewerProps,
   ref: React.ForwardedRef<PdfViewerHandle>
 ) => {
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -55,31 +107,61 @@ const EnhancedPdfViewerInner = (
   const [retries, setRetries] = useState(0);
   const documentRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Log when URL changes
+  const [currentUrl, setCurrentUrl] = useState<string | undefined>(url);
+
+  // Reset state when URL changes
   useEffect(() => {
-    if (url) {
-      console.log('[EnhancedPdfViewer] Received URL:', url);
+    setCurrentUrl(url);
     setLoading(true);
     setError(null);
-        } else {
-        setLoading(false);
-      }
+    setRetries(0);
   }, [url]);
+
+  // Handle retry when first load fails
+  useEffect(() => {
+    if (retries > 0 && retries <= 3 && error) {
+      const retryTimeout = setTimeout(() => {
+        console.log(`PDF Viewer: Retry attempt ${retries}/3`);
+        
+        // Add cache buster to URL to force fresh request
+        const cacheBuster = `?retry=${retries}&t=${Date.now()}`;
+        const newUrl = url?.includes('?') 
+          ? `${url.split('?')[0]}${cacheBuster}` 
+          : `${url}${cacheBuster}`;
+          
+        setCurrentUrl(newUrl);
+        setLoading(true);
+        setError(null);
+      }, 1000 * retries); // Increasing delays for each retry
+      
+      return () => clearTimeout(retryTimeout);
+    }
+  }, [retries, error, url]);
 
   // Document load success handler
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    setPageNumber(initialPage > 0 && initialPage <= numPages ? initialPage : 1);
     setLoading(false);
     setError(null);
-  }, []);
+
+    // Notify parent that loading has completed successfully
+    if (onLoad) {
+      onLoad();
+    }
+  }, [initialPage, numPages, onLoad]);
 
   // Document load error handler
   const onDocumentLoadError = useCallback((error: Error) => {
     console.error('[EnhancedPdfViewer] Error loading document:', error);
     setLoading(false);
     setError(`Failed to load PDF: ${error.message}`);
-  }, []);
+    
+    // Let parent know that load failed so it can update its state
+    if (onLoadError) {
+      onLoadError(error);
+    }
+  }, [onLoadError]);
 
   // Page change handlers
   const goToPrevPage = useCallback(() => {
@@ -220,7 +302,7 @@ const EnhancedPdfViewerInner = (
             const searchInput = document.querySelector('[data-testid="pdf-search-input"]') as HTMLInputElement;
             if (searchInput) {
               searchInput.focus();
-      }
+            }
           }
           break;
         default:
@@ -265,7 +347,7 @@ const EnhancedPdfViewerInner = (
     >
       <IconButton onClick={goToPrevPage} disabled={pageNumber <= 1 || loading} size="small">
         <PrevIcon />
-              </IconButton>
+      </IconButton>
 
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <TextField
@@ -279,9 +361,9 @@ const EnhancedPdfViewerInner = (
         />
         <Typography variant="body2">
           / {numPages || '-'}
-          </Typography>
-        </Box>
-        
+        </Typography>
+      </Box>
+      
       <IconButton onClick={goToNextPage} disabled={loading || !numPages || pageNumber >= numPages} size="small">
         <NextIcon />
       </IconButton>
@@ -289,51 +371,51 @@ const EnhancedPdfViewerInner = (
       <Box sx={{ height: '24px', width: '1px', bgcolor: 'divider', mx: 1 }} />
 
       <Tooltip title="Zoom out (Ctrl+-)">
-            <span>
+        <span>
           <IconButton onClick={zoomOut} size="small" disabled={loading}>
             <ZoomOutIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-          
+          </IconButton>
+        </span>
+      </Tooltip>
+      
       <Typography variant="body2" sx={{ minWidth: '40px', textAlign: 'center' }}>
         {Math.round(scale * 100)}%
-          </Typography>
-          
+      </Typography>
+      
       <Tooltip title="Zoom in (Ctrl++)">
-            <span>
+        <span>
           <IconButton onClick={zoomIn} size="small" disabled={loading}>
             <ZoomInIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
+          </IconButton>
+        </span>
+      </Tooltip>
 
       <Box sx={{ height: '24px', width: '1px', bgcolor: 'divider', mx: 1 }} />
-        
+      
       <Tooltip title="Rotate left (Ctrl+r)">
-            <span>
+        <span>
           <IconButton onClick={rotateLeft} size="small" disabled={loading}>
             <RotateLeftIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-          
+          </IconButton>
+        </span>
+      </Tooltip>
+      
       <Tooltip title="Rotate right (Ctrl+Shift+r)">
-            <span>
+        <span>
           <IconButton onClick={rotateRight} size="small" disabled={loading}>
             <RotateRightIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
+          </IconButton>
+        </span>
+      </Tooltip>
 
       <Box sx={{ height: '24px', width: '1px', bgcolor: 'divider', mx: 1 }} />
-        
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TextField
-            size="small"
+      
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <TextField
+          size="small"
           placeholder="Search... (Ctrl+f)"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           sx={{ width: '120px' }}
           disabled={loading}
@@ -345,15 +427,15 @@ const EnhancedPdfViewerInner = (
       </Box>
 
       <Box sx={{ height: '24px', width: '1px', bgcolor: 'divider', mx: 1 }} />
-          
+      
       <Tooltip title="Download PDF">
-            <span>
+        <span>
           <IconButton onClick={handleDownload} size="small" disabled={!url || loading}>
             <DownloadIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
-      </Paper>
+          </IconButton>
+        </span>
+      </Tooltip>
+    </Paper>
   );
 
   return (
@@ -420,7 +502,7 @@ const EnhancedPdfViewerInner = (
               }
               sx={{ mb: 2 }}
             >
-              {error}
+              {typeof error === 'string' ? error : error instanceof Error ? error.message : 'An unknown error occurred'}
             </Alert>
             <Typography variant="body2" color="text.secondary">
               You can try to download the file and open it externally
@@ -430,36 +512,51 @@ const EnhancedPdfViewerInner = (
               startIcon={<DownloadIcon />}
               onClick={handleDownload}
               sx={{ mt: 2 }}
-              disabled={!url}
             >
               Download
             </Button>
           </Box>
         )}
 
-        {!error && url ? (
+        {!error && (
           <Document
-            file={url}
+            file={currentUrl}
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}
-            loading={<></>}
-            key={`pdf-document-${retries}`} // Force re-render on retry
+            loading={<CircularProgress />}
+            noData={<Typography>No PDF data available</Typography>}
+            error={
+              <Box>
+                <Typography color="error">Failed to load PDF</Typography>
+                <Button onClick={handleRetry} startIcon={<RefreshIcon />} sx={{ mt: 1 }}>
+                  Retry
+                </Button>
+              </Box>
+            }
+            options={{
+              cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/cmaps/',
+              cMapPacked: true,
+              standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/standard_fonts/',
+              withCredentials: false, // Set to true if the PDF requires authentication
+              disableRange: true, // Disabling range requests can help when having CORS issues
+              disableStream: true, // Disabling streaming to prevent partial loading issues
+              disableAutoFetch: true, // Disable auto-fetching to prevent streaming issues
+            }}
           >
-            <Page
-              pageNumber={pageNumber}
-              scale={scale}
-              rotate={rotation}
-              loading={<></>}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-              canvasBackground="transparent"
-            />
+            {numPages && (
+              <Page
+                pageNumber={pageNumber}
+                scale={scale}
+                rotate={rotation}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                onLoadSuccess={() => setLoading(false)}
+                onRenderError={() => setError('Failed to render PDF page')}
+                loading={<CircularProgress size={20} />}
+              />
+            )}
           </Document>
-        ) : !error && !loading ? (
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 4 }}>
-            No document selected
-          </Typography>
-        ) : null}
+        )}
       </Box>
     </Box>
   );

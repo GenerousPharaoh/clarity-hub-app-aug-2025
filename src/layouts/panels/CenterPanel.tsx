@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   IconButton,
@@ -23,6 +23,7 @@ import { Note, Link } from '../../types';
 import SuggestionPanel from '../../components/ai/SuggestionPanel';
 import CitationFinder from '../../components/dialogs/CitationFinder';
 import { debounce } from 'lodash';
+import '../../theme/tinymce-custom.css'; // Import custom TinyMCE CSS
 
 // Define a local interface to match the actual database schema
 interface NoteData {
@@ -41,6 +42,7 @@ const CenterPanel = () => {
   const [saving, setSaving] = useState(false);
   const [isCitationFinderOpen, setCitationFinderOpen] = useState(false);
   const [editorInstance, setEditorInstance] = useState<any>(null);
+  const fetchedRef = useRef(false);
   
   // Use individual selectors instead of object destructuring
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
@@ -53,10 +55,15 @@ const CenterPanel = () => {
   // Load note when project changes
   useEffect(() => {
     if (selectedProjectId && user) {
+      // Prevent duplicate calls in StrictMode
+      if (fetchedRef.current) return;
+      fetchedRef.current = true;
       fetchNote();
     } else {
       setNote(null);
       setContent('');
+      // Reset the ref when project changes
+      fetchedRef.current = false;
     }
   }, [selectedProjectId, user]);
 
@@ -151,7 +158,10 @@ const CenterPanel = () => {
         
         const { data: createdNote, error: createError } = await supabaseClient
           .from('notes')
-          .upsert([newNote], { onConflict: ['project_id', 'user_id'] })
+          .upsert([newNote], { 
+            onConflict: 'project_id,user_id',
+            ignoreDuplicates: false // Use merge-duplicates behavior
+          })
           .select()
           .single();
         
@@ -188,15 +198,19 @@ const CenterPanel = () => {
       
       const userId = authUser.id;
       
+      // Use upsert instead of update to ensure consistency and avoid conflicts
       const { error } = await supabaseClient
         .from('notes')
-        .update({ 
+        .upsert({ 
+          id: noteToSave.id,
+          project_id: selectedProjectId,
           content: contentToSave, 
           updated_at: new Date().toISOString(),
           user_id: userId
-        })
-        .eq('id', noteToSave.id)
-        .eq('user_id', userId); // Add user_id constraint for extra security
+        }, {
+          onConflict: 'id',
+          ignoreDuplicates: false
+        });
       
       if (error) throw error;
       
@@ -254,48 +268,62 @@ const CenterPanel = () => {
 
   // TinyMCE configuration
   const editorConfig = {
-    height: '100%',
+    height: '100%', // Keep 100% height
     menubar: true,
     plugins: [
       'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
       'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
       'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
-      'save', 'autoresize'
+      'save', 'autoresize', 'pagebreak', 'nonbreaking', 'quickbars',
+      'emoticons', 'directionality', 'visualchars', 'codesample'
     ],
-    toolbar: 'undo redo | formatselect | ' +
-      'bold italic backcolor | alignleft aligncenter ' +
-      'alignright alignjustify | bullist numlist outdent indent | ' +
-      'removeformat | help | cite',
-    content_style: `
-      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; }
-      .exhibit-citation { 
-        background-color: #e3f2fd; 
-        color: #1976d2; 
-        padding: 2px 4px; 
-        border-radius: 4px; 
-        text-decoration: none; 
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .exhibit-citation:hover { 
-        background-color: #bbdefb; 
-      }
-    `,
+    toolbar: [
+      'undo redo | fontfamily fontsize | bold italic underline strikethrough forecolor backcolor | alignleft aligncenter alignright alignjustify',
+      'bullist numlist outdent indent | link image media table codesample | pagebreak nonbreaking | removeformat | cite fullscreen code'
+    ],
+    toolbar_mode: 'sliding', // Makes toolbar responsive
+    toolbar_sticky: true, // Keep toolbar visible when scrolling
     // Add base_url to ensure TinyMCE can find its resources
     base_url: '/tinymce',
     // Add skin_url to ensure TinyMCE can find its skin
     skin_url: '/tinymce/skins/ui/oxide',
     // Add content_css to ensure TinyMCE loads the proper CSS for the editor content
-    content_css: '/tinymce/skins/content/default/content.min.css',
+    content_css: [
+      '/tinymce/skins/content/default/content.min.css',
+      '/tinymce/tinymce-custom.css' // Path to our custom CSS in public directory
+    ],
     // Add license key for TinyMCE
     license_key: 'gpl',
     inline_styles: true,
     extended_valid_elements: 'a[*]',
+    resize: false, // Disable resize handle 
+    branding: false, // Remove TinyMCE branding
+    promotion: false, // Remove promotion link
+    statusbar: true, // Show status bar
+    min_height: 500, // Set minimum height
+    autoresize_bottom_margin: 50, // Add space at the bottom when using autoresize
+    // Word count and indicator
+    wordcount_countcharacters: true,
+    wordcount_cleanregex: /[0-9.(),;:!?%#$?\x27\x22_+=\\\/\-]*/g,
     // Setup editor
     setup: (editor) => {
       // Store editor instance for later use
       editor.on('init', () => {
         setEditorInstance(editor);
+        
+        // Add clean editor styling
+        const editorContainer = editor.getContainer();
+        if (editorContainer) {
+          editorContainer.style.border = 'none';
+          editorContainer.style.boxShadow = 'rgba(0, 0, 0, 0.05) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px 0px';
+          editorContainer.style.borderRadius = '4px';
+        }
+        
+        // Make editor body use the full height
+        const editorBody = editor.getBody();
+        if (editorBody) {
+          editorBody.style.minHeight = '90vh'; 
+        }
       });
       
       // Add custom cite button
@@ -305,6 +333,16 @@ const CenterPanel = () => {
         onAction: () => {
           setCitationFinderOpen(true);
         }
+      });
+      
+      // Auto-save indication
+      let saveTimer = null;
+      editor.on('KeyUp', () => {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          // This will trigger the content change handler which handles saving
+          editor.fire('change');
+        }, 1000);
       });
       
       // Add citation click handler
@@ -373,7 +411,18 @@ const CenterPanel = () => {
       data-test="center-panel"
     >
       {/* Editor Area */}
-      <Box sx={{ flexGrow: 1, overflow: 'hidden', position: 'relative' }}>
+      <Box sx={{ 
+        flexGrow: 1, 
+        overflow: 'hidden', 
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.paper',
+        borderRadius: 1,
+        p: 0,
+        width: '100%',
+        height: '100%',
+      }}>
         {loading && selectedProjectId ? (
           <Box sx={{ 
             display: 'flex', 
@@ -395,24 +444,26 @@ const CenterPanel = () => {
             {/* Empty placeholder - this should never be seen */}
           </Box>
         ) : (
-          <Editor
-            apiKey={import.meta.env.VITE_TINYMCE_API_KEY as string}
-            value={content}
-            onEditorChange={handleEditorChange}
-            init={editorConfig}
-            // Add onInit handler to log successful initialization
-            onInit={(evt, editor) => {
-              console.log('TinyMCE initialized successfully');
-              setEditorInstance(editor);
-              if (editor.getContainer()) {
-                editor.getContainer().setAttribute('data-test', 'note-editor');
-              }
-            }}
-            // Add onError handler to catch any editor loading errors
-            onLoadError={(err) => {
-              console.error('TinyMCE failed to load:', err);
-            }}
-          />
+          <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden', minHeight: 0 }}>
+            <Editor
+              apiKey={import.meta.env.VITE_TINYMCE_API_KEY as string}
+              value={content}
+              onEditorChange={handleEditorChange}
+              init={editorConfig}
+              // Add onInit handler to log successful initialization
+              onInit={(evt, editor) => {
+                console.log('TinyMCE initialized successfully');
+                setEditorInstance(editor);
+                if (editor.getContainer()) {
+                  editor.getContainer().setAttribute('data-test', 'note-editor');
+                }
+              }}
+              // Add onError handler to catch any editor loading errors
+              onLoadError={(err) => {
+                console.error('TinyMCE failed to load:', err);
+              }}
+            />
+          </Box>
         )}
         
         {/* Action buttons */}
@@ -423,6 +474,7 @@ const CenterPanel = () => {
             right: 10,
             display: 'flex',
             alignItems: 'center',
+            gap: 1,
             zIndex: 1000,
           }}>
             <Tooltip title="Analyze with AI">
@@ -454,11 +506,12 @@ const CenterPanel = () => {
             alignItems: 'center',
             bgcolor: 'background.paper',
             p: 0.5,
+            px: 1,
             borderRadius: 1,
             boxShadow: 1,
           }}>
             <CircularProgress size={16} sx={{ mr: 1 }} />
-            <Typography variant="caption">Saving...</Typography>
+            <Typography variant="caption">Saving changes...</Typography>
           </Box>
         )}
       </Box>

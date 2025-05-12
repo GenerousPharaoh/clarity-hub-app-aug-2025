@@ -45,3 +45,54 @@ dist-ssr
 
 # Debug
 .pnpm-debug.log*
+
+# Google Cloud credentials
+google-credentials.json
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/dist
+/build
+
+# local env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore large media files
+*.mp4
+*.mp3
+*.mov
+*.avi
+*.wmv
+*.flv
+*.webm
+*.mkv
+test-files/large-media/
+
+# Debug files
+debug-output/
+test-results/

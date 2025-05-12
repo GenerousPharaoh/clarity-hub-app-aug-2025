@@ -7,6 +7,7 @@
     "postinstall": "node copy-tinymce.js",
     "predev": "node copy-tinymce.js",
     "dev": "vite",
+    "start": "vite",
     "prebuild": "node copy-tinymce.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -14,7 +15,13 @@
     "copy-tinymce": "node copy-tinymce.js",
     "apply-migration": "node supabase-direct.cjs",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "check-ports": "node check-port-config.js",
+    "fix:storage": "node apply-fix.js",
+    "fix:projects": "node fix-project-display.js",
+    "test:uploads": "node test-uploads.js",
+    "fix:all": "npm run fix:storage && npm run fix:projects && npm run test:uploads",
+    "setup:admin": "node direct-admin-setup.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -30,6 +37,11 @@
     "axios": "^1.9.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
+    "idb": "^8.0.3",
+    "node-fetch": "^2.7.0",
+    "papaparse": "^5.5.2",
+    "pg": "^8.15.6",
+    "puppeteer": "^24.8.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
@@ -38,8 +50,10 @@
     "react-resizable-panels": "^3.0.0",
     "react-router-dom": "^7.5.3",
     "react-spring": "^9.7.5",
+    "react-syntax-highlighter": "^15.6.1",
     "react-zoom-pan-pinch": "^3.7.0",
     "tinymce": "^7.8.0",
+    "uuid": "^11.1.0",
     "zustand": "^5.0.4"
   },
   "devDependencies": {
@@ -53,6 +67,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "playwright": "^1.52.0",
     "react-devtools": "^6.1.1",
     "supabase": "^2.22.6",
     "typescript": "~5.7.2",

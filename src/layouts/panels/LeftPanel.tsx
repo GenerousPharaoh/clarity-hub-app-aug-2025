@@ -55,6 +55,7 @@ import { debounce } from 'lodash';
 import FileTypeIcon from '../../components/icons/FileTypeIcon';
 import { getErrorMessage, logError } from '../../utils/errorHandler';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useNavigate } from 'react-router-dom';
 
 // File type icons are now handled by the FileTypeIcon component
 
@@ -71,6 +72,7 @@ const LeftPanel = () => {
   const setFiles = useAppStore((state) => state.setFiles);
   const projects = useAppStore((state) => state.projects);
   const setProjects = useAppStore((state) => state.setProjects);
+  const navigate = useNavigate();
 
   // Upload state
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -123,6 +125,20 @@ const LeftPanel = () => {
       fetchProjects();
     }
   }, [user, authLoading]);
+
+  // Add a useEffect to auto-open the project dialog when no projects exist
+  // Add after the useEffect that fetches projects
+  useEffect(() => {
+    // Check if projects were loaded and there are none
+    if (!projectsLoading && projects.length === 0 && user) {
+      // Slight delay to ensure UI is ready
+      const timer = setTimeout(() => {
+        setProjectDialogOpen(true);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [projectsLoading, projects, user]);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -191,6 +207,18 @@ const LeftPanel = () => {
         return;
       }
       
+      // Verify authentication status before proceeding
+      const { data: session, error: sessionError } = await supabaseClient.auth.getSession();
+      
+      if (sessionError) {
+        throw new Error(`Authentication error: ${sessionError.message}`);
+      }
+      
+      if (!session?.session?.access_token) {
+        throw new Error('Authentication error: No API key found in request');
+      }
+      
+      // Use the Supabase client consistently for all database operations
       const { data, error } = await supabaseClient
         .from('projects')
         .select('*')
@@ -203,7 +231,14 @@ const LeftPanel = () => {
       setProjects(data || []);
     } catch (error) {
       logError(error, 'fetchProjects');
-      // We're not showing this error to the user directly, but could add a notification here
+      // If this is the common API key error, provide a more helpful message
+      if (error?.message?.includes('No API key found')) {
+        showNotification({
+          message: 'Session expired. Please refresh your browser or log in again.',
+          severity: 'warning',
+          autoHideDuration: 6000
+        });
+      }
     } finally {
       setProjectsLoading(false);
     }
@@ -211,14 +246,68 @@ const LeftPanel = () => {
 
   // Create new project
   const handleCreateProject = async () => {
-    if (!newProjectName.trim() || !user) return;
-
+    if (!newProjectName.trim()) return;
+    
+    // Close the dialog immediately to prevent UI issues
+    setProjectDialogOpen(false);
+    
+    // Check if we are in demo mode (no real user)
+    const isDemoMode = !user || user.id === 'demo-user-123';
+    
     try {
+      console.log('Creating new project:', newProjectName, isDemoMode ? '(DEMO MODE)' : '');
+      
+      // Verify authentication status before proceeding
+      const { data: session, error: sessionError } = await supabaseClient.auth.getSession();
+      
+      if (sessionError) {
+        throw new Error(`Authentication error: ${sessionError.message}`);
+      }
+      
+      if (!session?.session?.access_token) {
+        throw new Error('Authentication error: No API key found in request');
+      }
+      
+      // Use user ID if available, otherwise use a fallback for demo mode
+      const ownerId = user?.id || 'demo-user-123';
+      
+      // In demo mode, create a mock project without database call
+      if (isDemoMode) {
+        // Generate a mock project with proper UUID instead of demo- prefix
+        const mockProject = {
+          id: crypto.randomUUID(), // Using standard UUID format
+          name: newProjectName.trim(),
+          owner_id: ownerId,
+          created_at: new Date().toISOString(),
+        };
+        
+        console.log('Created mock project (demo mode):', mockProject);
+        
+        // Add to local projects array
+        setProjects([mockProject, ...projects]);
+        setSelectedProject(mockProject.id);
+        setNewProjectName('');
+        
+        // Navigate to the new project page
+        console.log('Navigating to:', `/projects/${mockProject.id}`);
+        navigate(`/projects/${mockProject.id}`);
+        
+        // Show a demo mode notification
+        showNotification({
+          message: 'Project created in demo mode (changes won\'t be saved)',
+          severity: 'info',
+          autoHideDuration: 6000
+        });
+        
+        return;
+      }
+      
+      // Normal mode - create project in database
       const { data, error } = await supabaseClient
         .from('projects')
         .insert({
           name: newProjectName.trim(),
-          owner_id: user.id,
+          owner_id: ownerId,
         })
         .select()
         .single();
@@ -227,10 +316,15 @@ const LeftPanel = () => {
         throw error;
       }
 
+      console.log('Project created successfully:', data);
       setProjects([data, ...projects]);
       setSelectedProject(data.id);
       setNewProjectName('');
-      setProjectDialogOpen(false);
+      
+      // Navigate to the new project page
+      console.log('Navigating to:', `/projects/${data.id}`);
+      navigate(`/projects/${data.id}`);
+      
     } catch (error) {
       logError(error, 'handleCreateProject');
       showNotification({
@@ -306,7 +400,27 @@ const LeftPanel = () => {
     setSearchFilters({ searchTerm: '' });
   };
 
-  // Apply search filters - Type-safe and always returns an array
+  // Add tag filters
+  const handleAddTagFilter = (tag: string) => {
+    const currentTags = searchFilters.tags || [];
+    if (!currentTags.includes(tag)) {
+      setSearchFilters({ tags: [...currentTags, tag] });
+    }
+  };
+
+  // Filter by tags function
+  const filterFilesByTags = (filesToFilter: FileRecord[]): FileRecord[] => {
+    if (!searchFilters.tags || searchFilters.tags.length === 0) {
+      return filesToFilter;
+    }
+    
+    return filesToFilter.filter(file => {
+      const fileTags = file.metadata?.tags || [];
+      return searchFilters.tags.some(tag => fileTags.includes(tag));
+    });
+  };
+
+  // Update to apply tag filters
   const filterFiles = (filesToFilter: FileRecord[]): FileRecord[] => {
     // Guard: ensure files is always an array
     if (!Array.isArray(filesToFilter)) {
@@ -317,14 +431,16 @@ const LeftPanel = () => {
     // No filters applied
     if (!searchFilters.searchTerm && 
         (!searchFilters.fileTypes || searchFilters.fileTypes.length === 0) &&
+        (!searchFilters.tags || searchFilters.tags.length === 0) &&
         (!searchFilters.dateFrom && !searchFilters.dateTo)) {
       return sortFiles(filesToFilter);
     }
 
-    return sortFiles(filesToFilter.filter((file) => {
+    let filteredByTextAndType = filesToFilter.filter((file) => {
       const matchesSearchTerm = !searchFilters.searchTerm ||
         file.name.toLowerCase().includes(searchFilters.searchTerm.toLowerCase()) ||
-        (file.exhibit_id && file.exhibit_id.toLowerCase().includes(searchFilters.searchTerm.toLowerCase()));
+        (file.exhibit_id && file.exhibit_id.toLowerCase().includes(searchFilters.searchTerm.toLowerCase())) ||
+        (file.metadata?.description && file.metadata.description.toLowerCase().includes(searchFilters.searchTerm.toLowerCase()));
       
       const matchesFileType = !searchFilters.fileTypes || 
         searchFilters.fileTypes.length === 0 || 
@@ -344,7 +460,14 @@ const LeftPanel = () => {
       }
       
       return matchesSearchTerm && matchesFileType && matchesDateRange;
-    }));
+    });
+    
+    // Apply tag filtering
+    if (searchFilters.tags && searchFilters.tags.length > 0) {
+      filteredByTextAndType = filterFilesByTags(filteredByTextAndType);
+    }
+    
+    return sortFiles(filteredByTextAndType);
   };
 
   // Sort files based on sort option and direction
@@ -506,17 +629,47 @@ const LeftPanel = () => {
 
   return (
     <Box 
-      sx={{ height: '100%', maxHeight: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
-      data-test="left-panel"
-    >
+  sx={{ 
+    height: '100%', 
+    maxHeight: '100%', 
+    display: 'flex', 
+    flexDirection: 'column', 
+    overflow: 'hidden',
+    pt: 1.5, // Increased padding to prevent content from being cut off
+    backgroundColor: theme => theme.palette.background.default
+  }}
+  data-test="left-panel"
+>
       {/* Projects Section */}
-      <Paper elevation={0} sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          p: 2, 
+          borderBottom: 1, 
+          borderColor: 'divider',
+          position: 'relative',
+          zIndex: 1,
+          backgroundColor: theme => theme.palette.mode === 'dark' 
+            ? theme.palette.background.paper
+            : theme.palette.background.default
+        }}
+      >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="h6">Projects</Typography>
           <Button
             size="small"
+            variant="outlined"
             startIcon={<AddIcon />}
             onClick={() => setProjectDialogOpen(true)}
+            data-test="new-project-button"
+            color="primary"
+            sx={{
+              borderRadius: 4,
+              px: 1.5,
+              '&:hover': {
+                backgroundColor: theme => theme.palette.primary.main + '10',
+              }
+            }}
           >
             New
           </Button>
@@ -536,13 +689,34 @@ const LeftPanel = () => {
         ) : (
           <List dense sx={{ maxHeight: '200px', overflow: 'auto' }}>
             {projects.length === 0 ? (
-              <ListItem>
-                <ListItemText 
-                  primary="No projects yet" 
-                  secondary="Create your first project to get started"
-                  primaryTypographyProps={{ color: 'text.secondary' }}
-                />
-              </ListItem>
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography 
+                  variant="body1" 
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
+                  No projects yet
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AddIcon />}
+                  fullWidth
+                  size="large"
+                  onClick={() => setProjectDialogOpen(true)}
+                  data-test="start-first-project-button"
+                  sx={{
+                    py: 1.5,
+                    fontWeight: 'bold',
+                    boxShadow: 2,
+                    '&:hover': {
+                      boxShadow: 4,
+                    }
+                  }}
+                >
+                  Start your first project
+                </Button>
+              </Box>
             ) : (
               projects.map((project: Project) => (
                 <ListItem key={project.id} disablePadding>
@@ -783,7 +957,7 @@ const LeftPanel = () => {
         </Paper>
         
         {/* File List */}
-        <List sx={{ flexGrow: 1, overflow: 'auto', p: 0 }}>
+        <List sx={{ flexGrow: 1, overflow: 'auto', minHeight: 0, p: 0 }}>
           {filesLoading ? (
             Array(5).fill(0).map((_, index) => (
               <ListItem key={index} divider>
@@ -812,6 +986,8 @@ const LeftPanel = () => {
             filteredFiles.map((file) => {
               const metadata = file.metadata || {};
               const thumbnailUrl = metadata.thumbnailUrl;
+              const tags = metadata.tags || [];
+              const description = metadata.description || '';
               
               return (
                 <ListItem
@@ -872,10 +1048,11 @@ const LeftPanel = () => {
                           variant="body2"
                           noWrap
                           sx={{ fontWeight: selectedFileId === file.id ? 'bold' : 'normal' }}
+                          title={description ? `${description}` : file.name}
                         >
                           {file.name}
                         </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
                           {file.exhibit_id && (
                             <Chip
                               label={file.exhibit_id}
@@ -885,8 +1062,31 @@ const LeftPanel = () => {
                               sx={{ mr: 1, height: 20, '& .MuiChip-label': { px: 1, py: 0 } }}
                             />
                           )}
-                          <Typography variant="caption" color="text.secondary" noWrap>
-                            {(file.size / 1024).toFixed(0)} KB • {new Date(file.added_at).toLocaleDateString()}
+                          
+                          {tags.slice(0, 2).map((tag, index) => (
+                            <Chip
+                              key={index}
+                              label={tag}
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddTagFilter(tag);
+                              }}
+                              sx={{ 
+                                height: 20, 
+                                '& .MuiChip-label': { px: 1, py: 0 },
+                                backgroundColor: theme => theme.palette.primary.main + '20',
+                              }}
+                            />
+                          ))}
+                          {tags.length > 2 && (
+                            <Typography variant="caption" sx={{ ml: 0.5 }}>
+                              +{tags.length - 2}
+                            </Typography>
+                          )}
+                          
+                          <Typography variant="caption" color="text.secondary" noWrap sx={{ ml: 'auto' }}>
+                            {(file.size / 1024).toFixed(0)} KB
                           </Typography>
                         </Box>
                       </Box>
@@ -937,30 +1137,44 @@ const LeftPanel = () => {
         </MenuItem>
       </Menu>
 
-      {/* Add Project Dialog */}
-      <Dialog open={isProjectDialogOpen} onClose={() => setProjectDialogOpen(false)}>
-        <DialogTitle>Create New Project</DialogTitle>
+      {/* New Project Dialog */}
+      <Dialog 
+        open={isProjectDialogOpen} 
+        onClose={() => setProjectDialogOpen(false)} 
+        data-test="create-project-dialog"
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>{projects.length === 0 ? 'Start Your First Project' : 'Create New Project'}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Enter a name for your new project. This will be a collection of your evidence files and notes.
-          </DialogContentText>
+          {projects.length === 0 && (
+            <DialogContentText sx={{ mb: 2 }}>
+              Projects help you organize your files and documents. Create your first project to get started.
+            </DialogContentText>
+          )}
           <TextField
             autoFocus
             margin="dense"
             label="Project Name"
+            type="text"
             fullWidth
             value={newProjectName}
             onChange={(e) => setNewProjectName(e.target.value)}
+            data-test="project-name-input"
+            placeholder="Enter a name for your project"
+            helperText="Example: Smith Case, Client Onboarding, etc."
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setProjectDialogOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleCreateProject} 
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setProjectDialogOpen(false)} data-test="cancel-project-button">Cancel</Button>
+          <Button
+            variant="contained" 
+            color="primary"
             disabled={!newProjectName.trim()}
-            variant="contained"
+            onClick={handleCreateProject}
+            data-test="create-project-button"
           >
-            Create
+            {projects.length === 0 ? 'Start Project' : 'Create Project'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,49 +1,66 @@
 #!/bin/bash
 
-# Colors for output
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Simple script to apply SQL migrations to Supabase
+# This script generates a link to the SQL Editor with the migration loaded
 
-# Print header
-echo -e "${BLUE}====================================${NC}"
-echo -e "${BLUE}  Applying Supabase Migrations      ${NC}"
-echo -e "${BLUE}====================================${NC}"
-
-# Check if supabase CLI is installed
-if ! command -v supabase &> /dev/null; then
-    echo -e "${RED}Error: Supabase CLI is not installed.${NC}"
-    echo "Please install it with: npm install -g supabase"
+# Get SQL migration file path
+if [ -z "$1" ]; then
+    echo "Error: No SQL file specified."
+    echo "Usage: $0 <path-to-sql-file>"
     exit 1
 fi
 
-# Check connection to Supabase
-echo -e "${BLUE}Checking connection to Supabase...${NC}"
+SQL_FILE="$1"
+
+if [ ! -f "$SQL_FILE" ]; then
+    echo "Error: SQL file not found: $SQL_FILE"
+    exit 1
+fi
+
+# Get Supabase URL from .env
 SUPABASE_URL=$(grep VITE_SUPABASE_URL .env | cut -d '=' -f2)
+
 if [ -z "$SUPABASE_URL" ]; then
-    echo -e "${RED}Error: Could not find SUPABASE_URL in .env file${NC}"
+    echo "Error: Could not find VITE_SUPABASE_URL in .env file."
     exit 1
 fi
-echo -e "${GREEN}Using Supabase URL: $SUPABASE_URL${NC}"
 
-# Apply migrations using Supabase REST API
-echo -e "${BLUE}Applying migration: 20250503000000_cleanup_schema_and_fix_conflicts.sql${NC}"
-echo -e "${GREEN}Migration will fix schema conflicts and ensure proper routing.${NC}"
+# Extract project reference from URL
+PROJECT_REF=$(echo $SUPABASE_URL | sed -E 's/https:\/\/([^.]+)\.supabase\.co/\1/')
 
-# This would normally use supabase CLI but we'll just print instructions
-echo -e "${BLUE}To apply this migration, you need to:${NC}"
-echo "1. Go to the Supabase dashboard"
-echo "2. Navigate to the SQL Editor"
-echo "3. Open the file: supabase/migrations/20250503000000_cleanup_schema_and_fix_conflicts.sql"
-echo "4. Execute the SQL"
+if [ -z "$PROJECT_REF" ]; then
+    echo "Error: Could not extract project reference from Supabase URL."
+    exit 1
+fi
 
-# Restart application
-echo -e "${BLUE}Restarting application...${NC}"
-echo -e "${GREEN}Stopping any running instances...${NC}"
-pkill -f "npm run dev" || true
-echo -e "${GREEN}Starting application...${NC}"
-npm run dev &
+# Read the SQL file
+SQL_CONTENT=$(cat "$SQL_FILE")
 
-echo -e "${GREEN}Done! The application should now be running with the fixed schema.${NC}"
-echo -e "${BLUE}Check the console for any remaining errors.${NC}" 
+# Encode the SQL content for URL
+ENCODED_SQL=$(echo "$SQL_CONTENT" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read()))")
+
+# Generate SQL Editor URL
+SQL_EDITOR_URL="https://supabase.com/dashboard/project/$PROJECT_REF/sql/new?content=$ENCODED_SQL"
+
+echo "--------------------------------------------------------------------------------"
+echo "📝 SQL Migration: $SQL_FILE"
+echo "--------------------------------------------------------------------------------"
+echo "To apply this migration, please:"
+echo ""
+echo "1. Open the following URL in your browser:"
+echo ""
+echo "$SQL_EDITOR_URL"
+echo ""
+echo "2. Review the SQL in the editor"
+echo "3. Click 'Run' to execute the migration"
+echo "--------------------------------------------------------------------------------"
+echo "SQL Content:"
+echo "--------------------------------------------------------------------------------"
+echo "$SQL_CONTENT"
+echo "--------------------------------------------------------------------------------"
+
+# On macOS, try to open the URL automatically
+if [ "$(uname)" = "Darwin" ]; then
+    echo "Attempting to open URL in your browser..."
+    open "$SQL_EDITOR_URL"
+fi 

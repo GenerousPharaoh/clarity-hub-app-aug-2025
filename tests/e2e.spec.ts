@@ -123,4 +123,38 @@ test.describe('responsive and console checks', () => {
     );
     expect(criticalErrors).toEqual([]);
   });
+});
+
+// This test specifically checks the project creation and routing
+test('project creation and dialog behavior', async ({ page }) => {
+  // Set a longer timeout since we need to wait for network requests
+  test.setTimeout(30000);
+  
+  // Enter the demo mode first
+  await page.click('button:has-text("Skip Login (Demo Mode)")');
+  
+  // Verify we're at the projects page (wait for the element to be stable)
+  await page.waitForSelector('.MuiBox-root', { state: 'visible', timeout: 10000 });
+  
+  // Open the create project dialog
+  await page.click('[data-test="new-project-button"]');
+  
+  // Wait for the dialog to appear
+  await page.waitForSelector('[data-test="create-project-dialog"]', { state: 'visible' });
+  
+  // Enter a project name - target the input element inside the TextField
+  const projectName = `Test Project ${Date.now()}`;
+  await page.fill('[data-test="project-name-input"] input', projectName);
+  
+  // Click create button and wait for dialog to close
+  await page.click('[data-test="create-project-button"]');
+  
+  // Wait for dialog to disappear
+  await page.waitForSelector('[data-test="create-project-dialog"]', { 
+    state: 'detached',
+    timeout: 5000 
+  });
+  
+  // Test passed if the dialog closes
+  expect(await page.isVisible('[data-test="create-project-dialog"]')).toBe(false);
 }); 

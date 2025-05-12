@@ -1,13 +1,27 @@
+// Set CORS headers for all responses
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Max-Age': '86400',
+};
+
 // Handle CORS for all responses, including preflight OPTIONS requests
 export function handleCors(req: Request, res?: Response): Response | null {
   // Get the request origin
   const origin = req.headers.get('origin');
-  const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'];
   
-  // If the origin is allowed, use it; otherwise default to the first allowed origin
-  const allowedOrigin = origin && allowedOrigins.includes(origin) 
-    ? origin 
-    : allowedOrigins[0];
+  // Allow any localhost origin regardless of port, plus production URLs
+  const isAllowedOrigin = origin && (
+    origin.match(/^http:\/\/localhost:[0-9]+$/) || 
+    origin === 'http://localhost:5173' ||  // Explicitly allow Vite's default port
+    origin === 'http://localhost:5175' ||  // Add the new port we're using
+    origin.includes('clarity-hub-app.vercel.app') ||
+    origin.includes('.supabase.co')
+  );
+  
+  // If the origin is allowed, use it; otherwise use *
+  const allowedOrigin = isAllowedOrigin ? origin : '*';
   
   // Handle preflight CORS
   if (req.method === 'OPTIONS') {
@@ -18,6 +32,7 @@ export function handleCors(req: Request, res?: Response): Response | null {
         'Access-Control-Allow-Headers': 'Authorization, X-Client-Info, apikey, Content-Type',
         'Access-Control-Allow-Credentials': 'true',
         'Access-Control-Max-Age': '86400',
+        'Vary': 'Origin', // Important for caching with different origins
       },
     });
   }
@@ -29,6 +44,7 @@ export function handleCors(req: Request, res?: Response): Response | null {
     headers.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     headers.set('Access-Control-Allow-Headers', 'Authorization, X-Client-Info, apikey, Content-Type');
     headers.set('Access-Control-Allow-Credentials', 'true');
+    headers.set('Vary', 'Origin');
 
     return new Response(res.body, {
       status: res.status,

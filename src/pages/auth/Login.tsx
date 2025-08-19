@@ -1,182 +1,125 @@
-import { useState, useCallback, memo, useEffect } from 'react';
-import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Link,
-  Paper,
+import * as React from 'react';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
   CircularProgress,
   Alert,
+  Stack,
+  Divider 
 } from '@mui/material';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface LocationState {
-  from?: string;
-}
-
-// Admin credentials
-const ADMIN_EMAIL = 'kareem.hassanein@gmail.com';
-const ADMIN_PASSWORD = 'Kingtut11-';
-
-// Use memo to prevent unnecessary re-renders
-const Login = memo(() => {
+export default function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { signIn, user } = useAuth();
+  const { signIn } = useAuth();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
   
-  // Pre-fill with admin credentials
-  const [email, setEmail] = useState(ADMIN_EMAIL);
-  const [password, setPassword] = useState(ADMIN_PASSWORD);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [attemptedAutoLogin, setAttemptedAutoLogin] = useState(false);
-  
-  const handleEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  }, []);
-  
-  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  }, []);
-  
-  const handleLogin = useCallback(async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    
-    if (!email || !password) {
-      setError('Email and password are required');
-      return;
-    }
-    
-    setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
     setLoading(true);
     
     try {
-      const { error } = await signIn(email, password);
-      
-      if (error) throw error;
-      
-      // Redirect to appropriate page
-      const state = location.state as LocationState;
-      const from = state?.from || '/';
-      console.log('Login successful, navigating to:', from);
-      navigate(from, { replace: true });
-    } catch (error: any) {
-      console.error('Login error:', error);
-      setError(error.message || 'Failed to log in. Please try again.');
+      await signIn(email, password);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in');
+    } finally {
       setLoading(false);
     }
-  }, [email, password, signIn, navigate, location.state]);
-  
-  // Attempt auto-login on component mount
-  useEffect(() => {
-    if (!user && !attemptedAutoLogin) {
-      console.log('Attempting automatic login with admin credentials');
-      setAttemptedAutoLogin(true);
-      
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        handleLogin();
-      }
-    }
-  }, [user, attemptedAutoLogin, email, password, handleLogin]);
-  
-  // If already logged in, redirect to home
-  useEffect(() => {
-    if (user) {
-      const state = location.state as LocationState;
-      const from = state?.from || '/';
-      navigate(from, { replace: true });
-    }
-  }, [user, navigate, location.state]);
+  };
   
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
+    <Box component="form" onSubmit={handleSubmit} noValidate>
+      <Typography 
+        component="h1" 
+        variant="h4" 
+        align="center" 
+        sx={{ 
+          mb: 3, 
+          fontWeight: 700,
+          background: theme => theme.palette.mode === 'dark'
+            ? 'linear-gradient(90deg, #60A5FA, #A78BFA)'
+            : 'linear-gradient(90deg, #1D4ED8, #7C3AED)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         }}
       >
-        <Paper 
-          elevation={3} 
+        Sign In
+      </Typography>
+      
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      
+      <Stack spacing={3}>
+        <TextField
+          label="Email Address"
+          type="email"
+          required
+          fullWidth
+          autoComplete="email"
+          autoFocus
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        
+        <TextField
+          label="Password"
+          type="password"
+          required
+          fullWidth
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          disabled={loading}
+          sx={{ py: 1.2 }}
+        >
+          {loading ? <CircularProgress size={24} /> : 'Sign In'}
+        </Button>
+      </Stack>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+        <Typography
+          component={RouterLink}
+          to="/auth/forgot-password"
+          variant="body2"
           sx={{ 
-            p: 4, 
-            width: '100%', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
+            textDecoration: 'none',
+            color: 'primary.main',
+            '&:hover': { textDecoration: 'underline' }
           }}
         >
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            {import.meta.env.VITE_APP_NAME || 'Legal Case Tracker'}
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ mb: 3, width: '100%' }}>
-              {error}
-            </Alert>
-          )}
-          
-          <Box component="form" onSubmit={handleLogin} sx={{ width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={handleEmailChange}
-              disabled={loading}
-              inputProps={{
-                'aria-label': 'Email Address',
-              }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={handlePasswordChange}
-              disabled={loading}
-              inputProps={{
-                'aria-label': 'Password',
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign In'}
-            </Button>
-            
-            <Alert severity="info" sx={{ mb: 2 }}>
-              <Typography variant="body2">
-                Using admin account for this legal case tracking application.
-              </Typography>
-            </Alert>
-          </Box>
-        </Paper>
+          Forgot password?
+        </Typography>
+        
+        <Typography
+          component={RouterLink}
+          to="/auth/register"
+          variant="body2"
+          sx={{ 
+            textDecoration: 'none',
+            color: 'primary.main',
+            '&:hover': { textDecoration: 'underline' }
+          }}
+        >
+          Don't have an account? Sign Up
+        </Typography>
       </Box>
-    </Container>
+    </Box>
   );
-});
-
-Login.displayName = 'Login';
-
-export default Login; 
+} 

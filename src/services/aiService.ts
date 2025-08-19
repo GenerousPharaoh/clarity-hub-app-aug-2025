@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { supabase } from '../lib/supabaseClient';
 
 // Get the configured base URL or use default edge function path
 const BASE_URL = import.meta.env.VITE_AI_API_BASE?.replace(/\/+$/, '') || 
@@ -43,4 +44,74 @@ export async function analyzeWritingContext(
   }
 }
 
-export default { analyzeWritingContext }; 
+/**
+ * Analyze a file using Google Gemini through Edge Functions
+ * @param fileId The ID of the file to analyze
+ * @returns Analysis result from Gemini
+ */
+export async function analyzeFile(fileId: string): Promise<any> {
+  try {
+    console.log(`Analyzing file ${fileId} with AI`);
+    
+    // Call the Edge Function
+    const { data, error } = await supabase.functions.invoke('analyze-file', {
+      body: { fileId }
+    });
+    
+    if (error) {
+      throw new Error(`Analysis failed: ${error.message}`);
+    }
+    
+    console.log('File analysis completed successfully');
+    
+    // Update file metadata with analysis results
+    if (data?.analysis) {
+      // Update file metadata in database
+      const { error: updateError } = await supabase
+        .from('files')
+        .update({
+          metadata: {
+            documentAnalysis: data.analysis,
+            processingStatus: 'completed',
+            processedAt: new Date().toISOString()
+          }
+        })
+        .eq('id', fileId);
+      
+      if (updateError) {
+        console.error('Error updating file metadata:', updateError);
+      }
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('Error analyzing file:', error);
+    throw error;
+  }
+}
+
+/**
+ * Generate tag suggestions for a document using AI
+ * @param text The document text to analyze
+ * @returns List of tag suggestions
+ */
+export async function generateTagSuggestions(text: string): Promise<string[]> {
+  try {
+    // Truncate text if it's too long
+    const truncatedText = text.length > 5000 ? text.substring(0, 5000) + '...' : text;
+    
+    // Call analyze-writing-context
+    const result = await analyzeWritingContext(truncatedText);
+    
+    if (result?.suggestedTopics) {
+      return result.suggestedTopics;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error generating tag suggestions:', error);
+    return [];
+  }
+}
+
+export default { analyzeWritingContext, analyzeFile, generateTagSuggestions }; 

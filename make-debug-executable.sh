@@ -1,0 +1,1 @@
+chmod +x ~/Desktop/clarity-hub-app/debug-dev.sh

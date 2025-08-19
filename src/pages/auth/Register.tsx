@@ -1,37 +1,30 @@
-import { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Link,
-  Paper,
+import * as React from 'react';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
   CircularProgress,
   Alert,
+  Stack 
 } from '@mui/material';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-const Register = () => {
+export default function Register() {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  const handleRegister = async (e: React.FormEvent) => {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
-      return;
-    }
-    
+    // Validate passwords
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -41,132 +34,101 @@ const Register = () => {
       setError('Password must be at least 6 characters');
       return;
     }
-
+    
+    setLoading(true);
+    
     try {
-      setError(null);
-      setSuccess(null);
-      setLoading(true);
-      
-      const { error, data } = await signUp(email, password);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Check if email confirmation is required
-      if (data?.user && !data.session) {
-        setSuccess('Registration successful! Please check your email to confirm your account before logging in.');
-        setTimeout(() => {
-          navigate('/login');
-        }, 5000);
-      } else if (data?.session) {
-        // User is automatically logged in
-        navigate('/');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      setError('Failed to create account. Email may already be in use.');
+      await signUp(email, password);
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
+    <Box component="form" onSubmit={handleSubmit} noValidate>
+      <Typography 
+        component="h1" 
+        variant="h4" 
+        align="center" 
+        sx={{ 
+          mb: 3, 
+          fontWeight: 700,
+          background: theme => theme.palette.mode === 'dark'
+            ? 'linear-gradient(90deg, #60A5FA, #A78BFA)'
+            : 'linear-gradient(90deg, #1D4ED8, #7C3AED)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         }}
       >
-        <Paper 
-          elevation={3} 
+        Create Account
+      </Typography>
+      
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      
+      <Stack spacing={3}>
+        <TextField
+          label="Email Address"
+          type="email"
+          required
+          fullWidth
+          autoComplete="email"
+          autoFocus
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        
+        <TextField
+          label="Password"
+          type="password"
+          required
+          fullWidth
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        
+        <TextField
+          label="Confirm Password"
+          type="password"
+          required
+          fullWidth
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          disabled={loading}
+          sx={{ py: 1.2 }}
+        >
+          {loading ? <CircularProgress size={24} /> : 'Sign Up'}
+        </Button>
+      </Stack>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Typography
+          component={RouterLink}
+          to="/auth/login"
+          variant="body2"
           sx={{ 
-            p: 4, 
-            width: '100%', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
+            textDecoration: 'none',
+            color: 'primary.main',
+            '&:hover': { textDecoration: 'underline' }
           }}
         >
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Create an Account
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ mb: 3, width: '100%' }}>
-              {error}
-            </Alert>
-          )}
-          
-          {success && (
-            <Alert severity="success" sx={{ mb: 3, width: '100%' }}>
-              {success}
-            </Alert>
-          )}
-          
-          <Box component="form" onSubmit={handleRegister} sx={{ width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
-              id="confirmPassword"
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={loading}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign Up'}
-            </Button>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Link component={RouterLink} to="/login" variant="body2">
-                Already have an account? Sign In
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
+          Already have an account? Sign In
+        </Typography>
       </Box>
-    </Container>
+    </Box>
   );
-};
-
-export default Register; 
+} 

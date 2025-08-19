@@ -1,58 +1,84 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Snackbar, Alert, AlertColor } from '@mui/material';
+import { Alert, Snackbar, SnackbarCloseReason } from '@mui/material';
 
-// Notification type
-export interface Notification {
+interface NotificationContextProps {
+  showNotification: (message: string, type?: NotificationType, duration?: number) => void;
+  hideNotification: () => void;
+}
+
+type NotificationType = 'success' | 'info' | 'warning' | 'error';
+
+interface NotificationState {
+  open: boolean;
   message: string;
-  severity: AlertColor;
-  autoHideDuration?: number;
+  type: NotificationType;
+  duration: number;
 }
 
-// Context interface
-interface NotificationContextType {
-  showNotification: (notification: Notification) => void;
-  closeNotification: () => void;
+const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
+
+export const useNotification = () => {
+  const context = useContext(NotificationContext);
+  if (context === undefined) {
+    throw new Error('useNotification must be used within a NotificationProvider');
+  }
+  return context;
+};
+
+interface NotificationProviderProps {
+  children: ReactNode;
 }
 
-// Create context with default values
-const NotificationContext = createContext<NotificationContextType>({
-  showNotification: () => {},
-  closeNotification: () => {},
-});
-
-// Custom hook to use notifications
-export const useNotification = () => useContext(NotificationContext);
-
-// Provider component
-export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [open, setOpen] = useState(false);
-  const [notification, setNotification] = useState<Notification>({
+export const NotificationProvider = ({ children }: NotificationProviderProps) => {
+  const [notification, setNotification] = useState<NotificationState>({
+    open: false,
     message: '',
-    severity: 'info',
-    autoHideDuration: 5000,
+    type: 'info',
+    duration: 4000,
   });
 
-  const showNotification = (newNotification: Notification) => {
-    setNotification(newNotification);
-    setOpen(true);
+  const showNotification = (
+    message: string,
+    type: NotificationType = 'info',
+    duration: number = 4000
+  ) => {
+    setNotification({
+      open: true,
+      message,
+      type,
+      duration,
+    });
   };
 
-  const closeNotification = () => {
-    setOpen(false);
+  const hideNotification = () => {
+    setNotification((prev) => ({
+      ...prev,
+      open: false,
+    }));
+  };
+
+  const handleClose = (
+    _event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    hideNotification();
   };
 
   return (
-    <NotificationContext.Provider value={{ showNotification, closeNotification }}>
+    <NotificationContext.Provider value={{ showNotification, hideNotification }}>
       {children}
       <Snackbar
-        open={open}
-        autoHideDuration={notification.autoHideDuration}
-        onClose={closeNotification}
+        open={notification.open}
+        autoHideDuration={notification.duration}
+        onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={closeNotification} 
-          severity={notification.severity} 
+        <Alert
+          onClose={() => hideNotification()}
+          severity={notification.type}
           variant="filled"
           sx={{ width: '100%' }}
         >

@@ -9,6 +9,13 @@ interface RequestParams {
   fileId: string;
 }
 
+// Define direct CORS headers
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, apikey, content-type",
+};
+
 // Parse file text based on file type
 async function extractTextContent(fileId: string, fileType: string, storagePath: string) {
   // Create a Supabase client with the service role key
@@ -64,25 +71,16 @@ function chunkText(text: string, chunkSize = 1000, overlapSize = 200) {
 }
 
 // Main handler function
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: new Headers({
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        'Access-Control-Max-Age': '86400', // 24 hours
-        'Vary': 'Origin', // Important for caching responses with different CORS headers
-      })
-    });
+    return new Response("ok", { headers: CORS });
   }
-  
-  // Ensure origin is set properly for all responses
+
+  // Add headers to all responses
   const headers = new Headers({
-    ...corsHeaders,
+    ...CORS,
     'Content-Type': 'application/json',
-    'Vary': 'Origin'
   });
   
   // Check that the request is a POST
@@ -205,6 +203,7 @@ Deno.serve(async (req) => {
         }),
         {
           status: 200,
+          headers
         }
       );
     } catch (error) {
@@ -217,9 +216,20 @@ Deno.serve(async (req) => {
         }),
         {
           status: 500,
+          headers
         }
       );
     }
   })();
-  return handleCors(req, new Response(response.body, response));
+  
+  // Add CORS headers to response
+  const origin = req.headers.get('origin');
+  return new Response(response.body, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": origin ?? "*",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+      "Access-Control-Allow-Headers": "authorization,apikey,content-type"
+    }
+  });
 }); 

@@ -1,0 +1,1 @@
+chmod +x /Users/kareemhassanein/Desktop/clarity-hub-app/restart-server.sh

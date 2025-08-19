@@ -1,4 +1,15 @@
-// Database types
+// Common types used throughout the application
+
+// User type
+export interface User {
+  id: string;
+  email: string;
+  full_name?: string;
+  avatar_url?: string;
+  is_admin?: boolean;
+}
+
+// Project type
 export interface Project {
   id: string;
   name: string;
@@ -6,8 +17,10 @@ export interface Project {
   goal_type?: string;
   created_at: string;
   is_ai_organized?: boolean;
+  description?: string;
 }
 
+// File type
 export interface File {
   id: string;
   project_id: string;
@@ -17,17 +30,75 @@ export interface File {
   content_type: string;
   size: number;
   file_type: string;
-  metadata: {
-    thumbnailUrl?: string;
-    tags?: string[];
-    fileType?: string;
-    uploadTimestamp?: number;
-  };
+  metadata: Record<string, any>;
   added_at: string;
   owner_id: string;
   uploaded_by_user_id?: string;
 }
 
+// Link activation type for handling deep linking to specific parts of files
+export interface LinkActivation {
+  fileId: string;
+  selectionInfo?: SelectionInfo;
+  timestamp?: number;
+  exhibitId?: string;
+}
+
+// Selection info for capturing text selections
+export interface SelectionInfo {
+  text: string;
+  pageNumber?: number;
+  boundingRect?: DOMRect;
+  timestamp?: number;
+}
+
+// Search filters for file searching
+export interface SearchFilters {
+  searchTerm?: string;
+  fileTypes?: string[];
+  tags?: string[];
+  entities?: string[];
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  searchType?: 'semantic' | 'exact' | 'combined';
+}
+
+// AI analysis result interface
+export interface AnalysisResult {
+  summary: string;
+  documentType: string;
+  keyEntities: { name: string; role: string }[];
+  keyDates: { date: string; significance: string }[];
+  legalIssues: string[];
+  keyFacts: string[];
+  relevantLaw: string[];
+  suggestedKeywords: string[];
+}
+
+// Entity type for extracted entities
+export interface Entity {
+  entity_text: string;
+  entity_type: string;
+  confidence?: number;
+}
+
+// FileRecord type for file upload hook
+export interface FileRecord {
+  id: string;
+  project_id: string;
+  name: string;
+  exhibit_id?: string;
+  storage_path: string;
+  content_type: string;
+  size: number;
+  file_type: string;
+  metadata: Record<string, any>;
+  added_at: string;
+  owner_id: string;
+  uploaded_by_user_id?: string;
+}
+
+// Note type
 export interface Note {
   id: string;
   project_id: string;
@@ -55,15 +126,6 @@ export interface Link {
   };
 }
 
-export interface Entity {
-  id: string;
-  project_id: string;
-  owner_id: string;
-  entity_text: string;
-  entity_type: string;
-  source_file_id: string | null;
-}
-
 export interface DocumentChunk {
   id: string;
   file_id: string;
@@ -82,35 +144,9 @@ export interface ProjectCollaborator {
 }
 
 // Application state types
-export interface User {
-  id: string;
-  email: string;
-  avatar_url?: string;
-  full_name?: string;
-  is_admin?: boolean;
-}
-
 export interface FileWithUrl extends File {
   url?: string;
   thumbnailUrl?: string;
-}
-
-// UI types
-export interface SearchFilters {
-  searchTerm?: string;
-  fileTypes?: string[];
-  searchType?: 'combined' | 'filename' | 'content';
-  tags?: string[];
-  entities?: string[];
-  dateFrom?: string | Date | null;
-  dateTo?: string | Date | null;
-}
-
-export interface LinkActivation {
-  fileId: string;
-  page?: number;
-  timestamp?: number;
-  selection?: string;
 }
 
 // API response types

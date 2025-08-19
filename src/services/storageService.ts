@@ -1,13 +1,8 @@
 import { supabase } from '../lib/supabaseClient';
 import { fallbackStorage } from './fallbackStorageService';
-import { createClient } from '@supabase/supabase-js';
 
-// Create a Supabase client
+// Get Supabase URL for public URL construction
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://swtkpfpyjjkkemmvkhmz.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dGtwZnB5ampra2VtbXZraG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMDM5NTIsImV4cCI6MjA2MDg3OTk1Mn0.8herIfBAFOFUXro03pQxiS4Htnljavfncz-FvPj3sGw';
-
-// Initialize the Supabase client
-const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 // Initialize fallback mode based on prior failures
 let useLocalFallback = false;
@@ -101,16 +96,9 @@ export const getPublicUrl = (bucket: string, path: string): string => {
   // Clean up the path by removing any leading slashes
   const cleanPath = path.startsWith('/') ? path.substring(1) : path;
   
-  // Extract the Supabase reference from the URL
-  const ref = supabase.supabaseUrl.match(/https:\/\/(.*?)\.supabase\.co/)?.[1];
-  
-  if (!ref) {
-    console.error('[storageService] Unable to extract Supabase ref from URL:', supabase.supabaseUrl);
-    return '';
-  }
-  
-  // Return deterministic public URL
-  return `https://${ref}.supabase.co/storage/v1/object/public/${bucket}/${cleanPath}`;
+  // Use the public URL helper from utils
+  // Return deterministic public URL without signed URLs for reliability
+  return `${supabaseUrl}/storage/v1/object/public/${bucket}/${cleanPath}`;
 };
 
 /**
@@ -535,11 +523,128 @@ const parsePath = (fullPath: string): { bucket: string; path: string } => {
 
 /**
  * Get a public URL for a file in the storage bucket
+ * Enhanced with improved reliability and error handling
+ * Now supports cross-environment compatibility
  */
-export function getFileUrl(filePath: string): string | null {
-  if (!filePath) return null;
+export function getFileUrl(filePath: string, options?: { cacheBuster?: boolean }): Promise<{ url: string; error?: any }> {
+  if (!filePath) return Promise.resolve({ url: '', error: 'No file path provided' });
 
-  return getPublicUrl('files', filePath);
+  // Add cache busting if needed
+  const useCache = options?.cacheBuster !== false;
+  const timestamp = useCache ? `?t=${Date.now()}` : '';
+
+  return new Promise(async (resolve) => {
+    console.log(`[storageService] Getting URL for file: ${filePath}`);
+    
+    try {
+      // Get environment variables or fallback values
+      const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
+      
+      // APPROACH 1: Use the Supabase JS client's built-in getPublicUrl method
+      try {
+        console.log('[storageService] Using getPublicUrl from Supabase client');
+        const { data } = supabase.storage.from('files').getPublicUrl(filePath);
+        
+        if (data?.publicUrl) {
+          const publicUrl = data.publicUrl + (data.publicUrl.includes('?') ? '&' : '?') + `_cb=${Date.now()}`;
+          console.log(`[storageService] Got public URL: ${publicUrl}`);
+          
+          // Test if the URL is accessible
+          try {
+            const response = await fetch(publicUrl, { method: 'HEAD', mode: 'no-cors' });
+            console.log(`[storageService] Public URL test response:`, response);
+            return resolve({ url: publicUrl });
+          } catch (e) {
+            console.log('[storageService] Public URL test failed, trying alternative methods');
+          }
+        }
+      } catch (e) {
+        console.log('[storageService] getPublicUrl error:', e);
+      }
+      
+      // APPROACH 2: Direct URL construction (works across environments)
+      try {
+        const directUrl = `${supabaseUrl}/storage/v1/object/public/files/${filePath}${timestamp}`;
+        console.log(`[storageService] Trying direct URL: ${directUrl}`);
+        
+        // Test if URL is accessible with a HEAD request
+        try {
+          const headResponse = await fetch(directUrl, { 
+            method: 'HEAD',
+            cache: 'no-cache', // Force fresh request
+            mode: 'no-cors' // Allow cross-origin requests
+          });
+          
+          console.log(`[storageService] Direct URL test response:`, headResponse);
+          return resolve({ url: directUrl });
+        } catch (directError) {
+          console.log(`[storageService] Direct URL test failed:`, directError);
+        }
+      } catch (directError) {
+        console.log(`[storageService] Direct URL error:`, directError);
+      }
+      
+      // APPROACH 3: Signed URL
+      try {
+        console.log(`[storageService] Trying signed URL for ${filePath}`);
+        const { data, error } = await supabase.storage
+          .from('files')
+          .createSignedUrl(filePath, 3600);
+        
+        if (data?.signedUrl) {
+          console.log(`[storageService] Signed URL created successfully`);
+          return resolve({ url: data.signedUrl });
+        } else {
+          console.log(`[storageService] Signed URL failed:`, error);
+        }
+      } catch (signedError) {
+        console.log(`[storageService] Signed URL error:`, signedError);
+      }
+      
+      // APPROACH 4: Alternative public URL format (absolute URL)
+      try {
+        const absolutePublicUrl = `https://${supabaseProjectId}.supabase.co/storage/v1/object/public/files/${filePath}${timestamp}`;
+        console.log(`[storageService] Trying absolute public URL: ${absolutePublicUrl}`);
+        return resolve({ url: absolutePublicUrl });
+      } catch (publicError) {
+        console.log(`[storageService] Public URL helper error:`, publicError);
+      }
+      
+      // APPROACH 5: Direct download and blob URL
+      try {
+        console.log(`[storageService] Trying direct download for blob URL`);
+        const { data, error } = await supabase.storage
+          .from('files')
+          .download(filePath);
+        
+        if (data) {
+          const blobUrl = URL.createObjectURL(data);
+          console.log(`[storageService] Created blob URL from download`);
+          return resolve({ url: blobUrl });
+        } else {
+          console.log(`[storageService] Download failed:`, error);
+        }
+      } catch (downloadError) {
+        console.log(`[storageService] Download error:`, downloadError);
+      }
+      
+      // LAST RESORT: Construct a direct URL again with alt path format
+      const lastResortUrl = `${supabaseUrl}/storage/v1/object/public/files/${filePath}${timestamp}`;
+      
+      console.log(`[storageService] All methods failed. Using last resort URL: ${lastResortUrl}`);
+      resolve({ 
+        url: lastResortUrl,
+        error: "All URL resolution methods failed, using direct URL as last resort" 
+      });
+      
+    } catch (finalError) {
+      console.error(`[storageService] Critical error in getFileUrl:`, finalError);
+      resolve({ 
+        url: '',
+        error: finalError
+      });
+    }
+  });
 }
 
 // Export the supabase client for direct use

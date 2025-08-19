@@ -1,126 +1,161 @@
-import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Link,
-  Paper,
+import * as React from 'react';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
   CircularProgress,
   Alert,
+  Stack 
 } from '@mui/material';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-const ResetPassword = () => {
-  const { resetPassword } = useAuth();
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  const handleResetPassword = async (e: React.FormEvent) => {
+export default function ResetPassword() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { confirmPasswordReset } = useAuth();
+  
+  const [password, setPassword] = React.useState('');
+  const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [success, setSuccess] = React.useState(false);
+  
+  // Get code from URL query params
+  const queryParams = new URLSearchParams(location.search);
+  const code = queryParams.get('code');
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
-    if (!email) {
-      setError('Please enter your email address');
+    if (!code) {
+      setError('Invalid password reset link');
       return;
     }
-
+    
+    // Validate passwords
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    
+    setLoading(true);
+    
     try {
-      setError(null);
-      setSuccess(null);
-      setLoading(true);
+      await confirmPasswordReset(code, password);
+      setSuccess(true);
       
-      const { error } = await resetPassword(email);
-      
-      if (error) {
-        throw error;
-      }
-      
-      setSuccess('Password reset instructions have been sent to your email address.');
-    } catch (error) {
-      console.error('Password reset error:', error);
-      setError('Failed to send password reset email. Please check your email address and try again.');
+      // Navigate back to login after a delay
+      setTimeout(() => {
+        navigate('/auth/login');
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to reset password');
     } finally {
       setLoading(false);
     }
   };
-
+  
+  if (success) {
+    return (
+      <Box sx={{ textAlign: 'center' }}>
+        <Alert severity="success" sx={{ mb: 3 }}>
+          Your password has been successfully reset
+        </Alert>
+        <Typography variant="body2">
+          You will be redirected to the login page shortly.
+        </Typography>
+      </Box>
+    );
+  }
+  
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
+    <Box component="form" onSubmit={handleSubmit} noValidate>
+      <Typography 
+        component="h1" 
+        variant="h4" 
+        align="center" 
+        sx={{ 
+          mb: 3, 
+          fontWeight: 700,
+          background: theme => theme.palette.mode === 'dark'
+            ? 'linear-gradient(90deg, #60A5FA, #A78BFA)'
+            : 'linear-gradient(90deg, #1D4ED8, #7C3AED)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
         }}
       >
-        <Paper 
-          elevation={3} 
+        Create New Password
+      </Typography>
+      
+      {!code && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Invalid or expired password reset link. Please request a new one.
+        </Alert>
+      )}
+      
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      
+      <Stack spacing={3}>
+        <TextField
+          label="New Password"
+          type="password"
+          required
+          fullWidth
+          autoComplete="new-password"
+          autoFocus
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={!code || loading}
+        />
+        
+        <TextField
+          label="Confirm New Password"
+          type="password"
+          required
+          fullWidth
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          disabled={!code || loading}
+        />
+        
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          disabled={!code || loading}
+          sx={{ py: 1.2 }}
+        >
+          {loading ? <CircularProgress size={24} /> : 'Reset Password'}
+        </Button>
+      </Stack>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Typography
+          component={RouterLink}
+          to="/auth/login"
+          variant="body2"
           sx={{ 
-            p: 4, 
-            width: '100%', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
+            textDecoration: 'none',
+            color: 'primary.main',
+            '&:hover': { textDecoration: 'underline' }
           }}
         >
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
-            Reset Password
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ mb: 3, width: '100%' }}>
-              {error}
-            </Alert>
-          )}
-          
-          {success && (
-            <Alert severity="success" sx={{ mb: 3, width: '100%' }}>
-              {success}
-            </Alert>
-          )}
-          
-          <Box component="form" onSubmit={handleResetPassword} sx={{ width: '100%' }}>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Enter your email address and we'll send you instructions to reset your password.
-            </Typography>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : 'Send Reset Instructions'}
-            </Button>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Link component={RouterLink} to="/login" variant="body2">
-                Back to Login
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
+          Back to Sign In
+        </Typography>
       </Box>
-    </Container>
+    </Box>
   );
-};
-
-export default ResetPassword; 
+} 

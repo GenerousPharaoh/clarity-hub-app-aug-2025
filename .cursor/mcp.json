@@ -6,8 +6,8 @@
         "-y",
         "@supabase/mcp-server-supabase@latest",
         "--access-token",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dGtwZnB5ampra2VtbXZraG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMDM5NTIsImV4cCI6MjA2MDg3OTk1Mn0.8herIfBAFOFUXro03pQxiS4Htnljavfncz-FvPj3sGw"
+        "sbp_a8050310172fab2165a40b1438fd6c582203b1bb"
       ]
     }
   }
-} 
+}

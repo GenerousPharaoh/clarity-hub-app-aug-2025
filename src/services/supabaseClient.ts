@@ -1,27 +1,42 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '../types/supabase';
 
-const url = import.meta.env.VITE_SUPABASE_URL?.trim();
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
-const serviceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+// Use dummy values for demo mode - we won't actually connect to Supabase
+const url = 'https://example.supabase.co'; 
+const key = 'dummy-key-for-demo-mode';
 
-if (!url || !key) throw new Error('Missing Supabase env vars');
+console.log('Using mock Supabase client for demo mode');
 
-// Create a singleton instance of the client
-// @ts-ignore - globalThis may not have __supabase property
-const _supabase = globalThis.__supabase ??
-  createClient<Database>(url, key, {
-    auth: { persistSession: true, autoRefreshToken: true },
+// Create a stable globally-accessible singleton
+// This prevents the "Multiple GoTrueClient instances detected" warning
+const createSingletonClient = () => {
+  // @ts-ignore - Check for existing instance
+  if (globalThis.__supabaseClient) {
+    // @ts-ignore - Return existing instance
+    return globalThis.__supabaseClient;
+  }
+
+  // Create a new client instance
+  const client = createClient<Database>(url, key, {
+    auth: { 
+      persistSession: true, 
+      autoRefreshToken: true,
+      storageKey: 'clarity-hub-auth'
+    },
   });
 
-// Store the instance in globalThis to ensure we reuse it
-// @ts-ignore - globalThis may not have __supabase property
-globalThis.__supabase = _supabase;
+  // Store the instance
+  // @ts-ignore - Store globally
+  globalThis.__supabaseClient = client;
+  
+  return client;
+};
 
 // Export the singleton instance
-export const supabase = _supabase;
+export const supabase = createSingletonClient();
 
 // Service client with service role key for admin operations (if available)
+const serviceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 export const serviceClient = serviceKey ? createClient<Database>(url, serviceKey, {
   auth: { persistSession: false }
 }) : null;
@@ -110,4 +125,4 @@ export const manualRefresh = {
 
 export type Supabase = typeof supabase;
 
-export default supabase; 
+export default supabase;

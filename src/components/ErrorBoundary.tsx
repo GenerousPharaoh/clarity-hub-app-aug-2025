@@ -11,7 +11,8 @@ import {
   Divider,
   Chip,
   styled,
-  CircularProgress
+  CircularProgress,
+  Container
 } from '@mui/material';
 import { 
   Refresh as RefreshIcon, 
@@ -253,189 +254,73 @@ class ErrorBoundaryClass extends Component<Props & { navigate: Function, locatio
 
       // Otherwise use the enhanced error UI
       return (
-        <Box 
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            p: 3,
-            backgroundImage: theme => 
-              theme.palette.mode === 'dark' 
-                ? 'radial-gradient(circle at 50% 14%, rgba(96, 165, 250, 0.03) 0%, rgba(0, 0, 0, 0) 60%), linear-gradient(to bottom, rgba(17, 24, 39, 0.9) 0%, rgba(31, 41, 55, 0.4) 100%)'
-                : 'radial-gradient(circle at 50% 14%, rgba(29, 78, 216, 0.02) 0%, rgba(0, 0, 0, 0) 60%), linear-gradient(to bottom, rgba(249, 250, 251, 0.9) 0%, rgba(243, 244, 246, 0.4) 100%)',
-          }}
-        >
+        <Container maxWidth="md" sx={{ 
+          height: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}>
           <Paper 
-            elevation={3}
+            elevation={3} 
             sx={{ 
-              p: 4, 
-              maxWidth: 600, 
-              textAlign: 'center',
-              borderRadius: 2,
-              overflow: 'hidden',
-              border: theme => `1px solid ${theme.palette.divider}`,
-              boxShadow: theme => theme.palette.mode === 'dark' 
-                ? '0 4px 20px rgba(0, 0, 0, 0.5)' 
-                : '0 4px 20px rgba(0, 0, 0, 0.08)',
+              p: 5, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center',
+              maxWidth: '600px',
+              mx: 'auto'
             }}
           >
-            <Box sx={{ mb: 3 }}>
-              <AnimatedErrorIcon />
-            </Box>
-            
-            <Typography variant="h5" color="error" gutterBottom>
+            <BugReport color="error" sx={{ fontSize: 60, mb: 2, opacity: 0.8 }} />
+            <Typography variant="h4" component="h1" gutterBottom color="error.main">
               Something went wrong
             </Typography>
-            
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              We're sorry, but an error occurred while rendering this component.
+            <Typography variant="body1" align="center" sx={{ mb: 3 }}>
+              An error occurred in the application. Please try refreshing the page or contact support if the problem persists.
             </Typography>
             
-            <Chip 
-              label={`Error Code: ${errorCode}`} 
-              color="error" 
-              variant="outlined"
-              size="small"
-              sx={{ mb: 3 }}
-            />
-            
-            {/* Contextual error message */}
-            {error && (
-              <Alert severity="error" sx={{ mb: 3, textAlign: 'left' }}>
-                <Typography variant="body2">
-                  {error.toString().replace(/^Error: /, '')}
+            {process.env.NODE_ENV === 'development' && error && (
+              <Box sx={{ 
+                mt: 2, 
+                p: 2, 
+                bgcolor: 'grey.900', 
+                color: 'grey.100', 
+                width: '100%',
+                borderRadius: 1,
+                fontFamily: 'monospace',
+                fontSize: '0.875rem',
+                overflowX: 'auto'
+              }}>
+                <Typography variant="subtitle2" color="error.light" sx={{ mb: 1 }}>
+                  Error: {error.toString()}
                 </Typography>
-              </Alert>
+                {errorInfo && (
+                  <pre style={{ whiteSpace: 'pre-wrap' }}>
+                    {errorInfo.componentStack}
+                  </pre>
+                )}
+              </Box>
             )}
             
-            {/* Error details (expandable) */}
-            {process.env.NODE_ENV !== 'production' && error && (
-              <>
-                <Button 
-                  variant="text" 
-                  size="small"
-                  onClick={this.toggleDetails}
-                  endIcon={showDetails ? <ExpandLess /> : <ExpandMore />}
-                  sx={{ mb: 2 }}
-                >
-                  {showDetails ? 'Hide Technical Details' : 'Show Technical Details'}
-                </Button>
-                
-                <Collapse in={showDetails}>
-                  <Box 
-                    sx={{ 
-                      mt: 1, 
-                      p: 2, 
-                      backgroundColor: theme => theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.03)', 
-                      borderRadius: 1,
-                      textAlign: 'left',
-                      overflow: 'auto',
-                      maxHeight: 300,
-                      fontFamily: 'monospace',
-                      fontSize: 14,
-                      mb: 3,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                    }}
-                  >
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                      Error details:
-                    </Typography>
-                    <Typography variant="body2" component="div" sx={{ color: 'error.main' }}>
-                      {error.toString()}
-                    </Typography>
-                    
-                    {errorInfo && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                          Component stack:
-                        </Typography>
-                        <Typography 
-                          variant="body2" 
-                          component="pre" 
-                          sx={{ 
-                            whiteSpace: 'pre-wrap',
-                            wordBreak: 'break-word',
-                            fontSize: 12,
-                            color: theme => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                          }}
-                        >
-                          {errorInfo.componentStack}
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                </Collapse>
-              </>
-            )}
-            
-            <Divider sx={{ my: 3 }}>
-              <Chip label="Recovery Options" size="small" />
-            </Divider>
-            
-            <Stack 
-              direction={{ xs: 'column', sm: 'row' }} 
-              spacing={2} 
-              justifyContent="center"
-            >
+            <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+              <Button 
+                variant="outlined" 
+                color="primary" 
+                onClick={this.handleReset}
+                startIcon={<RefreshIcon />}
+              >
+                Try Again
+              </Button>
               <Button 
                 variant="contained" 
-                startIcon={isRetrying ? <CircularProgress size={20} /> : <RefreshIcon />}
-                onClick={this.handleReset}
-                disabled={isRetrying}
-                color="primary"
+                color="primary" 
+                onClick={() => window.location.reload()}
               >
-                {isRetrying ? 'Retrying...' : 'Try Again'}
-              </Button>
-              
-              <Button 
-                variant="outlined"
-                startIcon={<ArrowBack />}
-                onClick={this.handleNavigateBack}
-                disabled={isRetrying}
-              >
-                Go Back
-              </Button>
-              
-              <Button 
-                variant="outlined"
-                startIcon={<Home />}
-                onClick={this.handleNavigateHome}
-                disabled={isRetrying}
-              >
-                Go to Home
-              </Button>
-              
-              {/* Contextual action based on error */}
-              {contextualAction && (
-                <Button 
-                  variant="outlined"
-                  color="secondary"
-                  onClick={contextualAction.action}
-                  disabled={isRetrying}
-                >
-                  {contextualAction.text}
-                </Button>
-              )}
-            </Stack>
-            
-            {/* Bug report link - in production this would go to your support system */}
-            <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
-              <Button
-                component={Link}
-                to="/report-bug"
-                size="small"
-                color="inherit"
-                startIcon={<BugReport fontSize="small" />}
-                sx={{ fontSize: '0.75rem' }}
-              >
-                Report this bug
+                Reload Page
               </Button>
             </Box>
           </Paper>
-        </Box>
+        </Container>
       );
     }
 

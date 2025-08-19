@@ -1,170 +1,90 @@
-#!/usr/bin/env node
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Script to copy TinyMCE resources to public directory
-// This ensures TinyMCE works correctly in development and production
-
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-// Get __dirname equivalent in ESM
+// Get current directory name
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Paths
-const nodeModulesPath = path.join(__dirname, 'node_modules', 'tinymce');
-const publicPath = path.join(__dirname, 'public', 'tinymce');
+// This script copies TinyMCE files from node_modules to the public directory
+console.log('Checking TinyMCE files...');
 
-// Create public/tinymce directory if it doesn't exist
-if (!fs.existsSync(publicPath)) {
-  fs.mkdirSync(publicPath, { recursive: true });
-  console.log('Created directory:', publicPath);
+// Source and destination paths
+const sourceDir = path.join(__dirname, 'node_modules', 'tinymce');
+const destDir = path.join(__dirname, 'public', 'tinymce');
+
+// Check if tinymce is already in public
+const publicTinymceExists = fs.existsSync(destDir) && 
+                            fs.existsSync(path.join(destDir, 'tinymce.min.js'));
+
+// Check if tinymce is installed in node_modules
+const tinymceInstalled = fs.existsSync(sourceDir);
+
+// Skip if tinymce is not installed or public directory already has the files
+if (!tinymceInstalled) {
+  console.log('TinyMCE not found in node_modules. Checking for direct installation...');
+  
+  if (publicTinymceExists) {
+    console.log('TinyMCE files found in public directory, using existing files');
+  } else {
+    console.warn('WARNING: TinyMCE not found in node_modules or public directory.');
+    console.warn('The editor may not function properly. Try running npm install.');
+  }
+  process.exit(0);
 }
 
-// Function to copy a directory recursively
-function copyDirRecursive(source, destination) {
-  // Create destination directory if it doesn't exist
-  if (!fs.existsSync(destination)) {
-    fs.mkdirSync(destination, { recursive: true });
-  }
+if (publicTinymceExists) {
+  console.log('TinyMCE files already exist in public directory, skipping copy operation');
+  process.exit(0);
+}
 
-  // Read source directory contents
-  const files = fs.readdirSync(source);
-  
-  // Copy each file/directory
-  for (const file of files) {
-    const sourcePath = path.join(source, file);
-    const destPath = path.join(destination, file);
-    
-    // Get file stats
-    const stats = fs.statSync(sourcePath);
-    
-    if (stats.isDirectory()) {
-      // Recursively copy subdirectories
-      copyDirRecursive(sourcePath, destPath);
-    } else {
-      // Copy files
-      fs.copyFileSync(sourcePath, destPath);
-      console.log(`Copied: ${sourcePath} → ${destPath}`);
+// Create destination directory if it doesn't exist
+try {
+  console.log('Copying TinyMCE files to public directory...');
+  fs.mkdirSync(destDir, { recursive: true });
+
+  // Function to copy directory recursively
+  function copyRecursive(src, dest) {
+    try {
+      const exists = fs.existsSync(src);
+      if (!exists) return;
+
+      const stats = fs.statSync(src);
+      if (stats.isDirectory()) {
+        fs.mkdirSync(dest, { recursive: true });
+        fs.readdirSync(src).forEach(childItemName => {
+          copyRecursive(
+            path.join(src, childItemName),
+            path.join(dest, childItemName)
+          );
+        });
+      } else {
+        fs.copyFileSync(src, dest);
+      }
+    } catch (err) {
+      console.error(`Error copying ${src} to ${dest}:`, err.message);
     }
   }
-}
 
-// List of TinyMCE directories to copy
-const directoriesToCopy = [
-  'icons',
-  'plugins',
-  'skins',
-  'themes',
-  'models'
-];
+  // Copy only essential directories
+  const essentialDirs = ['icons', 'models', 'plugins', 'skins', 'themes'];
+  essentialDirs.forEach(dir => {
+    const srcDir = path.join(sourceDir, dir);
+    const dstDir = path.join(destDir, dir);
+    if (fs.existsSync(srcDir)) {
+      copyRecursive(srcDir, dstDir);
+    }
+  });
 
-// List of TinyMCE files to copy
-const filesToCopy = [
-  'tinymce.min.js',
-  'tinymce.js',
-  'license.md',
-  'README.md'
-];
-
-// Copy directories
-for (const dir of directoriesToCopy) {
-  const sourceDir = path.join(nodeModulesPath, dir);
-  const destDir = path.join(publicPath, dir);
-  
-  if (fs.existsSync(sourceDir)) {
-    console.log(`Copying directory: ${dir}`);
-    copyDirRecursive(sourceDir, destDir);
-  } else {
-    console.warn(`Warning: Directory not found: ${sourceDir}`);
+  // Also copy the main tinymce.min.js file
+  const srcFile = path.join(sourceDir, 'tinymce.min.js');
+  const dstFile = path.join(destDir, 'tinymce.min.js');
+  if (fs.existsSync(srcFile)) {
+    fs.copyFileSync(srcFile, dstFile);
   }
-}
 
-// Copy files
-for (const file of filesToCopy) {
-  const sourcePath = path.join(nodeModulesPath, file);
-  const destPath = path.join(publicPath, file);
-  
-  if (fs.existsSync(sourcePath)) {
-    fs.copyFileSync(sourcePath, destPath);
-    console.log(`Copied file: ${file}`);
-  } else {
-    console.warn(`Warning: File not found: ${sourcePath}`);
-  }
-}
-
-// Copy package.json, bower.json, and composer.json for reference
-const jsonFiles = ['package.json', 'bower.json', 'composer.json'];
-for (const file of jsonFiles) {
-  const sourcePath = path.join(nodeModulesPath, file);
-  const destPath = path.join(publicPath, file);
-  
-  if (fs.existsSync(sourcePath)) {
-    fs.copyFileSync(sourcePath, destPath);
-    console.log(`Copied file: ${file}`);
-  }
-}
-
-console.log('TinyMCE resources have been successfully copied to public/tinymce!');
-
-// Create a simple README in the public/tinymce directory
-const readmeContent = `# TinyMCE Resources
-
-This directory contains TinyMCE resources that are used by the Rich Text Editor in the application.
-These files are copied from node_modules/tinymce by the copy-tinymce.js script.
-
-Do not edit these files directly as they will be overwritten when the script is run again.
-
-## Configuration
-
-The TinyMCE editor is configured in src/layouts/panels/CenterPanel.tsx.
-`;
-
-fs.writeFileSync(path.join(publicPath, 'README.md'), readmeContent);
-console.log('Created README.md in public/tinymce');
-
-// ========== PDF.js Worker Setup ==========
-// Copy the PDF.js worker file for PDF viewer
-console.log('\nSetting up PDF.js worker file...');
-
-const pdfJsWorkerSrc = path.join(__dirname, 'node_modules', 'pdfjs-dist', 'build', 'pdf.worker.min.mjs');
-const pdfJsWorkerDest = path.join(__dirname, 'public', 'pdf');
-
-// Create pdf directory if it doesn't exist
-if (!fs.existsSync(pdfJsWorkerDest)) {
-  fs.mkdirSync(pdfJsWorkerDest, { recursive: true });
-  console.log('Created directory:', pdfJsWorkerDest);
-}
-
-// Copy the worker file with .js extension
-const pdfJsWorkerDestFile = path.join(pdfJsWorkerDest, 'pdf.worker.min.js');
-fs.copyFileSync(pdfJsWorkerSrc, pdfJsWorkerDestFile);
-console.log(`Copied PDF.js worker: ${pdfJsWorkerSrc} → ${pdfJsWorkerDestFile}`);
-
-// Create a README for the PDF.js worker
-const pdfReadmeContent = `# PDF.js Worker
-
-This directory contains the PDF.js worker file that is used by the PDF viewer in the application.
-This file is copied from node_modules/pdfjs-dist/build by the copy-tinymce.js script.
-
-Do not edit this file directly as it will be overwritten when the script is run again.
-`;
-
-fs.writeFileSync(path.join(pdfJsWorkerDest, 'README.md'), pdfReadmeContent);
-console.log('Created README.md in public/pdf');
-
-// Copy the custom TinyMCE CSS to make it accessible
-console.log('\nSetting up custom TinyMCE CSS...');
-
-const customCssSrc = path.join(__dirname, 'src', 'theme', 'tinymce-custom.css');
-const customCssDest = path.join(__dirname, 'public', 'tinymce', 'tinymce-custom.css');
-
-// Check if the custom CSS exists
-if (fs.existsSync(customCssSrc)) {
-  fs.copyFileSync(customCssSrc, customCssDest);
-  console.log(`Copied custom TinyMCE CSS: ${customCssSrc} → ${customCssDest}`);
-} else {
-  console.warn(`Warning: Custom TinyMCE CSS not found: ${customCssSrc}`);
-}
-
-console.log('All resources have been successfully copied to public directory!'); 
+  console.log('TinyMCE files copied successfully');
+} catch (error) {
+  console.error('Error copying TinyMCE files:', error.message);
+  console.log('Attempting to continue despite copy error...');
+} 

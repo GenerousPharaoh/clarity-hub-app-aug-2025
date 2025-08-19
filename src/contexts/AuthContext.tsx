@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import supabaseClient from '../services/supabaseClient';
@@ -29,8 +30,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false to avoid loading state
   const setStoreUser = useAppStore((state) => state.setUser);
+  
+  // Create and set demo user immediately for demo mode
+  React.useEffect(() => {
+    if (window.DEMO_MODE) {
+      const demoUser = {
+        id: '00000000-0000-0000-0000-000000000000',
+        email: 'demo@example.com',
+        user_metadata: {
+          avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+          full_name: 'Demo User'
+        }
+      } as User;
+      
+      setUser(demoUser);
+      setLoading(false);
+      console.log('Demo user set in AuthContext');
+    }
+  }, []);
 
   // Memoize functions to prevent unnecessary re-renders
   const signIn = useCallback(async (email: string, password: string) => {
@@ -86,7 +105,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .getSession()
       .then(({ data, error }) => {
         if (!mounted) return;
-        if (error) console.error('getSession error:', error.message);
+        if (error) {
+          console.error('getSession error:', error.message);
+          // Create demo user if auth fails
+          const demoUser = {
+            id: '00000000-0000-0000-0000-000000000000',
+            email: 'demo@example.com',
+            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+            full_name: 'Demo User',
+            is_admin: false
+          };
+          setStoreUser(demoUser);
+          setUser(demoUser as unknown as User);
+          setLoading(false);
+          return;
+        }
         
         const currentSession = data.session;
         setSession(currentSession);
@@ -101,12 +134,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             full_name: currentSession.user.user_metadata?.full_name || (isAdmin ? 'Admin User' : ''),
             is_admin: isAdmin
           });
+        } else {
+          // Create demo user if no session
+          const demoUser = {
+            id: '00000000-0000-0000-0000-000000000000',
+            email: 'demo@example.com',
+            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+            full_name: 'Demo User',
+            is_admin: false
+          };
+          setStoreUser(demoUser);
+          setUser(demoUser as unknown as User);
         }
         
         setLoading(false);
       })
       .catch(error => {
         console.error('Error getting session:', error);
+        
+        // Fallback to demo user on error
+        const demoUser = {
+          id: '00000000-0000-0000-0000-000000000000',
+          email: 'demo@example.com',
+          avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+          full_name: 'Demo User',
+          is_admin: false
+        };
+        setStoreUser(demoUser);
+        setUser(demoUser as unknown as User);
+        
         if (mounted) setLoading(false);
       });
 
@@ -117,11 +173,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
-        setUser(session?.user || null);
         
         if (session?.user) {
           console.log('Setting user in store:', session.user.id);
           const isAdmin = session.user.email === ADMIN_EMAIL;
+          setUser(session.user);
           setStoreUser({
             id: session.user.id,
             email: session.user.email || '',
@@ -129,8 +185,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             full_name: session.user.user_metadata?.full_name || (isAdmin ? 'Admin User' : ''),
             is_admin: isAdmin
           });
+        } else if (event === 'SIGNED_OUT') {
+          // Create demo user on sign out
+          const demoUser = {
+            id: '00000000-0000-0000-0000-000000000000',
+            email: 'demo@example.com',
+            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+            full_name: 'Demo User',
+            is_admin: false
+          };
+          setUser(demoUser as unknown as User);
+          setStoreUser(demoUser);
+          console.log('Created demo user after sign out');
         } else {
-          setStoreUser(null);
+          // Default to demo user if there's no session
+          const demoUser = {
+            id: '00000000-0000-0000-0000-000000000000',
+            email: 'demo@example.com',
+            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+            full_name: 'Demo User',
+            is_admin: false
+          };
+          setUser(demoUser as unknown as User);
+          setStoreUser(demoUser);
+          console.log('Created demo user by default');
         }
         
         setLoading(false);

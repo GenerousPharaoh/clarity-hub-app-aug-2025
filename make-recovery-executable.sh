@@ -1,0 +1,1 @@
+chmod +x /Users/kareemhassanein/Desktop/clarity-hub-app/recovery.sh

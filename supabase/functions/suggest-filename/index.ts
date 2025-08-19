@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { generateText } from "../utils/googleai.ts";
 import { getFile, getNextExhibitId } from "../utils/database.ts";
-import { handleCors } from '../_shared/cors.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4';
 
 interface RequestParams {
@@ -13,25 +12,23 @@ interface RequestParams {
   fileType: string;
 }
 
+// Define CORS headers for direct use
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, apikey, content-type",
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: new Headers({
-        ...corsHeaders,
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        'Access-Control-Max-Age': '86400', // 24 hours
-        'Vary': 'Origin', // Important for caching responses with different CORS headers
-      })
-    });
+    return new Response("ok", { headers: CORS });
   }
   
   // Ensure origin is set properly for all responses
   const headers = new Headers({
-    ...corsHeaders,
+    ...CORS,
     'Content-Type': 'application/json',
-    'Vary': 'Origin'
   });
   
   // Check that the request is a POST
@@ -51,7 +48,7 @@ serve(async (req) => {
       if (!fileId || !storagePath) {
         return new Response(JSON.stringify({ 
           error: 'File ID and storage path are required' 
-        }), { status: 400 });
+        }), { status: 400, headers });
       }
 
       // Create a Supabase client with the service role key
@@ -168,6 +165,7 @@ serve(async (req) => {
         }),
         {
           status: 200,
+          headers
         }
       );
     } catch (error) {
@@ -180,10 +178,20 @@ serve(async (req) => {
         }),
         {
           status: 500,
+          headers
         }
       );
     }
   })();
   
-  return handleCors(req, new Response(response.body, response));
+  // Add CORS headers to response
+  const origin = req.headers.get('origin');
+  return new Response(response.body, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": origin ?? "*",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+      "Access-Control-Allow-Headers": "authorization,apikey,content-type"
+    }
+  });
 }); 

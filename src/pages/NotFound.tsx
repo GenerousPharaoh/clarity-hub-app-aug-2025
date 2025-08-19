@@ -1,88 +1,59 @@
-import { useState, useEffect } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Typography, CircularProgress } from '@mui/material';
-import { Home as HomeIcon } from '@mui/icons-material';
+import { Box, Button, Typography, Container, Paper } from '@mui/material';
+import { ArrowBack, ErrorOutline } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
-const NotFound = () => {
+export default function NotFound() {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(5);
-  const [redirecting, setRedirecting] = useState(false);
-
-  // Auto-redirect after 5 seconds
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setRedirecting(true);
-      const redirectTimer = setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 500);
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [countdown, navigate]);
 
   return (
-    <Container>
-      <Box
+    <Container maxWidth="md" sx={{ 
+      height: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center' 
+    }}>
+      <Paper
+        elevation={2}
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
+          p: 6,
           textAlign: 'center',
+          borderRadius: 2,
+          maxWidth: '600px',
+          width: '100%'
         }}
       >
-        <Typography 
-          variant="h1" 
+        <ErrorOutline 
           sx={{ 
-            mb: 2, 
-            fontSize: { xs: '5rem', sm: '8rem' },
-            background: 'linear-gradient(45deg, #2C4F7C 10%, #3A5E86 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.2))',
-          }}
-        >
-          404
-        </Typography>
-        <Typography variant="h4" sx={{ mb: 3, fontWeight: 500 }}>
+            fontSize: 80, 
+            color: 'error.main',
+            opacity: 0.8,
+            mb: 4
+          }} 
+        />
+        <Typography variant="h3" component="h1" gutterBottom>
           Page Not Found
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: '500px' }}>
-          The page you're looking for doesn't exist or has been moved.
-          {!redirecting && (
-            <Box component="span" sx={{ display: 'block', mt: 2, fontWeight: 'bold' }}>
-              Redirecting to homepage in {countdown} seconds...
-            </Box>
-          )}
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          The page you're looking for doesn't exist or you may not have permission to view it.
         </Typography>
-        
-        {redirecting ? (
-          <CircularProgress size={36} sx={{ mb: 2 }} />
-        ) : (
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
           <Button
-            component={RouterLink}
-            to="/"
-            variant="contained"
-            startIcon={<HomeIcon />}
-            sx={{
-              boxShadow: 2,
-              px: 3,
-              py: 1,
-              background: 'linear-gradient(45deg, #2C4F7C 30%, #3A5E86 90%)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #3A5E86 30%, #4E6D94 90%)',
-              },
-            }}
+            variant="outlined"
+            color="primary"
+            startIcon={<ArrowBack />}
+            onClick={() => navigate(-1)}
           >
-            Back to Home
+            Go Back
           </Button>
-        )}
-      </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate('/')}
+          >
+            Go to Dashboard
+          </Button>
+        </Box>
+      </Paper>
     </Container>
   );
-};
-
-export default NotFound; 
+} 

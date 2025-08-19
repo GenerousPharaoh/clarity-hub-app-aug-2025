@@ -8,12 +8,15 @@ import {
   Typography,
   CircularProgress,
   Tooltip,
+  Paper,
+  Button,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   ZoomOut,
   ZoomIn,
   AutoAwesome as AnalyzeIcon,
+  NoteAddOutlined,
 } from '@mui/icons-material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -46,6 +49,8 @@ const CenterPanel = () => {
   
   // Use individual selectors instead of object destructuring
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
+  const selectedFileId = useAppStore((state) => state.selectedFileId);
+  const selectedNoteId = useAppStore((state) => state.selectedNoteId);
   const isSuggestionPanelOpen = useAppStore((state) => state.isSuggestionPanelOpen);
   const toggleSuggestionPanel = useAppStore((state) => state.toggleSuggestionPanel);
   const linkActivation = useAppStore((state) => state.linkActivation);
@@ -400,16 +405,113 @@ const CenterPanel = () => {
     }
   };
 
+  if (!selectedProjectId) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          p: 4,
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h5" gutterBottom>
+          Welcome to Clarity Hub
+        </Typography>
+        <Typography variant="body1" color="text.secondary" paragraph>
+          Select a project from the left panel to get started
+        </Typography>
+      </Box>
+    );
+  }
+  
+  if (!selectedNoteId) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          p: 4,
+          textAlign: 'center',
+        }}
+      >
+        <NoteAddOutlined sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          No note selected
+        </Typography>
+        <Typography variant="body2" color="text.secondary" paragraph>
+          Select a note or create a new one to start editing
+        </Typography>
+        <Button variant="contained" color="primary">
+          Create New Note
+        </Button>
+      </Box>
+    );
+  }
+  
   return (
-    <Box 
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
+    <Box
+      sx={{
+        display: 'flex',
         flexDirection: 'column',
-        position: 'relative',
+        height: '100%',
+        width: '100%',
+        overflow: 'hidden',
       }}
-      data-test="center-panel"
     >
+      {/* Title bar */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
+        <Typography variant="h6">
+          Note Title
+        </Typography>
+      </Paper>
+      
+      {/* Editor container */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflow: 'auto',
+          p: 2,
+        }}
+      >
+        <Typography variant="body1" paragraph>
+          This is where the TinyMCE editor will be integrated.
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          The editor will support:
+        </Typography>
+        <ul>
+          <li>Rich text formatting</li>
+          <li>Exhibit reference links with tooltips</li>
+          <li>AI-powered writing assistance</li>
+          <li>Automatic citation generation</li>
+        </ul>
+        
+        {selectedFileId && (
+          <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Selected File ID: {selectedFileId}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              You can reference this file using exhibit links in the editor.
+            </Typography>
+          </Paper>
+        )}
+      </Box>
+      
       {/* Editor Area */}
       <Box sx={{ 
         flexGrow: 1, 

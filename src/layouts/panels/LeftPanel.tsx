@@ -56,10 +56,19 @@ import FileTypeIcon from '../../components/icons/FileTypeIcon';
 import { getErrorMessage, logError } from '../../utils/errorHandler';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useNavigate } from 'react-router-dom';
+import ProjectList from '../../components/search/ProjectList';
+import FileList from '../../components/search/FileList';
 
-// File type icons are now handled by the FileTypeIcon component
+// Props interface definition
+interface LeftPanelProps {
+  isCollapsed?: boolean;
+  headerComponent?: (defaultHeader: React.ReactNode) => React.ReactNode;
+}
 
-const LeftPanel = () => {
+const LeftPanel = ({ 
+  isCollapsed = false, 
+  headerComponent,
+}: LeftPanelProps = {}) => {
   const { user, loading: authLoading } = useAuth();
   const { showNotification } = useNotification();
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
@@ -629,557 +638,142 @@ const LeftPanel = () => {
 
   return (
     <Box 
-  sx={{ 
-    height: '100%', 
-    maxHeight: '100%', 
-    display: 'flex', 
-    flexDirection: 'column', 
-    overflow: 'hidden',
-    pt: 1.5, // Increased padding to prevent content from being cut off
-    backgroundColor: theme => theme.palette.background.default
-  }}
-  data-test="left-panel"
->
-      {/* Projects Section */}
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: 2, 
-          borderBottom: 1, 
-          borderColor: 'divider',
-          position: 'relative',
-          zIndex: 1,
-          backgroundColor: theme => theme.palette.mode === 'dark' 
-            ? theme.palette.background.paper
-            : theme.palette.background.default
+      sx={{ 
+        height: '100%', 
+        maxHeight: '100%', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden',
+        pt: 1.5, // Increased padding to prevent content from being cut off
+        backgroundColor: theme => theme.palette.background.default
+      }}
+      data-test="left-panel"
+    >
+      {/* Header component passed from parent */}
+      {headerComponent ? headerComponent(
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          Clarity Hub
+        </Typography>
+      ) : (
+        <Typography variant="h6" sx={{ fontWeight: 'bold', px: 2, py: 1 }}>
+          Clarity Hub
+        </Typography>
+      )}
+
+      {/* Collapsible content */}
+      <Box
+        sx={{
+          display: isCollapsed ? 'none' : 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflowY: 'auto',
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6">Projects</Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<AddIcon />}
-            onClick={() => setProjectDialogOpen(true)}
-            data-test="new-project-button"
-            color="primary"
-            sx={{
-              borderRadius: 4,
-              px: 1.5,
-              '&:hover': {
-                backgroundColor: theme => theme.palette.primary.main + '10',
-              }
-            }}
-          >
-            New
-          </Button>
+        {/* Project List Section */}
+        <Box sx={{ pb: 2 }}>
+          <ProjectList
+            projects={projects}
+            selectedProjectId={selectedProjectId}
+            loading={projectsLoading}
+            onSelectProject={setSelectedProject}
+            onCreateProject={handleCreateProject}
+            onRefresh={fetchProjects}
+          />
         </Box>
-        
-        {/* Project List */}
-        {authLoading || projectsLoading ? (
-          <List>
-            {[1, 2, 3].map((i) => (
-              <ListItem key={i} disablePadding>
-                <ListItemButton>
-                  <Skeleton variant="rectangular" width="100%" height={30} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        ) : (
-          <List dense sx={{ maxHeight: '200px', overflow: 'auto' }}>
-            {projects.length === 0 ? (
-              <Box sx={{ p: 2, textAlign: 'center' }}>
-                <Typography 
-                  variant="body1" 
-                  color="text.secondary"
-                  sx={{ mb: 2 }}
-                >
-                  No projects yet
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<AddIcon />}
-                  fullWidth
-                  size="large"
-                  onClick={() => setProjectDialogOpen(true)}
-                  data-test="start-first-project-button"
-                  sx={{
-                    py: 1.5,
-                    fontWeight: 'bold',
-                    boxShadow: 2,
-                    '&:hover': {
-                      boxShadow: 4,
-                    }
-                  }}
-                >
-                  Start your first project
-                </Button>
-              </Box>
-            ) : (
-              projects.map((project: Project) => (
-                <ListItem key={project.id} disablePadding>
-                  <ListItemButton
-                    data-test="project-list-item"
-                    selected={selectedProjectId === project.id}
-                    onClick={() => setSelectedProject(project.id)}
-                  >
-                    <ListItemText
-                      primary={project.name}
-                      primaryTypographyProps={{
-                        noWrap: true,
-                        sx: { fontWeight: selectedProjectId === project.id ? 'bold' : 'normal' },
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              ))
-            )}
-          </List>
-        )}
-      </Paper>
-      
-      {/* Files Section */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Paper elevation={0} sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="h6">Files</Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip title="Refresh files list">
-                <span>
-                  <IconButton 
-                    size="small" 
-                    onClick={() => refetchFiles()} 
-                    disabled={!selectedProjectId || filesLoading}
-                  >
-                    <RefreshIcon fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-              
-              {/* Sort Menu */}
-              <Tooltip title="Sort files">
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                      setFileMenuAnchorEl(e.currentTarget);
-                      setActiveFileMenuId('sort');
-                    }}
-                    color={activeFileMenuId === 'sort' ? 'primary' : 'default'}
-                    disabled={!selectedProjectId}
-                  >
-                    <SortIcon fontSize="small" />
-                  </IconButton>
-                </span>
-              </Tooltip>
-              
-              <Menu
-                anchorEl={fileMenuAnchorEl}
-                open={activeFileMenuId === 'sort'}
-                onClose={handleCloseFileMenu}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-              >
-                <MenuItem 
-                  onClick={() => { handleChangeSortOption('added_at'); handleCloseFileMenu(); }}
-                  selected={sortOption === 'added_at'}
-                >
-                  Date Added {sortOption === 'added_at' && (sortDirection === 'desc' ? '(Newest)' : '(Oldest)')}
-                </MenuItem>
-                <MenuItem 
-                  onClick={() => { handleChangeSortOption('name'); handleCloseFileMenu(); }}
-                  selected={sortOption === 'name'}
-                >
-                  Name {sortOption === 'name' && (sortDirection === 'asc' ? '(A-Z)' : '(Z-A)')}
-                </MenuItem>
-                <MenuItem 
-                  onClick={() => { handleChangeSortOption('exhibit_id'); handleCloseFileMenu(); }}
-                  selected={sortOption === 'exhibit_id'}
-                >
-                  Exhibit ID {sortOption === 'exhibit_id' && (sortDirection === 'asc' ? '(A-Z)' : '(Z-A)')}
-                </MenuItem>
-                <Divider />
-                <MenuItem onClick={() => { handleToggleSortDirection(); handleCloseFileMenu(); }}>
-                  {sortDirection === 'asc' ? 'Sort Descending' : 'Sort Ascending'}
-                </MenuItem>
-              </Menu>
-              
-              {/* Upload Button */}
-              <Button
-                size="small"
-                startIcon={<UploadIcon />}
-                component="label"
-                disabled={!selectedProjectId || isUploading}
-                variant="contained"
-                color="primary"
-                data-test="upload-button"
-              >
-                Upload
-                <input
-                  type="file"
-                  hidden
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  disabled={!selectedProjectId || isUploading}
-                  data-test="file-input"
-                />
-              </Button>
-            </Box>
-          </Box>
-          
-          {/* Search Box */}
-          <Box sx={{ display: 'flex', mb: 1, alignItems: 'center' }}>
+
+        <Divider />
+
+        {/* Search bar */}
+        {selectedProjectId && (
+          <Box sx={{ p: 2 }}>
             <TextField
-              size="small"
+              fullWidth
               placeholder="Search files..."
               value={searchFilters.searchTerm || ''}
               onChange={handleSearchTermChange}
-              sx={{ flexGrow: 1 }}
               InputProps={{
-                startAdornment: searchLoading ? (
-                  <InputAdornment position="start">
-                    <CircularProgress size={20} />
-                  </InputAdornment>
-                ) : (
+                startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
-                endAdornment: searchFilters.searchTerm ? (
+                endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={handleClearSearch}
-                    >
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ) : null,
-              }}
-            />
-            <IconButton
-              size="small"
-              onClick={() => setSearchExpanded(!searchExpanded)}
-              color={searchExpanded ? 'primary' : 'default'}
-              sx={{ ml: 1 }}
-            >
-              <FilterListIcon />
-            </IconButton>
-          </Box>
-          
-          {/* Advanced Search Filters */}
-          {searchExpanded && (
-            <Box sx={{ mb: 2 }}>
-              <AdvancedSearchFilters />
-            </Box>
-          )}
-          
-          {/* Upload Progress */}
-          {isUploading && (
-            <Box sx={{ mt: 2, mb: 1 }}>
-              <Typography variant="caption" display="block" gutterBottom>
-                Uploading file... {uploadProgress}%
-              </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={uploadProgress} 
-                sx={{ height: 4, borderRadius: 2 }} 
-              />
-            </Box>
-          )}
-          
-          {/* Upload Error */}
-          {isUploadError && (
-            <Alert severity="error" sx={{ mt: 1, mb: 2 }}>
-              Upload failed: {uploadMutationError instanceof Error ? uploadMutationError.message : 'Unknown error'}
-            </Alert>
-          )}
-          
-          {/* Files Error */}
-          {isFilesError && (
-            <Alert severity="error" sx={{ mt: 1, mb: 2 }}>
-              Error loading files: {filesError instanceof Error ? filesError.message : 'Unknown error'}
-            </Alert>
-          )}
-          
-          {/* Active Filters */}
-          {((searchFilters.fileTypes?.length || 0) > 0 || searchFilters.dateFrom || searchFilters.dateTo) && (
-            <Stack direction="row" spacing={1} sx={{ mb: 1, flexWrap: 'wrap', gap: 0.5 }}>
-              {/* File type filters */}
-              {searchFilters.fileTypes?.map((type) => (
-                <Chip
-                  key={type}
-                  label={type}
-                  size="small"
-                  onDelete={() => {
-                    const newTypes = searchFilters.fileTypes?.filter(t => t !== type) || [];
-                    setSearchFilters({ fileTypes: newTypes });
-                  }}
-                />
-              ))}
-              
-              {/* Date filters */}
-              {searchFilters.dateFrom && (
-                <Chip
-                  label={`From: ${new Date(searchFilters.dateFrom).toLocaleDateString()}`}
-                  size="small"
-                  onDelete={() => setSearchFilters({ dateFrom: null })}
-                />
-              )}
-              
-              {searchFilters.dateTo && (
-                <Chip
-                  label={`To: ${new Date(searchFilters.dateTo).toLocaleDateString()}`}
-                  size="small"
-                  onDelete={() => setSearchFilters({ dateTo: null })}
-                />
-              )}
-              
-              {/* Clear all button */}
-              {((searchFilters.fileTypes?.length || 0) > 0 || searchFilters.dateFrom || searchFilters.dateTo) && (
-                <Chip
-                  label="Clear all filters"
-                  size="small"
-                  color="primary"
-                  onClick={resetSearchFilters}
-                />
-              )}
-            </Stack>
-          )}
-        </Paper>
-        
-        {/* File List */}
-        <List sx={{ flexGrow: 1, overflow: 'auto', minHeight: 0, p: 0 }}>
-          {filesLoading ? (
-            Array(5).fill(0).map((_, index) => (
-              <ListItem key={index} divider>
-                <Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-                  <Skeleton variant="rectangular" width={40} height={40} sx={{ mr: 2 }} />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Skeleton variant="text" width="80%" />
-                    <Skeleton variant="text" width="50%" />
-                  </Box>
-                </Box>
-              </ListItem>
-            ))
-          ) : !selectedProjectId ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
-              <Typography color="text.secondary">
-                Select a project to view files.
-              </Typography>
-            </Box>
-          ) : filteredFiles.length === 0 ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
-              <Typography color="text.secondary">
-                {searchFilters.searchTerm ? 'No files match your search criteria.' : 'No files found. Upload a file to get started.'}
-              </Typography>
-            </Box>
-          ) : (
-            filteredFiles.map((file) => {
-              const metadata = file.metadata || {};
-              const thumbnailUrl = metadata.thumbnailUrl;
-              const tags = metadata.tags || [];
-              const description = metadata.description || '';
-              
-              return (
-                <ListItem
-                  key={file.id}
-                  divider
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      size="small"
-                      onClick={(e) => handleFileMenuOpen(e, file.id)}
-                    >
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                  }
-                  disablePadding
-                >
-                  <ListItemButton
-                    selected={selectedFileId === file.id}
-                    onClick={() => handleFileSelect(file.id)}
-                    sx={{ py: 1 }}
-                    data-test="file-item"
-                  >
-                    <Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-                      {/* Thumbnail or Icon */}
-                      <Box
-                        sx={{
-                          width: 40,
-                          height: 40,
-                          mr: 2,
-                          backgroundColor: 'background.default',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: 1,
-                          overflow: 'hidden',
-                          border: 1,
-                          borderColor: 'divider',
-                        }}
+                    {searchLoading ? (
+                      <CircularProgress size={20} />
+                    ) : searchFilters.searchTerm ? (
+                      <IconButton
+                        size="small"
+                        onClick={handleClearSearch}
+                        edge="end"
+                        aria-label="clear search"
                       >
-                        {thumbnailUrl ? (
-                          <img
-                            src={thumbnailUrl}
-                            alt={file.name}
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        ) : (
-                          <FileTypeIcon 
-                            fileName={file.name}
-                            fileType={file.file_type}
-                            mimeType={file.content_type}
-                            size="medium"
-                          />
-                        )}
-                      </Box>
-                      
-                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                        <Typography
-                          variant="body2"
-                          noWrap
-                          sx={{ fontWeight: selectedFileId === file.id ? 'bold' : 'normal' }}
-                          title={description ? `${description}` : file.name}
-                        >
-                          {file.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
-                          {file.exhibit_id && (
-                            <Chip
-                              label={file.exhibit_id}
-                              size="small"
-                              color="primary"
-                              variant="outlined"
-                              sx={{ mr: 1, height: 20, '& .MuiChip-label': { px: 1, py: 0 } }}
-                            />
-                          )}
-                          
-                          {tags.slice(0, 2).map((tag, index) => (
-                            <Chip
-                              key={index}
-                              label={tag}
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddTagFilter(tag);
-                              }}
-                              sx={{ 
-                                height: 20, 
-                                '& .MuiChip-label': { px: 1, py: 0 },
-                                backgroundColor: theme => theme.palette.primary.main + '20',
-                              }}
-                            />
-                          ))}
-                          {tags.length > 2 && (
-                            <Typography variant="caption" sx={{ ml: 0.5 }}>
-                              +{tags.length - 2}
-                            </Typography>
-                          )}
-                          
-                          <Typography variant="caption" color="text.secondary" noWrap sx={{ ml: 'auto' }}>
-                            {(file.size / 1024).toFixed(0)} KB
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </ListItemButton>
-                </ListItem>
-              );
-            })
-          )}
-        </List>
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        size="small"
+                        onClick={() => setSearchExpanded(!searchExpanded)}
+                        edge="end"
+                        aria-label="advanced search"
+                        color={searchExpanded ? 'primary' : 'default'}
+                      >
+                        <FilterListIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </InputAdornment>
+                ),
+              }}
+              size="small"
+              sx={{ mb: 1 }}
+            />
+
+            {/* Advanced search filters */}
+            {searchExpanded && (
+              <AdvancedSearchFilters
+                filters={searchFilters}
+                onUpdateFilters={setSearchFilters}
+                onReset={resetSearchFilters}
+                projectId={selectedProjectId}
+              />
+            )}
+          </Box>
+        )}
+
+        {/* Files List Section */}
+        {selectedProjectId && (
+          <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <FileList
+              files={files}
+              filteredFiles={filteredFiles}
+              selectedFileId={selectedFileId}
+              loading={filesLoading}
+              uploading={isUploading}
+              uploadProgress={uploadProgress}
+              onSelectFile={handleFileSelect}
+              onDeleteFile={handleDeleteFile}
+              onDownloadFile={handleDownloadFile}
+              onRenameFile={handleOpenRenameDialog}
+              onUploadFile={handleFileUpload}
+              searchActive={!!searchFilters.searchTerm || 
+                            (searchFilters.tags && searchFilters.tags.length > 0) ||
+                            (searchFilters.fileTypes && searchFilters.fileTypes.length > 0) ||
+                            searchFilters.dateFrom || 
+                            searchFilters.dateTo}
+            />
+          </Box>
+        )}
       </Box>
 
-      {/* File Action Menu */}
-      <Menu
-        anchorEl={fileMenuAnchorEl}
-        open={Boolean(fileMenuAnchorEl) && activeFileMenuId !== 'sort'}
-        onClose={handleCloseFileMenu}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={() => activeFileMenuId && handleOpenRenameDialog(activeFileMenuId, {} as React.MouseEvent)}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Rename / Assign ID</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={() => activeFileMenuId && handleDownloadFile(activeFileMenuId)}>
-          <ListItemIcon>
-            <DownloadIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Download</ListItemText>
-        </MenuItem>
-        <Divider />
-        <MenuItem 
-          onClick={() => activeFileMenuId && handleDeleteConfirm(activeFileMenuId)}
-          sx={{ color: 'error.main' }}
-        >
-          <ListItemIcon sx={{ color: 'error.main' }}>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Delete</ListItemText>
-        </MenuItem>
-      </Menu>
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onChange={handleFileUpload}
+      />
 
-      {/* New Project Dialog */}
-      <Dialog 
-        open={isProjectDialogOpen} 
-        onClose={() => setProjectDialogOpen(false)} 
-        data-test="create-project-dialog"
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>{projects.length === 0 ? 'Start Your First Project' : 'Create New Project'}</DialogTitle>
-        <DialogContent>
-          {projects.length === 0 && (
-            <DialogContentText sx={{ mb: 2 }}>
-              Projects help you organize your files and documents. Create your first project to get started.
-            </DialogContentText>
-          )}
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Project Name"
-            type="text"
-            fullWidth
-            value={newProjectName}
-            onChange={(e) => setNewProjectName(e.target.value)}
-            data-test="project-name-input"
-            placeholder="Enter a name for your project"
-            helperText="Example: Smith Case, Client Onboarding, etc."
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setProjectDialogOpen(false)} data-test="cancel-project-button">Cancel</Button>
-          <Button
-            variant="contained" 
-            color="primary"
-            disabled={!newProjectName.trim()}
-            onClick={handleCreateProject}
-            data-test="create-project-button"
-          >
-            {projects.length === 0 ? 'Start Project' : 'Create Project'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Rename File Dialog */}
+      {/* Rename file dialog */}
       <RenameFileDialog
         open={renameFileDialogOpen}
         fileId={fileToRename}

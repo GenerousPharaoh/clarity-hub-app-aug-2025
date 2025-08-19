@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -28,6 +28,8 @@ import {
   Search as SearchIcon,
   FindInPage as FindInPageIcon,
   Refresh as RefreshIcon,
+  Info as InfoIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import useAppStore from '../../store';
 import supabaseClient from '../../services/supabaseClient';
@@ -35,6 +37,8 @@ import { File as FileType, FileWithUrl, LinkActivation } from '../../types';
 import FileViewer, { SupportedFileType } from '../../components/viewers/FileViewer';
 import { getErrorMessage, logError } from '../../utils/errorHandler';
 import storageService from '../../services/storageService';
+import { useNotification } from '../../contexts/NotificationContext';
+import AIAssistPanel from '../../components/ai/AIAssistPanel';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -60,7 +64,10 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-const RightPanel = () => {
+const RightPanel = ({
+  isCollapsed = false,
+  headerComponent,
+}) => {
   const [tabValue, setTabValue] = useState(0);
   const [selectedFile, setSelectedFile] = useState<FileWithUrl | null>(null);
   const [loading, setLoading] = useState(false);
@@ -91,6 +98,8 @@ const RightPanel = () => {
   const linkActivation = useAppStore((state) => state.linkActivation);
   const setLinkActivation = useAppStore((state) => state.setLinkActivation);
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
+
+  const { showNotification } = useNotification();
 
   // Fetch file details when the selected file changes
   useEffect(() => {
@@ -146,56 +155,36 @@ const RightPanel = () => {
         storage_path: data.storage_path 
       });
       
-      // Generate URL for storage file using robust helper
-      const { url: resolvedUrl, error: urlError } = await storageService.getFileUrl(data.storage_path);
+      // Generate URL for storage file using enhanced getFileUrl helper
+      const resolvedUrlData = await storageService.getFileUrl(data.storage_path, {
+        cacheBuster: true // Add cache buster to prevent stale cache issues
+      });
 
-      if (!resolvedUrl) {
-        console.error('Error generating URL:', urlError);
-        
-        // If the helper fails, try direct URL construction as a last resort
-        const projectId = 'swtkpfpyjjkkemmvkhmz';
-        const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}`;
-        console.log('Using direct URL as last resort:', directUrl);
-        
-        setSelectedFile({
-          ...data,
-          url: directUrl,
-        });
-        return;
+      // Check if we got an error from URL resolution
+      if (resolvedUrlData.error) {
+        console.error('Error generating URL:', resolvedUrlData.error);
+        throw new Error(`Failed to generate file URL: ${resolvedUrlData.error}`);
       }
 
-      console.log('Resolved file URL:', resolvedUrl);
+      if (!resolvedUrlData.url) {
+        throw new Error('Failed to generate a valid URL for the file');
+      }
+
+      console.log('Resolved file URL:', resolvedUrlData.url);
       
-      // Try fetching with a HEAD request to verify URL accessibility
+      // Test the URL is actually accessible before setting the file
       try {
-        const checkResponse = await fetch(resolvedUrl, { method: 'HEAD' });
-        if (!checkResponse.ok) {
-          console.warn('URL accessibility check failed, status:', checkResponse.status);
-          
-          if (retryCount < 2) {
-            // If HEAD fails, try with a cache buster
-            const cacheBuster = `?cb=${Date.now()}`;
-            const altUrl = resolvedUrl.includes('?') 
-              ? `${resolvedUrl.split('?')[0]}${cacheBuster}` 
-              : `${resolvedUrl}${cacheBuster}`;
-              
-            console.log('Trying with cache buster:', altUrl);
-            
-            setSelectedFile({
-              ...data,
-              url: altUrl,
-            });
-            return;
-          }
-        }
-      } catch (checkError) {
-        console.warn('URL accessibility check error:', checkError);
-        // Continue anyway as the browser might still be able to load it
+        await fetch(resolvedUrlData.url, { method: 'HEAD', mode: 'no-cors' });
+        console.log('URL is accessible, setting file data');
+      } catch (e) {
+        console.warn('URL might have access issues:', e);
+        // Continue anyway, as the no-cors mode might not give accurate results
       }
-
+      
+      // Set the file with the resolved URL
       setSelectedFile({
         ...data,
-        url: resolvedUrl,
+        url: resolvedUrlData.url,
       });
     } catch (error) {
       console.error('Error in fetchFileDetails:', error);
@@ -207,6 +196,51 @@ const RightPanel = () => {
           fetchFileDetails(fileId, retryCount + 1);
         }, 1000);
         return;
+      }
+      
+      // Last resort - try with a direct Supabase URL pattern
+      if (retryCount === 2) {
+        try {
+          const { data } = await supabaseClient
+            .from('files')
+            .select('storage_path')
+            .eq('id', fileId)
+            .single();
+            
+          if (data?.storage_path) {
+            const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
+            const directUrl = `https://${supabaseProjectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
+            console.log('Trying last resort URL:', directUrl);
+            
+            // Try to download the file directly
+            const { data: fileData } = await supabaseClient.storage
+              .from('files')
+              .download(data.storage_path);
+              
+            if (fileData) {
+              const blobUrl = URL.createObjectURL(fileData);
+              console.log('Created blob URL as absolute fallback');
+              
+              // Get the full file data again
+              const { data: fullData } = await supabaseClient
+                .from('files')
+                .select('*')
+                .eq('id', fileId)
+                .single();
+                
+              if (fullData) {
+                setSelectedFile({
+                  ...fullData,
+                  url: blobUrl,
+                });
+                setLoading(false);
+                return;
+              }
+            }
+          }
+        } catch (lastError) {
+          console.error('Final fallback attempt failed:', lastError);
+        }
       }
       
       setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -602,7 +636,28 @@ const RightPanel = () => {
     }
   };
 
-  // Render file viewer
+  // Handle file download
+  const handleDownload = useCallback(() => {
+    if (!selectedFile) return;
+    
+    try {
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = selectedFile.url;
+      link.download = selectedFile.name || 'download';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log(`[RightPanel] Downloaded file: ${selectedFile.name}`);
+    } catch (error) {
+      console.error('[RightPanel] Download error:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred during download');
+    }
+  }, [selectedFile]);
+
+  // Render file viewer with enhanced error handling
   const renderFileViewer = () => {
     if (loading) {
       return (
@@ -638,7 +693,7 @@ const RightPanel = () => {
                 onClick={() => {
                   if (!selectedFileId) return;
                   
-                  // Try with a direct public URL approach
+                  // Try with a direct public URL approach as a last resort
                   const projectId = 'swtkpfpyjjkkemmvkhmz';
                   
                   supabaseClient
@@ -691,7 +746,7 @@ const RightPanel = () => {
         url={selectedFile.url}
         fileName={selectedFile.name}
         fileType={selectedFile.file_type}
-        contentType={selectedFile.content_type}
+        mimeType={selectedFile.content_type}
         onError={(error) => {
           console.error('File viewer error:', error);
           setErrorMessage(`Error viewing file: ${error.message || 'Unknown error'}`);
@@ -719,273 +774,81 @@ const RightPanel = () => {
       }}
       data-test="right-panel"
     >
-      {/* File Info */}
-      <Paper sx={{ p: 2, boxShadow: 'none', borderBottom: 1, borderColor: 'divider' }}>
-        {loading && selectedFileId ? (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <CircularProgress size={20} sx={{ mr: 1 }} />
-            <Typography variant="subtitle1">Loading...</Typography>
-          </Box>
-        ) : selectedFile ? (
-          <>
-            <Typography variant="subtitle1" noWrap title={selectedFile.name}>
-              {selectedFile.name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" display="block">
-              {selectedFile.exhibit_id ? `Exhibit ID: ${selectedFile.exhibit_id} • ` : ''}
-              {selectedFile.content_type} • {(selectedFile.size / 1024).toFixed(0)} KB
-            </Typography>
-          </>
-        ) : (
-          <Typography variant="subtitle1" color="text.secondary">
-            No file selected
-          </Typography>
-        )}
-      </Paper>
+      {/* Header component passed from parent */}
+      {headerComponent ? headerComponent(
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          {selectedFile ? selectedFile.name : 'No file selected'}
+        </Typography>
+      ) : null}
 
-      {/* Controls for viewer */}
-      {selectedFile && (
-        <Paper sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          p: 0.5, 
-          boxShadow: 'none', 
-          borderBottom: 1, 
-          borderColor: 'divider' 
-        }}>
-          <Box>
-            <Tooltip title="Zoom out">
-              <span>
-                <IconButton size="small" onClick={handleZoomOut} disabled={zoom <= 0.5}>
-                  <ZoomOutIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title="Zoom in">
-              <span>
-                <IconButton size="small" onClick={handleZoomIn} disabled={zoom >= 3}>
-                  <ZoomInIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title="Rotate left">
-              <span>
-                <IconButton size="small" onClick={handleRotateLeft}>
-                  <RotateLeftIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title="Rotate right">
-              <span>
-                <IconButton size="small" onClick={handleRotateRight}>
-                  <RotateRightIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Box>
-          <Tooltip title="Copy link to current position">
-            <span>
-              <IconButton 
-                size="small" 
-                onClick={copyLink}
-                color={linkActivation ? 'primary' : 'default'}
-              >
-                <CopyIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </Paper>
-      )}
-
-      {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange}
-          variant="fullWidth"
-          sx={{ minHeight: 40 }}
-        >
-          <Tab label="Preview" sx={{ minHeight: 40, py: 0.5 }} />
-          <Tab label="AI Assist" sx={{ minHeight: 40, py: 0.5 }} />
-        </Tabs>
-      </Box>
-
-      {/* File Viewer Tab */}
-      <TabPanel value={tabValue} index={0} sx={{ flexGrow: 1, overflow: 'hidden', minHeight: 0 }}>
-        <Box sx={{ height: '100%' }}>
-          {renderFileViewer()}
-        </Box>
-      </TabPanel>
-
-      {/* AI Assist Tab */}
-      <TabPanel value={tabValue} index={1}>
-        <Box sx={{ height: '100%', overflow: 'auto', p: 2 }}>
-          {/* File Summary */}
-          <Accordion defaultExpanded sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="subtitle2">File Summary</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              {isLoadingSummary ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : fileSummary ? (
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {fileSummary}
-                </Typography>
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                  <Button 
-                    variant="outlined" 
-                    size="small" 
-                    onClick={() => fetchFileSummary()}
-                    startIcon={<SearchIcon />}
-                  >
-                    Generate Summary
-                  </Button>
-                </Box>
-              )}
-            </AccordionDetails>
-          </Accordion>
-
-          {/* File Q&A */}
-          <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="subtitle2">Ask about this document</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="Ask a question about this document..."
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                disabled={analyzing || !selectedFile}
-                sx={{ mb: 2 }}
-              />
-              <Button
-                variant="contained"
-                size="small"
-                fullWidth
-                onClick={analyzeFile}
-                disabled={analyzing || !selectedFile || !question}
-                sx={{ mb: 2 }}
-              >
-                {analyzing ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-                {analyzing ? 'Analyzing...' : 'Ask AI'}
-              </Button>
-              
-              {answer && (
-                <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
-                  <Typography variant="body2" whiteSpace="pre-wrap">
-                    {answer}
-                  </Typography>
-                </Paper>
-              )}
-            </AccordionDetails>
-          </Accordion>
-
-          {/* Project Q&A */}
-          <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="subtitle2">Project Q&A</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="Ask a question about the entire project..."
-                value={projectQuestion}
-                onChange={(e) => setProjectQuestion(e.target.value)}
-                disabled={isAnalyzingProject || !selectedProjectId}
-                sx={{ mb: 2 }}
-              />
-              <Button
-                variant="contained"
-                size="small"
-                fullWidth
-                onClick={analyzeProject}
-                disabled={isAnalyzingProject || !selectedProjectId || !projectQuestion}
-                sx={{ mb: 2 }}
-              >
-                {isAnalyzingProject ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-                {isAnalyzingProject ? 'Analyzing...' : 'Ask Project AI'}
-              </Button>
-              
-              {projectAnswer && (
-                <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
-                  <Typography variant="body2" whiteSpace="pre-wrap">
-                    {projectAnswer}
-                  </Typography>
-                </Paper>
-              )}
-            </AccordionDetails>
-          </Accordion>
-
-          {/* Entity Extraction */}
-          <Accordion sx={{ mb: 2 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="subtitle2">Entities</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              {isLoadingEntities ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : extractedEntities.length > 0 ? (
-                <Box>
-                  {Object.entries(groupedEntities).map(([entityType, entities]) => (
-                    <Box key={entityType} sx={{ mb: 2 }}>
-                      <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                        {entityType.replace('_', ' ').toUpperCase()}
-                      </Typography>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {entities.map((entity, index) => (
-                          <Chip 
-                            key={index} 
-                            label={entity} 
-                            size="small" 
-                            variant="outlined" 
-                          />
-                        ))}
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                  <Button 
-                    variant="outlined" 
-                    size="small" 
-                    onClick={() => fetchExtractedEntities()}
-                    startIcon={<SearchIcon />}
-                  >
-                    Extract Entities
-                  </Button>
-                </Box>
-              )}
-            </AccordionDetails>
-          </Accordion>
-        </Box>
-      </TabPanel>
-
-      {/* Link copied alert */}
-      <Snackbar
-        open={linkCopySuccess}
-        autoHideDuration={3000}
-        onClose={() => setLinkCopySuccess(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      {/* Collapsible content */}
+      <Box
+        sx={{
+          display: isCollapsed ? 'none' : 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          overflow: 'hidden',
+        }}
       >
-        <Alert 
-          onClose={() => setLinkCopySuccess(false)} 
-          severity="success" 
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          Link copied to clipboard
-        </Alert>
-      </Snackbar>
+        {!selectedFile ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              p: 3,
+              textAlign: 'center',
+            }}
+          >
+            <InfoIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              No file selected
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Select a file from the list to view it here.
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            {/* Tabs for file viewer and AI tools */}
+            <Paper elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="file tabs"
+                sx={{ minHeight: 48 }}
+                variant="scrollable"
+                scrollButtons="auto"
+              >
+                <Tab label="View" id="file-tab-0" />
+                <Tab label="AI Assist" id="file-tab-1" />
+              </Tabs>
+            </Paper>
+
+            {/* Tab panels */}
+            <Box sx={{ flexGrow: 1, overflow: 'hidden', display: tabValue === 0 ? 'flex' : 'none' }}>
+              {renderFileViewer()}
+            </Box>
+
+            {/* AI Assist tab panel */}
+            <Box
+              sx={{
+                flexGrow: 1,
+                overflow: 'hidden',
+                display: tabValue === 1 ? 'flex' : 'none',
+                flexDirection: 'column',
+              }}
+            >
+              <AIAssistPanel
+                file={selectedFile}
+                projectId={selectedProjectId}
+              />
+            </Box>
+          </>
+        )}
+      </Box>
     </Box>
   );
 };

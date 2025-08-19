@@ -67,6 +67,22 @@ export function logError(error: unknown, context?: string): void {
 }
 
 /**
+ * Get file name from a path without using Node.js path module
+ * @param filePath - The file path string
+ * @returns The file name
+ */
+export function getFileNameFromPath(filePath: string): string {
+  if (!filePath) return '';
+  
+  // Handle both forward and backward slashes
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  const parts = normalizedPath.split('/');
+  
+  // Get the last part which should be the file name
+  return parts[parts.length - 1] || '';
+}
+
+/**
  * Parse and categorize API errors
  * @param error - The error to parse
  * @returns A categorized error object

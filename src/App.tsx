@@ -1,312 +1,231 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, Snackbar, Alert } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { lightTheme, darkTheme } from './theme/index';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import NotificationProvider from './contexts/NotificationContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import ErrorBoundary from './components/ErrorBoundary';
-import useAppStore from './store';
-import FileUploadStatus from './components/FileUploadStatus';
+import * as React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, CssBaseline, GlobalStyles, Button, Box } from '@mui/material';
+import { Settings as SettingsIcon } from '@mui/icons-material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState, useCallback } from 'react';
-import { isAdminUser } from './services/supabaseClient';
-import errorHandlingService, { AppError, ErrorType } from './services/errorHandlingService';
-
-// Layouts
+import getTheme from './theme';
 import MainLayout from './layouts/MainLayout';
+import ErrorBoundary from './components/ErrorBoundary';
+import { AuthProvider } from './contexts/AuthContext';
+import SimpleDemoFixProvider from './SimpleDemoFixProvider';
+import { NotificationProvider } from './contexts/NotificationContext';
+import useAppStore from './store';
+import ProjectLayout from './layouts/ProjectLayout';
 
-// Pages
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import ResetPassword from './pages/auth/ResetPassword';
-import NotFound from './pages/NotFound';
-import AITestPage from './pages/AITestPage';
-import ReportBug from './pages/ReportBug';
-import DebugFilesPage from './pages/DebugFilesPage';
+// Lazy-loaded components for better performance
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Auth = React.lazy(() => import('./pages/auth/Auth'));
+const ProjectView = React.lazy(() => import('./pages/ProjectView'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
 
-// Create a ProjectListPage component that's just a wrapper around MainLayout
-// This way the MainLayout will handle showing the welcome screen for the root route
-const ProjectListPage = () => <MainLayout />;
+// Add type definition for window.DEMO_MODE
+declare global {
+  interface Window {
+    DEMO_MODE?: boolean;
+  }
+}
 
-// Page transition component
-const PageTransition = ({ children }) => (
-  <div
-    style={{
-      animationName: 'fadeIn',
-      animationDuration: '0.3s',
-      animationFillMode: 'both',
-    }}
-  >
-    {children}
-  </div>
-);
-
-// Add global styles for animations
-const GlobalStyle = () => {
-  const styleElement = document.createElement('style');
-  
-  styleElement.innerHTML = `
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  `;
-  
-  document.head.appendChild(styleElement);
-  
-  return null;
-};
-
-// Configure the query client with global error handling
+// Create a query client instance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 60 * 1000, // 1 minute
-      onError: (error) => {
-        errorHandlingService.handleApiError(error as Error);
-      }
     },
-    mutations: {
-      onError: (error) => {
-        errorHandlingService.handleApiError(error as Error);
-      }
-    }
   },
 });
 
-// Admin-only route
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  
-  useEffect(() => {
-    if (user) {
-      // Check if user is admin
-      isAdminUser().then(admin => {
-        setIsAdmin(admin);
-      });
-    }
-  }, [user]);
-  
-  // If still loading, show nothing
-  if (loading) return null;
-  
-  // If no user or not admin, redirect to login
-  if (!user || !isAdmin) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
-function App() {
+export default function App() {
+  // Get theme mode from store
   const themeMode = useAppStore((state) => state.themeMode);
-  const theme = themeMode === 'light' ? lightTheme : darkTheme;
-  const [globalError, setGlobalError] = useState<AppError | null>(null);
-
-  // Handle global errors
-  const handleGlobalError = useCallback((error: Error) => {
-    // Only show user-visible errors in UI
-    if (error instanceof AppError) {
-      setGlobalError(error);
-      
-      // Auto-clear certain types of errors after a delay
-      if (
-        error.type === ErrorType.NETWORK ||
-        error.type === ErrorType.API
-      ) {
-        setTimeout(() => {
-          setGlobalError(null);
-        }, 5000);
+  
+  // Create theme based on selected mode
+  const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
+  
+  // Debug mode state - enable in demo mode
+  const [debugMode, setDebugMode] = React.useState(true);
+  
+  // Set up demo mode on first render
+  React.useEffect(() => {
+    console.log('App initialized in demo mode');
+    
+    // Create a demo user for testing
+    const demoUser = {
+      id: '00000000-0000-0000-0000-000000000000',
+      email: 'demo@example.com',
+      avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+      full_name: 'Demo User',
+    };
+    
+    // Set the user in the store directly
+    useAppStore.setState({
+      user: demoUser,
+    });
+    
+    // Create demo projects
+    const projectId = '11111111-1111-1111-1111-111111111111';
+    const demoProjects = [
+      {
+        id: projectId,
+        name: 'Acme Corp. v. Widget Industries',
+        owner_id: demoUser.id,
+        created_at: new Date().toISOString(),
+        description: 'Contract dispute regarding manufacturing components',
+        status: 'active'
       }
-      
-      // Handle special error cases
-      if (errorHandlingService.shouldRedirectToLogin(error)) {
-        // Will be handled by auth context/protected routes
-        console.log('Error requires re-authentication');
+    ];
+    
+    // Create demo files
+    const demoFiles = [
+      {
+        id: '22222222-2222-2222-2222-222222222222',
+        name: 'Client Contract.pdf',
+        project_id: projectId,
+        owner_id: demoUser.id,
+        file_type: 'pdf',
+        content_type: 'application/pdf',
+        size: 12345,
+        added_at: new Date().toISOString(),
       }
-      
-      if (errorHandlingService.shouldTriggerReload(error)) {
-        // For truly fatal errors, reload the page after a delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-      }
-    }
+    ];
+    
+    // Set projects and files in the store
+    useAppStore.setState({
+      projects: demoProjects,
+      files: demoFiles,
+      selectedProjectId: projectId
+    });
   }, []);
   
-  // Register global error handler
-  useEffect(() => {
-    const unsubscribe = errorHandlingService.onError(handleGlobalError);
-    return () => unsubscribe();
-  }, [handleGlobalError]);
-  
-  // Clear error when user dismisses
-  const handleCloseError = () => {
-    setGlobalError(null);
+  // Function to load and execute the reset script
+  const resetApplication = () => {
+    const script = document.createElement('script');
+    script.src = '/reset-app.js';
+    script.onload = () => {
+      console.log('Reset script loaded and executed');
+      script.remove(); // Clean up script tag
+    };
+    script.onerror = () => {
+      console.error('Failed to load reset script');
+      script.remove(); // Clean up script tag
+    };
+    document.body.appendChild(script);
   };
+
+  // Toggle debug mode with key combination (Ctrl+Shift+D)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        setDebugMode(prev => !prev);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+  
+  // Global styles for app
+  const globalStyles = (
+    <GlobalStyles 
+      styles={{
+        '#root': {
+          height: '100vh',
+          width: '100vw',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        },
+        // Prevent iOS overscroll/bounce effect
+        'html, body': {
+          overscrollBehavior: 'none',
+          height: '100vh',
+          width: '100vw',
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+        },
+        // Improved scrollbars
+        '::-webkit-scrollbar': {
+          width: '8px',
+          height: '8px',
+        },
+        '::-webkit-scrollbar-track': {
+          background: theme.palette.mode === 'dark' ? '#2d2d2d' : '#f1f1f1',
+        },
+        '::-webkit-scrollbar-thumb': {
+          background: theme.palette.mode === 'dark' ? '#555' : '#c1c1c1',
+          borderRadius: '4px',
+        },
+        '::-webkit-scrollbar-thumb:hover': {
+          background: theme.palette.mode === 'dark' ? '#777' : '#a8a8a8',
+        },
+      }} 
+    />
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary 
-        onError={errorHandlingService.handleComponentError}
-        resetOnPropsChange={true}
-      >
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <GlobalStyle />
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {globalStyles}
+        
+        {/* Debug mode reset button */}
+        {debugMode && (
+          <Box 
+            sx={{ 
+              position: 'fixed', 
+              bottom: 16, 
+              right: 16, 
+              zIndex: 9999,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+            }}
+          >
+            <Button
+              variant="contained"
+              color="warning"
+              size="small"
+              onClick={resetApplication}
+              startIcon={<SettingsIcon />}
+              sx={{ 
+                fontWeight: 'bold',
+                boxShadow: 2
+              }}
+            >
+              Reset App
+            </Button>
+          </Box>
+        )}
+        
+        <ErrorBoundary>
           <NotificationProvider>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <AuthProvider>
+            <SimpleDemoFixProvider />
+            <AuthProvider>
+              <React.Suspense fallback={<div className="app-loading">Loading...</div>}>
                 <Routes>
                   {/* Auth routes */}
-                  <Route 
-                    path="/login" 
-                    element={
-                      <PageTransition>
-                        <Login />
-                      </PageTransition>
-                    } 
-                  />
-                  <Route 
-                    path="/register" 
-                    element={
-                      <PageTransition>
-                        <Register />
-                      </PageTransition>
-                    } 
-                  />
-                  <Route 
-                    path="/reset-password" 
-                    element={
-                      <PageTransition>
-                        <ResetPassword />
-                      </PageTransition>
-                    } 
-                  />
+                  <Route path="/auth/*" element={<Auth />} />
                   
-                  {/* Protected routes */}
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <ErrorBoundary>
-                          <PageTransition>
-                            <ProjectListPage />
-                          </PageTransition>
-                        </ErrorBoundary>
-                      </ProtectedRoute>
-                    }
-                  />
+                  {/* Main app routes */}
+                  <Route path="/" element={<MainLayout />}>
+                    <Route index element={<Dashboard />} />
+                  </Route>
                   
-                  {/* Project route */}
-                  <Route
-                    path="/projects/:projectId"
-                    element={
-                      <ProtectedRoute>
-                        <ErrorBoundary>
-                          <PageTransition>
-                            <MainLayout />
-                          </PageTransition>
-                        </ErrorBoundary>
-                      </ProtectedRoute>
-                    }
-                  />
+                  {/* Project routes with specialized layout */}
+                  <Route path="/projects/:projectId/*" element={<ProjectLayout />}>
+                    <Route index element={<ProjectView />} />
+                  </Route>
                   
-                  {/* AI Test Page */}
-                  <Route
-                    path="/ai-test"
-                    element={
-                      <ProtectedRoute>
-                        <ErrorBoundary>
-                          <PageTransition>
-                            <AITestPage />
-                          </PageTransition>
-                        </ErrorBoundary>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Bug Report Page */}
-                  <Route
-                    path="/report-bug"
-                    element={
-                      <ProtectedRoute>
-                        <ErrorBoundary>
-                          <PageTransition>
-                            <ReportBug />
-                          </PageTransition>
-                        </ErrorBoundary>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Debug Routes (only in development) */}
-                  <Route
-                    path="/debug-files"
-                    element={
-                      <ProtectedRoute>
-                        <ErrorBoundary>
-                          <PageTransition>
-                            <DebugFilesPage />
-                          </PageTransition>
-                        </ErrorBoundary>
-                      </ProtectedRoute>
-                    }
-                  />
-                  
-                  {/* Redirects */}
-                  <Route path="/home" element={<Navigate to="/" replace />} />
-                  <Route path="/dashboard" element={<Navigate to="/" replace />} />
-                  <Route path="/projects" element={<Navigate to="/" replace />} />
-                  
-                  {/* 404 Not Found - must be last */}
-                  <Route 
-                    path="*" 
-                    element={
-                      <PageTransition>
-                        <NotFound />
-                      </PageTransition>
-                    } 
-                  />
+                  {/* Fallback routes */}
+                  <Route path="/not-found" element={<NotFound />} />
+                  <Route path="*" element={<Navigate to="/not-found" replace />} />
                 </Routes>
-                
-                {/* Global error alert */}
-                <Snackbar
-                  open={!!globalError}
-                  autoHideDuration={6000}
-                  onClose={handleCloseError}
-                  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                >
-                  {globalError && (
-                    <Alert 
-                      onClose={handleCloseError}
-                      severity="error"
-                      variant="filled"
-                      sx={{ 
-                        width: '100%', 
-                        boxShadow: 3,
-                        '& .MuiAlert-message': { fontWeight: 500 }
-                      }}
-                    >
-                      {globalError.getUserMessage()}
-                    </Alert>
-                  )}
-                </Snackbar>
-                
-                {/* Add FileUploadStatus here, which will appear on all pages when necessary */}
-                <FileUploadStatus />
-              </AuthProvider>
-            </LocalizationProvider>
+              </React.Suspense>
+            </AuthProvider>
           </NotificationProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
+        </ErrorBoundary>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;

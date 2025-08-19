@@ -1,443 +1,377 @@
-import React, { useEffect, Children, ReactElement, cloneElement, useState, useRef } from 'react';
-import { Box, IconButton, Tooltip, Typography, alpha } from '@mui/material';
-import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import {
-  PanelGroup,
-  Panel,
-  PanelResizeHandle,
-  ImperativePanelHandle,
-} from 'react-resizable-panels';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Box, IconButton, useTheme } from '@mui/material';
+import { 
+  ChevronLeft, 
+  ChevronRight
+} from '@mui/icons-material';
 import useAppStore from '../store';
-import { usePanelState } from '../hooks/usePanelState';
+import { useShallowAppStore } from '../store';
 
-// Minimum size for collapsed panels - ABSOLUTE MINIMUM to ensure visibility
-const MIN_COLLAPSED_SIZE = 5;
-// Fixed size for collapsed panels
-const COLLAPSED_PANEL_SIZE = 8;
-// Animation durations
-const TRANSITION_DURATION = '200ms';
-
-// Resize handle component with professional, subtle styling
-const ResizeHandle = ({ id, disabled = false }: { 
-  id: string;
-  disabled?: boolean;
-}) => {
-  return (
-    <PanelResizeHandle id={id} disabled={disabled}>
-          <Box
-            sx={{
-          width: '8px',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: `all ${TRANSITION_DURATION} ease`,
-          opacity: disabled ? 0 : 0.5,
-              cursor: disabled ? 'default' : 'col-resize',
-          '&:hover': {
-            opacity: disabled ? 0 : 0.8,
-            backgroundColor: (theme) => disabled ? 'transparent' : alpha(theme.palette.primary.main, 0.05),
-          },
-          '&:active': {
-            opacity: disabled ? 0 : 1,
-            backgroundColor: (theme) => disabled ? 'transparent' : alpha(theme.palette.primary.main, 0.1),
-          },
-          '&::after': {
-            content: '""',
-            height: '40%',
-            width: '2px',
-            borderRadius: '2px',
-            backgroundColor: (theme) => disabled 
-              ? 'transparent' 
-              : alpha(theme.palette.text.secondary, 0.3),
-            transition: 'all 0.2s ease',
-          },
-          zIndex: 10,
-      }}
-      />
-    </PanelResizeHandle>
-  );
-};
-
-// Panel header container with fold/expand button
-interface PanelHeaderProps {
-  children: React.ReactNode;
-  isLeft?: boolean;
-  isCollapsed: boolean;
-  onToggle: () => void;
+interface ResizablePanelsProps {
+  children: React.ReactNode | React.ReactNode[];
 }
 
-const PanelHeader = ({ children, isLeft = false, isCollapsed, onToggle }: PanelHeaderProps) => (
-  <Box
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      px: 2,
-      height: '48px',
-      borderBottom: '1px solid',
-      borderColor: (theme) => theme.palette.divider,
-      bgcolor: (theme) => theme.palette.mode === 'dark' 
-        ? alpha(theme.palette.primary.dark, 0.15)
-        : alpha(theme.palette.primary.light, 0.08),
-      transition: `all ${TRANSITION_DURATION} ease`,
-      boxShadow: (theme) => `0 1px 3px ${alpha(theme.palette.common.black, 0.05)}`,
-      zIndex: 5,
-      position: 'relative',
-    }}
-  >
-    {isLeft ? (
-      <>
-        {isCollapsed ? (
-          <Typography
-            variant="body2"
-            sx={{
-              writingMode: 'vertical-rl',
-              transform: 'rotate(180deg)',
-              textAlign: 'center',
-              fontWeight: 500,
-              color: 'text.primary',
-              flexGrow: 1,
-              my: 2,
-            }}
-          >
-            Projects
-          </Typography>
-        ) : (
-          children
-        )}
-        <Tooltip title={isCollapsed ? 'Expand panel' : 'Collapse panel'}>
-            <IconButton
-              data-test={isCollapsed ? "unfold-left-tab" : "fold-left-button"}
-              size="small"
-              onClick={onToggle}
-              aria-expanded={!isCollapsed}
-              aria-label={isCollapsed ? 'Expand left panel' : 'Collapse left panel'}
-            sx={{ 
-              minWidth: '28px', 
-              minHeight: '28px',
-              color: 'text.secondary',
-            }}
-            >
-            <ChevronLeft fontSize="small" />
-            </IconButton>
-        </Tooltip>
-      </>
-    ) : (
-      <>
-        <Tooltip title={isCollapsed ? 'Expand panel' : 'Collapse panel'}>
-            <IconButton
-              data-test={isCollapsed ? "unfold-right-tab" : "fold-right-button"}
-              size="small"
-              onClick={onToggle}
-              aria-expanded={!isCollapsed}
-              aria-label={isCollapsed ? 'Expand right panel' : 'Collapse right panel'}
-            sx={{ 
-              minWidth: '28px', 
-              minHeight: '28px',
-              color: 'text.secondary',
-            }}
-            >
-            <ChevronRight fontSize="small" />
-            </IconButton>
-        </Tooltip>
-        {isCollapsed ? (
-          <Typography
-            variant="body2"
-            sx={{
-              writingMode: 'vertical-rl',
-              textAlign: 'center',
-              fontWeight: 500,
-              color: 'text.primary',
-              flexGrow: 1,
-              my: 2,
-            }}
-          >
-            Details
-          </Typography>
-        ) : (
-          children
-        )}
-      </>
-    )}
-  </Box>
-);
-
-export interface ResizablePanelsProps {
-  children: React.ReactNode;
-  initialSizes?: number[];
-  minSizes?: number[];
-}
-
-export const ResizablePanels = ({
-  children,
-  initialSizes = [20, 60, 20],
-  minSizes = [10, 30, 10],
-}: ResizablePanelsProps) => {
-  const childrenArray = Children.toArray(children) as ReactElement[];
-  const panelGroupRef = useRef<any>(null);
-  const leftPanelRef = useRef<ImperativePanelHandle>(null);
-  const centerPanelRef = useRef<ImperativePanelHandle>(null);
-  const rightPanelRef = useRef<ImperativePanelHandle>(null);
+const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
+  const theme = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  // Validate children
+  // Local dragging state
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [startX, setStartX] = useState<number>(0);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+  
+  // Use shallow comparison for panel state to prevent unnecessary re-renders
+  const {
+    isLeftPanelOpen, 
+    isRightPanelOpen,
+    toggleLeftPanel,
+    toggleRightPanel,
+    leftPanelWidth,
+    centerPanelWidth,
+    rightPanelWidth,
+    leftPanelPercentage,
+    centerPanelPercentage,
+    rightPanelPercentage,
+    minLeftPanelWidth,
+    minCenterPanelWidth,
+    minRightPanelWidth,
+    setPanelSizes,
+    setPanelPercentages
+  } = useShallowAppStore(state => ({
+    isLeftPanelOpen: state.isLeftPanelOpen,
+    isRightPanelOpen: state.isRightPanelOpen,
+    toggleLeftPanel: state.toggleLeftPanel,
+    toggleRightPanel: state.toggleRightPanel,
+    leftPanelWidth: state.leftPanelWidth,
+    centerPanelWidth: state.centerPanelWidth,
+    rightPanelWidth: state.rightPanelWidth,
+    leftPanelPercentage: state.leftPanelPercentage,
+    centerPanelPercentage: state.centerPanelPercentage,
+    rightPanelPercentage: state.rightPanelPercentage,
+    minLeftPanelWidth: state.minLeftPanelWidth,
+    minCenterPanelWidth: state.minCenterPanelWidth,
+    minRightPanelWidth: state.minRightPanelWidth,
+    setPanelSizes: state.setPanelSizes,
+    setPanelPercentages: state.setPanelPercentages
+  }));
+  
+  // Make sure we have three children
+  const childrenArray = React.Children.toArray(children);
   if (childrenArray.length !== 3) {
-    console.error('ResizablePanels requires exactly 3 child components');
-    return null;
+    console.warn('ResizablePanels expects exactly 3 children');
   }
   
-  // Get panel states from the store
-  const panelSizes = useAppStore(state => state.panelSizes);
-  const leftCollapsed = useAppStore(state => state.leftCollapsed);
-  const rightCollapsed = useAppStore(state => state.rightCollapsed);
-  const setPanelSizes = useAppStore(state => state.setPanelSizes);
-  const toggleLeft = useAppStore(state => state.toggleLeft);
-  const toggleRight = useAppStore(state => state.toggleRight);
-  
-  // Track current sizes for resize handle rendering
-  const [currentSizes, setCurrentSizes] = useState<number[]>(
-    panelSizes.length === 3 ? panelSizes : initialSizes
-  );
-  
-  // Enforce absolute minimum sizes
-  const absoluteMinSizes = minSizes.map(size => Math.max(size, MIN_COLLAPSED_SIZE));
-  
-  // Calculate maxSizes for each panel based on other panels' minimum sizes
-  const calculateMaxSizes = () => {
-    const sumOfOtherMinSizes = absoluteMinSizes.reduce((sum, size) => sum + size, 0);
-    return absoluteMinSizes.map((_, i) => {
-      const otherMinSizes = sumOfOtherMinSizes - absoluteMinSizes[i];
-      return 100 - otherMinSizes;
-    });
-  };
-  
-  const maxSizes = calculateMaxSizes();
-  
-  // Get effective panel sizes based on collapse state
-  const getEffectiveSizes = () => {
-    const sizes = [...(panelSizes.length === 3 ? panelSizes : initialSizes)];
-    
-    // Set collapsed panels to their fixed size
-    if (leftCollapsed) {
-      sizes[0] = COLLAPSED_PANEL_SIZE;
-    }
-    
-    if (rightCollapsed) {
-      sizes[2] = COLLAPSED_PANEL_SIZE;
-    }
-    
-    // Adjust center panel to fill remaining space
-    const totalSideSpace = sizes[0] + sizes[2];
-    sizes[1] = 100 - totalSideSpace;
-    
-    return sizes;
-  };
-  
-  // Panel resize handler with improved clamping
-  const handleResize = (sizes: number[]) => {
-    // Skip resize if either panel is collapsed (we'll handle this in useEffect)
-    if (leftCollapsed || rightCollapsed) {
-      return;
-    }
-    
-    // Ensure minimum sizes are respected by clamping
-    const safe = sizes.map((size, index) => Math.max(size, absoluteMinSizes[index]));
-    
-    // Store current sizes for resize handle rendering
-    setCurrentSizes(safe);
-    
-    // Apply clamped values back to the panel group if needed
-    if (JSON.stringify(safe) !== JSON.stringify(sizes) && panelGroupRef.current) {
-      panelGroupRef.current.setLayout(safe);
-    }
-    
-    // Only update store if sizes have actually changed
-    if (JSON.stringify(safe) !== JSON.stringify(panelSizes)) {
-      setPanelSizes(safe);
-    }
-  };
-  
-  // Use either stored panel sizes or initialSizes prop, with collapsed adjustments
-  const activeSizes = getEffectiveSizes();
-  
-  // Enforce collapsed panel sizes and handle panel collapse/expand programmatically
+  // Set initial container size and add resize listener
   useEffect(() => {
-    // Calculate new sizes based on collapse state
-    const newSizes = getEffectiveSizes();
-    setCurrentSizes(newSizes);
-    
-    // Only update the store if sizes have changed
-    if (JSON.stringify(newSizes) !== JSON.stringify(panelSizes)) {
-      setPanelSizes(newSizes);
-    }
-    
-    // Programmatically collapse/expand panels using refs
-    if (leftPanelRef.current) {
-      if (leftCollapsed) {
-        leftPanelRef.current.collapse();
-      } else {
-        leftPanelRef.current.expand();
+    const updateContainerWidth = () => {
+      if (containerRef.current) {
+        const newWidth = containerRef.current.offsetWidth;
+        setContainerWidth(newWidth);
+        
+        // Calculate actual widths in pixels based on percentages
+        const leftWidth = (leftPanelPercentage / 100) * newWidth;
+        const centerWidth = (centerPanelPercentage / 100) * newWidth;
+        const rightWidth = (rightPanelPercentage / 100) * newWidth;
+        
+        setPanelSizes(leftWidth, centerWidth, rightWidth);
       }
+    };
+    
+    // Initial size update
+    updateContainerWidth();
+    
+    // Add resize listener
+    window.addEventListener('resize', updateContainerWidth);
+    
+    return () => {
+      window.removeEventListener('resize', updateContainerWidth);
+    };
+  }, [leftPanelPercentage, centerPanelPercentage, rightPanelPercentage]);
+  
+  // Mouse event handlers for resizing
+  const handleMouseDown = (index: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    setDragging(index);
+    setStartX(e.clientX);
+  };
+  
+  // Throttled mouse move handler to improve performance
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (dragging === null || !containerRef.current) return;
+    
+    // Get current container width
+    const currentContainerWidth = containerRef.current.offsetWidth;
+    const deltaX = e.clientX - startX;
+    
+    // Skip tiny movements for performance
+    if (Math.abs(deltaX) < 1) return;
+    
+    // Resizing the first divider (between left and center panels)
+    if (dragging === 0 && isLeftPanelOpen) {
+      let newLeftWidth = Math.max(leftPanelWidth + deltaX, minLeftPanelWidth);
+      let newCenterWidth = Math.max(centerPanelWidth - deltaX, minCenterPanelWidth);
+      
+      // If total exceeds container width, adjust proportionally
+      const totalWidth = newLeftWidth + newCenterWidth + rightPanelWidth;
+      if (totalWidth > currentContainerWidth) {
+        const excess = totalWidth - currentContainerWidth;
+        // Distribute excess proportionally
+        newLeftWidth -= excess * (newLeftWidth / (newLeftWidth + newCenterWidth));
+        newCenterWidth -= excess * (newCenterWidth / (newLeftWidth + newCenterWidth));
+      }
+      
+      // Calculate percentages
+      const newLeftPercentage = (newLeftWidth / currentContainerWidth) * 100;
+      const newCenterPercentage = (newCenterWidth / currentContainerWidth) * 100;
+      const newRightPercentage = 100 - newLeftPercentage - newCenterPercentage;
+      
+      // Update state
+      setPanelSizes(newLeftWidth, newCenterWidth, rightPanelWidth);
+      setPanelPercentages(newLeftPercentage, newCenterPercentage, newRightPercentage);
+      setStartX(e.clientX);
     }
     
-    if (rightPanelRef.current) {
-      if (rightCollapsed) {
-        rightPanelRef.current.collapse();
-      } else {
-        rightPanelRef.current.expand();
+    // Resizing the second divider (between center and right panels)
+    if (dragging === 1 && isRightPanelOpen) {
+      let newCenterWidth = Math.max(centerPanelWidth + deltaX, minCenterPanelWidth);
+      let newRightWidth = Math.max(rightPanelWidth - deltaX, minRightPanelWidth);
+      
+      // If total exceeds container width, adjust proportionally
+      const totalWidth = leftPanelWidth + newCenterWidth + newRightWidth;
+      if (totalWidth > currentContainerWidth) {
+        const excess = totalWidth - currentContainerWidth;
+        // Distribute excess proportionally
+        newCenterWidth -= excess * (newCenterWidth / (newCenterWidth + newRightWidth));
+        newRightWidth -= excess * (newRightWidth / (newCenterWidth + newRightWidth));
       }
+      
+      // Calculate percentages
+      const newLeftPercentage = isLeftPanelOpen 
+        ? (leftPanelWidth / currentContainerWidth) * 100 
+        : 0;
+      const newCenterPercentage = (newCenterWidth / currentContainerWidth) * 100;
+      const newRightPercentage = (newRightWidth / currentContainerWidth) * 100;
+      
+      // Update state
+      setPanelSizes(leftPanelWidth, newCenterWidth, newRightWidth);
+      setPanelPercentages(newLeftPercentage, newCenterPercentage, newRightPercentage);
+      setStartX(e.clientX);
     }
-  }, [leftCollapsed, rightCollapsed]);
+  }, [
+    dragging, 
+    startX, 
+    containerRef, 
+    leftPanelWidth, 
+    centerPanelWidth, 
+    rightPanelWidth,
+    minLeftPanelWidth,
+    minCenterPanelWidth,
+    minRightPanelWidth,
+    isLeftPanelOpen,
+    isRightPanelOpen,
+    setPanelSizes,
+    setPanelPercentages,
+    leftPanelPercentage,
+    rightPanelPercentage
+  ]);
   
-  const { selectedNoteId, selectedFileId } = usePanelState();
+  const handleMouseUp = () => {
+    setDragging(null);
+  };
   
-  // Auto-collapse/expand center & right panels based on selection
+  // Add and remove event listeners
   useEffect(() => {
-    if (centerPanelRef.current) {
-      if (!selectedNoteId) {
-        centerPanelRef.current.collapse();
-      } else {
-        centerPanelRef.current.expand();
-      }
+    if (dragging !== null) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     }
-    if (rightPanelRef.current) {
-      if (!selectedFileId) {
-        rightPanelRef.current.collapse();
-      } else {
-        rightPanelRef.current.expand();
-      }
-    }
-  }, [selectedNoteId, selectedFileId]);
+    
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragging, startX, leftPanelWidth, centerPanelWidth, rightPanelWidth]);
   
   return (
-    <Box sx={{ 
-      height: '100%', 
-      width: '100%',
-      position: 'relative',
-      borderRadius: 1,
-      overflow: 'hidden',
-      boxShadow: (theme) => `0 4px 20px ${alpha(theme.palette.common.black, 0.08)}`,
-    }}>
-      <PanelGroup
-        ref={panelGroupRef}
-        direction="horizontal"
-        onLayout={handleResize}
-        autoSaveId="clarity-hub-panels"
-        style={{ height: '100%' }}
+    <Box 
+      ref={containerRef} 
+      sx={{ 
+        display: 'flex', 
+        width: '100%', 
+        height: '100%', 
+        overflow: 'hidden',
+        position: 'relative',
+        backgroundColor: 'background.default',
+        borderRadius: theme => theme.shape.borderRadius,
+      }}
+    >
+      {/* Left Panel */}
+      <Box 
+        sx={{ 
+          display: isLeftPanelOpen ? 'flex' : 'none',
+          width: isLeftPanelOpen ? `${leftPanelPercentage}%` : '0',
+          minWidth: isLeftPanelOpen ? minLeftPanelWidth : 0,
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          flexDirection: 'column',
+          transition: isLeftPanelOpen ? 'width 0.3s ease' : 'none',
+          borderRight: 1,
+          borderColor: 'divider',
+          flexShrink: 0,
+          bgcolor: 'background.paper',
+        }}
       >
-        {/* Left Panel */}
-        <Panel
-          id="left-panel"
-          data-test="left-panel"
-          ref={leftPanelRef}
-          minSize={leftCollapsed ? COLLAPSED_PANEL_SIZE : absoluteMinSizes[0]}
+        {childrenArray[0]}
+      </Box>
+      
+      {/* Left Panel Toggle */}
+      <Box
+        sx={{
+          position: 'absolute',
+          left: isLeftPanelOpen ? `${leftPanelPercentage}%` : 0,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: theme => theme.zIndex.drawer + 1,
+          transition: isLeftPanelOpen ? 'left 0.3s ease' : 'none',
+        }}
+      >
+        <IconButton
+          onClick={toggleLeftPanel}
+          size="small"
+          sx={{
+            backgroundColor: 'background.paper',
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: '50%',
+            boxShadow: 1,
+            '&:hover': {
+              backgroundColor: 'primary.light',
+              color: 'primary.contrastText',
+            },
+          }}
         >
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              maxWidth: '100%',
-              minHeight: 0, // Critical fix for flexbox nested scrollable content
-              transition: `all ${TRANSITION_DURATION} ease`,
-              bgcolor: 'background.paper',
-              borderRight: 1,
-              borderColor: 'divider',
-              boxShadow: (theme) => `inset -2px 0 5px ${alpha(theme.palette.common.black, 0.02)}`,
-              pt: 2.5, // Increased top padding to prevent content from being cut off by menu bar
-            }}
-          >
-            {cloneElement(childrenArray[0], {
-              isCollapsed: leftCollapsed,
-              onToggleCollapse: toggleLeft,
-              panelWidth: leftCollapsed ? 'collapsed' : 'expanded',
-              headerComponent: (headerContent: React.ReactNode) => (
-                <PanelHeader isLeft isCollapsed={leftCollapsed} onToggle={toggleLeft}>
-                  {headerContent}
-                </PanelHeader>
-              ),
-            })}
-          </Box>
-        </Panel>
-        
-        {/* Resize Handle for Left Panel - Disabled when collapsed */}
-        <ResizeHandle 
-          id="left-resize-handle" 
-          disabled={leftCollapsed}
+          {isLeftPanelOpen ? <ChevronLeft /> : <ChevronRight />}
+        </IconButton>
+      </Box>
+      
+      {/* Left Divider */}
+      {isLeftPanelOpen && (
+        <Box
+          sx={{
+            position: 'absolute',
+            left: `${leftPanelPercentage}%`,
+            top: 0,
+            bottom: 0,
+            width: '5px',
+            backgroundColor: 'transparent',
+            cursor: 'col-resize',
+            zIndex: theme => theme.zIndex.drawer,
+            '&:hover': {
+              backgroundColor: 'primary.main',
+              opacity: 0.3,
+            },
+            '&:active': {
+              backgroundColor: 'primary.main',
+              opacity: 0.5,
+            },
+          }}
+          onMouseDown={(e) => handleMouseDown(0, e)}
         />
-        
-        {/* Center Panel */}
-        <Panel
-          id="center-panel"
-          data-test="center-panel"
-          ref={centerPanelRef}
-          minSize={absoluteMinSizes[1]}
-        >
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              minHeight: 0, // Critical fix for flexbox nested scrollable content
-              transition: `all ${TRANSITION_DURATION} ease`,
-              backgroundColor: 'background.paper',
-              boxShadow: (theme) => `0 0 8px ${alpha(theme.palette.common.black, 0.08)}`,
-              position: 'relative',
-              zIndex: 2,
-              border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.05)}`,
-              pt: 2.5, // Increased top padding to prevent content from being cut off by menu bar
-            }}
-          >
-            {cloneElement(childrenArray[1], {
-              panelWidth: 'center',
-            })}
-          </Box>
-        </Panel>
-        
-        {/* Resize Handle for Right Panel - Disabled when collapsed */}
-        <ResizeHandle 
-          id="right-resize-handle" 
-          disabled={rightCollapsed}
+      )}
+      
+      {/* Center Panel */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          width: `${centerPanelPercentage}%`,
+          minWidth: minCenterPanelWidth,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          transition: 'width 0.3s ease',
+          backgroundColor: 'background.paper',
+          borderRadius: theme => theme.shape.borderRadius,
+          borderLeft: isLeftPanelOpen ? 0 : 1,
+          borderRight: isRightPanelOpen ? 0 : 1,
+          borderColor: 'divider',
+        }}
+      >
+        {childrenArray[1]}
+      </Box>
+      
+      {/* Right Divider */}
+      {isRightPanelOpen && (
+        <Box
+          sx={{
+            position: 'absolute',
+            right: `${rightPanelPercentage}%`,
+            top: 0,
+            bottom: 0,
+            width: '5px',
+            backgroundColor: 'transparent',
+            cursor: 'col-resize',
+            zIndex: theme => theme.zIndex.drawer,
+            '&:hover': {
+              backgroundColor: 'primary.main',
+              opacity: 0.3,
+            },
+            '&:active': {
+              backgroundColor: 'primary.main',
+              opacity: 0.5,
+            },
+          }}
+          onMouseDown={(e) => handleMouseDown(1, e)}
         />
-        
-        {/* Right Panel */}
-        <Panel
-          id="right-panel"
-          data-test="right-panel"
-          ref={rightPanelRef}
-          minSize={rightCollapsed ? COLLAPSED_PANEL_SIZE : absoluteMinSizes[2]}
+      )}
+      
+      {/* Right Panel Toggle */}
+      <Box
+        sx={{
+          position: 'absolute',
+          right: isRightPanelOpen ? `${rightPanelPercentage}%` : 0,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: theme => theme.zIndex.drawer + 1,
+          transition: isRightPanelOpen ? 'right 0.3s ease' : 'none',
+        }}
+      >
+        <IconButton
+          onClick={toggleRightPanel}
+          size="small"
+          sx={{
+            backgroundColor: 'background.paper',
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: '50%',
+            boxShadow: 1,
+            '&:hover': {
+              backgroundColor: 'primary.light',
+              color: 'primary.contrastText',
+            },
+          }}
         >
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              maxWidth: '100%',
-              minHeight: 0, // Critical fix for flexbox nested scrollable content
-              transition: `all ${TRANSITION_DURATION} ease`,
-              bgcolor: 'background.paper',
-              borderLeft: 1,
-              borderColor: 'divider',
-              boxShadow: (theme) => `inset 2px 0 5px ${alpha(theme.palette.common.black, 0.02)}`,
-              pt: 2.5, // Increased top padding to prevent content from being cut off by menu bar
-            }}
-          >
-            {cloneElement(childrenArray[2], {
-              isCollapsed: rightCollapsed,
-              onToggleCollapse: toggleRight,
-              panelWidth: rightCollapsed ? 'collapsed' : 'expanded',
-              headerComponent: (headerContent: React.ReactNode) => (
-                <PanelHeader isLeft={false} isCollapsed={rightCollapsed} onToggle={toggleRight}>
-                  {headerContent}
-                </PanelHeader>
-              ),
-            })}
-          </Box>
-        </Panel>
-      </PanelGroup>
+          {isRightPanelOpen ? <ChevronRight /> : <ChevronLeft />}
+        </IconButton>
+      </Box>
+      
+      {/* Right Panel */}
+      <Box
+        sx={{
+          display: isRightPanelOpen ? 'flex' : 'none',
+          width: isRightPanelOpen ? `${rightPanelPercentage}%` : '0',
+          minWidth: isRightPanelOpen ? minRightPanelWidth : 0,
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          flexDirection: 'column',
+          transition: isRightPanelOpen ? 'width 0.3s ease' : 'none',
+          borderLeft: 1,
+          borderColor: 'divider',
+          flexShrink: 0,
+          bgcolor: 'background.paper',
+        }}
+      >
+        {childrenArray[2]}
+      </Box>
     </Box>
   );
 };

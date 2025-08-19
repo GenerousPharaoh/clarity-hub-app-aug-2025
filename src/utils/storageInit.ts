@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../services/supabaseClient';
 import { openDB } from 'idb';
 
 // Define required buckets
@@ -169,12 +169,55 @@ export const getIndexedDB = () => {
 };
 
 // Initialize storage with delay to ensure Supabase auth is ready
-console.log('Initializing storage with delay...');
-setTimeout(() => {
-  initStorageBuckets()
-    .then(() => console.log('Storage initialization complete'))
-    .catch(err => console.error('Storage initialization failed:', err));
-}, 2000); // Increased delay to allow auth to fully initialize
+console.log('Storage initialization requested...');
+let initStarted = false;
+
+const initIfNeeded = () => {
+  if (initStarted) return;
+  initStarted = true;
+  
+  console.log('Starting delayed storage initialization...');
+  
+  // Skip bucket initialization in browser context
+  if (typeof window !== 'undefined') {
+    console.log('Browser environment detected, initializing IndexedDB only');
+    // Initialize IndexedDB for local fallback, but skip bucket creation
+    initIndexedDB()
+      .then(() => console.log('IndexedDB initialization complete'))
+      .catch(err => console.error('IndexedDB initialization failed:', err));
+    return;
+  }
+  
+  // Server-side code can proceed with full initialization
+  setTimeout(() => {
+    initStorageBuckets()
+      .then(() => console.log('Storage initialization complete'))
+      .catch(err => console.error('Storage initialization failed:', err));
+  }, 2000); // Increased delay to allow auth to fully initialize
+};
+
+// Always initialize IndexedDB in browser environment 
+if (typeof window !== 'undefined') {
+  console.log('Initializing local storage in browser environment...');
+  
+  // Enable fallback storage
+  try {
+    localStorage.setItem('USE_FALLBACK_STORAGE', 'true');
+    console.log('Fallback storage enabled for demo mode');
+    
+    // Initialize immediately
+    initIndexedDB()
+      .then(() => console.log('IndexedDB initialized for fallback storage'))
+      .catch(err => console.error('IndexedDB initialization failed:', err));
+  } catch (err) {
+    console.error('Failed to enable fallback storage:', err);
+  }
+}
+
+// Only run bucket initialization on the server (SSR) to avoid client-side noise
+if (import.meta.env.SSR) {
+  initIfNeeded();
+}
 
 export default {
   initStorageBuckets,

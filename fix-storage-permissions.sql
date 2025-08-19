@@ -1,148 +1,95 @@
--- First, ensure storage buckets exist
-INSERT INTO storage.buckets (id, name)
-VALUES ('files', 'files')
-ON CONFLICT (id) DO NOTHING;
+-- Storage permissions fix - make buckets public and simplify policies
+-- This fixes storage access issues related to uploads and downloads
 
-INSERT INTO storage.buckets (id, name)
-VALUES ('avatars', 'avatars')
-ON CONFLICT (id) DO NOTHING;
+-- Update buckets to be public and increase size limits
+UPDATE storage.buckets
+SET 
+  public = true,
+  file_size_limit = 100000000,  -- 100MB
+  allowed_mime_types = null     -- Allow all file types
+WHERE id IN ('files', 'thumbnails');
 
-INSERT INTO storage.buckets (id, name)
-VALUES ('thumbnails', 'thumbnails')
-ON CONFLICT (id) DO NOTHING;
+-- Drop any existing policies with restrictive permissions
+DROP POLICY IF EXISTS "Authenticated users can upload files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view their own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own files" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload thumbnails" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view their own thumbnails" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own thumbnails" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own thumbnails" ON storage.objects;
+DROP POLICY IF EXISTS "Collaborators can view project files" ON storage.objects;
+DROP POLICY IF EXISTS "Allow authenticated to select" ON storage.objects;
+DROP POLICY IF EXISTS "Allow authenticated to insert" ON storage.objects;
+DROP POLICY IF EXISTS "Allow users to update own files" ON storage.objects;
+DROP POLICY IF EXISTS "Allow users to delete own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view thumbnails" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update thumbnails" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete thumbnails" ON storage.objects;
+DROP POLICY IF EXISTS "Public can view files" ON storage.objects;
+DROP POLICY IF EXISTS "Public can view thumbnails" ON storage.objects;
 
--- Remove existing policies if they're causing issues
-DROP POLICY IF EXISTS "Files bucket policy" ON storage.objects;
-DROP POLICY IF EXISTS "Avatars bucket policy" ON storage.objects;
-DROP POLICY IF EXISTS "Thumbnails bucket policy" ON storage.objects;
+-- Create simple open policies for authenticated users to upload and manage files
+CREATE POLICY "Authenticated users can upload files"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'files');
 
--- Create policies for authenticated users to manage their own files
--- Files bucket - allow insert
-CREATE POLICY "Files bucket insert policy"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'files');
+CREATE POLICY "Users can view files"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (bucket_id = 'files');
 
--- Files bucket - allow select (read)
-CREATE POLICY "Files bucket select policy"
-ON storage.objects FOR SELECT
-TO authenticated
-USING (bucket_id = 'files');
+CREATE POLICY "Users can update files"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'files');
 
--- Files bucket - allow update
-CREATE POLICY "Files bucket update policy"
-ON storage.objects FOR UPDATE
-TO authenticated
-USING (bucket_id = 'files')
-WITH CHECK (bucket_id = 'files');
-
--- Files bucket - allow delete
-CREATE POLICY "Files bucket delete policy"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (bucket_id = 'files');
-
--- Avatars bucket policies
-CREATE POLICY "Avatars bucket insert policy"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'avatars');
-
-CREATE POLICY "Avatars bucket select policy"
-ON storage.objects FOR SELECT
-TO authenticated
-USING (bucket_id = 'avatars');
-
-CREATE POLICY "Avatars bucket update policy"
-ON storage.objects FOR UPDATE
-TO authenticated
-USING (bucket_id = 'avatars')
-WITH CHECK (bucket_id = 'avatars');
-
-CREATE POLICY "Avatars bucket delete policy"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (bucket_id = 'avatars');
+CREATE POLICY "Users can delete files"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'files');
 
 -- Thumbnails bucket policies
-CREATE POLICY "Thumbnails bucket insert policy"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'thumbnails');
+CREATE POLICY "Authenticated users can upload thumbnails"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'thumbnails');
 
-CREATE POLICY "Thumbnails bucket select policy"
-ON storage.objects FOR SELECT
-TO authenticated
-USING (bucket_id = 'thumbnails');
+CREATE POLICY "Users can view thumbnails"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (bucket_id = 'thumbnails');
 
-CREATE POLICY "Thumbnails bucket update policy"
-ON storage.objects FOR UPDATE
-TO authenticated
-USING (bucket_id = 'thumbnails')
-WITH CHECK (bucket_id = 'thumbnails');
+CREATE POLICY "Users can update thumbnails"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'thumbnails');
 
-CREATE POLICY "Thumbnails bucket delete policy"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (bucket_id = 'thumbnails');
+CREATE POLICY "Users can delete thumbnails"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'thumbnails');
 
--- Allow anonymous users to select (view) files - useful for public sharing
-CREATE POLICY "Public files viewing policy"
-ON storage.objects FOR SELECT
-TO anon
-USING (bucket_id IN ('files', 'avatars', 'thumbnails'));
+-- Public access for reading (anonymous access)
+CREATE POLICY "Public can view files"
+  ON storage.objects FOR SELECT TO anon
+  USING (bucket_id = 'files');
 
--- Create policy to allow demo mode users to access all resources
-CREATE POLICY "Demo mode access"
-ON storage.objects FOR ALL
-TO authenticated
-USING (auth.jwt() ->> 'is_demo_user' = 'true')
-WITH CHECK (auth.jwt() ->> 'is_demo_user' = 'true');
+CREATE POLICY "Public can view thumbnails"
+  ON storage.objects FOR SELECT TO anon
+  USING (bucket_id = 'thumbnails');
 
--- Fix project fetch issue by ensuring the projects table has the right RLS policies
-DROP POLICY IF EXISTS "Projects access policy" ON public.projects;
+-- Create demo bucket policy for easy testing
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM storage.buckets WHERE id = 'demo-files') THEN
+    INSERT INTO storage.buckets (id, name, public, file_size_limit)
+    VALUES ('demo-files', 'Demo Files', true, 100000000);
+  END IF;
+END
+$$;
 
-CREATE POLICY "Projects insert policy"
-ON public.projects FOR INSERT
-TO authenticated
-WITH CHECK (true);
+CREATE POLICY "Demo bucket access"
+  ON storage.objects FOR ALL TO authenticated
+  USING (bucket_id = 'demo-files')
+  WITH CHECK (bucket_id = 'demo-files');
 
-CREATE POLICY "Projects select policy"
-ON public.projects FOR SELECT
-TO authenticated
-USING (true);
-
-CREATE POLICY "Projects update policy"
-ON public.projects FOR UPDATE
-TO authenticated
-USING (owner_id = auth.uid() OR auth.jwt() ->> 'is_demo_user' = 'true')
-WITH CHECK (owner_id = auth.uid() OR auth.jwt() ->> 'is_demo_user' = 'true');
-
-CREATE POLICY "Projects delete policy"
-ON public.projects FOR DELETE
-TO authenticated
-USING (owner_id = auth.uid() OR auth.jwt() ->> 'is_demo_user' = 'true');
-
--- Fix files table RLS policies
-DROP POLICY IF EXISTS "Files access policy" ON public.files;
-
-CREATE POLICY "Files insert policy"
-ON public.files FOR INSERT
-TO authenticated
-WITH CHECK (true);
-
-CREATE POLICY "Files select policy"
-ON public.files FOR SELECT
-TO authenticated
-USING (true);
-
-CREATE POLICY "Files update policy"
-ON public.files FOR UPDATE
-TO authenticated
-USING (owner_id = auth.uid() OR auth.jwt() ->> 'is_demo_user' = 'true')
-WITH CHECK (owner_id = auth.uid() OR auth.jwt() ->> 'is_demo_user' = 'true');
-
-CREATE POLICY "Files delete policy"
-ON public.files FOR DELETE
-TO authenticated
-USING (owner_id = auth.uid() OR auth.jwt() ->> 'is_demo_user' = 'true'); 
+CREATE POLICY "Public can view demo files"
+  ON storage.objects FOR SELECT TO anon
+  USING (bucket_id = 'demo-files'); 

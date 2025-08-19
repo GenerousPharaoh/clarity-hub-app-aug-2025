@@ -4,12 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Legal Case Tracker</title>
+    <title>Clarity Hub</title>
     <!-- TinyMCE script - load from local public folder instead of CDN -->
     <script src="/tinymce/tinymce.min.js"></script>
+    <!-- Custom style fixes -->
+    <link rel="stylesheet" href="/style-fixes.css">
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Auto-load UI fixes after page loads
+      window.addEventListener('load', () => {
+        const script = document.createElement('script');
+        script.src = '/ui-fixes.js';
+        document.body.appendChild(script);
+      });
+    </script>
   </body>
 </html>

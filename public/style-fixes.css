@@ -1,0 +1,92 @@
+/* Style fixes for Clarity Hub app */
+
+/* General padding and margin fixes */
+.MuiToolbar-root {
+  padding: 0 16px !important;
+}
+
+.MuiButton-root {
+  margin: 4px !important;
+  padding: 6px 16px !important;
+}
+
+.MuiIconButton-root {
+  margin: 2px !important;
+  padding: 8px !important;
+}
+
+/* Fix icon alignment */
+.MuiSvgIcon-root {
+  vertical-align: middle !important;
+}
+
+/* Panel styling */
+[data-test="left-panel"],
+[data-test="center-panel"],
+[data-test="right-panel"] {
+  padding: 16px !important;
+  overflow: auto !important;
+}
+
+/* Fix file list item styling */
+.MuiListItem-root {
+  padding: 8px 16px !important;
+  margin-bottom: 4px !important;
+  border-radius: 4px !important;
+}
+
+/* Fix button text alignment */
+.MuiButton-startIcon {
+  margin-right: 8px !important;
+}
+
+/* Fix panel resizing handles */
+.resize-handle {
+  width: 6px !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Fix file viewer container */
+.file-viewer-container {
+  height: 100% !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Ensure content fits in panels */
+.MuiBox-root {
+  box-sizing: border-box !important;
+}
+
+/* Fix spacing between components */
+.MuiStack-root > * {
+  margin: 4px 0 !important;
+}
+
+/* Fix button hover states */
+.MuiButton-root:hover {
+  opacity: 0.9 !important;
+}
+
+/* Fix file item selection */
+.file-item-selected {
+  background-color: rgba(25, 118, 210, 0.12) !important;
+}
+
+/* Fix input fields */
+.MuiTextField-root {
+  margin: 8px 0 !important;
+}
+
+/* Fix toolbar spacing */
+.MuiToolbar-root {
+  min-height: 56px !important;
+}
+
+/* Fix avatar sizing */
+.MuiAvatar-root {
+  width: 32px !important;
+  height: 32px !important;
+}

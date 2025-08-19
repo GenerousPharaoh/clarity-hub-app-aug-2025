@@ -1,57 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  CircularProgress, 
-  Button, 
-  Stack, 
-  Alert, 
-  IconButton,
-  Chip,
-  Tooltip,
-  Skeleton
-} from '@mui/material';
-import { 
-  FileOpen, 
-  Download, 
-  ZoomIn, 
-  ZoomOut, 
-  RotateRight, 
-  Fullscreen, 
-  Code, 
-  Description,
-  Image as ImageIcon,
-  VideoFile,
-  AudioFile,
-  Article,
-  InsertDriveFile,
-  TableChart,
-  Slideshow
-} from '@mui/icons-material';
-import { FileRecord } from '../../hooks/useProjectFiles';
-import PDFViewer from './PDFViewer';
-import ImageViewer from './ImageViewer';
-import DocumentViewer from './DocumentViewer';
-import VideoViewer from './VideoViewer';
-import AudioViewer from './AudioViewer';
-import CodeViewer from './CodeViewer';
-import SpreadsheetViewer from './SpreadsheetViewer';
+import { Box, CircularProgress, Typography, Alert } from '@mui/material';
 import { supabase } from '../../lib/supabaseClient';
-import { getPublicUrl } from '../../services/storageService';
+import { publicUrl } from '../../utils/publicUrl';
+import ViewerContainer, { FileType } from './core/ViewerContainer';
+import { FileRecord } from '../../hooks/useProjectFiles';
+import MockFileViewer from './MockFileViewer';
+import useAppStore from '../../store';
 
-interface UniversalFileViewerProps {
-  file: FileRecord | null;
-  onClose?: () => void;
-}
-
-const UniversalFileViewer: React.FC<UniversalFileViewerProps> = ({ file, onClose }) => {
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+const UniversalFileViewer: React.FC<{ file: FileRecord | null }> = ({ file }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
-  
-  // Get file URL when component mounts or file changes
+
+  // Map file_type to viewer FileType
+  const mapFileType = (type: string): FileType => {
+    switch (type) {
+      case 'pdf': return 'pdf';
+      case 'image': return 'image';
+      case 'document': return 'document';
+      case 'spreadsheet': return 'spreadsheet';
+      case 'code': return 'code';
+      case 'audio': return 'audio';
+      case 'video': return 'video';
+      case 'text': return 'text';
+      default: return 'unknown';
+    }
+  };
+
   useEffect(() => {
     const getFile = async () => {
       setLoading(true);
@@ -65,8 +41,29 @@ const UniversalFileViewer: React.FC<UniversalFileViewerProps> = ({ file, onClose
       
       try {
         // Get public URL for file
-        const url = getPublicUrl('files', file.storage_path);
-        setFileUrl(url);
+        const directUrl = publicUrl(`files/${file.storage_path}`);
+        console.log(`[UniversalFileViewer] Generated public URL: ${directUrl}`);
+        
+        // For PDF and document files, fetch as blob and create object URL
+        if (['pdf', 'document'].includes(file.file_type)) {
+          console.log(`[UniversalFileViewer] Using blob approach for ${file.file_type}`);
+          try {
+            const response = await fetch(directUrl);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch file: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            console.log(`[UniversalFileViewer] Created blob URL from ${blob.size} bytes`);
+            setFileUrl(blobUrl);
+          } catch (blobError) {
+            console.error(`[UniversalFileViewer] Blob fetch failed, using direct URL:`, blobError);
+            setFileUrl(directUrl);
+          }
+        } else {
+          // For other file types, direct URL is fine
+          setFileUrl(directUrl);
+        }
         
         // Check if file needs processing based on type
         const needsProcessing = ['pdf', 'document', 'spreadsheet'].includes(file.file_type);
@@ -75,8 +72,6 @@ const UniversalFileViewer: React.FC<UniversalFileViewerProps> = ({ file, onClose
           setProcessing(true);
           
           // Call analyze-file function to process the file
-          // This would typically be done by a server-side trigger
-          // But here we'll simulate it for demo purposes
           try {
             await supabase.functions.invoke('analyze-file', {
               body: { fileId: file.id }
@@ -88,237 +83,115 @@ const UniversalFileViewer: React.FC<UniversalFileViewerProps> = ({ file, onClose
             setProcessing(false);
           }
         }
+        
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching file URL:', error);
         setError('Error loading file. Please try again later.');
-      } finally {
         setLoading(false);
       }
     };
     
     getFile();
+    
+    // Clean up any blob URLs on unmount
+    return () => {
+      if (fileUrl && fileUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
   }, [file]);
-  
-  // Handle file download
-  const handleDownload = async () => {
-    if (!file || !fileUrl) return;
-    
-    try {
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = file.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      setError('Error downloading file. Please try again later.');
-    }
-  };
-  
-  // Get icon for file type
-  const getFileIcon = () => {
-    if (!file) return <InsertDriveFile />;
-    
-    switch (file.file_type) {
-      case 'pdf':
-        return <Description />;
-      case 'document':
-        return <Article />;
-      case 'image':
-        return <ImageIcon />;
-      case 'video':
-        return <VideoFile />;
-      case 'audio':
-        return <AudioFile />;
-      case 'code':
-        return <Code />;
-      case 'spreadsheet':
-        return <TableChart />;
-      case 'presentation':
-        return <Slideshow />;
-      default:
-        return <InsertDriveFile />;
-    }
-  };
-  
-  // Render appropriate viewer based on file type
-  const renderFileViewer = () => {
-    if (!file || !fileUrl) {
-      return <Typography color="text.secondary">No file selected</Typography>;
-    }
-    
-    if (loading) {
-      return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 4 }}>
-          <CircularProgress size={40} thickness={4} />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            Loading file...
-          </Typography>
-        </Box>
-      );
-    }
-    
-    if (error) {
-      return (
-        <Alert severity="error" sx={{ m: 2 }}>
-          {error}
-        </Alert>
-      );
-    }
-    
-    // Render appropriate viewer based on file type
-    switch (file.file_type) {
-      case 'pdf':
-        return <PDFViewer url={fileUrl} fileName={file.name} />;
-        
-      case 'image':
-        return <ImageViewer url={fileUrl} fileName={file.name} />;
-        
-      case 'video':
-        return <VideoViewer url={fileUrl} fileName={file.name} type={file.content_type} />;
-        
-      case 'audio':
-        return <AudioViewer url={fileUrl} fileName={file.name} type={file.content_type} />;
-        
-      case 'document':
-        return <DocumentViewer url={fileUrl} fileName={file.name} fileType={file.content_type} />;
-        
-      case 'code':
-        return <CodeViewer url={fileUrl} fileName={file.name} />;
-        
-      case 'spreadsheet':
-        return <SpreadsheetViewer url={fileUrl} fileName={file.name} />;
-        
-      default:
-        // Generic file viewer with download option
-        return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 4 }}>
-            {getFileIcon()}
-            <Typography variant="body1" sx={{ mt: 2, mb: 3 }}>
-              File preview not available for this file type
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<Download />}
-              onClick={handleDownload}
-            >
-              Download File
-            </Button>
-          </Box>
-        );
-    }
-  };
-  
-  // File info panel
-  const renderFileInfo = () => {
-    if (!file) return null;
-    
+
+  if (loading) {
     return (
-      <Box sx={{ 
-        p: 2, 
-        borderBottom: 1, 
-        borderColor: 'divider',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1 
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {getFileIcon()}
-          <Typography variant="h6" noWrap sx={{ maxWidth: '85%' }}>
-            {file.name}
-          </Typography>
-        </Box>
-        
-        <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-          <Chip 
-            label={file.file_type.toUpperCase()} 
-            size="small" 
-            color="primary" 
-            variant="outlined" 
-          />
-          
-          <Chip 
-            label={`${(file.size / 1024).toFixed(1)} KB`} 
-            size="small" 
-            variant="outlined" 
-          />
-          
-          {file.exhibit_id && (
-            <Chip 
-              label={`ID: ${file.exhibit_id}`} 
-              size="small" 
-              color="secondary" 
-              variant="outlined" 
-            />
-          )}
-          
-          {processing && (
-            <Chip 
-              label="Processing..." 
-              size="small" 
-              color="warning" 
-              icon={<CircularProgress size={12} />} 
-            />
-          )}
-        </Stack>
+      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress size={40} thickness={4} />
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+          Loading file...
+        </Typography>
       </Box>
     );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!file) {
+    return (
+      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <Typography variant="body1" color="text.secondary">
+          No file selected
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!fileUrl) {
+    return (
+      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+          Unable to generate URL for this file.
+        </Alert>
+      </Box>
+    );
+  }
+
+  // Check if we're in demo mode
+  const user = useAppStore(state => state.user);
+  const isDemoMode = user?.id === '00000000-0000-0000-0000-000000000000';
+
+  // Handle link copying for demo mode
+  const handleCopyLink = () => {
+    if (!file) return;
+    
+    // Create a dummy link activation and set it in the store
+    const linkActivation = {
+      fileId: file.id,
+      page: file.file_type === 'pdf' ? 1 : undefined,
+      timestamp: ['audio', 'video'].includes(file.file_type) ? '00:00' : undefined,
+    };
+    
+    // Add link activation to store if needed
+    useAppStore.setState(state => ({
+      ...state,
+      linkActivation
+    }));
+    
+    // Show notification if needed
+    console.log('Demo link copied for file:', file.name);
   };
-  
+
   return (
-    <Paper 
-      elevation={3} 
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
-        overflow: 'hidden',
-        borderRadius: 2,
-        bgcolor: 'background.paper' 
-      }}
-      data-test="file-viewer"
-    >
-      {/* File Info */}
-      {renderFileInfo()}
+    <Box sx={{ height: '100%', width: '100%', overflow: 'hidden' }}>
+      {processing && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          This file is being processed for AI analysis...
+        </Alert>
+      )}
       
-      {/* File Viewer */}
-      <Box sx={{ 
-        flexGrow: 1, 
-        overflow: 'auto', 
-        position: 'relative',
-        display: 'flex',
-        bgcolor: 'action.hover' 
-      }}>
-        {renderFileViewer()}
-      </Box>
-      
-      {/* Action Bar */}
-      <Box sx={{ 
-        p: 1, 
-        borderTop: 1, 
-        borderColor: 'divider',
-        display: 'flex',
-        justifyContent: 'space-between' 
-      }}>
-        <Button
-          size="small"
-          startIcon={<Download />}
-          onClick={handleDownload}
-          disabled={!fileUrl}
-        >
-          Download
-        </Button>
-        
-        <Box>
-          <Tooltip title="View fullscreen">
-            <IconButton size="small">
-              <Fullscreen fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
-    </Paper>
+      {/* Use mock file viewer in demo mode to avoid backend requests */}
+      {isDemoMode && file ? (
+        <MockFileViewer
+          fileName={file.name}
+          fileType={file.file_type}
+          onCopyLink={handleCopyLink}
+        />
+      ) : (
+        <ViewerContainer
+          url={fileUrl}
+          fileType={mapFileType(file.file_type)}
+          fileName={file.name}
+          metadata={file.metadata}
+        />
+      )}
+    </Box>
   );
 };
 

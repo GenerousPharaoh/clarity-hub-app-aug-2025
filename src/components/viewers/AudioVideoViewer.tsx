@@ -1,323 +1,431 @@
-import { useState, useEffect, useRef } from 'react';
-import { Box, CircularProgress, IconButton, Paper, Slider, Typography, Tooltip } from '@mui/material';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import {
-  PlayArrow as PlayIcon,
-  Pause as PauseIcon,
-  VolumeUp as VolumeIcon,
-  VolumeOff as MuteIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
-  LinkSharp as LinkIcon,
+  Box,
+  Typography,
+  IconButton,
+  Paper,
+  Tooltip,
+  Stack,
+  Slider,
+  ButtonGroup,
+  Button,
+  Divider,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import {
+  PlayArrow,
+  Pause,
+  VolumeUp,
+  VolumeMute,
+  Fullscreen,
+  ContentCopy,
+  SkipNext,
+  SkipPrevious,
+  Speed,
 } from '@mui/icons-material';
-import useAppStore from '../../store';
+import { LinkActivation } from '../../types';
 
 interface AudioVideoViewerProps {
   url: string;
-  contentType: string;
-  initialTime?: number;
+  fileName: string;
+  isVideo: boolean;
+  onLinkUpdate?: (updates: Partial<LinkActivation>) => void;
 }
 
-const AudioVideoViewer = ({ url, contentType, initialTime }: AudioVideoViewerProps) => {
-  const [loading, setLoading] = useState(true);
-  const [playing, setPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.8);
-  const [muted, setMuted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const formatTime = (time: number): string => {
+  const hours = Math.floor(time / 3600);
+  const minutes = Math.floor((time % 3600) / 60);
+  const seconds = Math.floor(time % 60);
   
-  const playerRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
-  const isVideo = contentType.startsWith('video/');
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
   
-  const linkActivation = useAppStore((state) => state.linkActivation);
-  const setLinkActivation = useAppStore((state) => state.setLinkActivation);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
 
-  // Initialize player with correct time
-  useEffect(() => {
-    if (playerRef.current && initialTime && initialTime !== currentTime) {
-      playerRef.current.currentTime = initialTime;
-      setCurrentTime(initialTime);
-    }
-  }, [initialTime, playerRef.current]);
-
-  // Handle media load
-  const handleOnLoadedData = () => {
-    setLoading(false);
-    setDuration(playerRef.current?.duration || 0);
+const AudioVideoViewer = forwardRef<any, AudioVideoViewerProps>(
+  ({ url, fileName, isVideo, onLinkUpdate }, ref) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [duration, setDuration] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [volume, setVolume] = useState(1);
+    const [isMuted, setIsMuted] = useState(false);
+    const [playbackRate, setPlaybackRate] = useState(1);
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+    const [showCopySuccess, setShowCopySuccess] = useState(false);
     
-    // Set initial time if specified
-    if (initialTime && playerRef.current) {
-      playerRef.current.currentTime = initialTime;
-    }
-  };
-
-  // Handle media load error
-  const handleError = () => {
-    setError('Failed to load media. The file may be corrupted or not supported by your browser.');
-    setLoading(false);
-  };
-
-  // Handle play/pause
-  const togglePlay = () => {
-    if (playerRef.current) {
-      if (playing) {
-        playerRef.current.pause();
-      } else {
-        playerRef.current.play();
+    const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    
+    // Expose methods via ref
+    useImperativeHandle(ref, () => ({
+      play: () => {
+        if (mediaRef.current) {
+          mediaRef.current.play();
+          setIsPlaying(true);
+        }
+      },
+      pause: () => {
+        if (mediaRef.current) {
+          mediaRef.current.pause();
+          setIsPlaying(false);
+        }
+      },
+      getCurrentTime: () => currentTime,
+      getDuration: () => duration,
+      seekTo: (time: number) => {
+        if (mediaRef.current) {
+          mediaRef.current.currentTime = time;
+        }
+      },
+    }));
+    
+    // Play/pause toggle
+    const togglePlay = () => {
+      if (mediaRef.current) {
+        if (isPlaying) {
+          mediaRef.current.pause();
+        } else {
+          mediaRef.current.play();
+        }
+        setIsPlaying(!isPlaying);
       }
-      setPlaying(!playing);
-    }
-  };
-
-  // Handle time update
-  const handleTimeUpdate = () => {
-    if (playerRef.current) {
-      setCurrentTime(playerRef.current.currentTime);
-    }
-  };
-
-  // Handle seek
-  const handleSeek = (_: Event, newValue: number | number[]) => {
-    const newTime = typeof newValue === 'number' ? newValue : newValue[0];
-    if (playerRef.current) {
-      playerRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-      
-      // Update link activation if active
-      if (linkActivation) {
-        setLinkActivation({
-          ...linkActivation,
-          timestamp: newTime,
-        });
+    };
+    
+    // Skip forward/backward
+    const skipForward = () => {
+      if (mediaRef.current) {
+        mediaRef.current.currentTime = Math.min(mediaRef.current.currentTime + 10, duration);
       }
-    }
-  };
-
-  // Handle volume change
-  const handleVolumeChange = (_: Event, newValue: number | number[]) => {
-    const newVolume = typeof newValue === 'number' ? newValue : newValue[0];
-    setVolume(newVolume);
+    };
     
-    if (playerRef.current) {
-      playerRef.current.volume = newVolume;
-    }
+    const skipBackward = () => {
+      if (mediaRef.current) {
+        mediaRef.current.currentTime = Math.max(mediaRef.current.currentTime - 10, 0);
+      }
+    };
     
-    if (newVolume === 0) {
-      setMuted(true);
-    } else if (muted) {
-      setMuted(false);
-    }
-  };
-
-  // Handle mute toggle
-  const toggleMute = () => {
-    if (playerRef.current) {
-      playerRef.current.muted = !muted;
-      setMuted(!muted);
-    }
-  };
-
-  // Format time (seconds to MM:SS)
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
-
-  // Create a timestamp link
-  const createTimestampLink = () => {
-    if (!linkActivation) return;
+    // Volume control
+    const toggleMute = () => {
+      if (mediaRef.current) {
+        mediaRef.current.muted = !isMuted;
+        setIsMuted(!isMuted);
+      }
+    };
     
-    setLinkActivation({
-      ...linkActivation,
-      timestamp: currentTime,
-    });
+    const handleVolumeChange = (_: Event, newValue: number | number[]) => {
+      const vol = newValue as number;
+      if (mediaRef.current) {
+        mediaRef.current.volume = vol;
+        setVolume(vol);
+        setIsMuted(vol === 0);
+      }
+    };
     
-    // Provide feedback to user
-    alert(`Timestamp link created at ${formatTime(currentTime)}`);
-  };
-
-  return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Media Container */}
+    // Playback rate control
+    const changePlaybackRate = (rate: number) => {
+      if (mediaRef.current) {
+        mediaRef.current.playbackRate = rate;
+        setPlaybackRate(rate);
+      }
+    };
+    
+    // Time update handler
+    const handleTimeUpdate = () => {
+      if (mediaRef.current) {
+        setCurrentTime(mediaRef.current.currentTime);
+      }
+    };
+    
+    // Duration change handler
+    const handleDurationChange = () => {
+      if (mediaRef.current) {
+        setDuration(mediaRef.current.duration);
+      }
+    };
+    
+    // Seek handler
+    const handleSeek = (_: Event, newValue: number | number[]) => {
+      const seekTime = newValue as number;
+      if (mediaRef.current) {
+        mediaRef.current.currentTime = seekTime;
+        setCurrentTime(seekTime);
+      }
+    };
+    
+    // Enter full screen (for video)
+    const enterFullScreen = () => {
+      if (isVideo && mediaRef.current) {
+        if (mediaRef.current.requestFullscreen) {
+          mediaRef.current.requestFullscreen()
+            .catch(err => {
+              console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        }
+      } else if (containerRef.current && containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen()
+          .catch(err => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+          });
+      }
+    };
+    
+    // Copy link with timestamp
+    const copyTimestampLink = () => {
+      // Notify parent about the link activation
+      onLinkUpdate?.({ timestamp: currentTime });
+      setShowCopySuccess(true);
+    };
+    
+    // Media element props
+    const mediaProps = {
+      src: url,
+      ref: mediaRef,
+      onTimeUpdate: handleTimeUpdate,
+      onDurationChange: handleDurationChange,
+      onPlay: () => setIsPlaying(true),
+      onPause: () => setIsPlaying(false),
+      onEnded: () => setIsPlaying(false),
+      volume,
+      muted: isMuted,
+      style: { width: '100%', height: '100%', maxHeight: isVideo ? '600px' : 'auto' },
+    };
+    
+    return (
       <Box
+        ref={containerRef}
         sx={{
-          flexGrow: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative',
-          bgcolor: isVideo ? 'black' : 'background.default',
-          minHeight: isVideo ? 0 : 'auto',
-        }}
-      >
-        {loading && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              zIndex: 1,
-            }}
-          >
-            <CircularProgress />
-            <Typography variant="body2" sx={{ mt: 2, color: isVideo ? 'white' : 'inherit' }}>
-              Loading {isVideo ? 'video' : 'audio'}...
-            </Typography>
-          </Box>
-        )}
-
-        {error && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              p: 3,
-              zIndex: 1,
-            }}
-          >
-            <Typography color="error" variant="body1" gutterBottom>
-              {error}
-            </Typography>
-          </Box>
-        )}
-
-        {isVideo ? (
-          <video
-            ref={playerRef as React.RefObject<HTMLVideoElement>}
-            src={url}
-            style={{
-              maxWidth: '100%',
-              maxHeight: '100%',
-              display: loading ? 'none' : 'block',
-            }}
-            onLoadedData={handleOnLoadedData}
-            onTimeUpdate={handleTimeUpdate}
-            onError={handleError}
-            onEnded={() => setPlaying(false)}
-            playsInline
-            muted={muted}
-          />
-        ) : (
-          <audio
-            ref={playerRef as React.RefObject<HTMLAudioElement>}
-            src={url}
-            style={{ width: '100%', display: loading ? 'none' : 'block' }}
-            onLoadedData={handleOnLoadedData}
-            onTimeUpdate={handleTimeUpdate}
-            onError={handleError}
-            onEnded={() => setPlaying(false)}
-            muted={muted}
-          />
-        )}
-
-        {/* Overlay play button for video (visible only when paused) */}
-        {isVideo && !loading && !playing && (
-          <IconButton
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              color: 'white',
-              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
-            }}
-            onClick={togglePlay}
-          >
-            <PlayIcon fontSize="large" />
-          </IconButton>
-        )}
-      </Box>
-
-      {/* Controls */}
-      <Paper
-        sx={{
-          p: 1,
           display: 'flex',
           flexDirection: 'column',
-          borderTop: 1,
-          borderColor: 'divider',
+          height: '100%',
+          width: '100%',
+          bgcolor: 'background.paper',
+          position: 'relative',
         }}
-        elevation={0}
       >
-        {/* Time Slider */}
-        <Box sx={{ px: 2, width: '100%' }}>
-          <Slider
-            value={currentTime}
-            min={0}
-            max={duration || 100}
-            onChange={handleSeek}
-            disabled={loading || error !== null}
-            sx={{ mt: 1 }}
-          />
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              width: '100%',
-              mt: -1,
-            }}
-          >
-            <Typography variant="caption">{formatTime(currentTime)}</Typography>
-            <Typography variant="caption">{formatTime(duration)}</Typography>
-          </Box>
-        </Box>
-
-        {/* Action Controls */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {/* Play/Pause */}
-            <IconButton
-              onClick={togglePlay}
-              disabled={loading || error !== null}
-              size="small"
+        {/* Media player */}
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#1E1E1E' : '#f5f5f5',
+            p: 2,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {isVideo ? (
+            <video {...mediaProps} controls={false} />
+          ) : (
+            <audio {...mediaProps} controls={false} />
+          )}
+          
+          {isVideo ? null : (
+            <Box 
+              sx={{ 
+                p: 2, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+              }}
             >
-              {playing ? <PauseIcon /> : <PlayIcon />}
-            </IconButton>
-
-            {/* Volume */}
-            <Box sx={{ display: 'flex', alignItems: 'center', ml: 1, width: 140 }}>
-              <IconButton onClick={toggleMute} size="small" disabled={loading}>
-                {muted ? <MuteIcon /> : <VolumeIcon />}
-              </IconButton>
-              <Slider
-                value={muted ? 0 : volume}
-                min={0}
-                max={1}
-                step={0.01}
-                onChange={handleVolumeChange}
-                sx={{ ml: 1, mr: 1 }}
-                disabled={loading}
-                size="small"
-              />
+              <Typography variant="h6" gutterBottom>
+                {fileName}
+              </Typography>
+              <Box
+                sx={{ 
+                  width: 200, 
+                  height: 200, 
+                  bgcolor: 'primary.dark', 
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 3,
+                }}
+              >
+                <IconButton
+                  onClick={togglePlay}
+                  sx={{ 
+                    width: 80, 
+                    height: 80, 
+                    color: 'white',
+                  }}
+                >
+                  {isPlaying ? <Pause fontSize="large" /> : <PlayArrow fontSize="large" />}
+                </IconButton>
+              </Box>
             </Box>
-          </Box>
-
-          {/* Timestamp Link */}
-          <Tooltip title="Copy link to current timestamp">
-            <IconButton
-              onClick={createTimestampLink}
-              disabled={loading || error !== null}
-              size="small"
-            >
-              <LinkIcon />
-            </IconButton>
-          </Tooltip>
+          )}
         </Box>
-      </Paper>
-    </Box>
-  );
-};
+        
+        {/* Controls */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            borderTop: 1,
+            borderColor: 'divider',
+            borderRadius: 0,
+          }}
+        >
+          {/* Progress slider */}
+          <Box sx={{ display: 'flex', alignItems: 'center', px: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mr: 1, minWidth: 40 }}>
+              {formatTime(currentTime)}
+            </Typography>
+            
+            <Slider
+              value={currentTime}
+              max={duration || 100}
+              onChange={handleSeek}
+              aria-label="media progress"
+              sx={{ mx: 1 }}
+            />
+            
+            <Typography variant="caption" color="text.secondary" sx={{ ml: 1, minWidth: 40 }}>
+              {formatTime(duration)}
+            </Typography>
+          </Box>
+          
+          {/* Control buttons */}
+          <Stack
+            direction="row"
+            spacing={1}
+            divider={<Divider orientation="vertical" flexItem />}
+            sx={{ width: '100%', alignItems: 'center', px: 1, py: 0.5 }}
+          >
+            {/* Playback controls */}
+            <Stack direction="row" spacing={0.5}>
+              <Tooltip title="Skip backward 10s">
+                <IconButton onClick={skipBackward} size="small">
+                  <SkipPrevious />
+                </IconButton>
+              </Tooltip>
+              
+              <IconButton onClick={togglePlay} size="small">
+                {isPlaying ? <Pause /> : <PlayArrow />}
+              </IconButton>
+              
+              <Tooltip title="Skip forward 10s">
+                <IconButton onClick={skipForward} size="small">
+                  <SkipNext />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+            
+            {/* Volume control */}
+            <Box sx={{ position: 'relative' }}>
+              <IconButton 
+                onMouseEnter={() => setShowVolumeSlider(true)}
+                onMouseLeave={() => setShowVolumeSlider(false)}
+                onClick={toggleMute}
+                size="small"
+              >
+                {isMuted ? <VolumeMute /> : <VolumeUp />}
+              </IconButton>
+              
+              {showVolumeSlider && (
+                <Paper
+                  sx={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    left: 0,
+                    p: 1,
+                    width: 40,
+                    height: 120,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    zIndex: 10,
+                    mb: 0.5,
+                  }}
+                  onMouseEnter={() => setShowVolumeSlider(true)}
+                  onMouseLeave={() => setShowVolumeSlider(false)}
+                >
+                  <Slider
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    aria-label="Volume"
+                    orientation="vertical"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    sx={{ height: 100 }}
+                  />
+                </Paper>
+              )}
+            </Box>
+            
+            {/* Playback rate */}
+            <ButtonGroup size="small" variant="text">
+              <Button
+                onClick={() => changePlaybackRate(1)}
+                variant={playbackRate === 1 ? "contained" : "text"}
+                size="small"
+                startIcon={<Speed fontSize="small" />}
+              >
+                1x
+              </Button>
+              <Button
+                onClick={() => changePlaybackRate(1.5)}
+                variant={playbackRate === 1.5 ? "contained" : "text"}
+                size="small"
+              >
+                1.5x
+              </Button>
+              <Button
+                onClick={() => changePlaybackRate(2)}
+                variant={playbackRate === 2 ? "contained" : "text"}
+                size="small"
+              >
+                2x
+              </Button>
+            </ButtonGroup>
+            
+            {/* Actions */}
+            <Box sx={{ flexGrow: 1 }} />
+            
+            <Stack direction="row" spacing={0.5}>
+              <Tooltip title="Copy link to timestamp">
+                <IconButton onClick={copyTimestampLink} size="small">
+                  <ContentCopy />
+                </IconButton>
+              </Tooltip>
+              
+              {isVideo && (
+                <Tooltip title="Fullscreen">
+                  <IconButton onClick={enterFullScreen} size="small">
+                    <Fullscreen />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Stack>
+          </Stack>
+        </Paper>
+        
+        <Snackbar
+          open={showCopySuccess}
+          autoHideDuration={3000}
+          onClose={() => setShowCopySuccess(false)}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={() => setShowCopySuccess(false)} severity="success" sx={{ width: '100%' }}>
+            Link to timestamp copied!
+          </Alert>
+        </Snackbar>
+      </Box>
+    );
+  }
+);
 
 export default AudioVideoViewer; 

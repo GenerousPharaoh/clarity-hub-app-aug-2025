@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "installCommand": "node patch.js && npm install --omit=optional",
+  "buildCommand": "npx vite build --mode production",
+  "framework": null,
+  "outputDirectory": "dist"
+}

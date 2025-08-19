@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test PDF Document</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      text-align: center;
+      color: #0070f3;
+    }
+    .page {
+      page-break-after: always;
+      border: 1px solid #eee;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Test PDF Document</h1>
+    <p>This is a test document for PDF viewing. It demonstrates the capability of the PDF viewer component to properly display PDF documents using blob URLs.</p>
+    
+    <h2>Key Features</h2>
+    <ul>
+      <li>Network-independent viewing (after initial load)</li>
+      <li>Robust error handling</li>
+      <li>Memory efficient with proper cleanup</li>
+      <li>Cross-browser compatibility</li>
+    </ul>
+    
+    <h2>Implementation Details</h2>
+    <p>The PDF viewer works by:</p>
+    <ol>
+      <li>Fetching the PDF once from the server</li>
+      <li>Converting it to a blob object</li>
+      <li>Creating a blob URL for viewing</li>
+      <li>Displaying it in an iframe or dedicated viewer component</li>
+    </ol>
+    
+    <div class="footer">Page 1 of 2</div>
+  </div>
+  
+  <div class="page">
+    <h1>Test PDF Document - Page 2</h1>
+    <p>This second page tests multi-page PDF viewing capabilities and navigation.</p>
+    
+    <h2>Text Content Sample</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras vestibulum, justo id varius tempus, nulla purus ornare arcu, at sagittis eros magna vel ante. Nulla facilisi. Nunc vestibulum ante at magna maximus, vitae efficitur eros porta. Ut id ipsum tempus, blandit libero non, porttitor massa.</p>
+    
+    <p>Nullam vitae enim ac enim suscipit maximus vel in diam. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Suspendisse non luctus justo. Suspendisse potenti. Donec vitae quam eu magna sagittis porta.</p>
+    
+    <h2>Testing Results</h2>
+    <ul>
+      <li>✅ PDF loads correctly</li>
+      <li>✅ Navigation between pages works</li>
+      <li>✅ Text is selectable and searchable</li>
+      <li>✅ Zoom and pan functionality</li>
+    </ul>
+    
+    <div class="footer">Page 2 of 2</div>
+  </div>
+</body>
+</html> 

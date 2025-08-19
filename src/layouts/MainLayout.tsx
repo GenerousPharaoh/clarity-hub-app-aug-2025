@@ -1,23 +1,33 @@
 import { useEffect, useState } from 'react';
-import { Box, AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Avatar, Container, Tooltip, CircularProgress } from '@mui/material';
-import { Menu as MenuIcon, DarkMode, LightMode, Logout, Settings, Dashboard, NotificationsNone } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Box, AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Avatar, Container, Tooltip, CircularProgress, Button, Divider, useTheme } from '@mui/material';
+import { Menu as MenuIcon, DarkMode, LightMode, Logout, Settings, Dashboard, NotificationsNone, Apps as AppsIcon } from '@mui/icons-material';
+import { useNavigate, useParams, Outlet, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import useAppStore from '../store';
 import AutoSyncButton from '../components/AutoSyncButton';
+import { useNotification } from '../contexts/NotificationContext';
 
 // Panels
 import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
 import ResizablePanels from '../components/ResizablePanels';
+import DemoLeftPanel from '../components/DemoLeftPanel';
+
+// Add proper type definitions for the NavLink component
+interface NavLinkProps {
+  to: string;
+  label: string;
+  icon: React.ReactNode;
+  onClick?: () => void;
+}
 
 // Add a custom NavLink component with loading indicator
-const NavLink = ({ to, label, icon, onClick }) => {
+const NavLink = ({ to, label, icon, onClick }: NavLinkProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   
-  const handleNavigation = (e) => {
+  const handleNavigation = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setLoading(true);
     
@@ -56,10 +66,13 @@ const NavLink = ({ to, label, icon, onClick }) => {
 };
 
 const MainLayout = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
   const { signOut, user } = useAuth();
+  const { showNotification } = useNotification();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
 
   // Use individual selectors for each state value to prevent infinite re-renders
   const isLeftPanelOpen = useAppStore((state) => state.isLeftPanelOpen);
@@ -84,19 +97,27 @@ const MainLayout = () => {
     setSelectedFile(null);
   }, [selectedProjectId, setSelectedFile]);
 
+  // Open user menu
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
+  
+  // Close user menu
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
+  
+  // Handle user logout
   const handleLogout = async () => {
-    handleMenuClose();
-    await signOut();
-    setSelectedProject(null);
-    navigate('/login');
+    try {
+      await signOut();
+      handleMenuClose();
+      navigate('/auth/login');
+      showNotification('Successfully logged out', 'success');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      showNotification('Failed to log out. Please try again.', 'error');
+    }
   };
 
   return (
@@ -154,11 +175,14 @@ const MainLayout = () => {
             <Typography
               variant="h6"
               noWrap
-              component="div"
+              component={RouterLink}
+              to="/"
               sx={{ 
                 flexGrow: 0, 
                 display: { xs: 'none', sm: 'block' },
                 fontWeight: 600,
+                textDecoration: 'none',
+                color: 'primary.main',
                 background: theme => theme.palette.mode === 'dark'
                   ? 'linear-gradient(90deg, #60A5FA, #A78BFA)'
                   : 'linear-gradient(90deg, #1D4ED8, #7C3AED)',
@@ -208,92 +232,97 @@ const MainLayout = () => {
               <AutoSyncButton variant="icon" showCount />
             </Box>
             
-            <IconButton 
-              color="inherit" 
-              onClick={toggleTheme}
-              sx={{ 
-                mx: 1,
-                borderRadius: 1.5,
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  transform: 'translateY(-1px)',
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(255, 255, 255, 0.05)'
-                    : 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-            >
-              {themeMode === 'dark' ? <LightMode /> : <DarkMode />}
-            </IconButton>
-            
-            <IconButton
-              color="inherit"
-              onClick={handleMenuOpen}
-              sx={{ 
-                ml: 1,
-                borderRadius: '50%',
-                transition: 'all 0.2s ease',
-                border: '2px solid transparent',
-                '&:hover': {
-                  borderColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(255, 255, 255, 0.1)'
-                    : 'rgba(0, 0, 0, 0.05)'
-                }
-              }}
-            >
-              <Avatar
+            <Tooltip title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}>
+              <IconButton
+                color="inherit"
+                onClick={toggleTheme}
                 sx={{ 
-                  width: 32, 
-                  height: 32,
-                  boxShadow: theme => theme.palette.mode === 'dark'
-                    ? '0 0 0 2px rgba(255, 255, 255, 0.1)'
-                    : '0 0 0 2px rgba(0, 0, 0, 0.03)'
+                  mx: 1,
+                  borderRadius: 1.5,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateY(-1px)',
+                    backgroundColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(255, 255, 255, 0.05)'
+                      : 'rgba(0, 0, 0, 0.04)'
+                  }
                 }}
-                src={user?.user_metadata?.avatar_url}
-                alt={user?.email?.charAt(0).toUpperCase() || 'U'}
               >
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
-              </Avatar>
-            </IconButton>
+                {themeMode === 'dark' ? <LightMode /> : <DarkMode />}
+              </IconButton>
+            </Tooltip>
             
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              PaperProps={{
-                elevation: 2,
-                sx: {
-                  mt: 1.5,
-                  overflow: 'visible',
-                  borderRadius: 2,
-                  '&:before': {
-                    content: '""',
-                    display: 'block',
-                    position: 'absolute',
-                    top: 0,
-                    right: 14,
-                    width: 10,
-                    height: 10,
-                    bgcolor: 'background.paper',
-                    transform: 'translateY(-50%) rotate(45deg)',
-                    zIndex: 0,
-                  },
-                }
-              }}
-            >
-              <MenuItem onClick={handleLogout} sx={{ py: 1.5, borderRadius: 1, mx: 0.5 }}>
-                <Logout fontSize="small" sx={{ mr: 1.5, opacity: 0.7 }} />
-                Logout
-              </MenuItem>
-            </Menu>
+            {/* User avatar and menu */}
+            {user ? (
+              <>
+                <IconButton
+                  onClick={handleMenuOpen}
+                  size="small"
+                  sx={{ ml: 2 }}
+                  aria-controls={menuOpen ? 'account-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={menuOpen ? 'true' : undefined}
+                >
+                  <Avatar 
+                    sx={{ width: 36, height: 36 }}
+                    src={user.avatar_url || undefined}
+                    alt={user.full_name || user.email}
+                  >
+                    {(user.full_name || user.email || 'U')[0].toUpperCase()}
+                  </Avatar>
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  id="account-menu"
+                  open={menuOpen}
+                  onClose={handleMenuClose}
+                  onClick={handleMenuClose}
+                  PaperProps={{
+                    elevation: 3,
+                    sx: {
+                      overflow: 'visible',
+                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
+                      minWidth: 200,
+                      mt: 1.5,
+                      '& .MuiMenuItem-root': {
+                        px: 2,
+                        py: 1,
+                      },
+                    },
+                  }}
+                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                >
+                  <Box sx={{ px: 2, py: 1 }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                      {user.full_name || 'User'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {user.email}
+                    </Typography>
+                  </Box>
+                  <Divider />
+                  <MenuItem onClick={() => navigate('/settings')}>
+                    <Settings fontSize="small" sx={{ mr: 2 }} />
+                    Settings
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <Logout fontSize="small" sx={{ mr: 2 }} />
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button
+                component={RouterLink}
+                to="/auth/login"
+                variant="contained"
+                color="primary"
+                sx={{ ml: 2 }}
+              >
+                Sign In
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
@@ -327,9 +356,15 @@ const MainLayout = () => {
               : 'rgba(0, 0, 0, 0.03)'}`,
           }}
         >
-          <ResizablePanels initialSizes={[20, 60, 20]} minSizes={[10, 30, 10]}>
-            <LeftPanel />
-            <CenterPanelWrapper />
+          <ResizablePanels>
+            {/* Use demo left panel if user is in demo mode, otherwise use regular LeftPanel */}
+            {user?.id === '00000000-0000-0000-0000-000000000000' ? 
+              <DemoLeftPanel /> : 
+              <LeftPanel />
+            }
+            <CenterPanelWrapper>
+              <Outlet />
+            </CenterPanelWrapper>
             <RightPanelWrapper />
           </ResizablePanels>
         </Container>

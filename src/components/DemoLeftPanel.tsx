@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -17,6 +18,10 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
+  Switch,
+  FormControl,
+  FormControlLabel,
 } from '@mui/material';
 import { 
   Home as HomeIcon,
@@ -41,19 +46,21 @@ interface DemoLeftPanelProps {
 }
 
 const DemoLeftPanel: React.FC<DemoLeftPanelProps> = ({ isCollapsed = false }) => {
+  const navigate = useNavigate();
   const user = useAppStore(state => state.user);
   const selectedProjectId = useAppStore(state => state.selectedProjectId);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   
   // Navigation items
   const navItems = [
-    { icon: <HomeIcon />, text: 'Home', path: '/', onClick: () => console.log('Navigate to Home') },
-    { icon: <DashboardIcon />, text: 'Dashboard', path: '/dashboard', onClick: () => console.log('Navigate to Dashboard') },
-    { icon: <InboxIcon />, text: 'Messages', path: '/messages', onClick: () => console.log('Navigate to Messages') },
-    { icon: <SettingsIcon />, text: 'Settings', path: '/settings', onClick: () => console.log('Navigate to Settings') },
-    { icon: <HelpIcon />, text: 'Help', path: '/help', onClick: () => window.open('https://docs.example.com', '_blank') },
+    { icon: <HomeIcon />, text: 'Home', path: '/', onClick: () => navigate('/') },
+    { icon: <DashboardIcon />, text: 'Dashboard', path: '/dashboard', onClick: () => navigate('/') },
+    { icon: <InboxIcon />, text: 'Messages', path: '/messages', onClick: () => alert('Messages feature coming soon!') },
+    { icon: <SettingsIcon />, text: 'Settings', path: '/settings', onClick: () => setSettingsDialogOpen(true) },
+    { icon: <HelpIcon />, text: 'Help', path: '/help', onClick: () => window.open('https://github.com/clarity-hub-app/clarity-hub/wiki', '_blank') },
   ];
   
   // If panel is collapsed, show only icons
@@ -102,7 +109,7 @@ const DemoLeftPanel: React.FC<DemoLeftPanelProps> = ({ isCollapsed = false }) =>
         width: '100%',
         overflow: 'hidden',
         bgcolor: 'background.paper',
-        p: 2,
+        p: 1,
       }}
       data-test="left-panel"
       data-testid="left-panel"
@@ -114,8 +121,8 @@ const DemoLeftPanel: React.FC<DemoLeftPanelProps> = ({ isCollapsed = false }) =>
           sx={{
             display: 'flex',
             alignItems: 'center',
-            p: 2,
-            mb: 2,
+            p: 1.5,
+            mb: 1.5,
             borderRadius: 2,
             bgcolor: theme => theme.palette.mode === 'dark' 
               ? 'rgba(255, 255, 255, 0.05)'
@@ -160,11 +167,11 @@ const DemoLeftPanel: React.FC<DemoLeftPanelProps> = ({ isCollapsed = false }) =>
             </InputAdornment>
           ),
         }}
-        sx={{ mb: 2 }}
+        sx={{ mb: 1.5 }}
       />
       
       {/* Action Buttons */}
-      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+      <Box sx={{ display: 'flex', gap: 1, mb: 1.5 }}>
         <Button
           fullWidth
           variant="contained"
@@ -192,7 +199,7 @@ const DemoLeftPanel: React.FC<DemoLeftPanelProps> = ({ isCollapsed = false }) =>
           overflow: 'hidden',
           border: '1px solid',
           borderColor: 'divider',
-          mb: 2,
+          mb: 1.5,
         }}
       >
         <List disablePadding>
@@ -212,11 +219,14 @@ const DemoLeftPanel: React.FC<DemoLeftPanelProps> = ({ isCollapsed = false }) =>
         </List>
       </Paper>
       
-      {/* Projects Section */}
-      <DemoProjectsList searchQuery={searchQuery} />
-      
-      {/* Files Section */}
-      <DemoFilesList sx={{ mt: 2, flex: 1 }} searchQuery={searchQuery} />
+      {/* Projects and Files Section - Make scrollable */}
+      <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Projects Section */}
+        <DemoProjectsList searchQuery={searchQuery} />
+        
+        {/* Files Section */}
+        <DemoFilesList sx={{ mt: 1, flex: 1, minHeight: 0 }} searchQuery={searchQuery} />
+      </Box>
       
       {/* Create Project Dialog */}
       <CreateProjectDialog 
@@ -254,6 +264,63 @@ const DemoLeftPanel: React.FC<DemoLeftPanelProps> = ({ isCollapsed = false }) =>
         <DialogContent dividers sx={{ p: 0 }}>
           <FunctionalFileUpload />
         </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsDialogOpen}
+        onClose={() => setSettingsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+          }
+        }}
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }}>
+          Settings
+          <IconButton
+            onClick={() => setSettingsDialogOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'grey.500',
+            }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 2 }}>
+          <FormControl component="fieldset" fullWidth>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={useAppStore.getState().themeMode === 'dark'}
+                  onChange={() => useAppStore.getState().toggleTheme()}
+                  name="darkMode"
+                />
+              }
+              label="Dark Mode"
+            />
+            <FormControlLabel
+              control={<Switch defaultChecked name="notifications" />}
+              label="Enable Notifications"
+              sx={{ mt: 1 }}
+            />
+            <FormControlLabel
+              control={<Switch defaultChecked name="autoSave" />}
+              label="Auto Save"
+              sx={{ mt: 1 }}
+            />
+          </FormControl>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setSettingsDialogOpen(false)} variant="contained">
+            Done
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

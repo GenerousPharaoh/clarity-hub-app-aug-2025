@@ -177,8 +177,8 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className, searchQuery = 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          px: 2,
-          py: 1.5,
+          px: 1.5,
+          py: 1,
           bgcolor: theme => theme.palette.mode === 'dark' 
             ? 'rgba(255, 255, 255, 0.05)'
             : 'rgba(0, 0, 0, 0.02)',
@@ -215,7 +215,7 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className, searchQuery = 
       {/* Files Content */}
       <Collapse in={expanded} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Search Bar */}
-        <Box sx={{ p: 1.5 }}>
+        <Box sx={{ p: 1 }}>
           <TextField
             fullWidth
             placeholder="Search files..."
@@ -261,11 +261,11 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className, searchQuery = 
 
         {/* Advanced Filters Collapsed Panel */}
         <Collapse in={showFilters}>
-          <Box sx={{ px: 1.5, pb: 1.5 }}>
+          <Box sx={{ px: 1, pb: 1 }}>
             <Paper
               variant="outlined"
               sx={{
-                p: 1.5,
+                p: 1,
                 borderRadius: 1,
               }}
             >
@@ -292,16 +292,18 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className, searchQuery = 
           flexGrow: 1, 
           overflow: 'auto',
           borderTop: '1px solid',
-          borderTopColor: 'divider'
-        }}>
+          borderTopColor: 'divider',
+          scrollbarWidth: 'thin',
+          minHeight: 0
+        }}
           {!selectedProjectId ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
+            <Box sx={{ p: 2, textAlign: 'center' }}
               <Alert severity="info">
                 Please select a project to view files
               </Alert>
             </Box>
           ) : filteredFiles.length === 0 ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
+            <Box sx={{ p: 2, textAlign: 'center' }}
               <Typography color="text.secondary" variant="body2">
                 {(searchQuery || localSearchText) ? 'No files match your search' : 'No files in this project yet'}
               </Typography>
@@ -337,7 +339,7 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className, searchQuery = 
         {selectedProjectId && filteredFiles.length > 0 && (
           <>
             <Divider />
-            <Box sx={{ p: 1.5 }}>
+            <Box sx={{ p: 1 }}>
               <Button
                 fullWidth
                 variant="contained"

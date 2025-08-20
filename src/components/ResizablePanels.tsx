@@ -207,7 +207,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
           overflowX: 'hidden',
           overflowY: 'auto',
           flexDirection: 'column',
-          transition: isLeftPanelOpen ? 'width 0.3s ease' : 'none',
+          transition: isLeftPanelOpen ? 'width 0.2s ease' : 'none',
           borderRight: 1,
           borderColor: 'divider',
           flexShrink: 0,
@@ -225,7 +225,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: theme => theme.zIndex.drawer + 1,
-          transition: isLeftPanelOpen ? 'left 0.3s ease' : 'none',
+          transition: isLeftPanelOpen ? 'left 0.2s ease' : 'none',
         }}
       >
         <IconButton
@@ -255,7 +255,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
             left: `${leftPanelPercentage}%`,
             top: 0,
             bottom: 0,
-            width: '5px',
+            width: '3px',
             backgroundColor: 'transparent',
             cursor: 'col-resize',
             zIndex: theme => theme.zIndex.drawer,
@@ -281,7 +281,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          transition: 'width 0.3s ease',
+          transition: 'width 0.2s ease',
           backgroundColor: 'background.paper',
           borderRadius: theme => theme.shape.borderRadius,
           borderLeft: isLeftPanelOpen ? 0 : 1,
@@ -300,7 +300,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
             right: `${rightPanelPercentage}%`,
             top: 0,
             bottom: 0,
-            width: '5px',
+            width: '3px',
             backgroundColor: 'transparent',
             cursor: 'col-resize',
             zIndex: theme => theme.zIndex.drawer,
@@ -325,7 +325,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: theme => theme.zIndex.drawer + 1,
-          transition: isRightPanelOpen ? 'right 0.3s ease' : 'none',
+          transition: isRightPanelOpen ? 'right 0.2s ease' : 'none',
         }}
       >
         <IconButton
@@ -356,7 +356,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
           overflowX: 'hidden',
           overflowY: 'auto',
           flexDirection: 'column',
-          transition: isRightPanelOpen ? 'width 0.3s ease' : 'none',
+          transition: isRightPanelOpen ? 'width 0.2s ease' : 'none',
           borderLeft: 1,
           borderColor: 'divider',
           flexShrink: 0,

@@ -96,8 +96,8 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className, searchQu
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          px: 2,
-          py: 1.5,
+          px: 1.5,
+          py: 1,
           bgcolor: theme => theme.palette.mode === 'dark' 
             ? 'rgba(255, 255, 255, 0.05)'
             : 'rgba(0, 0, 0, 0.02)',
@@ -133,12 +133,13 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className, searchQu
       <Collapse in={expanded}>
         <Box
           sx={{
-            maxHeight: 200,
+            maxHeight: 180,
             overflow: 'auto',
+            scrollbarWidth: 'thin',
           }}
         >
           {filteredProjects.length === 0 ? (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Box sx={{ p: 2, textAlign: 'center' }}
               <Typography variant="body2" color="text.secondary">
                 {searchQuery ? 'No projects match your search' : 'No projects yet'}
               </Typography>
@@ -151,7 +152,7 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className, searchQu
                   selected={project.id === selectedProjectId}
                   onClick={() => setSelectedProject(project.id)}
                   sx={{
-                    py: 1.5,
+                    py: 1,
                     borderLeft: project.id === selectedProjectId ? 3 : 0,
                     borderLeftColor: 'primary.main',
                     '&.Mui-selected': {
@@ -193,7 +194,7 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className, searchQu
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            p: 1,
+            p: 0.5,
           }}
         >
           <Button

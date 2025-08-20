@@ -26,13 +26,13 @@ export interface PanelState {
   resetPanelSizes: () => void;
 }
 
-const DEFAULT_LEFT_PERCENTAGE = 25;
-const DEFAULT_CENTER_PERCENTAGE = 50;
-const DEFAULT_RIGHT_PERCENTAGE = 25;
+const DEFAULT_LEFT_PERCENTAGE = 20;
+const DEFAULT_CENTER_PERCENTAGE = 60;
+const DEFAULT_RIGHT_PERCENTAGE = 20;
 
-const DEFAULT_MIN_LEFT_WIDTH = 240;
-const DEFAULT_MIN_CENTER_WIDTH = 300;
-const DEFAULT_MIN_RIGHT_WIDTH = 240;
+const DEFAULT_MIN_LEFT_WIDTH = 200;
+const DEFAULT_MIN_CENTER_WIDTH = 320;
+const DEFAULT_MIN_RIGHT_WIDTH = 200;
 
 // Load stored panel state from localStorage with validation
 const loadPanelState = () => {

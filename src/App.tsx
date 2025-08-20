@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import SimpleDemoFixProvider from './SimpleDemoFixProvider';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { CollaborationProvider } from './contexts/CollaborationContext';
 import useAppStore from './store';
 import ProjectLayout from './layouts/ProjectLayout';
 
@@ -202,26 +203,28 @@ export default function App() {
           <NotificationProvider>
             <SimpleDemoFixProvider />
             <AuthProvider>
-              <React.Suspense fallback={<div className="app-loading">Loading...</div>}>
-                <Routes>
-                  {/* Auth routes */}
-                  <Route path="/auth/*" element={<Auth />} />
-                  
-                  {/* Main app routes */}
-                  <Route path="/" element={<MainLayout />}>
-                    <Route index element={<Dashboard />} />
-                  </Route>
-                  
-                  {/* Project routes with specialized layout */}
-                  <Route path="/projects/:projectId/*" element={<ProjectLayout />}>
-                    <Route index element={<ProjectView />} />
-                  </Route>
-                  
-                  {/* Fallback routes */}
-                  <Route path="/not-found" element={<NotFound />} />
-                  <Route path="*" element={<Navigate to="/not-found" replace />} />
-                </Routes>
-              </React.Suspense>
+              <CollaborationProvider>
+                <React.Suspense fallback={<div className="app-loading">Loading...</div>}>
+                  <Routes>
+                    {/* Auth routes */}
+                    <Route path="/auth/*" element={<Auth />} />
+                    
+                    {/* Main app routes */}
+                    <Route path="/" element={<MainLayout />}>
+                      <Route index element={<Dashboard />} />
+                    </Route>
+                    
+                    {/* Project routes with specialized layout */}
+                    <Route path="/projects/:projectId/*" element={<ProjectLayout />}>
+                      <Route index element={<ProjectView />} />
+                    </Route>
+                    
+                    {/* Fallback routes */}
+                    <Route path="/not-found" element={<NotFound />} />
+                    <Route path="*" element={<Navigate to="/not-found" replace />} />
+                  </Routes>
+                </React.Suspense>
+              </CollaborationProvider>
             </AuthProvider>
           </NotificationProvider>
         </ErrorBoundary>

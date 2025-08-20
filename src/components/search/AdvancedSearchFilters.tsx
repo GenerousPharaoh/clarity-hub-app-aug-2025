@@ -18,7 +18,17 @@ import {
   CircularProgress,
   Alert,
   Skeleton,
+  FormControlLabel,
+  Checkbox,
+  Switch,
+  Tooltip,
+  IconButton,
 } from '@mui/material';
+import {
+  BookmarkBorder as SaveIcon,
+  FilterListOff as ClearIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import useAppStore from '../../store';
 import supabaseClient from '../../services/supabaseClient';
@@ -32,6 +42,10 @@ const AdvancedSearchFilters = () => {
   const [availableFileTypes, setAvailableFileTypes] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableEntities, setAvailableEntities] = useState<EntityOption[]>([]);
+  const [availableAuthors, setAvailableAuthors] = useState<string[]>([]);
+  const [evidenceStatuses, setEvidenceStatuses] = useState<string[]>([
+    'document', 'photo', 'video', 'audio', 'physical', 'digital', 'other'
+  ]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,6 +104,21 @@ const AdvancedSearchFilters = () => {
       if (entitiesError) throw entitiesError;
       
       setAvailableEntities(entitiesData || []);
+
+      // Fetch authors from file metadata
+      const { data: authorsData, error: authorsError } = await supabaseClient
+        .from('files')
+        .select('metadata')
+        .eq('project_id', selectedProjectId)
+        .not('metadata->author', 'is', null);
+
+      if (authorsError) throw authorsError;
+
+      const uniqueAuthors = [...new Set(
+        authorsData?.map(item => item.metadata?.author)
+          .filter(Boolean) || []
+      )];
+      setAvailableAuthors(uniqueAuthors);
     } catch (error) {
       console.error('Error fetching filter options:', error);
       setError('Failed to load filter options. Please try again.');
@@ -288,6 +317,135 @@ const AdvancedSearchFilters = () => {
           </Box>
         )}
 
+        {/* Authors */}
+        {isLoading ? (
+          <Skeleton variant="rectangular" height={56} />
+        ) : (
+          <Autocomplete
+            multiple
+            size="small"
+            options={availableAuthors}
+            value={searchFilters.authors || []}
+            onChange={(_, newValue) => {
+              setSearchFilters({ authors: newValue });
+            }}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  label={option}
+                  size="small"
+                  {...getTagProps({ index })}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Authors"
+                placeholder="Select authors"
+              />
+            )}
+          />
+        )}
+
+        {/* Evidence Status */}
+        {isLoading ? (
+          <Skeleton variant="rectangular" height={56} />
+        ) : (
+          <Autocomplete
+            multiple
+            size="small"
+            options={evidenceStatuses}
+            value={searchFilters.evidenceStatus || []}
+            onChange={(_, newValue) => {
+              setSearchFilters({ evidenceStatus: newValue });
+            }}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  label={option}
+                  size="small"
+                  color="primary"
+                  {...getTagProps({ index })}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Evidence Type"
+                placeholder="Select evidence types"
+              />
+            )}
+          />
+        )}
+
+        {/* Advanced Options */}
+        <Box>
+          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+            Advanced Options
+          </Typography>
+          <Stack spacing={1}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={searchFilters.includePrivileged || false}
+                  onChange={(e) => setSearchFilters({ includePrivileged: e.target.checked })}
+                />
+              }
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="body2">Include Privileged Documents</Typography>
+                  <Tooltip title="Include attorney-client privileged documents in search results">
+                    <InfoIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                  </Tooltip>
+                </Box>
+              }
+            />
+            
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={searchFilters.includeWorkProduct || false}
+                  onChange={(e) => setSearchFilters({ includeWorkProduct: e.target.checked })}
+                />
+              }
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography variant="body2">Include Work Product</Typography>
+                  <Tooltip title="Include attorney work product documents in search results">
+                    <InfoIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                  </Tooltip>
+                </Box>
+              }
+            />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={searchFilters.exactMatch || false}
+                  onChange={(e) => setSearchFilters({ exactMatch: e.target.checked })}
+                />
+              }
+              label="Exact phrase matching"
+            />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  size="small"
+                  checked={searchFilters.caseSensitive || false}
+                  onChange={(e) => setSearchFilters({ caseSensitive: e.target.checked })}
+                />
+              }
+              label="Case sensitive search"
+            />
+          </Stack>
+        </Box>
+
         {/* Date Range */}
         <Box>
           <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
@@ -347,8 +505,14 @@ const AdvancedSearchFilters = () => {
         {((searchFilters.fileTypes?.length || 0) > 0 || 
           (searchFilters.tags?.length || 0) > 0 || 
           (searchFilters.entities?.length || 0) > 0 || 
+          (searchFilters.authors?.length || 0) > 0 ||
+          (searchFilters.evidenceStatus?.length || 0) > 0 ||
           searchFilters.dateFrom || 
-          searchFilters.dateTo) && (
+          searchFilters.dateTo ||
+          searchFilters.includePrivileged ||
+          searchFilters.includeWorkProduct ||
+          searchFilters.exactMatch ||
+          searchFilters.caseSensitive) && (
           <Box sx={{ mt: 1 }}>
             <Divider sx={{ my: 1 }} />
             <Typography variant="caption" color="text.secondary">
@@ -379,6 +543,22 @@ const AdvancedSearchFilters = () => {
                   color="primary"
                 />
               )}
+              {(searchFilters.authors?.length || 0) > 0 && (
+                <Chip 
+                  size="small" 
+                  label={`${searchFilters.authors?.length} authors`} 
+                  variant="outlined" 
+                  color="secondary"
+                />
+              )}
+              {(searchFilters.evidenceStatus?.length || 0) > 0 && (
+                <Chip 
+                  size="small" 
+                  label={`${searchFilters.evidenceStatus?.length} evidence types`} 
+                  variant="outlined" 
+                  color="success"
+                />
+              )}
               {searchFilters.dateFrom && (
                 <Chip 
                   size="small" 
@@ -393,6 +573,38 @@ const AdvancedSearchFilters = () => {
                   label={`To: ${new Date(searchFilters.dateTo).toLocaleDateString()}`} 
                   variant="outlined" 
                   color="primary"
+                />
+              )}
+              {searchFilters.includePrivileged && (
+                <Chip 
+                  size="small" 
+                  label="Including Privileged" 
+                  variant="outlined" 
+                  color="warning"
+                />
+              )}
+              {searchFilters.includeWorkProduct && (
+                <Chip 
+                  size="small" 
+                  label="Including Work Product" 
+                  variant="outlined" 
+                  color="warning"
+                />
+              )}
+              {searchFilters.exactMatch && (
+                <Chip 
+                  size="small" 
+                  label="Exact Match" 
+                  variant="outlined" 
+                  color="info"
+                />
+              )}
+              {searchFilters.caseSensitive && (
+                <Chip 
+                  size="small" 
+                  label="Case Sensitive" 
+                  variant="outlined" 
+                  color="info"
                 />
               )}
             </Stack>

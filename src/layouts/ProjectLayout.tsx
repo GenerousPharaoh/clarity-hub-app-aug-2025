@@ -8,6 +8,7 @@ import ResizablePanels from '../components/ResizablePanels';
 import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
+import { CollaborationDashboard } from '../components/collaboration';
 
 export default function ProjectLayout() {
   const theme = useTheme();
@@ -163,13 +164,19 @@ export default function ProjectLayout() {
             {error}
           </Box>
         ) : (
-          <ResizablePanels>
-            <LeftPanel />
-            <CenterPanelWrapper>
-              <Outlet />
-            </CenterPanelWrapper>
-            <RightPanelWrapper />
-          </ResizablePanels>
+          <>
+            <ResizablePanels>
+              <LeftPanel />
+              <CenterPanelWrapper>
+                <Outlet />
+              </CenterPanelWrapper>
+              <RightPanelWrapper />
+            </ResizablePanels>
+            <CollaborationDashboard
+              projectId={projectId!}
+              compact={isMobile}
+            />
+          </>
         )}
       </Box>
     </Box>

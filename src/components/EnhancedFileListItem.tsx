@@ -57,9 +57,9 @@ interface EnhancedFileListItemProps {
 // Styled components for enhanced visuals
 const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  margin: '4px 0',
+  margin: '2px 0',
   transition: 'all 0.2s ease',
-  padding: '8px 12px',
+  padding: '6px 8px',
   '&:hover': {
     backgroundColor: theme.palette.mode === 'dark' 
       ? 'rgba(255, 255, 255, 0.08)' 
@@ -211,8 +211,8 @@ const EnhancedFileListItem: React.FC<EnhancedFileListItemProps> = ({
           <Avatar
             variant="rounded"
             sx={{
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               bgcolor: 'background.paper',
               boxShadow: 1,
               display: 'flex',

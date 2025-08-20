@@ -4,7 +4,8 @@ import { useParams } from 'react-router-dom';
 import useAppStore from '../store';
 import supabaseClient from '../services/supabaseClient';
 import { Editor } from '@tinymce/tinymce-react';
-import { FileUpload, Delete, ContentCopy, NoteAdd } from '@mui/icons-material';
+import { FileUpload, Delete, ContentCopy, NoteAdd, Gavel } from '@mui/icons-material';
+import { LegalCaseManager } from '../components/legal';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -191,6 +192,7 @@ export default function ProjectView() {
           <Tab label="Workpad" />
           <Tab label="Timeline" />
           <Tab label="Summary" />
+          <Tab icon={<Gavel />} label="Legal Management" iconPosition="start" />
         </Tabs>
       </Box>
       
@@ -254,6 +256,11 @@ export default function ProjectView() {
         <Typography variant="body1">
           Project summary will be implemented here.
         </Typography>
+      </TabPanel>
+      
+      {/* Legal Management Tab */}
+      <TabPanel value={activeTab} index={3}>
+        {projectId && <LegalCaseManager projectId={projectId} />}
       </TabPanel>
     </Box>
   );

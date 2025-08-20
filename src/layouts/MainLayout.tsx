@@ -143,9 +143,9 @@ const MainLayout = () => {
           zIndex: theme => theme.zIndex.drawer + 1,
           backdropFilter: 'blur(12px)',
           background: theme => theme.palette.mode === 'dark' 
-            ? 'rgba(31, 41, 55, 0.7)'
-            : 'rgba(255, 255, 255, 0.8)',
-          color: 'text.primary',
+            ? 'linear-gradient(135deg, #1a237e 0%, #3949ab 100%)'
+            : 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+          color: 'white',
           borderBottom: '1px solid',
           borderColor: theme => theme.palette.mode === 'dark' 
             ? 'rgba(255, 255, 255, 0.08)'
@@ -191,7 +191,7 @@ const MainLayout = () => {
                 mr: 2
               }}
             >
-              Clarity Hub
+              CLARITY HUB PRO - LEGAL CASE MANAGEMENT
             </Typography>
           </Box>
           

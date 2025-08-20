@@ -11,7 +11,7 @@ import { useNotification } from '../contexts/NotificationContext';
 import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
-import ResizablePanels from '../components/ProfessionalPanels';
+import LegalCaseNavigator from '../components/LegalCaseNavigator';
 import DemoLeftPanel from '../components/DemoLeftPanel';
 
 // Add proper type definitions for the NavLink component
@@ -191,7 +191,7 @@ const MainLayout = () => {
                 mr: 2
               }}
             >
-              CLARITY HUB PRO - LEGAL CASE MANAGEMENT
+              LEGAL CASE MANAGER PRO
             </Typography>
           </Box>
           
@@ -207,21 +207,9 @@ const MainLayout = () => {
             }}
           >
             <NavLink
-              to="/dashboard"
-              label="Dashboard"
+              to="/"
+              label="Cases Dashboard"
               icon={<Dashboard fontSize="small" />}
-            />
-            
-            <NavLink
-              to="/notifications"
-              label="Notifications"
-              icon={<NotificationsNone fontSize="small" />}
-            />
-            
-            <NavLink
-              to="/settings"
-              label="Settings"
-              icon={<Settings fontSize="small" />}
             />
           </Box>
           
@@ -302,10 +290,6 @@ const MainLayout = () => {
                     </Typography>
                   </Box>
                   <Divider />
-                  <MenuItem onClick={() => navigate('/settings')}>
-                    <Settings fontSize="small" sx={{ mr: 2 }} />
-                    Settings
-                  </MenuItem>
                   <MenuItem onClick={handleLogout}>
                     <Logout fontSize="small" sx={{ mr: 2 }} />
                     Logout
@@ -356,17 +340,30 @@ const MainLayout = () => {
               : 'rgba(0, 0, 0, 0.03)'}`,
           }}
         >
-          <ResizablePanels>
-            {/* Use demo left panel if user is in demo mode, otherwise use regular LeftPanel */}
-            {user?.id === '00000000-0000-0000-0000-000000000000' ? 
-              <DemoLeftPanel /> : 
-              <LeftPanel />
+          <LegalCaseNavigator
+            leftPanel={
+              /* Use demo left panel if user is in demo mode, otherwise use regular LeftPanel */
+              user?.id === '00000000-0000-0000-0000-000000000000' ? 
+                <DemoLeftPanel /> : 
+                <LeftPanel />
             }
-            <CenterPanelWrapper>
-              <Outlet />
-            </CenterPanelWrapper>
-            <RightPanelWrapper />
-          </ResizablePanels>
+            centerPanel={
+              <CenterPanelWrapper>
+                <Outlet />
+              </CenterPanelWrapper>
+            }
+            rightPanel={<RightPanelWrapper />}
+            leftPanelConfig={{
+              defaultWidth: 300,
+              minWidth: 200,
+              maxWidth: 500
+            }}
+            rightPanelConfig={{
+              defaultWidth: 400,
+              minWidth: 300,
+              maxWidth: 600
+            }}
+          />
         </Container>
       </Box>
 

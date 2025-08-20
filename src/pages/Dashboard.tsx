@@ -86,7 +86,7 @@ export default function Dashboard() {
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Dashboard
+          Legal Case Management Dashboard
         </Typography>
         
         <Button
@@ -94,7 +94,7 @@ export default function Dashboard() {
           startIcon={<AddIcon />}
           onClick={() => setProjectDialogOpen(true)}
         >
-          New Project
+          New Legal Case
         </Button>
       </Box>
       
@@ -143,7 +143,7 @@ export default function Dashboard() {
                     size="small" 
                     onClick={() => handleOpenProject(project.id)}
                   >
-                    Open Project
+                    Open Case
                   </Button>
                 </CardActions>
               </Card>
@@ -153,32 +153,33 @@ export default function Dashboard() {
       ) : (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" gutterBottom>
-            No projects yet
+            No legal cases yet
           </Typography>
           <Typography variant="body1" color="text.secondary" paragraph>
-            Create your first project to get started with Clarity Hub
+            Create your first legal case to start managing documents with our three-panel citation system
           </Typography>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setProjectDialogOpen(true)}
           >
-            Create Project
+            Create Legal Case
           </Button>
         </Paper>
       )}
       
-      {/* New Project Dialog */}
+      {/* New Legal Case Dialog */}
       <Dialog open={isProjectDialogOpen} onClose={() => setProjectDialogOpen(false)}>
-        <DialogTitle>Create New Project</DialogTitle>
+        <DialogTitle>Create New Legal Case</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter a name for your new project. You can organize your files and collaborate with others.
+            Enter a name for your new legal case. You'll be able to upload documents, create citations, and manage evidence using our three-panel workflow.
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
-            label="Project Name"
+            label="Case Name"
+            placeholder="e.g., Smith v. Jones Contract Dispute"
             fullWidth
             variant="outlined"
             value={newProjectName}
@@ -192,7 +193,7 @@ export default function Dashboard() {
             variant="contained" 
             disabled={!newProjectName.trim() || loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Create Project"}
+            {loading ? <CircularProgress size={24} /> : "Create Legal Case"}
           </Button>
         </DialogActions>
       </Dialog>

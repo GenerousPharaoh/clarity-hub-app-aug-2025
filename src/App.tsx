@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline, GlobalStyles, Button, Box } from '@mui/material';
+import { CssBaseline, Button, Box } from '@mui/material';
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import getTheme from './theme';
+import { ProfessionalThemeProvider, ThemeModeToggle } from './contexts/ThemeContext';
+import ProfessionalGlobalStyles from './theme/GlobalStyles';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
@@ -37,11 +38,6 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
-  // Get theme mode from store
-  const themeMode = useAppStore((state) => state.themeMode);
-  
-  // Create theme based on selected mode
-  const theme = React.useMemo(() => getTheme(themeMode), [themeMode]);
   
   // Debug mode state - enable in demo mode
   const [debugMode, setDebugMode] = React.useState(true);
@@ -125,52 +121,15 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
   
-  // Global styles for app
-  const globalStyles = (
-    <GlobalStyles 
-      styles={{
-        '#root': {
-          height: '100vh',
-          width: '100vw',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        },
-        // Prevent iOS overscroll/bounce effect
-        'html, body': {
-          overscrollBehavior: 'none',
-          height: '100vh',
-          width: '100vw',
-          margin: 0,
-          padding: 0,
-          overflow: 'hidden',
-        },
-        // Improved scrollbars
-        '::-webkit-scrollbar': {
-          width: '8px',
-          height: '8px',
-        },
-        '::-webkit-scrollbar-track': {
-          background: theme.palette.mode === 'dark' ? '#2d2d2d' : '#f1f1f1',
-        },
-        '::-webkit-scrollbar-thumb': {
-          background: theme.palette.mode === 'dark' ? '#555' : '#c1c1c1',
-          borderRadius: '4px',
-        },
-        '::-webkit-scrollbar-thumb:hover': {
-          background: theme.palette.mode === 'dark' ? '#777' : '#a8a8a8',
-        },
-      }} 
-    />
-  );
+
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
+      <ProfessionalThemeProvider defaultMode="system">
         <CssBaseline />
-        {globalStyles}
+        <ProfessionalGlobalStyles />
         
-        {/* Debug mode reset button */}
+        {/* Debug mode controls */}
         {debugMode && (
           <Box 
             sx={{ 
@@ -183,6 +142,7 @@ export default function App() {
               gap: 1,
             }}
           >
+            <ThemeModeToggle size="medium" />
             <Button
               variant="contained"
               color="warning"
@@ -228,7 +188,7 @@ export default function App() {
             </AuthProvider>
           </NotificationProvider>
         </ErrorBoundary>
-      </ThemeProvider>
+      </ProfessionalThemeProvider>
     </QueryClientProvider>
   );
 }

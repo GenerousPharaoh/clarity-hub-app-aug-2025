@@ -15,7 +15,11 @@ import {
   EvidenceRecord,
   LegalDeadline,
   DocumentTemplate,
-  ChainOfCustodyEntry
+  ChainOfCustodyEntry,
+  Exhibit,
+  ExhibitFile,
+  CitationHistory,
+  ExhibitLinkActivation
 } from '../types';
 import { createPanelSlice, PanelState } from './panelSlice';
 
@@ -117,6 +121,40 @@ export interface AppState extends PanelState {
   addDocumentTemplate: (template: DocumentTemplate) => void;
   updateDocumentTemplate: (id: string, updates: Partial<DocumentTemplate>) => void;
   deleteDocumentTemplate: (id: string) => void;
+
+  // Exhibit Management state
+  exhibits: Exhibit[];
+  citationHistory: CitationHistory[];
+  selectedExhibitId: string | null;
+  exhibitLinkActivation: ExhibitLinkActivation | null;
+
+  // Exhibit Management actions
+  setExhibits: (exhibits: Exhibit[]) => void;
+  addExhibit: (exhibit: Exhibit) => void;
+  updateExhibit: (id: string, updates: Partial<Exhibit>) => void;
+  deleteExhibit: (id: string) => void;
+  setSelectedExhibit: (id: string | null) => void;
+  
+  // File-to-Exhibit mapping
+  assignFileToExhibit: (fileId: string, exhibitId: string, isPrimary?: boolean) => void;
+  removeFileFromExhibit: (fileId: string, exhibitId: string) => void;
+  createExhibitFromFile: (fileId: string, exhibitId: string, title?: string) => void;
+  
+  // Auto-detection utilities
+  detectExhibitIdFromFilename: (filename: string) => string | null;
+  getNextExhibitId: () => string;
+  
+  // Citation Navigation
+  setCitationHistory: (history: CitationHistory[]) => void;
+  addCitationToHistory: (citation: CitationHistory) => void;
+  setExhibitLinkActivation: (linkActivation: ExhibitLinkActivation | null) => void;
+  navigateToExhibit: (exhibitReference: string, sourceContext?: string) => void;
+  
+  // Exhibit Utilities
+  getExhibitByReference: (reference: string) => Exhibit | null;
+  getFilesByExhibit: (exhibitId: string) => File[];
+  getExhibitFiles: (exhibitId: string) => ExhibitFile[];
+  generateCitationReference: (exhibitId: string, page?: number) => string;
 }
 
 const defaultSearchFilters: SearchFilters = {
@@ -228,6 +266,12 @@ export const useAppStore = create<AppState>()(
         evidenceRecords: [],
         legalDeadlines: [],
         documentTemplates: [],
+        
+        // Exhibit Management state
+        exhibits: [],
+        citationHistory: [],
+        selectedExhibitId: null,
+        exhibitLinkActivation: null,
         
         // Legal Case Management actions
         setLegalCases: (cases) => a[0]({ legalCases: cases }),
@@ -342,6 +386,228 @@ export const useAppStore = create<AppState>()(
         deleteDocumentTemplate: (id) => a[0]((state) => ({
           documentTemplates: state.documentTemplates.filter((template) => template.id !== id),
         })),
+        
+        // Exhibit Management actions
+        setExhibits: (exhibits) => a[0]({ exhibits }),
+        addExhibit: (exhibit) => a[0]((state) => ({
+          exhibits: [...state.exhibits, exhibit]
+        })),
+        updateExhibit: (id, updates) => a[0]((state) => ({
+          exhibits: state.exhibits.map((exhibit) => 
+            exhibit.id === id ? { ...exhibit, ...updates } : exhibit
+          ),
+        })),
+        deleteExhibit: (id) => a[0]((state) => ({
+          exhibits: state.exhibits.filter((exhibit) => exhibit.id !== id),
+          selectedExhibitId: state.selectedExhibitId === id ? null : state.selectedExhibitId,
+        })),
+        setSelectedExhibit: (id) => a[0]({ selectedExhibitId: id }),
+        
+        // File-to-Exhibit mapping
+        assignFileToExhibit: (fileId, exhibitId, isPrimary = false) => a[0]((state) => {
+          const exhibit = state.exhibits.find(e => e.exhibit_id === exhibitId);
+          if (exhibit) {
+            const existingFile = exhibit.files.find(f => f.file_id === fileId);
+            if (!existingFile) {
+              const newExhibitFile: ExhibitFile = {
+                id: crypto.randomUUID(),
+                file_id: fileId,
+                exhibit_id: exhibitId,
+                is_primary: isPrimary,
+                created_at: new Date().toISOString(),
+              };
+              
+              return {
+                exhibits: state.exhibits.map(e => 
+                  e.id === exhibit.id 
+                    ? { ...e, files: [...e.files, newExhibitFile] }
+                    : e
+                )
+              };
+            }
+          }
+          return {};
+        }),
+        
+        removeFileFromExhibit: (fileId, exhibitId) => a[0]((state) => ({
+          exhibits: state.exhibits.map(exhibit => 
+            exhibit.exhibit_id === exhibitId
+              ? { ...exhibit, files: exhibit.files.filter(f => f.file_id !== fileId) }
+              : exhibit
+          )
+        })),
+        
+        createExhibitFromFile: (fileId, exhibitId, title) => a[0]((state) => {
+          const file = state.files.find(f => f.id === fileId);
+          if (file && !state.exhibits.find(e => e.exhibit_id === exhibitId)) {
+            const newExhibit: Exhibit = {
+              id: crypto.randomUUID(),
+              exhibit_id: exhibitId,
+              project_id: file.project_id,
+              title: title || `Exhibit ${exhibitId}`,
+              exhibit_type: file.file_type.includes('image') ? 'photo' : 
+                           file.file_type.includes('video') ? 'video' :
+                           file.file_type.includes('audio') ? 'audio' : 'document',
+              is_key_evidence: false,
+              files: [{
+                id: crypto.randomUUID(),
+                file_id: fileId,
+                exhibit_id: exhibitId,
+                is_primary: true,
+                created_at: new Date().toISOString(),
+              }],
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              owner_id: file.owner_id,
+            };
+            
+            return {
+              exhibits: [...state.exhibits, newExhibit],
+              // Also update the file's exhibit_id
+              files: state.files.map(f => 
+                f.id === fileId ? { ...f, exhibit_id: exhibitId } : f
+              )
+            };
+          }
+          return {};
+        }),
+        
+        // Auto-detection utilities
+        detectExhibitIdFromFilename: (filename: string) => {
+          // Patterns to match: "1-A:", "2B:", "15-C:", etc.
+          const patterns = [
+            /^(\d+[A-Z])/i,           // "1A", "2B", "15C"
+            /^(\d+-[A-Z])/i,          // "1-A", "2-B", "15-C" 
+            /^(\d+\s*[A-Z])/i,        // "1 A", "2 B", "15 C"
+          ];
+          
+          for (const pattern of patterns) {
+            const match = filename.match(pattern);
+            if (match) {
+              return match[1].replace(/[-\s]/g, '').toUpperCase();
+            }
+          }
+          return null;
+        },
+        
+        getNextExhibitId: () => {
+          const state = a[0]();
+          const existingIds = state.exhibits.map(e => e.exhibit_id);
+          
+          // Generate next sequential ID: 1A, 2A, 3A, etc.
+          let nextNumber = 1;
+          let nextLetter = 'A';
+          
+          while (existingIds.includes(`${nextNumber}${nextLetter}`)) {
+            if (nextLetter === 'Z') {
+              nextNumber++;
+              nextLetter = 'A';
+            } else {
+              nextLetter = String.fromCharCode(nextLetter.charCodeAt(0) + 1);
+            }
+          }
+          
+          return `${nextNumber}${nextLetter}`;
+        },
+        
+        // Citation Navigation
+        setCitationHistory: (history) => a[0]({ citationHistory: history }),
+        addCitationToHistory: (citation) => a[0]((state) => {
+          const existingIndex = state.citationHistory.findIndex(
+            c => c.exhibit_reference === citation.exhibit_reference
+          );
+          
+          if (existingIndex >= 0) {
+            // Update existing citation with new access time and count
+            return {
+              citationHistory: state.citationHistory.map((c, i) => 
+                i === existingIndex 
+                  ? { ...c, last_accessed: new Date().toISOString(), access_count: c.access_count + 1 }
+                  : c
+              )
+            };
+          } else {
+            // Add new citation to history
+            return {
+              citationHistory: [...state.citationHistory, citation]
+            };
+          }
+        }),
+        
+        setExhibitLinkActivation: (linkActivation) => a[0]({ exhibitLinkActivation: linkActivation }),
+        
+        navigateToExhibit: (exhibitReference, sourceContext = 'general') => a[0]((state) => {
+          const exhibit = state.exhibits.find(e => e.exhibit_id === exhibitReference);
+          if (exhibit && exhibit.files.length > 0) {
+            const primaryFile = exhibit.files.find(f => f.is_primary) || exhibit.files[0];
+            const targetFile = state.files.find(f => f.id === primaryFile.file_id);
+            
+            if (targetFile) {
+              // Parse page number from reference if it exists (e.g., "2B:15")
+              const [exhibitId, pageStr] = exhibitReference.split(':');
+              const targetPage = pageStr ? parseInt(pageStr, 10) : undefined;
+              
+              // Create exhibit link activation
+              const linkActivation: ExhibitLinkActivation = {
+                type: 'citation',
+                fileId: targetFile.id,
+                exhibitId: exhibit.exhibit_id,
+                exhibitReference,
+                targetPage,
+                timestamp: Date.now(),
+                navigationType: sourceContext === 'editor' ? 'citation_click' : 'exhibit_click',
+                sourceContext: sourceContext as any,
+              };
+              
+              // Add to citation history
+              const historyEntry: CitationHistory = {
+                id: crypto.randomUUID(),
+                exhibit_id: exhibit.exhibit_id,
+                exhibit_reference: exhibitReference,
+                target_file_id: targetFile.id,
+                target_page: targetPage,
+                last_accessed: new Date().toISOString(),
+                access_count: 1,
+              };
+              
+              return {
+                selectedFileId: targetFile.id,
+                exhibitLinkActivation: linkActivation,
+                linkActivation, // Also set the general linkActivation
+                citationHistory: [...state.citationHistory.filter(c => c.exhibit_reference !== exhibitReference), historyEntry],
+              };
+            }
+          }
+          return {};
+        }),
+        
+        // Exhibit Utilities
+        getExhibitByReference: (reference: string) => {
+          const state = a[0]();
+          const [exhibitId] = reference.split(':');
+          return state.exhibits.find(e => e.exhibit_id === exhibitId) || null;
+        },
+        
+        getFilesByExhibit: (exhibitId: string) => {
+          const state = a[0]();
+          const exhibit = state.exhibits.find(e => e.exhibit_id === exhibitId);
+          if (exhibit) {
+            return exhibit.files
+              .map(ef => state.files.find(f => f.id === ef.file_id))
+              .filter(Boolean) as File[];
+          }
+          return [];
+        },
+        
+        getExhibitFiles: (exhibitId: string) => {
+          const state = a[0]();
+          const exhibit = state.exhibits.find(e => e.exhibit_id === exhibitId);
+          return exhibit?.files || [];
+        },
+        
+        generateCitationReference: (exhibitId: string, page?: number) => {
+          return page ? `${exhibitId}:${page}` : exhibitId;
+        },
       }),
       {
         name: 'clarity-hub-storage',

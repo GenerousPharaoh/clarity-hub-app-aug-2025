@@ -20,10 +20,6 @@ import {
 import {
   People as PeopleIcon,
   Comment as CommentIcon,
-  Timeline as ActivityIcon,
-  Chat as ChatIcon,
-  Brush as WhiteboardIcon,
-  Security as PermissionsIcon,
   History as VersionIcon,
   Close as CloseIcon,
   Menu as MenuIcon,
@@ -33,10 +29,6 @@ import { useCollaboration } from '../../contexts/CollaborationContext';
 import UserPresenceIndicator from './presence/UserPresenceIndicator';
 import CursorTracker from './presence/CursorTracker';
 import CommentSystem from './comments/CommentSystem';
-import ActivityFeed from './activity/ActivityFeed';
-import TeamChat from './chat/TeamChat';
-import CollaborativeWhiteboard from './whiteboard/CollaborativeWhiteboard';
-import WorkspacePermissions from './workspace/WorkspacePermissions';
 import VersionControl from './versions/VersionControl';
 
 interface CollaborationDashboardProps {
@@ -136,20 +128,12 @@ const CollaborationDashboard: React.FC<CollaborationDashboardProps> = ({
       comment => new Date(comment.created_at).getTime() > fiveMinutesAgo
     ).length;
 
-    const newActivities = state.activities.filter(
-      activity => new Date(activity.created_at).getTime() > fiveMinutesAgo
-    ).length;
-
-    const newChatMessages = state.chatMessages.filter(
-      message => new Date(message.created_at).getTime() > fiveMinutesAgo
-    ).length;
-
     setUnreadCounts({
       comments: newComments,
-      activity: newActivities,
-      chat: newChatMessages,
+      activity: 0,
+      chat: 0,
     });
-  }, [state.comments, state.activities, state.chatMessages]);
+  }, [state.comments]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -168,18 +152,6 @@ const CollaborationDashboard: React.FC<CollaborationDashboardProps> = ({
 
   const tabsData = [
     {
-      label: 'Activity',
-      icon: <ActivityIcon />,
-      badge: unreadCounts.activity,
-      component: (
-        <ActivityFeed
-          projectId={projectId}
-          compact={compact}
-          autoRefresh={true}
-        />
-      ),
-    },
-    {
       label: 'Comments',
       icon: <CommentIcon />,
       badge: unreadCounts.comments,
@@ -192,32 +164,9 @@ const CollaborationDashboard: React.FC<CollaborationDashboardProps> = ({
       ) : (
         <Box sx={{ p: 2 }}>
           <Typography color="text.secondary">
-            Select a document to view comments
+            Select a document to view and add comments
           </Typography>
         </Box>
-      ),
-    },
-    {
-      label: 'Chat',
-      icon: <ChatIcon />,
-      badge: unreadCounts.chat,
-      component: (
-        <TeamChat
-          projectId={projectId}
-          compact={compact}
-          maxHeight={600}
-        />
-      ),
-    },
-    {
-      label: 'Whiteboard',
-      icon: <WhiteboardIcon />,
-      badge: 0,
-      component: (
-        <CollaborativeWhiteboard
-          projectId={projectId}
-          maxHeight={600}
-        />
       ),
     },
     {
@@ -239,18 +188,6 @@ const CollaborationDashboard: React.FC<CollaborationDashboardProps> = ({
         </Box>
       ),
     },
-    {
-      label: 'Permissions',
-      icon: <PermissionsIcon />,
-      badge: 0,
-      component: (
-        <WorkspacePermissions
-          projectId={projectId}
-          currentUserId={state.activeUsers[0]?.user_id}
-          isProjectOwner={true} // This would be determined by actual permissions
-        />
-      ),
-    },
   ];
 
   const sidebarContent = (
@@ -258,7 +195,7 @@ const CollaborationDashboard: React.FC<CollaborationDashboardProps> = ({
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar variant="dense">
           <Typography variant="h6" sx={{ flex: 1 }}>
-            Collaboration
+            Legal Document Collaboration
           </Typography>
           <UserPresenceIndicator
             maxUsers={3}
@@ -369,13 +306,9 @@ const CollaborationDashboard: React.FC<CollaborationDashboardProps> = ({
           onClick={() => setSidebarOpen(true)}
         >
           <Badge
-            badgeContent={
-              unreadCounts.comments + unreadCounts.activity + unreadCounts.chat
-            }
+            badgeContent={unreadCounts.comments}
             color="error"
-            invisible={
-              unreadCounts.comments + unreadCounts.activity + unreadCounts.chat === 0
-            }
+            invisible={unreadCounts.comments === 0}
           >
             <PeopleIcon />
           </Badge>

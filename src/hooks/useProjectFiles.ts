@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabaseClient';
 import { uploadFile, getPublicUrl } from '../services/storageService';
 import fileProcessingService from '../services/fileProcessingService';
+import useAppStore from '../store';
 
 // Define common file categories and their extensions
 const FILE_TYPES = {
@@ -114,6 +115,69 @@ export function useProjectFiles(projectId: string | null) {
  * Custom hook to upload a file to Supabase storage and add its record to the files table
  * Enhanced with progress reporting, better error handling, and AI file analysis
  */
+/**
+ * Custom hook to get file processing status and AI analysis results
+ */
+export function useFileProcessingStatus(fileId: string | null) {
+  return useQuery({
+    queryKey: ['file_processing_status', fileId],
+    queryFn: async () => {
+      if (!fileId) return null;
+      
+      const { data, error } = await supabase.functions.invoke('process-document', {
+        body: {
+          action: 'get_status',
+          file_id: fileId
+        }
+      });
+      
+      if (error) {
+        console.error('Error fetching processing status:', error);
+        throw error;
+      }
+      
+      return data?.status || null;
+    },
+    enabled: !!fileId,
+    refetchInterval: (data) => {
+      // Refetch every 5 seconds if still processing
+      return data?.processing_status === 'processing' ? 5000 : false;
+    },
+    staleTime: 10000 // Consider data stale after 10 seconds
+  });
+}
+
+/**
+ * Custom hook to get processed content and AI insights for a file
+ */
+export function useProcessedContent(fileId: string | null) {
+  return useQuery({
+    queryKey: ['processed_content', fileId],
+    queryFn: async () => {
+      if (!fileId) return null;
+      
+      const { data, error } = await supabase
+        .from('processed_content')
+        .select(`
+          *,
+          files!inner(name, metadata, content_type)
+        `)
+        .eq('file_id', fileId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') { // Not found is OK
+        console.error('Error fetching processed content:', error);
+        throw error;
+      }
+      
+      return data || null;
+    },
+    enabled: !!fileId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false
+  });
+}
+
 export function useFileUpload() {
   const queryClient = useQueryClient();
   
@@ -307,16 +371,55 @@ export function useFileUpload() {
             
             fileData = result.data;
             
-            // Trigger file processing for analysis in the background
-            setTimeout(() => {
-              fileProcessingService.processFile(
-                fileData.id,
-                fileData.storage_path,
-                fileData.file_type,
-                fileData.content_type
-              ).catch(err => {
-                console.error('Background file processing error:', err);
-              });
+            // Trigger AI processing for analysis in the background
+            setTimeout(async () => {
+              try {
+                console.log('Triggering AI processing for file:', fileData.id);
+                
+                // Queue file for AI processing using the new Edge Function
+                const { data: queueResult, error: queueError } = await supabase.functions.invoke('process-document', {
+                  body: {
+                    action: 'process_file',
+                    file_id: fileData.id,
+                    project_id: projectId
+                  }
+                });
+                
+                if (queueError) {
+                  console.error('Failed to queue file for AI processing:', queueError);
+                  // Fall back to legacy processing
+                  fileProcessingService.processFile(
+                    fileData.id,
+                    fileData.storage_path,
+                    fileData.file_type,
+                    fileData.content_type
+                  ).catch(err => {
+                    console.error('Background file processing error:', err);
+                  });
+                } else {
+                  console.log('File queued for AI processing:', queueResult);
+                  
+                  // Update query cache to reflect processing status
+                  queryClient.setQueryData(['files', projectId], (oldData: FileRecord[]) => 
+                    oldData ? oldData.map(f => 
+                      f.id === fileData.id 
+                        ? { ...f, processing_status: 'processing' }
+                        : f
+                    ) : oldData
+                  );
+                }
+              } catch (processingError) {
+                console.error('Error triggering AI processing:', processingError);
+                // Fall back to legacy processing
+                fileProcessingService.processFile(
+                  fileData.id,
+                  fileData.storage_path,
+                  fileData.file_type,
+                  fileData.content_type
+                ).catch(err => {
+                  console.error('Background file processing error:', err);
+                });
+              }
             }, 100);
             
             console.log('File record created successfully:', fileData?.id);
@@ -332,6 +435,33 @@ export function useFileUpload() {
             }
             
             throw new Error(`Failed to create file record: ${dbError.message}`);
+          }
+          
+          // Auto-detect exhibit ID from filename and create exhibit if needed
+          const detectExhibitIdFromFilename = useAppStore.getState().detectExhibitIdFromFilename;
+          const createExhibitFromFile = useAppStore.getState().createExhibitFromFile;
+          const exhibits = useAppStore.getState().exhibits.filter(e => e.project_id === projectId);
+          
+          const detectedExhibitId = detectExhibitIdFromFilename(file.name);
+          if (detectedExhibitId && fileData) {
+            console.log('Auto-detected exhibit ID from filename:', detectedExhibitId);
+            
+            // Check if exhibit already exists
+            const existingExhibit = exhibits.find(e => e.exhibit_id === detectedExhibitId);
+            
+            if (!existingExhibit) {
+              // Create new exhibit from this file
+              console.log('Creating new exhibit:', detectedExhibitId);
+              createExhibitFromFile(fileData.id, detectedExhibitId, `Exhibit ${detectedExhibitId}`);
+            } else {
+              // Assign file to existing exhibit
+              console.log('Assigning file to existing exhibit:', detectedExhibitId);
+              const assignFileToExhibit = useAppStore.getState().assignFileToExhibit;
+              assignFileToExhibit(fileData.id, detectedExhibitId, !existingExhibit.files.length);
+            }
+            
+            // Update the fileData with exhibit_id for consistency
+            fileData = { ...fileData, exhibit_id: detectedExhibitId };
           }
           
           return fileData;

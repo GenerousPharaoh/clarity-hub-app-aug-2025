@@ -29,6 +29,8 @@ import {
   DialogActions,
   Badge,
   Snackbar,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -43,6 +45,8 @@ import {
   CloudDownload as DownloadIcon,
   Label as LabelIcon,
   Sort as SortIcon,
+  Folder as ExhibitIcon,
+  InsertDriveFile as FileIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store';
@@ -58,6 +62,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { useNavigate } from 'react-router-dom';
 import ProjectList from '../../components/search/ProjectList';
 import FileList from '../../components/search/FileList';
+import ExhibitManager from '../../components/legal/ExhibitManager';
 
 // Props interface definition
 interface LeftPanelProps {
@@ -104,6 +109,7 @@ const LeftPanel = ({
   const [activeFileMenuId, setActiveFileMenuId] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<'added_at' | 'name' | 'exhibit_id'>('added_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [activeTab, setActiveTab] = useState<'files' | 'exhibits'>('files');
   
   // React Query hooks
   const { 
@@ -683,84 +689,143 @@ const LeftPanel = ({
 
         <Divider />
 
-        {/* Search bar */}
+        {/* Tabs for Files and Exhibits */}
         {selectedProjectId && (
-          <Box sx={{ p: 2 }}>
-            <TextField
-              fullWidth
-              placeholder="Search files..."
-              value={searchFilters.searchTerm || ''}
-              onChange={handleSearchTermChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {searchLoading ? (
-                      <CircularProgress size={20} />
-                    ) : searchFilters.searchTerm ? (
-                      <IconButton
-                        size="small"
-                        onClick={handleClearSearch}
-                        edge="end"
-                        aria-label="clear search"
-                      >
-                        <ClearIcon fontSize="small" />
-                      </IconButton>
-                    ) : (
-                      <IconButton
-                        size="small"
-                        onClick={() => setSearchExpanded(!searchExpanded)}
-                        edge="end"
-                        aria-label="advanced search"
-                        color={searchExpanded ? 'primary' : 'default'}
-                      >
-                        <FilterListIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </InputAdornment>
-                ),
-              }}
-              size="small"
-              sx={{ mb: 1 }}
-            />
-
-            {/* Advanced search filters */}
-            {searchExpanded && (
-              <AdvancedSearchFilters
-                filters={searchFilters}
-                onUpdateFilters={setSearchFilters}
-                onReset={resetSearchFilters}
-                projectId={selectedProjectId}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs
+              value={activeTab}
+              onChange={(_, newValue) => setActiveTab(newValue)}
+              variant="fullWidth"
+              textColor="primary"
+              indicatorColor="primary"
+            >
+              <Tab
+                icon={<FileIcon fontSize="small" />}
+                iconPosition="start"
+                label="Files"
+                value="files"
+                sx={{ minHeight: 48, textTransform: 'none' }}
               />
-            )}
+              <Tab
+                icon={<ExhibitIcon fontSize="small" />}
+                iconPosition="start"
+                label="Exhibits"
+                value="exhibits"
+                sx={{ minHeight: 48, textTransform: 'none' }}
+              />
+            </Tabs>
           </Box>
         )}
 
-        {/* Files List Section */}
+        {/* Tab Content */}
         {selectedProjectId && (
           <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <FileList
-              files={files}
-              filteredFiles={filteredFiles}
-              selectedFileId={selectedFileId}
-              loading={filesLoading}
-              uploading={isUploading}
-              uploadProgress={uploadProgress}
-              onSelectFile={handleFileSelect}
-              onDeleteFile={handleDeleteFile}
-              onDownloadFile={handleDownloadFile}
-              onRenameFile={handleOpenRenameDialog}
-              onUploadFile={handleFileUpload}
-              searchActive={!!searchFilters.searchTerm || 
-                            (searchFilters.tags && searchFilters.tags.length > 0) ||
-                            (searchFilters.fileTypes && searchFilters.fileTypes.length > 0) ||
-                            searchFilters.dateFrom || 
-                            searchFilters.dateTo}
-            />
+            {activeTab === 'files' ? (
+              <>
+                {/* Search bar for files */}
+                <Box sx={{ p: 2 }}>
+                  <TextField
+                    fullWidth
+                    placeholder="Search files..."
+                    value={searchFilters.searchTerm || ''}
+                    onChange={handleSearchTermChange}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          {searchLoading ? (
+                            <CircularProgress size={20} />
+                          ) : searchFilters.searchTerm ? (
+                            <IconButton
+                              size="small"
+                              onClick={handleClearSearch}
+                              edge="end"
+                              aria-label="clear search"
+                            >
+                              <ClearIcon fontSize="small" />
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              size="small"
+                              onClick={() => setSearchExpanded(!searchExpanded)}
+                              edge="end"
+                              aria-label="advanced search"
+                              color={searchExpanded ? 'primary' : 'default'}
+                            >
+                              <FilterListIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                        </InputAdornment>
+                      ),
+                    }}
+                    size="small"
+                    sx={{ mb: 1 }}
+                  />
+
+                  {/* Advanced search filters */}
+                  {searchExpanded && (
+                    <AdvancedSearchFilters
+                      filters={searchFilters}
+                      onUpdateFilters={setSearchFilters}
+                      onReset={resetSearchFilters}
+                      projectId={selectedProjectId}
+                    />
+                  )}
+                </Box>
+
+                {/* Files List */}
+                <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                  <FileList
+                    files={files}
+                    filteredFiles={filteredFiles}
+                    selectedFileId={selectedFileId}
+                    loading={filesLoading}
+                    uploading={isUploading}
+                    uploadProgress={uploadProgress}
+                    onSelectFile={handleFileSelect}
+                    onDeleteFile={handleDeleteFile}
+                    onDownloadFile={handleDownloadFile}
+                    onRenameFile={handleOpenRenameDialog}
+                    onUploadFile={handleFileUpload}
+                    searchActive={!!searchFilters.searchTerm || 
+                                  (searchFilters.tags && searchFilters.tags.length > 0) ||
+                                  (searchFilters.fileTypes && searchFilters.fileTypes.length > 0) ||
+                                  searchFilters.dateFrom || 
+                                  searchFilters.dateTo}
+                  />
+                </Box>
+              </>
+            ) : (
+              /* Exhibits Tab */
+              <ExhibitManager
+                projectId={selectedProjectId}
+                onExhibitClick={(exhibitId) => {
+                  // Switch to files tab to show the selected exhibit file
+                  setActiveTab('files');
+                }}
+                onCitationInsert={(exhibitId, page) => {
+                  // Create a citation insertion event that the editor can listen for
+                  const citationReference = page ? `${exhibitId}:${page}` : exhibitId;
+                  
+                  // Dispatch a custom event for citation insertion
+                  const event = new CustomEvent('insertCitation', {
+                    detail: {
+                      exhibitId,
+                      pageNumber: page,
+                      citationReference,
+                      description: `Exhibit ${exhibitId}${page ? `, page ${page}` : ''}`,
+                    }
+                  });
+                  window.dispatchEvent(event);
+                  
+                  console.log('Dispatched citation insertion event:', citationReference);
+                }}
+              />
+            )}
           </Box>
         )}
       </Box>

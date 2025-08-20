@@ -1,17 +1,22 @@
-import { useState } from 'react';
-import { Box, Typography, Tabs, Tab, Paper } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Paper } from '@mui/material';
 import useAppStore from '../../store';
 import UniversalFileViewer from '../../components/viewers/UniversalFileViewer';
 import FunctionalFileViewer from '../../components/viewers/FunctionalFileViewer';
-import AIAssistPanel from '../../components/ai/AIAssistPanel';
+import ProfessionalViewerContainer from '../../components/viewers/ProfessionalViewerContainer';
+import { supabase } from '../../lib/supabaseClient';
+import { publicUrl } from '../../utils/publicUrl';
 
 const RightPanelWrapper = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  
   // Get selected file directly from store
   const selectedFileId = useAppStore((state) => state.selectedFileId);
   const files = useAppStore((state) => state.files);
   const user = useAppStore((state) => state.user);
+  
+  // Professional viewer state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
   
   // Find the selected file details
   const selectedFile = selectedFileId 
@@ -20,11 +25,63 @@ const RightPanelWrapper = () => {
   
   // Check if we're in demo mode
   const isDemoMode = user?.id === '00000000-0000-0000-0000-000000000000';
-  
-  // Handle tab change
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
+
+  // Load file URL for professional viewer
+  useEffect(() => {
+    const loadFileUrl = async () => {
+      if (!selectedFile || isDemoMode) {
+        setFileUrl(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Generate public URL for the file
+        const directUrl = publicUrl(`files/${selectedFile.storage_path}`);
+        console.log(`[RightPanelWrapper] Generated public URL: ${directUrl}`);
+        
+        // For PDF and document files, fetch as blob and create object URL for better handling
+        if (['pdf', 'document'].includes(selectedFile.file_type)) {
+          console.log(`[RightPanelWrapper] Using blob approach for ${selectedFile.file_type}`);
+          try {
+            const response = await fetch(directUrl);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch file: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            console.log(`[RightPanelWrapper] Created blob URL from ${blob.size} bytes`);
+            setFileUrl(blobUrl);
+          } catch (blobError) {
+            console.error(`[RightPanelWrapper] Blob fetch failed, using direct URL:`, blobError);
+            setFileUrl(directUrl);
+          }
+        } else {
+          // For other file types, direct URL is fine
+          setFileUrl(directUrl);
+        }
+        
+      } catch (err) {
+        console.error('Error loading file URL:', err);
+        setError('Error loading file. Please try again later.');
+        setFileUrl(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFileUrl();
+
+    // Cleanup blob URLs on file change
+    return () => {
+      if (fileUrl && fileUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, [selectedFile, isDemoMode]);
   
   return (
     <Box
@@ -33,92 +90,29 @@ const RightPanelWrapper = () => {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        backgroundColor: theme => theme.palette.background.paper,
-        borderRadius: 1,
-        boxShadow: 1,
+        backgroundColor: '#ffffff',
+        color: '#1a1a1a',
       }}
       data-test="right-panel"
     >
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={activeTab} onChange={handleTabChange} variant="fullWidth">
-          <Tab label="Preview" />
-          <Tab label="AI Assist" />
-        </Tabs>
-      </Box>
-
-      {/* Preview Tab */}
-      <Box
-        role="tabpanel"
-        hidden={activeTab !== 0}
-        sx={{ 
-          flexGrow: 1, 
-          display: activeTab !== 0 ? 'none' : 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
-        }}
-      >
-        {selectedFile ? (
-          isDemoMode ? (
-            <FunctionalFileViewer file={selectedFile} />
-          ) : (
-            <UniversalFileViewer file={selectedFile} />
-          )
-        ) : (
-          <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: 3, 
-                backgroundColor: theme => theme.palette.mode === 'dark' 
-                  ? 'rgba(255,255,255,0.05)' 
-                  : 'rgba(0,0,0,0.02)',
-                width: '80%',
-                textAlign: 'center',
-                borderRadius: 2
-              }}
-            >
-              <Typography variant="body1" color="text.secondary">
-                Select a file to view details
-              </Typography>
-            </Paper>
-          </Box>
-        )}
-      </Box>
-
-      {/* AI Assist Tab */}
-      <Box
-        role="tabpanel"
-        hidden={activeTab !== 1}
-        sx={{ 
-          flexGrow: 1, 
-          display: activeTab !== 1 ? 'none' : 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden'
-        }}
-      >
-        {selectedFile ? (
-          <AIAssistPanel fileId={selectedFile.id} />
-        ) : (
-          <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <Paper 
-              elevation={0} 
-              sx={{ 
-                p: 3, 
-                backgroundColor: theme => theme.palette.mode === 'dark' 
-                  ? 'rgba(255,255,255,0.05)' 
-                  : 'rgba(0,0,0,0.02)',
-                width: '80%',
-                textAlign: 'center',
-                borderRadius: 2
-              }}
-            >
-              <Typography variant="body1" color="text.secondary">
-                Select a file for AI analysis
-              </Typography>
-            </Paper>
-          </Box>
-        )}
-      </Box>
+      {isDemoMode && selectedFile ? (
+        // Demo mode - use existing functional viewer
+        <Box sx={{ 
+          flex: 1, 
+          overflow: 'hidden',
+          p: 1,
+        }}>
+          <FunctionalFileViewer file={selectedFile} />
+        </Box>
+      ) : (
+        // Production mode - use professional viewers with citation linking
+        <ProfessionalViewerContainer
+          file={selectedFile}
+          fileUrl={fileUrl}
+          loading={loading}
+          error={error}
+        />
+      )}
     </Box>
   );
 };

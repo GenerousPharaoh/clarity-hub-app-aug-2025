@@ -38,10 +38,13 @@ export interface File {
 
 // Link activation type for handling deep linking to specific parts of files
 export interface LinkActivation {
-  fileId: string;
+  type?: 'citation' | 'selection' | 'general';
+  fileId: string | null;
   selectionInfo?: SelectionInfo;
   timestamp?: number;
   exhibitId?: string;
+  targetPage?: number;
+  exhibitReference?: string;
 }
 
 // Selection info for capturing text selections
@@ -331,4 +334,51 @@ export interface CaseStats {
   upcoming_deadlines: number;
   overdue_deadlines: number;
   recent_activity_count: number;
+}
+
+// Exhibit Management Types
+export interface Exhibit {
+  id: string;
+  exhibit_id: string; // e.g., "1A", "2B", "15C"
+  project_id: string;
+  title?: string;
+  description?: string;
+  exhibit_type: 'document' | 'photo' | 'video' | 'audio' | 'physical' | 'digital' | 'other';
+  date_created?: string;
+  source?: string;
+  is_key_evidence: boolean;
+  files: ExhibitFile[];
+  created_at: string;
+  updated_at: string;
+  owner_id: string;
+}
+
+export interface ExhibitFile {
+  id: string;
+  file_id: string;
+  exhibit_id: string;
+  page_number?: number;
+  section?: string;
+  is_primary: boolean; // Main file for this exhibit
+  created_at: string;
+}
+
+export interface CitationHistory {
+  id: string;
+  exhibit_id: string;
+  exhibit_reference: string; // e.g., "1A", "2B:15"
+  target_file_id?: string;
+  target_page?: number;
+  last_accessed: string;
+  access_count: number;
+}
+
+// Enhanced LinkActivation for exhibit navigation
+export interface ExhibitLinkActivation extends LinkActivation {
+  type: 'citation' | 'selection' | 'general';
+  exhibitId: string;
+  exhibitReference: string; // Full citation like "1A" or "2B:15"
+  targetPage?: number;
+  navigationType: 'exhibit_click' | 'citation_click' | 'quick_nav';
+  sourceContext?: 'editor' | 'exhibit_list' | 'breadcrumb';
 } 

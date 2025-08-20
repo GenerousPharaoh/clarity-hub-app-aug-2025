@@ -1,29 +1,17 @@
-// Collaboration Components Export Index
+// Legal Document Collaboration Components Export Index
 export { default as CollaborationDashboard } from './CollaborationDashboard';
 
-// Presence Components
+// Presence Components - for legal document collaboration
 export { default as UserPresenceIndicator } from './presence/UserPresenceIndicator';
 export { default as CursorTracker } from './presence/CursorTracker';
 
-// Comments Components
+// Comments Components - for document annotations
 export { default as CommentSystem } from './comments/CommentSystem';
 
-// Activity Components
-export { default as ActivityFeed } from './activity/ActivityFeed';
-
-// Chat Components
-export { default as TeamChat } from './chat/TeamChat';
-
-// Whiteboard Components
-export { default as CollaborativeWhiteboard } from './whiteboard/CollaborativeWhiteboard';
-
-// Workspace Components
-export { default as WorkspacePermissions } from './workspace/WorkspacePermissions';
-
-// Version Control Components
+// Version Control Components - for document versioning
 export { default as VersionControl } from './versions/VersionControl';
 
-// Collaborative Viewers
+// Collaborative Viewers - for document review
 export { default as CollaborativeDocumentViewer } from './viewers/CollaborativeDocumentViewer';
 
 // Context and Hooks

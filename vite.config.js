@@ -80,7 +80,7 @@ export default defineConfig({
     },
     server: {
         host: true,
-        port: 3000,
+        port: 5040,
         // Add proper CORS headers for development
         headers: {
             'Access-Control-Allow-Origin': '*'

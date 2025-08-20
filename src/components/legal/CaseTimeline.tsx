@@ -16,16 +16,19 @@ import {
   Select,
   MenuItem,
   IconButton,
+  Fab,
+  Switch,
+  FormControlLabel,
+} from '@mui/material';
+import {
   Timeline,
   TimelineItem,
   TimelineSeparator,
   TimelineConnector,
   TimelineContent,
   TimelineDot,
-  Fab,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
+  TimelineOppositeContent,
+} from '@mui/lab';
 import {
   Add as AddIcon,
   Event as EventIcon,

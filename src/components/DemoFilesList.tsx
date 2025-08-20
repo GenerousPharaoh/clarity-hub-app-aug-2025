@@ -295,15 +295,15 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className, searchQuery = 
           borderTopColor: 'divider',
           scrollbarWidth: 'thin',
           minHeight: 0
-        }}
+        }}>
           {!selectedProjectId ? (
-            <Box sx={{ p: 2, textAlign: 'center' }}
+            <Box sx={{ p: 2, textAlign: 'center' }}>
               <Alert severity="info">
                 Please select a project to view files
               </Alert>
             </Box>
           ) : filteredFiles.length === 0 ? (
-            <Box sx={{ p: 2, textAlign: 'center' }}
+            <Box sx={{ p: 2, textAlign: 'center' }}>
               <Typography color="text.secondary" variant="body2">
                 {(searchQuery || localSearchText) ? 'No files match your search' : 'No files in this project yet'}
               </Typography>

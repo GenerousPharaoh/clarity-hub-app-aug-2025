@@ -661,7 +661,7 @@ Sincerely,
                         <Box sx={{ display: 'flex', justifyContent: 'between', alignItems: 'center' }}>
                           <Box sx={{ flexGrow: 1 }}>
                             <Typography variant="body2">
-                              <strong>{{variable.name}}</strong> - {variable.label}
+                              <strong>{variable.name}</strong> - {variable.label}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
                               Type: {variable.type} | Required: {variable.required ? 'Yes' : 'No'}

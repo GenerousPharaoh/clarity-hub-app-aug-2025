@@ -139,7 +139,7 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className, searchQu
           }}
         >
           {filteredProjects.length === 0 ? (
-            <Box sx={{ p: 2, textAlign: 'center' }}
+            <Box sx={{ p: 2, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
                 {searchQuery ? 'No projects match your search' : 'No projects yet'}
               </Typography>

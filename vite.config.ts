@@ -6,7 +6,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        parserOpts: {
+          plugins: ['decorators-legacy', 'classProperties']
+        }
+      }
+    }),
     // Add PWA plugin with proper configuration for favicon caching
     VitePWA({
       registerType: 'autoUpdate',
@@ -87,6 +93,16 @@ export default defineConfig({
     // Add proper CORS headers for development
     headers: {
       'Access-Control-Allow-Origin': '*'
+    }
+  },
+  
+  // Disable TypeScript type checking in build
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    tsconfigRaw: {
+      compilerOptions: {
+        useDefineForClassFields: false
+      }
     }
   },
   

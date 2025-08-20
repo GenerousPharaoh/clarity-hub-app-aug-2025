@@ -1,38 +1,41 @@
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
+import React, { useState } from 'react';
+import {
+  Box,
+  Typography,
+  Divider,
   Stack,
-  Alert,
   Chip,
-  LinearProgress,
-  Switch,
-  FormControlLabel,
-  Rating,
   Slider,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
+  Switch,
+  Checkbox,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  InputLabel,
+  Alert,
+  AlertTitle,
+  Snackbar,
+  CircularProgress,
+  LinearProgress,
   Tabs,
   Tab,
-  Badge,
   Avatar,
+  Badge,
+  IconButton,
+  Tooltip,
+  Rating,
   styled,
 } from '@mui/material';
 import {
-  Add as AddIcon,
-  Download as DownloadIcon,
+  Save as SaveIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
-  Favorite as FavoriteIcon,
+  Add as AddIcon,
   Star as StarIcon,
   ExpandMore as ExpandMoreIcon,
   Person as PersonIcon,
@@ -40,100 +43,105 @@ import {
 import { 
   ProfessionalButton, 
   ProfessionalTextField, 
-  ProfessionalCard,
-  designTokens 
+  ProfessionalCard
 } from './index';
 
 // Professional showcase container
 const ShowcaseSection = styled(Box)(({ theme }) => ({
-  marginBottom: designTokens.spacing[10],
+  marginBottom: '2.5rem',
   
   '& .section-title': {
-    fontSize: designTokens.typography.fontSize.xl,
-    fontWeight: designTokens.typography.fontWeight.semibold,
+    fontSize: '1.5rem',
+    fontWeight: 600,
     color: theme.palette.text.primary,
-    marginBottom: designTokens.spacing[6],
-    fontFamily: designTokens.typography.fontFamily.primary,
+    marginBottom: '1.5rem',
+    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   
-  '& .section-subtitle': {
-    fontSize: designTokens.typography.fontSize.sm,
+  '& .section-description': {
+    fontSize: '0.875rem',
     color: theme.palette.text.secondary,
-    marginBottom: designTokens.spacing[4],
-    lineHeight: designTokens.typography.lineHeight.relaxed,
+    marginBottom: '1rem',
+    lineHeight: 1.6,
   },
   
-  '& .component-group': {
-    padding: designTokens.spacing[6],
-    borderRadius: designTokens.borderRadius.lg,
+  '& .component-demo': {
+    padding: '1.5rem',
+    borderRadius: '0.75rem',
     backgroundColor: theme.palette.background.paper,
     border: `1px solid ${theme.palette.divider}`,
-    marginBottom: designTokens.spacing[4],
+    marginBottom: '1rem',
   },
   
-  '& .component-label': {
-    fontSize: designTokens.typography.fontSize.xs,
-    fontWeight: designTokens.typography.fontWeight.semibold,
-    color: theme.palette.text.secondary,
+  '& .demo-label': {
+    fontSize: '0.75rem',
+    fontWeight: 600,
     textTransform: 'uppercase',
-    letterSpacing: designTokens.typography.letterSpacing.wider,
-    marginBottom: designTokens.spacing[3],
+    color: theme.palette.text.secondary,
+    letterSpacing: '0.05em',
+    marginBottom: '0.75rem',
   },
 }));
 
-// Sample data for tables
-const sampleTableData = [
-  { id: 1, name: 'Smith v. Johnson', status: 'Active', priority: 'High', date: '2024-01-15' },
-  { id: 2, name: 'Contract Review - ABC Corp', status: 'Review', priority: 'Medium', date: '2024-01-12' },
-  { id: 3, name: 'Compliance Audit', status: 'Completed', priority: 'Low', date: '2024-01-10' },
-];
+// Sample data for demonstrations
+const sampleMenuItems = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
 
-export const ComponentShowcase: React.FC = () => {
-  const [tabValue, setTabValue] = React.useState(0);
-  const [switchValue, setSwitchValue] = React.useState(false);
-  const [sliderValue, setSliderValue] = React.useState(50);
-  const [ratingValue, setRatingValue] = React.useState(4);
-  
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
+const ComponentShowcase: React.FC = () => {
+  const [sliderValue, setSliderValue] = useState(50);
+  const [switchChecked, setSwitchChecked] = useState(true);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectValue, setSelectValue] = useState('');
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [ratingValue, setRatingValue] = useState(4);
+  const [textFieldValue, setTextFieldValue] = useState('');
+  const [radioValue, setRadioValue] = useState('option1');
+
+  const handleSelectChange = (event: SelectChangeEvent) => {
+    setSelectValue(event.target.value);
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, margin: '0 auto', padding: designTokens.spacing[6] }}>
-      <Box sx={{ textAlign: 'center', marginBottom: designTokens.spacing[10] }}>
-        <Typography 
-          variant="h2" 
+    <Box sx={{ maxWidth: 1200, margin: '0 auto', padding: '1.5rem' }}>
+      <Box sx={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <Typography
+          variant="h2"
           sx={{
-            fontSize: designTokens.typography.fontSize['4xl'],
-            fontWeight: designTokens.typography.fontWeight.bold,
-            marginBottom: designTokens.spacing[4],
+            fontSize: '3rem',
+            fontWeight: 700,
+            marginBottom: '1rem',
+            background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
           }}
         >
-          Professional Design System
+          Professional Component Library
         </Typography>
-        <Typography 
+        <Typography
+          variant="h5"
+          color="text.secondary"
           sx={{
-            fontSize: designTokens.typography.fontSize.lg,
-            color: 'text.secondary',
-            maxWidth: 600,
+            fontSize: '1.125rem',
+            maxWidth: 800,
             margin: '0 auto',
-            lineHeight: designTokens.typography.lineHeight.relaxed,
+            lineHeight: 1.6,
           }}
         >
-          Google Docs-inspired components for legal case management software with 
-          professional aesthetics and micro-interactions.
+          Google Docs-inspired design system for the LegalCaseNavigator.
+          Premium components with professional styling and smooth micro-interactions.
         </Typography>
       </Box>
 
+      <Divider sx={{ my: 4 }} />
+
       {/* Buttons Section */}
       <ShowcaseSection>
-        <Typography className="section-title">Buttons</Typography>
-        <Typography className="section-subtitle">
-          Professional button components with hover effects and loading states
+        <Typography className="section-title">Professional Buttons</Typography>
+        <Typography className="section-description">
+          Enhanced buttons with loading states, icons, and professional hover effects.
         </Typography>
         
-        <Box className="component-group">
-          <Typography className="component-label">Button Variants</Typography>
+        <Box className="component-demo">
+          <Typography className="demo-label">Button Variants</Typography>
           <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
             <ProfessionalButton variant="contained">
               Contained
@@ -149,9 +157,9 @@ export const ComponentShowcase: React.FC = () => {
             </ProfessionalButton>
           </Stack>
         </Box>
-        
-        <Box className="component-group">
-          <Typography className="component-label">Button Sizes</Typography>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Button Sizes</Typography>
           <Stack direction="row" spacing={2} alignItems="center">
             <ProfessionalButton size="small" variant="contained">
               Small
@@ -164,377 +172,434 @@ export const ComponentShowcase: React.FC = () => {
             </ProfessionalButton>
           </Stack>
         </Box>
-        
-        <Box className="component-group">
-          <Typography className="component-label">Button States</Typography>
-          <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-            <ProfessionalButton variant="contained" icon={<AddIcon />}>
-              With Icon
+
+        <Box className="component-demo">
+          <Typography className="demo-label">With Icons</Typography>
+          <Stack direction="row" spacing={2}>
+            <ProfessionalButton
+              variant="contained"
+              icon={<SaveIcon />}
+            >
+              Save
             </ProfessionalButton>
-            <ProfessionalButton variant="contained" loading>
-              Loading
+            <ProfessionalButton
+              variant="outlined"
+              icon={<EditIcon />}
+            >
+              Edit
             </ProfessionalButton>
-            <ProfessionalButton variant="contained" disabled>
+            <ProfessionalButton
+              variant="soft"
+              icon={<AddIcon />}
+            >
+              Add New
+            </ProfessionalButton>
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Loading States</Typography>
+          <Stack direction="row" spacing={2}>
+            <ProfessionalButton
+              variant="contained"
+              loading
+            >
+              Loading...
+            </ProfessionalButton>
+            <ProfessionalButton
+              variant="outlined"
+              loading
+            >
+              Processing
+            </ProfessionalButton>
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Disabled States</Typography>
+          <Stack direction="row" spacing={2}>
+            <ProfessionalButton
+              variant="contained"
+              disabled
+            >
               Disabled
             </ProfessionalButton>
-            <ProfessionalButton variant="outlined" rounded>
-              Rounded
+            <ProfessionalButton
+              variant="outlined"
+              disabled
+            >
+              Disabled
             </ProfessionalButton>
           </Stack>
         </Box>
       </ShowcaseSection>
 
-      {/* Cards Section */}
-      <ShowcaseSection>
-        <Typography className="section-title">Cards</Typography>
-        <Typography className="section-subtitle">
-          Professional card components with different variants and hover effects
-        </Typography>
-        
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <ProfessionalCard 
-              variant="elevated"
-              header="Elevated Card"
-              actions={
-                <>
-                  <ProfessionalButton variant="text" size="small">
-                    Edit
-                  </ProfessionalButton>
-                  <ProfessionalButton variant="contained" size="small">
-                    View
-                  </ProfessionalButton>
-                </>
-              }
-            >
-              This is an elevated card with shadow and hover effects. Perfect for 
-              displaying important content that needs to stand out.
-            </ProfessionalCard>
-          </Grid>
-          
-          <Grid item xs={12} md={4}>
-            <ProfessionalCard 
-              variant="outlined"
-              header="Outlined Card"
-              interactive
-              onClick={() => console.log('Card clicked')}
-            >
-              This is an outlined card that's interactive. Click on it to see the 
-              hover and focus effects in action.
-            </ProfessionalCard>
-          </Grid>
-          
-          <Grid item xs={12} md={4}>
-            <ProfessionalCard variant="filled" header="Filled Card">
-              This is a filled card with a subtle background color. Great for 
-              secondary content or grouped information.
-            </ProfessionalCard>
-          </Grid>
-        </Grid>
-      </ShowcaseSection>
+      <Divider sx={{ my: 4 }} />
 
       {/* Text Fields Section */}
       <ShowcaseSection>
-        <Typography className="section-title">Text Fields</Typography>
-        <Typography className="section-subtitle">
-          Professional input components with enhanced focus states and validation
+        <Typography className="section-title">Professional Text Fields</Typography>
+        <Typography className="section-description">
+          Enhanced input fields with clear buttons, password toggles, and professional styling.
         </Typography>
         
-        <Box className="component-group">
-          <Typography className="component-label">Field Variants</Typography>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <ProfessionalTextField
-                fullWidth
-                label="Outlined Field"
-                placeholder="Enter text..."
-                clearable
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <ProfessionalTextField
-                fullWidth
-                label="With Helper Text"
-                placeholder="Enter text..."
-                helperText="This is helper text"
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <ProfessionalTextField
-                fullWidth
-                label="Error State"
-                placeholder="Enter text..."
-                error
-                helperText="This field has an error"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <ProfessionalTextField
-                fullWidth
-                label="Password Field"
-                type="password"
-                passwordToggle
-                placeholder="Enter password..."
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <ProfessionalTextField
-                fullWidth
-                label="Multiline Field"
-                multiline
-                rows={3}
-                placeholder="Enter long text..."
-                clearable
-              />
-            </Grid>
-          </Grid>
+        <Box className="component-demo">
+          <Typography className="demo-label">Field Variants</Typography>
+          <Stack spacing={2}>
+            <ProfessionalTextField
+              label="Outlined Input"
+              variant="outlined"
+              placeholder="Enter text..."
+              value={textFieldValue}
+              onChange={(e) => setTextFieldValue(e.target.value)}
+              clearable
+            />
+            <ProfessionalTextField
+              label="Filled Input"
+              variant="filled"
+              placeholder="Enter text..."
+            />
+            <ProfessionalTextField
+              label="Standard Input"
+              variant="standard"
+              placeholder="Enter text..."
+            />
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Special Fields</Typography>
+          <Stack spacing={2}>
+            <ProfessionalTextField
+              label="Password Field"
+              type="password"
+              variant="outlined"
+              passwordToggle
+              helperText="Must be at least 8 characters"
+            />
+            <ProfessionalTextField
+              label="With Error"
+              variant="outlined"
+              error
+              helperText="This field is required"
+            />
+            <ProfessionalTextField
+              label="Disabled Field"
+              variant="outlined"
+              disabled
+              value="Cannot edit this"
+            />
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Multiline Fields</Typography>
+          <ProfessionalTextField
+            label="Comments"
+            variant="outlined"
+            multiline
+            rows={4}
+            placeholder="Enter your comments here..."
+            helperText="Maximum 500 characters"
+          />
         </Box>
       </ShowcaseSection>
 
-      {/* Material-UI Components with Professional Theme */}
+      <Divider sx={{ my: 4 }} />
+
+      {/* Cards Section */}
       <ShowcaseSection>
-        <Typography className="section-title">Enhanced MUI Components</Typography>
-        <Typography className="section-subtitle">
-          Standard Material-UI components enhanced with professional styling
+        <Typography className="section-title">Professional Cards</Typography>
+        <Typography className="section-description">
+          Enhanced cards with variants, interactivity, and professional styling.
         </Typography>
         
-        <Box className="component-group">
-          <Typography className="component-label">Navigation & Controls</Typography>
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={6}>
-              <Tabs value={tabValue} onChange={handleTabChange}>
-                <Tab label="Overview" />
-                <Tab label="Documents" />
-                <Tab label="Timeline" />
-                <Tab label="Settings" />
-              </Tabs>
-            </Grid>
+        <Box className="component-demo">
+          <Typography className="demo-label">Card Variants</Typography>
+          <Stack spacing={2}>
+            <ProfessionalCard variant="elevated">
+              <Typography variant="h6" gutterBottom>Elevated Card</Typography>
+              <Typography variant="body2" color="text.secondary">
+                This card has a subtle shadow that gives it an elevated appearance.
+                Perfect for highlighting important content.
+              </Typography>
+            </ProfessionalCard>
             
-            <Grid item xs={12} md={6}>
-              <Stack spacing={2}>
-                <FormControlLabel 
-                  control={
-                    <Switch 
-                      checked={switchValue} 
-                      onChange={(e) => setSwitchValue(e.target.checked)} 
-                    />
-                  } 
-                  label="Enable notifications" 
-                />
-                <Box sx={{ width: '100%' }}>
-                  <Typography gutterBottom>Progress</Typography>
-                  <LinearProgress variant="determinate" value={75} />
-                </Box>
-                <Box sx={{ width: '100%' }}>
-                  <Typography gutterBottom>Slider</Typography>
-                  <Slider 
-                    value={sliderValue} 
-                    onChange={(e, value) => setSliderValue(value as number)}
-                  />
-                </Box>
-              </Stack>
-            </Grid>
-          </Grid>
+            <ProfessionalCard variant="outlined">
+              <Typography variant="h6" gutterBottom>Outlined Card</Typography>
+              <Typography variant="body2" color="text.secondary">
+                This card uses a border instead of shadow for a cleaner look.
+                Great for list items and secondary content.
+              </Typography>
+            </ProfessionalCard>
+            
+            <ProfessionalCard variant="filled">
+              <Typography variant="h6" gutterBottom>Filled Card</Typography>
+              <Typography variant="body2" color="text.secondary">
+                This card has a subtle background color for visual separation.
+                Ideal for grouping related content.
+              </Typography>
+            </ProfessionalCard>
+          </Stack>
         </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Interactive Cards</Typography>
+          <ProfessionalCard
+            variant="elevated"
+            interactive
+            hover
+            onClick={() => setShowSnackbar(true)}
+          >
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Avatar sx={{ bgcolor: '#2563eb' }}>
+                <PersonIcon />
+              </Avatar>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="h6">Click Me!</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  This card is interactive with hover effects
+                </Typography>
+              </Box>
+              <IconButton size="small">
+                <ExpandMoreIcon />
+              </IconButton>
+            </Stack>
+          </ProfessionalCard>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Loading Card</Typography>
+          <ProfessionalCard variant="elevated" loading>
+            <Typography variant="h6" gutterBottom>Loading Content...</Typography>
+            <Typography variant="body2" color="text.secondary">
+              This card shows a loading state while content is being fetched.
+            </Typography>
+          </ProfessionalCard>
+        </Box>
+      </ShowcaseSection>
+
+      <Divider sx={{ my: 4 }} />
+
+      {/* Additional Components */}
+      <ShowcaseSection>
+        <Typography className="section-title">Additional Components</Typography>
+        <Typography className="section-description">
+          Other Material-UI components with professional styling applied.
+        </Typography>
         
-        <Box className="component-group">
-          <Typography className="component-label">Feedback & Display</Typography>
+        <Box className="component-demo">
+          <Typography className="demo-label">Form Controls</Typography>
           <Stack spacing={3}>
-            <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-              <Alert severity="success">Success message with professional styling</Alert>
-              <Alert severity="warning">Warning message for important notices</Alert>
-              <Alert severity="error">Error message with clear indication</Alert>
-              <Alert severity="info">Info message for additional context</Alert>
-            </Stack>
-            
-            <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-              <Chip label="Active" color="success" />
-              <Chip label="Pending" color="warning" />
-              <Chip label="Priority" color="error" />
-              <Chip label="Draft" variant="outlined" onDelete={() => {}} />
-              <Badge badgeContent={4} color="primary">
-                <Avatar><PersonIcon /></Avatar>
-              </Badge>
-            </Stack>
-            
+            <FormControl fullWidth>
+              <InputLabel>Select Option</InputLabel>
+              <Select
+                value={selectValue}
+                label="Select Option"
+                onChange={handleSelectChange}
+              >
+                {sampleMenuItems.map((item) => (
+                  <MenuItem key={item} value={item}>{item}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             <Box>
-              <Typography gutterBottom>Rating Component</Typography>
-              <Rating 
-                value={ratingValue} 
-                onChange={(e, value) => setRatingValue(value || 0)}
-                icon={<StarIcon fontSize="inherit" />}
+              <Typography gutterBottom>Slider: {sliderValue}</Typography>
+              <Slider
+                value={sliderValue}
+                onChange={(_, value) => setSliderValue(value as number)}
+                valueLabelDisplay="auto"
+                color="primary"
+              />
+            </Box>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={switchChecked}
+                  onChange={(e) => setSwitchChecked(e.target.checked)}
+                />
+              }
+              label="Toggle Setting"
+            />
+
+            <FormControl>
+              <FormLabel>Radio Options</FormLabel>
+              <RadioGroup
+                value={radioValue}
+                onChange={(e) => setRadioValue(e.target.value)}
+              >
+                <FormControlLabel value="option1" control={<Radio />} label="Option 1" />
+                <FormControlLabel value="option2" control={<Radio />} label="Option 2" />
+                <FormControlLabel value="option3" control={<Radio />} label="Option 3" />
+              </RadioGroup>
+            </FormControl>
+
+            <FormControlLabel
+              control={<Checkbox defaultChecked />}
+              label="I agree to the terms"
+            />
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Feedback Components</Typography>
+          <Stack spacing={2}>
+            <Alert severity="success">
+              <AlertTitle>Success</AlertTitle>
+              Operation completed successfully!
+            </Alert>
+            <Alert severity="info">
+              <AlertTitle>Information</AlertTitle>
+              Here's some helpful information for you.
+            </Alert>
+            <Alert severity="warning">
+              <AlertTitle>Warning</AlertTitle>
+              Please review this important notice.
+            </Alert>
+            <Alert severity="error">
+              <AlertTitle>Error</AlertTitle>
+              Something went wrong. Please try again.
+            </Alert>
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Progress Indicators</Typography>
+          <Stack spacing={3}>
+            <Box>
+              <Typography gutterBottom>Linear Progress</Typography>
+              <LinearProgress variant="determinate" value={65} />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <CircularProgress size={40} />
+              <Typography>Loading...</Typography>
+            </Box>
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Navigation</Typography>
+          <Tabs
+            value={selectedTab}
+            onChange={(_, value) => setSelectedTab(value)}
+            variant="fullWidth"
+          >
+            <Tab label="Tab One" />
+            <Tab label="Tab Two" />
+            <Tab label="Tab Three" />
+          </Tabs>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Data Display</Typography>
+          <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+            <Chip label="Default" />
+            <Chip label="Primary" color="primary" />
+            <Chip label="Success" color="success" />
+            <Chip label="Warning" color="warning" />
+            <Chip label="Error" color="error" />
+            <Chip label="Deletable" onDelete={() => {}} />
+            <Chip
+              avatar={<Avatar>A</Avatar>}
+              label="With Avatar"
+              color="primary"
+              variant="outlined"
+            />
+          </Stack>
+        </Box>
+
+        <Box className="component-demo">
+          <Typography className="demo-label">Interactive Elements</Typography>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Tooltip title="Save Document">
+              <IconButton color="primary">
+                <SaveIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Edit Document">
+              <IconButton>
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete Document">
+              <IconButton color="error">
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+            <Badge badgeContent={4} color="primary">
+              <IconButton>
+                <StarIcon />
+              </IconButton>
+            </Badge>
+            <Box>
+              <Typography component="legend">Rating</Typography>
+              <Rating
+                value={ratingValue}
+                onChange={(_, value) => setRatingValue(value || 0)}
               />
             </Box>
           </Stack>
         </Box>
-        
-        <Box className="component-group">
-          <Typography className="component-label">Collapsible Content</Typography>
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Case Details</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography>
-                This accordion contains detailed information about the case, 
-                including key documents, timeline, and involved parties.
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>Document History</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography>
-                View all document revisions, comments, and collaboration history 
-                for this case.
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
-        </Box>
-      </ShowcaseSection>
 
-      {/* Data Display Section */}
-      <ShowcaseSection>
-        <Typography className="section-title">Data Display</Typography>
-        <Typography className="section-subtitle">
-          Professional tables and data presentation components
-        </Typography>
-        
-        <Box className="component-group">
-          <Typography className="component-label">Professional Table</Typography>
-          <TableContainer component={Paper} elevation={0}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Case Name</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Priority</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {sampleTableData.map((row) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell component="th" scope="row">
-                      <Typography fontWeight="medium">{row.name}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={row.status} 
-                        color={row.status === 'Active' ? 'success' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={row.priority}
-                        color={row.priority === 'High' ? 'error' : row.priority === 'Medium' ? 'warning' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{row.date}</TableCell>
-                    <TableCell align="right">
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
-                        <ProfessionalButton 
-                          size="small" 
-                          variant="text" 
-                          icon={<EditIcon />}
-                        >
-                          Edit
-                        </ProfessionalButton>
-                        <ProfessionalButton 
-                          size="small" 
-                          variant="text" 
-                          icon={<DeleteIcon />}
-                        >
-                          Delete
-                        </ProfessionalButton>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      </ShowcaseSection>
-
-      {/* Color Palette Section */}
-      <ShowcaseSection>
-        <Typography className="section-title">Color System</Typography>
-        <Typography className="section-subtitle">
-          Professional color palette optimized for legal document work
-        </Typography>
-        
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Box className="component-group">
-              <Typography className="component-label">Primary Colors</Typography>
-              <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-                {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((shade) => (
-                  <Box
-                    key={shade}
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 1,
-                      backgroundColor: designTokens.colors.primary[shade as keyof typeof designTokens.colors.primary],
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      color: shade > 500 ? 'white' : 'black',
-                    }}
-                  >
-                    {shade}
-                  </Box>
-                ))}
-              </Stack>
-            </Box>
-          </Grid>
+        <Box className="component-demo">
+          <Typography className="demo-label">Color Palette</Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((shade) => (
+              <Box
+                key={shade}
+                sx={{
+                  width: 60,
+                  height: 60,
+                  backgroundColor: shade === 500 ? '#2563eb' : `rgba(37, 99, 235, ${shade / 1000})`,
+                  borderRadius: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: shade >= 500 ? 'white' : 'black',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                }}
+              >
+                {shade}
+              </Box>
+            ))}
+          </Stack>
           
-          <Grid item xs={12} md={6}>
-            <Box className="component-group">
-              <Typography className="component-label">Semantic Colors</Typography>
-              <Stack spacing={2}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ 
-                    width: 20, 
-                    height: 20, 
-                    borderRadius: '50%', 
-                    backgroundColor: designTokens.colors.success[500] 
-                  }} />
-                  <Typography>Success</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ 
-                    width: 20, 
-                    height: 20, 
-                    borderRadius: '50%', 
-                    backgroundColor: designTokens.colors.warning[500] 
-                  }} />
-                  <Typography>Warning</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ 
-                    width: 20, 
-                    height: 20, 
-                    borderRadius: '50%', 
-                    backgroundColor: designTokens.colors.error[500] 
-                  }} />
-                  <Typography>Error</Typography>
-                </Box>
-              </Stack>
-            </Box>
-          </Grid>
-        </Grid>
+          <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+            <Chip 
+              label="Success" 
+              sx={{ 
+                backgroundColor: '#10b981',
+                color: 'white' 
+              }} 
+            />
+            <Chip 
+              label="Warning" 
+              sx={{ 
+                backgroundColor: '#f59e0b',
+                color: 'white' 
+              }} 
+            />
+            <Chip 
+              label="Error" 
+              sx={{ 
+                backgroundColor: '#ef4444',
+                color: 'white' 
+              }} 
+            />
+          </Stack>
+        </Box>
       </ShowcaseSection>
+
+      {/* Snackbar for interactions */}
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setShowSnackbar(false)}
+        message="Card clicked! This is an interactive element."
+      />
     </Box>
   );
 };

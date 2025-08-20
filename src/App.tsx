@@ -3,8 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { CssBaseline, Button, Box } from '@mui/material';
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ProfessionalThemeProvider, ThemeModeToggle } from './contexts/ThemeContext';
-import ProfessionalGlobalStyles from './theme/GlobalStyles';
+// Simplified theme imports to prevent runtime errors
+// import { ProfessionalThemeProvider, ThemeModeToggle } from './contexts/ThemeContext';
+// import ProfessionalGlobalStyles from './theme/GlobalStyles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
@@ -123,11 +125,24 @@ export default function App() {
   
 
 
+  // Simple theme to prevent runtime errors
+  const simpleTheme = createTheme({
+    palette: {
+      mode: 'light',
+      primary: {
+        main: '#2563eb',
+      },
+      background: {
+        default: '#f8f9fa',
+        paper: '#ffffff',
+      },
+    },
+  });
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ProfessionalThemeProvider defaultMode="system">
+      <ThemeProvider theme={simpleTheme}>
         <CssBaseline />
-        <ProfessionalGlobalStyles />
         
         {/* Debug mode controls */}
         {debugMode && (
@@ -142,7 +157,7 @@ export default function App() {
               gap: 1,
             }}
           >
-            <ThemeModeToggle size="medium" />
+            {/* <ThemeModeToggle size="medium" /> */}
             <Button
               variant="contained"
               color="warning"
@@ -188,7 +203,7 @@ export default function App() {
             </AuthProvider>
           </NotificationProvider>
         </ErrorBoundary>
-      </ProfessionalThemeProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -129,10 +129,7 @@ const MainLayout = () => {
         height: '100vh', 
         width: '100vw',
         overflow: 'hidden', 
-        bgcolor: 'background.default',
-        backgroundImage: (theme) => theme.palette.mode === 'dark' 
-          ? 'radial-gradient(circle at 50% 14%, rgba(96, 165, 250, 0.03) 0%, rgba(0, 0, 0, 0) 60%), linear-gradient(to bottom, rgba(17, 24, 39, 0.9) 0%, rgba(31, 41, 55, 0.4) 100%)'
-          : 'radial-gradient(circle at 50% 14%, rgba(29, 78, 216, 0.02) 0%, rgba(0, 0, 0, 0) 60%), linear-gradient(to bottom, rgba(249, 250, 251, 0.9) 0%, rgba(243, 244, 246, 0.4) 100%)',
+        bgcolor: '#f8f9fa',
       }}
     >
       {/* App Bar */}
@@ -311,89 +308,43 @@ const MainLayout = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Main Content */}
-      <Box component="section" sx={{ 
-        flexGrow: 1, 
-        overflow: 'hidden', 
-        position: 'relative',
-        transition: 'all 0.3s ease',
+      {/* Main Content - Full viewport without padding */}
+      <Box sx={{ 
+        flexGrow: 1,
         display: 'flex',
-        width: '100%',
-        height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' },
-        mt: { xs: '56px', sm: '64px' }, // push content below the fixed AppBar
-        p: { xs: 1.5, sm: 3 } 
+        width: '100vw',
+        height: 'calc(100vh - 64px)',
+        mt: '64px', // Just below the AppBar
+        overflow: 'hidden',
+        position: 'relative',
       }}>
-        <Container 
-          maxWidth={false} 
-          disableGutters 
-          sx={{ 
-            maxWidth: '100%', 
-            width: '100%',
-            height: '100%',
-            overflow: 'hidden',
-            borderRadius: 3,
-            boxShadow: (theme) => theme.palette.mode === 'dark' 
-              ? '0 4px 20px rgba(0, 0, 0, 0.5), 0 8px 32px rgba(0, 0, 0, 0.3)' 
-              : '0 4px 20px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.04)',
-            border: theme => `1px solid ${theme.palette.mode === 'dark' 
-              ? 'rgba(255, 255, 255, 0.05)'
-              : 'rgba(0, 0, 0, 0.03)'}`,
+        <LegalCaseNavigator
+          leftPanel={
+            /* Use demo left panel if user is in demo mode, otherwise use regular LeftPanel */
+            user?.id === '00000000-0000-0000-0000-000000000000' ? 
+              <DemoLeftPanel /> : 
+              <LeftPanel />
+          }
+          centerPanel={
+            <CenterPanelWrapper>
+              <Outlet />
+            </CenterPanelWrapper>
+          }
+          rightPanel={<RightPanelWrapper />}
+          leftPanelConfig={{
+            defaultWidth: 320,
+            minWidth: 260,
+            maxWidth: 500
           }}
-        >
-          <LegalCaseNavigator
-            leftPanel={
-              /* Use demo left panel if user is in demo mode, otherwise use regular LeftPanel */
-              user?.id === '00000000-0000-0000-0000-000000000000' ? 
-                <DemoLeftPanel /> : 
-                <LeftPanel />
-            }
-            centerPanel={
-              <CenterPanelWrapper>
-                <Outlet />
-              </CenterPanelWrapper>
-            }
-            rightPanel={<RightPanelWrapper />}
-            leftPanelConfig={{
-              defaultWidth: 300,
-              minWidth: 200,
-              maxWidth: 500
-            }}
-            rightPanelConfig={{
-              defaultWidth: 400,
-              minWidth: 300,
-              maxWidth: 600
-            }}
-          />
-        </Container>
+          rightPanelConfig={{
+            defaultWidth: 420,
+            minWidth: 350,
+            maxWidth: 700
+          }}
+        />
       </Box>
 
-      {/* Footer */}
-      <Box 
-        component="footer" 
-        sx={{ 
-          py: 1.5, 
-          px: 2,
-          textAlign: 'center', 
-          backdropFilter: 'blur(12px)',
-          background: theme => theme.palette.mode === 'dark' 
-            ? 'rgba(31, 41, 55, 0.7)'
-            : 'rgba(255, 255, 255, 0.8)',
-          borderTop: 1, 
-          borderColor: theme => theme.palette.mode === 'dark' 
-            ? 'rgba(255, 255, 255, 0.08)'
-            : 'rgba(0, 0, 0, 0.06)',
-          color: 'text.secondary',
-          fontSize: '0.75rem',
-          minHeight: { xs: 36, sm: 40 },
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <Typography variant="caption" color="inherit">
-          © {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME || 'Legal Case Tracker'} • All rights reserved
-        </Typography>
-      </Box>
+      {/* Removed footer to maximize vertical space */}
     </Box>
   );
 };

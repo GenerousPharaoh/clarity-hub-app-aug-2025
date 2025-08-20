@@ -3,10 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { CssBaseline, Button, Box } from '@mui/material';
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-// Simplified theme imports to prevent runtime errors
-// import { ProfessionalThemeProvider, ThemeModeToggle } from './contexts/ThemeContext';
-// import ProfessionalGlobalStyles from './theme/GlobalStyles';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+// Professional theme system for sophisticated legal software
+import { ThemeProvider } from '@mui/material/styles';
+import { createProfessionalMuiTheme } from './theme/professionalTheme';
+import ProfessionalGlobalStyles from './theme/GlobalStyles';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
@@ -43,6 +43,9 @@ export default function App() {
   
   // Debug mode state - enable in demo mode
   const [debugMode, setDebugMode] = React.useState(true);
+  
+  // Professional theme mode state - default to dark for sophisticated look
+  const [themeMode, setThemeMode] = React.useState<'light' | 'dark'>('dark');
   
   // Set up demo mode on first render
   React.useEffect(() => {
@@ -125,24 +128,22 @@ export default function App() {
   
 
 
-  // Simple theme to prevent runtime errors
-  const simpleTheme = createTheme({
-    palette: {
-      mode: 'light',
-      primary: {
-        main: '#2563eb',
-      },
-      background: {
-        default: '#f8f9fa',
-        paper: '#ffffff',
-      },
-    },
-  });
+  // Professional sophisticated theme for legal software
+  const professionalTheme = React.useMemo(() => 
+    createProfessionalMuiTheme(themeMode), 
+    [themeMode]
+  );
+  
+  // Toggle theme mode function
+  const toggleTheme = React.useCallback(() => {
+    setThemeMode(prev => prev === 'dark' ? 'light' : 'dark');
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={simpleTheme}>
+      <ThemeProvider theme={professionalTheme}>
         <CssBaseline />
+        <ProfessionalGlobalStyles />
         
         {/* Debug mode controls */}
         {debugMode && (
@@ -157,7 +158,19 @@ export default function App() {
               gap: 1,
             }}
           >
-            {/* <ThemeModeToggle size="medium" /> */}
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={toggleTheme}
+              sx={{ 
+                fontWeight: 'bold',
+                boxShadow: 2,
+                mb: 1
+              }}
+            >
+              {themeMode === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </Button>
             <Button
               variant="contained"
               color="warning"

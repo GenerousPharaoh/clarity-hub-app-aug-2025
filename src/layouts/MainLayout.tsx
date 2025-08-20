@@ -129,7 +129,7 @@ const MainLayout = () => {
         height: '100vh', 
         width: '100vw',
         overflow: 'hidden', 
-        bgcolor: '#f8f9fa',
+        bgcolor: '#0a0f1b', // Deep midnight blue background
       }}
     >
       {/* App Bar */}
@@ -138,15 +138,11 @@ const MainLayout = () => {
         elevation={0}
         sx={{ 
           zIndex: theme => theme.zIndex.drawer + 1,
-          backdropFilter: 'blur(12px)',
-          background: theme => theme.palette.mode === 'dark' 
-            ? 'linear-gradient(135deg, #1a237e 0%, #3949ab 100%)'
-            : 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
-          color: 'white',
-          borderBottom: '1px solid',
-          borderColor: theme => theme.palette.mode === 'dark' 
-            ? 'rgba(255, 255, 255, 0.08)'
-            : 'rgba(0, 0, 0, 0.06)',
+          backdropFilter: 'blur(20px)',
+          background: 'linear-gradient(135deg, #111827 0%, #1f2937 100%)', // Dark slate gradient
+          color: '#f3f4f6', // High contrast text
+          borderBottom: '1px solid rgba(16, 185, 129, 0.1)', // Subtle emerald border
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)', // Enhanced dark shadow
         }}
       >
         <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
@@ -177,14 +173,13 @@ const MainLayout = () => {
               sx={{ 
                 flexGrow: 0, 
                 display: { xs: 'none', sm: 'block' },
-                fontWeight: 600,
+                fontWeight: 700,
                 textDecoration: 'none',
-                color: 'primary.main',
-                background: theme => theme.palette.mode === 'dark'
-                  ? 'linear-gradient(90deg, #60A5FA, #A78BFA)'
-                  : 'linear-gradient(90deg, #1D4ED8, #7C3AED)',
+                color: 'transparent',
+                background: 'linear-gradient(90deg, #10b981, #34d399)', // Emerald gradient
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
+                textShadow: '0 0 20px rgba(16, 185, 129, 0.3)', // Emerald glow
                 mr: 2
               }}
             >

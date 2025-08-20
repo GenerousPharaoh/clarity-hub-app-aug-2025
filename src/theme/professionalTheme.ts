@@ -79,17 +79,17 @@ const createProfessionalTheme = (mode: 'light' | 'dark' = 'light'): ThemeOptions
         contrastText: '#ffffff',
       },
       
-      // Background colors
+      // Background colors - Sophisticated dark theme with midnight blue
       background: {
-        default: isLight ? colors.neutral[50] : colors.dark[50],
-        paper: isLight ? '#ffffff' : colors.dark[100],
+        default: isLight ? colors.neutral[50] : colors.dark[50], // Deep midnight blue for dark mode
+        paper: isLight ? '#ffffff' : colors.dark[100], // Dark slate for panels
       },
       
-      // Text colors - High contrast for legal documents
+      // Text colors - High contrast for legal documents with sophisticated dark theme
       text: {
-        primary: isLight ? colors.neutral[900] : colors.dark[600],
-        secondary: isLight ? colors.neutral[600] : colors.dark[500],
-        disabled: isLight ? colors.neutral[500] : colors.dark[400],
+        primary: isLight ? colors.neutral[900] : colors.dark[900], // Maximum contrast text
+        secondary: isLight ? colors.neutral[600] : colors.dark[600], // Secondary text
+        disabled: isLight ? colors.neutral[500] : colors.dark[500], // Disabled text
       },
       
       // Dividers and borders

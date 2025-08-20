@@ -3,9 +3,9 @@
  * Professional "Google Docs for litigation" aesthetic
  */
 
-// Color Palette - Google Docs inspired professional colors
+// Color Palette - Sophisticated legal software colors inspired by "Notion meets LexisNexis"
 export const colors = {
-  // Neutral base colors
+  // Light mode neutral colors
   neutral: {
     50: '#f8f9fa',    // Background
     100: '#f1f3f4',   // Light background
@@ -19,28 +19,42 @@ export const colors = {
     900: '#202124',   // Text primary dark
   },
   
-  // Primary blue - Professional interaction color
+  // Sophisticated emerald primary - Legal confidence and trust
   primary: {
-    50: '#eff6ff',
-    100: '#dbeafe',
-    200: '#bfdbfe',
-    300: '#93c5fd',
-    400: '#60a5fa',
-    500: '#2563eb',    // Main primary
-    600: '#1d4ed8',
-    700: '#1e40af',
-    800: '#1e3a8a',
-    900: '#1e3a8a',
+    50: '#ecfdf5',    // Lightest emerald
+    100: '#d1fae5',   // Very light emerald
+    200: '#a7f3d0',   // Light emerald
+    300: '#6ee7b7',   // Medium light emerald
+    400: '#34d399',   // Medium emerald
+    500: '#10b981',   // Main emerald primary - sophisticated professional
+    600: '#059669',   // Dark emerald
+    700: '#047857',   // Darker emerald
+    800: '#065f46',   // Very dark emerald
+    900: '#064e3b',   // Darkest emerald
   },
   
-  // Semantic colors
+  // Indigo secondary - Professional accent
+  secondary: {
+    50: '#eef2ff',
+    100: '#e0e7ff',
+    200: '#c7d2fe',
+    300: '#a5b4fc',
+    400: '#818cf8',
+    500: '#6366f1',   // Main indigo secondary
+    600: '#4f46e5',
+    700: '#4338ca',
+    800: '#3730a3',
+    900: '#312e81',
+  },
+  
+  // Semantic colors - Enhanced for legal software
   success: {
-    50: '#f0fdf4',
-    100: '#dcfce7',
-    200: '#bbf7d0',
-    300: '#86efac',
-    400: '#4ade80',
-    500: '#10b981',    // Main success
+    50: '#ecfdf5',
+    100: '#d1fae5',
+    200: '#a7f3d0',
+    300: '#6ee7b7',
+    400: '#34d399',
+    500: '#10b981',    // Consistent with primary emerald
     600: '#059669',
     700: '#047857',
     800: '#065f46',
@@ -48,12 +62,12 @@ export const colors = {
   },
   
   warning: {
-    50: '#fefbf2',
+    50: '#fffbeb',
     100: '#fef3c7',
     200: '#fde68a',
     300: '#fcd34d',
     400: '#fbbf24',
-    500: '#f59e0b',    // Main warning
+    500: '#f59e0b',    // Sophisticated amber for warnings
     600: '#d97706',
     700: '#b45309',
     800: '#92400e',
@@ -66,69 +80,94 @@ export const colors = {
     200: '#fecaca',
     300: '#fca5a5',
     400: '#f87171',
-    500: '#ef4444',    // Main error
+    500: '#ef4444',    // Professional red for errors
     600: '#dc2626',
     700: '#b91c1c',
     800: '#991b1b',
     900: '#7f1d1d',
   },
   
-  // Dark mode colors
+  // Sophisticated dark mode colors - Deep midnight blue foundation
   dark: {
-    50: '#18181b',     // Background
-    100: '#27272a',    // Panel background
-    200: '#3f3f46',    // Border
-    300: '#52525b',    // Border hover
-    400: '#71717a',    // Text disabled
-    500: '#a1a1aa',    // Text secondary
-    600: '#d4d4d8',    // Text primary
-    700: '#e4e4e7',    // Text emphasis
-    800: '#f4f4f5',    // Text high contrast
-    900: '#fafafa',    // Text maximum contrast
+    50: '#0a0f1b',     // Deep midnight blue background
+    100: '#111827',    // Dark slate surface
+    200: '#1f2937',    // Elevated surface
+    300: '#374151',    // Border subtle
+    400: '#4b5563',    // Border
+    500: '#6b7280',    // Text disabled
+    600: '#9ca3af',    // Text secondary
+    700: '#d1d5db',    // Text emphasis
+    800: '#e5e7eb',    // Text high contrast
+    900: '#f3f4f6',    // Text primary - maximum contrast
+  },
+  
+  // Professional legal status colors
+  status: {
+    draft: '#6b7280',      // Neutral gray
+    active: '#10b981',     // Emerald green - active cases
+    pending: '#f59e0b',    // Amber - pending review
+    completed: '#059669',  // Dark emerald - completed
+    archived: '#4b5563',   // Muted gray - archived
+    urgent: '#ef4444',     // Red - urgent attention
+    review: '#6366f1',     // Indigo - under review
+  },
+  
+  // Document priority colors
+  priority: {
+    low: '#10b981',        // Green - low priority
+    medium: '#f59e0b',     // Amber - medium priority
+    high: '#f97316',       // Orange - high priority
+    critical: '#ef4444',   // Red - critical priority
   },
 } as const;
 
-// Typography Scale - Legal document focused
+// Typography Scale - Enhanced for legal document readability
 export const typography = {
   fontFamily: {
     primary: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
-    monospace: '"Fira Code", "SF Mono", Monaco, Consolas, monospace',
+    legal: '"Georgia", "Times New Roman", serif', // For legal documents
+    monospace: '"JetBrains Mono", "Fira Code", "SF Mono", Monaco, Consolas, monospace',
+    heading: '"Inter", -apple-system, BlinkMacSystemFont, sans-serif',
   },
   
   fontSize: {
-    xs: '0.75rem',     // 12px
-    sm: '0.875rem',    // 14px
-    base: '1rem',      // 16px
-    lg: '1.125rem',    // 18px
-    xl: '1.25rem',     // 20px
-    '2xl': '1.5rem',   // 24px
-    '3xl': '1.875rem', // 30px
-    '4xl': '2.25rem',  // 36px
-    '5xl': '3rem',     // 48px
+    xs: '0.75rem',     // 12px - captions, metadata
+    sm: '0.875rem',    // 14px - UI text, secondary content
+    base: '1rem',      // 16px - body text, primary content
+    lg: '1.125rem',    // 18px - large body text, legal documents
+    xl: '1.25rem',     // 20px - subheadings
+    '2xl': '1.5rem',   // 24px - section headings
+    '3xl': '1.875rem', // 30px - page headings
+    '4xl': '2.25rem',  // 36px - main headings
+    '5xl': '3rem',     // 48px - display headings
+    '6xl': '3.75rem',  // 60px - hero headings
   },
   
   fontWeight: {
-    normal: 400,
-    medium: 500,
-    semibold: 600,
-    bold: 700,
+    light: 300,        // Light weight for large headings
+    normal: 400,       // Normal body text
+    medium: 500,       // Emphasized text, UI elements
+    semibold: 600,     // Subheadings, important UI text
+    bold: 700,         // Headings, key information
+    extrabold: 800,    // Display headings
   },
   
   lineHeight: {
-    tight: 1.25,
-    snug: 1.375,
-    normal: 1.5,
-    relaxed: 1.625,
-    loose: 2,
+    none: 1,           // Tight for headings
+    tight: 1.25,       // Headings, display text
+    snug: 1.375,       // UI text, compact layouts
+    normal: 1.5,       // Body text, comfortable reading
+    relaxed: 1.625,    // Legal documents, long-form content
+    loose: 2,          // Very spacious, special cases
   },
   
   letterSpacing: {
-    tighter: '-0.05em',
-    tight: '-0.025em',
-    normal: '0em',
-    wide: '0.025em',
-    wider: '0.05em',
-    widest: '0.1em',
+    tighter: '-0.05em',   // Large headings
+    tight: '-0.025em',    // Headings
+    normal: '0em',        // Body text
+    wide: '0.025em',      // UI text, buttons
+    wider: '0.05em',      // Small caps, captions
+    widest: '0.1em',      // All caps, overlines
   },
 } as const;
 
@@ -162,39 +201,71 @@ export const borderRadius = {
   full: '9999px',
 } as const;
 
-// Shadow System - Subtle, professional depth
+// Shadow System - Sophisticated professional depth with dark mode support
 export const shadows = {
   none: 'none',
+  
+  // Light mode shadows - subtle and professional
   xs: '0 1px 2px rgba(0, 0, 0, 0.05)',
   sm: '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
   base: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
   md: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
   lg: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
   xl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
   
-  // Professional interactive shadows
-  interactive: '0 8px 32px rgba(37, 99, 235, 0.15)',
+  // Professional interactive shadows - emerald accent
+  interactive: '0 8px 32px rgba(16, 185, 129, 0.15)', // Emerald glow
+  primaryGlow: '0 0 20px rgba(16, 185, 129, 0.3)',    // Strong emerald glow
   panel: '0 4px 20px rgba(0, 0, 0, 0.08)',
+  float: '0 12px 24px rgba(0, 0, 0, 0.15)',
   
-  // Dark mode shadows
+  // Dark mode shadows - enhanced for midnight blue theme
   dark: {
-    xs: '0 1px 2px rgba(0, 0, 0, 0.3)',
-    sm: '0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2)',
-    base: '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
-    md: '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
-    lg: '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.1)',
-    xl: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+    xs: '0 1px 2px rgba(0, 0, 0, 0.4)',
+    sm: '0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3)',
+    base: '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)',
+    md: '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
+    lg: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
+    xl: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
+    '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.7)',
+    
+    // Enhanced dark mode specific shadows
+    panel: '0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4)',
+    interactive: '0 8px 32px rgba(16, 185, 129, 0.2)', // Stronger emerald glow for dark
+    primaryGlow: '0 0 24px rgba(16, 185, 129, 0.4)',
+    float: '0 16px 32px rgba(0, 0, 0, 0.7), 0 8px 16px rgba(0, 0, 0, 0.5)',
+    
+    // Sophisticated surface elevation
+    surface: {
+      1: '0 1px 3px rgba(0, 0, 0, 0.4)',
+      2: '0 2px 6px rgba(0, 0, 0, 0.5)',
+      3: '0 4px 12px rgba(0, 0, 0, 0.6)',
+      4: '0 8px 24px rgba(0, 0, 0, 0.7)',
+      5: '0 16px 48px rgba(0, 0, 0, 0.8)',
+    },
+  },
+  
+  // Light mode surface elevation
+  surface: {
+    1: '0 1px 3px rgba(0, 0, 0, 0.08)',
+    2: '0 2px 6px rgba(0, 0, 0, 0.1)',
+    3: '0 4px 12px rgba(0, 0, 0, 0.12)',
+    4: '0 8px 24px rgba(0, 0, 0, 0.15)',
+    5: '0 16px 48px rgba(0, 0, 0, 0.2)',
   },
 } as const;
 
-// Animation System - Professional micro-interactions
+// Animation System - Sophisticated professional micro-interactions
 export const animations = {
   duration: {
-    instant: '100ms',
-    fast: '120ms',
-    normal: '160ms',
-    slow: '300ms',
-    slower: '500ms',
+    instant: '75ms',    // Instant feedback
+    fastest: '100ms',   // Button presses, micro-interactions
+    fast: '150ms',      // Hover states, small animations
+    normal: '200ms',    // Standard transitions
+    slow: '300ms',      // Page transitions, large movements
+    slower: '500ms',    // Complex animations
+    slowest: '750ms',   // Dramatic effects
   },
   
   easing: {
@@ -204,21 +275,65 @@ export const animations = {
     easeOut: 'cubic-bezier(0, 0, 0.2, 1)',
     easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
     
-    // Professional easing curves
-    smooth: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
-    bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+    // Professional easing curves for legal software
+    smooth: 'cubic-bezier(0.25, 0.1, 0.25, 1)',        // Natural, smooth movement
+    bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',  // Playful bounce
+    professional: 'cubic-bezier(0.16, 1, 0.3, 1)',     // Confident, authoritative
+    elegant: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',   // Refined, sophisticated
+    snappy: 'cubic-bezier(0.33, 1.53, 0.69, 0.99)',    // Quick, responsive
   },
   
-  // Common transitions
+  // Professional transition patterns
   transition: {
-    fast: '120ms cubic-bezier(0.4, 0, 0.2, 1)',
-    normal: '160ms cubic-bezier(0.4, 0, 0.2, 1)',
+    // Basic transitions
+    instant: '75ms cubic-bezier(0.4, 0, 0.2, 1)',
+    fast: '150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    normal: '200ms cubic-bezier(0.4, 0, 0.2, 1)',
     slow: '300ms cubic-bezier(0.4, 0, 0.2, 1)',
     
     // Specific property transitions
-    colors: 'color 120ms cubic-bezier(0.4, 0, 0.2, 1), background-color 120ms cubic-bezier(0.4, 0, 0.2, 1)',
-    shadow: 'box-shadow 160ms cubic-bezier(0.4, 0, 0.2, 1)',
-    transform: 'transform 160ms cubic-bezier(0.4, 0, 0.2, 1)',
+    colors: 'color 150ms cubic-bezier(0.4, 0, 0.2, 1), background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), border-color 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    shadow: 'box-shadow 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    transform: 'transform 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+    opacity: 'opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    
+    // Complex professional transitions
+    all: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+    panel: 'width 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+    elevation: 'box-shadow 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+    
+    // Interactive element transitions
+    button: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1), transform 100ms cubic-bezier(0.16, 1, 0.3, 1)',
+    input: 'border-color 150ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    card: 'transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+  },
+  
+  // Keyframes and complex animations
+  keyframes: {
+    fadeIn: {
+      '0%': { opacity: 0, transform: 'translateY(10px)' },
+      '100%': { opacity: 1, transform: 'translateY(0)' },
+    },
+    slideInLeft: {
+      '0%': { opacity: 0, transform: 'translateX(-20px)' },
+      '100%': { opacity: 1, transform: 'translateX(0)' },
+    },
+    slideInRight: {
+      '0%': { opacity: 0, transform: 'translateX(20px)' },
+      '100%': { opacity: 1, transform: 'translateX(0)' },
+    },
+    float: {
+      '0%, 100%': { transform: 'translateY(0px)' },
+      '50%': { transform: 'translateY(-6px)' },
+    },
+    pulse: {
+      '0%, 100%': { opacity: 1 },
+      '50%': { opacity: 0.7 },
+    },
+    shimmer: {
+      '0%': { backgroundPosition: '-200% 0' },
+      '100%': { backgroundPosition: '200% 0' },
+    },
   },
 } as const;
 

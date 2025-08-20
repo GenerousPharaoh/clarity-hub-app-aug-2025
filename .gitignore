@@ -98,3 +98,4 @@ debug-output/
 test-results/
 
 **/.claude/settings.local.json
+.vercel

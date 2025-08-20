@@ -28,12 +28,13 @@ import EnhancedFileListItem, { FileItem } from './EnhancedFileListItem';
 
 interface DemoFilesListProps {
   className?: string;
+  searchQuery?: string;
 }
 
-const DemoFilesList: React.FC<DemoFilesListProps> = ({ className }) => {
+const DemoFilesList: React.FC<DemoFilesListProps> = ({ className, searchQuery = '' }) => {
   const [expanded, setExpanded] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  const [localSearchText, setLocalSearchText] = useState('');
 
   // Get files and selected file from store
   const files = useAppStore(state => state.files);
@@ -45,11 +46,14 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className }) => {
   const filteredFiles = useMemo(() => {
     if (!selectedProjectId) return [];
     
+    // Use global search query or local search text
+    const effectiveSearchText = searchQuery || localSearchText;
+    
     return files
       .filter(file => file.project_id === selectedProjectId)
       .filter(file => {
-        if (!searchText) return true;
-        const searchLower = searchText.toLowerCase();
+        if (!effectiveSearchText) return true;
+        const searchLower = effectiveSearchText.toLowerCase();
         return (
           file.name.toLowerCase().includes(searchLower) ||
           (file.exhibit_id && file.exhibit_id.toLowerCase().includes(searchLower)) ||
@@ -58,7 +62,7 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className }) => {
           ))
         );
       });
-  }, [files, selectedProjectId, searchText]);
+  }, [files, selectedProjectId, searchQuery, localSearchText]);
 
   // Handle file selection
   const handleSelectFile = (fileId: string) => {
@@ -148,7 +152,7 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className }) => {
 
   // Clear search
   const handleClearSearch = () => {
-    setSearchText('');
+    setLocalSearchText('');
   };
 
   return (
@@ -217,15 +221,15 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className }) => {
             placeholder="Search files..."
             variant="outlined"
             size="small"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
+            value={localSearchText}
+            onChange={(e) => setLocalSearchText(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
                   <SearchIcon fontSize="small" />
                 </InputAdornment>
               ),
-              endAdornment: searchText ? (
+              endAdornment: localSearchText ? (
                 <InputAdornment position="end">
                   <IconButton
                     size="small"
@@ -299,9 +303,9 @@ const DemoFilesList: React.FC<DemoFilesListProps> = ({ className }) => {
           ) : filteredFiles.length === 0 ? (
             <Box sx={{ p: 4, textAlign: 'center' }}>
               <Typography color="text.secondary" variant="body2">
-                {searchText ? 'No files match your search' : 'No files in this project yet'}
+                {(searchQuery || localSearchText) ? 'No files match your search' : 'No files in this project yet'}
               </Typography>
-              {!searchText && (
+              {!(searchQuery || localSearchText) && (
                 <Button
                   variant="outlined"
                   startIcon={<AddIcon />}

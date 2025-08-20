@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Box, Typography, Tabs, Tab, Paper } from '@mui/material';
 import useAppStore from '../../store';
 import UniversalFileViewer from '../../components/viewers/UniversalFileViewer';
+import FunctionalFileViewer from '../../components/viewers/FunctionalFileViewer';
 import AIAssistPanel from '../../components/ai/AIAssistPanel';
 
 const RightPanelWrapper = () => {
@@ -10,11 +11,15 @@ const RightPanelWrapper = () => {
   // Get selected file directly from store
   const selectedFileId = useAppStore((state) => state.selectedFileId);
   const files = useAppStore((state) => state.files);
+  const user = useAppStore((state) => state.user);
   
   // Find the selected file details
   const selectedFile = selectedFileId 
     ? files.find(file => file.id === selectedFileId) 
     : null;
+  
+  // Check if we're in demo mode
+  const isDemoMode = user?.id === '00000000-0000-0000-0000-000000000000';
   
   // Handle tab change
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -53,7 +58,11 @@ const RightPanelWrapper = () => {
         }}
       >
         {selectedFile ? (
-          <UniversalFileViewer file={selectedFile} />
+          isDemoMode ? (
+            <FunctionalFileViewer file={selectedFile} />
+          ) : (
+            <UniversalFileViewer file={selectedFile} />
+          )
         ) : (
           <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <Paper 

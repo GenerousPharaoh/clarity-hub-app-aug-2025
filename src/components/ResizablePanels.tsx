@@ -61,32 +61,25 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
     console.warn('ResizablePanels expects exactly 3 children');
   }
   
-  // Set initial container size and add resize listener
+  // Update container width on window resize only
   useEffect(() => {
-    const updateContainerWidth = () => {
+    const handleWindowResize = () => {
       if (containerRef.current) {
         const newWidth = containerRef.current.offsetWidth;
         setContainerWidth(newWidth);
-        
-        // Calculate actual widths in pixels based on percentages
-        const leftWidth = (leftPanelPercentage / 100) * newWidth;
-        const centerWidth = (centerPanelPercentage / 100) * newWidth;
-        const rightWidth = (rightPanelPercentage / 100) * newWidth;
-        
-        setPanelSizes(leftWidth, centerWidth, rightWidth);
       }
     };
     
-    // Initial size update
-    updateContainerWidth();
+    // Set initial width
+    handleWindowResize();
     
     // Add resize listener
-    window.addEventListener('resize', updateContainerWidth);
+    window.addEventListener('resize', handleWindowResize);
     
     return () => {
-      window.removeEventListener('resize', updateContainerWidth);
+      window.removeEventListener('resize', handleWindowResize);
     };
-  }, [leftPanelPercentage, centerPanelPercentage, rightPanelPercentage]);
+  }, []); // Empty dependency array - only run once
   
   // Mouse event handlers for resizing
   const handleMouseDown = (index: number, e: React.MouseEvent) => {
@@ -190,7 +183,7 @@ const ResizablePanels: React.FC<ResizablePanelsProps> = ({ children }) => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [dragging, startX, leftPanelWidth, centerPanelWidth, rightPanelWidth]);
+  }, [dragging, handleMouseMove]);
   
   return (
     <Box 

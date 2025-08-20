@@ -11,7 +11,7 @@ import { useNotification } from '../contexts/NotificationContext';
 import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
-import ResizablePanels from '../components/ResizablePanels';
+import ResizablePanels from '../components/ProfessionalPanels';
 import DemoLeftPanel from '../components/DemoLeftPanel';
 
 // Add proper type definitions for the NavLink component

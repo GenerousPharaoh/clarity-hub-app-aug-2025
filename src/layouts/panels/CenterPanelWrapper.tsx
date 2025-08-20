@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box } from '@mui/material';
 import SimpleDemoEditor from '../../components/SimpleDemoEditor';
+import FunctionalEditor from '../../components/FunctionalEditor';
 import useAppStore from '../../store';
 
 interface CenterPanelWrapperProps {
@@ -25,7 +26,7 @@ const CenterPanelWrapper: React.FC<CenterPanelWrapperProps> = ({ children }) => 
       }}
       data-test="center-panel"
     >
-      {isDemoMode ? <SimpleDemoEditor /> : children}
+      {isDemoMode ? <FunctionalEditor /> : children}
     </Box>
   );
 };

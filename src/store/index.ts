@@ -28,6 +28,7 @@ export interface AppState extends PanelState {
   setSelectedFile: (fileId: string | null) => void;
   setFiles: (files: File[]) => void;
   addFile: (file: File) => void;
+  addFileToProject: (projectId: string, file: File) => void;
   updateFile: (fileId: string, updates: Partial<File>) => void;
   deleteFile: (fileId: string) => void;
   
@@ -102,6 +103,9 @@ export const useAppStore = create<AppState>()(
         setFiles: (files) => a[0]({ files }),
         addFile: (file) => a[0]((state) => ({ 
           files: [...state.files, file] 
+        })),
+        addFileToProject: (projectId, file) => a[0]((state) => ({ 
+          files: [...state.files, { ...file, project_id: projectId }] 
         })),
         updateFile: (fileId, updates) => a[0]((state) => ({
           files: state.files.map((file) => 

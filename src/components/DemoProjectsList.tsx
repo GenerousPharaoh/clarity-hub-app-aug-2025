@@ -36,15 +36,26 @@ interface Project {
 
 interface DemoProjectsListProps {
   className?: string;
+  searchQuery?: string;
 }
 
-const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className }) => {
+const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className, searchQuery = '' }) => {
   const [expanded, setExpanded] = useState(true);
 
   // Get projects and selected project from store
   const projects = useAppStore(state => state.projects);
   const selectedProjectId = useAppStore(state => state.selectedProjectId);
   const setSelectedProject = useAppStore(state => state.setSelectedProject);
+  
+  // Filter projects based on search query
+  const filteredProjects = projects.filter(project => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      project.name.toLowerCase().includes(query) ||
+      (project.description && project.description.toLowerCase().includes(query))
+    );
+  });
 
   // Create a sample project
   const handleCreateProject = () => {
@@ -98,7 +109,7 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className }) => {
             Projects
           </Typography>
           <Chip 
-            label={projects.length} 
+            label={filteredProjects.length} 
             size="small" 
             sx={{ ml: 1, height: 20, minWidth: 20 }} 
           />
@@ -126,8 +137,15 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className }) => {
             overflow: 'auto',
           }}
         >
+          {filteredProjects.length === 0 ? (
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                {searchQuery ? 'No projects match your search' : 'No projects yet'}
+              </Typography>
+            </Box>
+          ) : (
           <List dense disablePadding>
-            {projects.map(project => (
+            {filteredProjects.map(project => (
               <ListItem key={project.id} disablePadding>
                 <ListItemButton
                   selected={project.id === selectedProjectId}
@@ -164,6 +182,7 @@ const DemoProjectsList: React.FC<DemoProjectsListProps> = ({ className }) => {
               </ListItem>
             ))}
           </List>
+          )}
         </Box>
         
         <Divider />

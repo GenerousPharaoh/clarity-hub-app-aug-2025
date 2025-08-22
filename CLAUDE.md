@@ -35,6 +35,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 1. **Client Application:** React + Vite app with Material UI
 2. **Backend:** Supabase for authentication, storage, and database
 3. **Edge Functions:** Supabase Edge Functions for AI integration
+4. **Deployment:** Vercel with automatic GitHub integration
+
+### Supabase Integration
+- Full database schema with projects, documents, files, and citations
+- File upload pipeline with SHA256 hashing and storage
+- Row Level Security (RLS) policies for data protection
+- Real-time subscriptions for collaborative features
 
 ### Key Components
 

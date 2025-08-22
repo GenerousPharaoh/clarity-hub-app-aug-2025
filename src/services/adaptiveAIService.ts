@@ -90,7 +90,7 @@ export class AdaptiveAIService {
   }
 
   /**
-   * Process uploaded file with user-specific analysis
+   * Process uploaded file with user-specific analysis and exhibit generation
    */
   async processFileForUser(fileId: string, userId: string): Promise<void> {
     console.log(`Starting AI processing for file ${fileId} for user ${userId}`);
@@ -119,6 +119,20 @@ export class AdaptiveAIService {
       // Analyze with user's historical context
       const analysis = await this.analyzeWithUserContext(fileContent, userProfile);
 
+      // Generate exhibit ID and title
+      const exhibitData = await this.generateExhibitData(file, analysis);
+      
+      // Update file with exhibit information
+      await supabase
+        .from('files')
+        .update({
+          exhibit_id: exhibitData.exhibitId,
+          exhibit_title: exhibitData.exhibitTitle,
+          exhibit_auto_generated: true,
+          description: analysis.extractedText?.substring(0, 500) || null
+        })
+        .eq('id', fileId);
+
       await this.updateProcessingStage(fileId, 'embed', 75);
 
       // Generate and store user-specific embeddings
@@ -132,16 +146,97 @@ export class AdaptiveAIService {
       // Complete processing
       await this.updateProcessingStage(fileId, 'completed', 100, {
         analysis,
-        insights: personalizedInsights
+        insights: personalizedInsights,
+        exhibit: exhibitData
       });
 
       // Update user's AI learning
       await this.updateUserAILearning(userId, file, analysis, personalizedInsights);
 
-      console.log(`AI processing completed for file ${fileId}`);
+      console.log(`AI processing completed for file ${fileId} with exhibit ${exhibitData.exhibitId}`);
     } catch (error) {
       console.error(`AI processing failed for file ${fileId}:`, error);
       await this.updateProcessingStage(fileId, 'error', 0, null, error.message);
+    }
+  }
+
+  /**
+   * Generate exhibit ID and title for uploaded file
+   */
+  private async generateExhibitData(file: any, analysis: ContentAnalysis): Promise<{exhibitId: string; exhibitTitle: string}> {
+    try {
+      // Generate exhibit ID using database function
+      const { data: exhibitIdResult } = await supabase.rpc('generate_exhibit_id', {
+        project_id_param: file.project_id,
+        file_name: file.name,
+        file_type: file.content_type || file.file_type
+      });
+
+      // Generate exhibit title using AI analysis
+      const exhibitTitle = await this.generateSmartExhibitTitle(file.name, analysis);
+
+      return {
+        exhibitId: exhibitIdResult || 'X1', // Fallback if function fails
+        exhibitTitle
+      };
+    } catch (error) {
+      console.error('Error generating exhibit data:', error);
+      // Fallback to simple naming
+      return {
+        exhibitId: 'X1',
+        exhibitTitle: file.name.replace(/\.[^/.]+$/, '') // Remove extension
+      };
+    }
+  }
+
+  /**
+   * Generate smart exhibit title using AI analysis
+   */
+  private async generateSmartExhibitTitle(fileName: string, analysis: ContentAnalysis): Promise<string> {
+    const model = this.gemini.getGenerativeModel({ model: "gemini-2.5-pro" });
+
+    const prompt = `
+    Based on this file analysis, generate a clear, professional exhibit title for a legal case.
+    
+    Original filename: ${fileName}
+    Content analysis: ${JSON.stringify(analysis)}
+    
+    Generate a title that:
+    1. Is clear and descriptive for legal professionals
+    2. Indicates the document type or content
+    3. Is 2-8 words long
+    4. Uses professional legal terminology
+    5. Avoids technical jargon
+    
+    Examples:
+    - "Employment Contract - John Smith"
+    - "Medical Records Summary"
+    - "Email Correspondence Chain"
+    - "Witness Statement Video"
+    
+    Return only the title, nothing else.
+    `;
+
+    try {
+      const result = await model.generateContent(prompt);
+      let title = result.response.text().trim();
+      
+      // Clean up the title
+      title = title.replace(/['"]/g, ''); // Remove quotes
+      title = title.substring(0, 100); // Limit length
+      
+      // Fallback if AI doesn't return reasonable title
+      if (title.length < 3 || title.length > 100) {
+        title = fileName.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+      }
+      
+      return title;
+    } catch (error) {
+      console.error('Error generating smart title:', error);
+      // Fallback to cleaned filename
+      let title = fileName.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+      return title.charAt(0).toUpperCase() + title.slice(1);
     }
   }
 

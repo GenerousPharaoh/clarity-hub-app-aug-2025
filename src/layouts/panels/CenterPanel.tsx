@@ -27,6 +27,7 @@ import SuggestionPanel from '../../components/ai/SuggestionPanel';
 import CitationFinder from '../../components/dialogs/CitationFinder';
 import { debounce } from 'lodash';
 import '../../theme/tinymce-custom.css'; // Import custom TinyMCE CSS
+import '../../styles/editor.css'; // Import sleek editor styles
 
 // Define a local interface to match the actual database schema
 interface NoteData {
@@ -271,23 +272,20 @@ const CenterPanel = () => {
     }
   };
 
-  // TinyMCE configuration
+  // TinyMCE configuration - sleek and modern
   const editorConfig = {
-    height: '100%', // Keep 100% height
-    menubar: true,
+    height: '100%',
+    menubar: false, // Hide menubar for cleaner look
     plugins: [
-      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
       'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-      'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
-      'save', 'autoresize', 'pagebreak', 'nonbreaking', 'quickbars',
-      'emoticons', 'directionality', 'visualchars', 'codesample'
+      'insertdatetime', 'media', 'table', 'help', 'wordcount',
+      'autoresize', 'pagebreak', 'quickbars', 'codesample'
     ],
-    toolbar: [
-      'undo redo | fontfamily fontsize | bold italic underline strikethrough forecolor backcolor | alignleft aligncenter alignright alignjustify',
-      'bullist numlist outdent indent | link image media table codesample | pagebreak nonbreaking | removeformat | cite fullscreen code'
-    ],
-    toolbar_mode: 'sliding', // Makes toolbar responsive
-    toolbar_sticky: true, // Keep toolbar visible when scrolling
+    toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent | link image table | cite | removeformat fullscreen',
+    toolbar_mode: 'sliding',
+    toolbar_sticky: true,
+    toolbar_sticky_offset: 0,
     // Add base_url to ensure TinyMCE can find its resources
     base_url: '/tinymce',
     // Add skin_url to ensure TinyMCE can find its skin
@@ -295,20 +293,42 @@ const CenterPanel = () => {
     // Add content_css to ensure TinyMCE loads the proper CSS for the editor content
     content_css: [
       '/tinymce/skins/content/default/content.min.css',
-      '/tinymce/tinymce-custom.css' // Path to our custom CSS in public directory
     ],
+    content_style: `
+      body { 
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 60px;
+      }
+      h1 { font-size: 2.5em; margin-bottom: 0.5em; }
+      h2 { font-size: 2em; margin-bottom: 0.5em; }
+      h3 { font-size: 1.5em; margin-bottom: 0.5em; }
+      p { margin-bottom: 1em; }
+      blockquote { 
+        border-left: 4px solid #e0e0e0;
+        padding-left: 20px;
+        margin-left: 0;
+        font-style: italic;
+      }
+    `,
     // Add license key for TinyMCE
     license_key: 'gpl',
     inline_styles: true,
     extended_valid_elements: 'a[*]',
-    resize: false, // Disable resize handle 
-    branding: false, // Remove TinyMCE branding
-    promotion: false, // Remove promotion link
-    statusbar: true, // Show status bar
-    min_height: 500, // Set minimum height
-    autoresize_bottom_margin: 50, // Add space at the bottom when using autoresize
-    // Word count and indicator
-    wordcount_countcharacters: true,
+    resize: false,
+    branding: false,
+    promotion: false,
+    statusbar: true,
+    elementpath: false, // Hide element path for cleaner look
+    // Quick insert toolbar
+    quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote',
+    quickbars_insert_toolbar: 'quicktable image media',
+    // Word count settings
+    wordcount_countcharacters: false,
     wordcount_cleanregex: /[0-9.(),;:!?%#$?\x27\x22_+=\\\/\-]*/g,
     // Setup editor
     setup: (editor) => {
@@ -316,18 +336,26 @@ const CenterPanel = () => {
       editor.on('init', () => {
         setEditorInstance(editor);
         
-        // Add clean editor styling
+        // Remove all borders and shadows for seamless integration
         const editorContainer = editor.getContainer();
         if (editorContainer) {
           editorContainer.style.border = 'none';
-          editorContainer.style.boxShadow = 'rgba(0, 0, 0, 0.05) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px 0px';
-          editorContainer.style.borderRadius = '4px';
+          editorContainer.style.boxShadow = 'none';
+          editorContainer.style.borderRadius = '0';
+          editorContainer.style.height = '100%';
         }
         
         // Make editor body use the full height
         const editorBody = editor.getBody();
         if (editorBody) {
-          editorBody.style.minHeight = '90vh'; 
+          editorBody.style.minHeight = '100%';
+        }
+        
+        // Style the toolbar for a sleeker look
+        const toolbar = editorContainer?.querySelector('.tox-toolbar');
+        if (toolbar) {
+          toolbar.style.borderBottom = '1px solid #e0e0e0';
+          toolbar.style.backgroundColor = '#fafafa';
         }
       });
       
@@ -463,157 +491,99 @@ const CenterPanel = () => {
         height: '100%',
         width: '100%',
         overflow: 'hidden',
+        position: 'relative',
+        bgcolor: 'background.paper',
       }}
     >
-      {/* Title bar */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 2,
-          borderBottom: 1,
-          borderColor: 'divider',
-        }}
-      >
-        <Typography variant="h6">
-          Note Title
-        </Typography>
-      </Paper>
-      
-      {/* Editor container */}
-      <Box
-        sx={{
-          flexGrow: 1,
-          overflow: 'auto',
-          p: 2,
-        }}
-      >
-        <Typography variant="body1" paragraph>
-          This is where the TinyMCE editor will be integrated.
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          The editor will support:
-        </Typography>
-        <ul>
-          <li>Rich text formatting</li>
-          <li>Exhibit reference links with tooltips</li>
-          <li>AI-powered writing assistance</li>
-          <li>Automatic citation generation</li>
-        </ul>
+      {loading && selectedProjectId ? (
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          height: '100%',
+        }}>
+          <CircularProgress />
+        </Box>
+      ) : !selectedProjectId ? (
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          height: '100%',
+          p: 3,
+          opacity: 0, // Keep hidden as we'll show the WelcomePlaceholder from CenterPanelWrapper instead
+        }}>
+          {/* Empty placeholder - this should never be seen */}
+        </Box>
+      ) : (
+        <Editor
+          apiKey={import.meta.env.VITE_TINYMCE_API_KEY as string}
+          value={content}
+          onEditorChange={handleEditorChange}
+          init={editorConfig}
+          // Add onInit handler to log successful initialization
+          onInit={(evt, editor) => {
+            console.log('TinyMCE initialized successfully');
+            setEditorInstance(editor);
+            if (editor.getContainer()) {
+              editor.getContainer().setAttribute('data-test', 'note-editor');
+            }
+          }}
+          // Add onError handler to catch any editor loading errors
+          onLoadError={(err) => {
+            console.error('TinyMCE failed to load:', err);
+          }}
+        />
+      )}
         
-        {selectedFileId && (
-          <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Selected File ID: {selectedFileId}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              You can reference this file using exhibit links in the editor.
-            </Typography>
-          </Paper>
-        )}
-      </Box>
-      
-      {/* Editor Area */}
-      <Box sx={{ 
-        flexGrow: 1, 
-        overflow: 'hidden', 
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: 'background.paper',
-        borderRadius: 1,
-        p: 0,
-        width: '100%',
-        height: '100%',
-      }}>
-        {loading && selectedProjectId ? (
+        {/* Floating AI Assistant button */}
+        {selectedProjectId && !loading && content && content.length > 100 && (
           <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            height: '100%',
-          }}>
-            <CircularProgress />
-          </Box>
-        ) : !selectedProjectId ? (
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            height: '100%',
-            p: 3,
-            opacity: 0, // Keep hidden as we'll show the WelcomePlaceholder from CenterPanelWrapper instead
-          }}>
-            {/* Empty placeholder - this should never be seen */}
-          </Box>
-        ) : (
-          <Box sx={{ flexGrow: 1, height: '100%', overflow: 'hidden', minHeight: 0 }}>
-            <Editor
-              apiKey={import.meta.env.VITE_TINYMCE_API_KEY as string}
-              value={content}
-              onEditorChange={handleEditorChange}
-              init={editorConfig}
-              // Add onInit handler to log successful initialization
-              onInit={(evt, editor) => {
-                console.log('TinyMCE initialized successfully');
-                setEditorInstance(editor);
-                if (editor.getContainer()) {
-                  editor.getContainer().setAttribute('data-test', 'note-editor');
-                }
-              }}
-              // Add onError handler to catch any editor loading errors
-              onLoadError={(err) => {
-                console.error('TinyMCE failed to load:', err);
-              }}
-            />
-          </Box>
-        )}
-        
-        {/* Action buttons */}
-        {selectedProjectId && !loading && (
-          <Box sx={{ 
-            position: 'absolute', 
-            top: 10, 
-            right: 10,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
+            position: 'fixed', 
+            bottom: 80, 
+            right: 24,
             zIndex: 1000,
           }}>
-            <Tooltip title="Analyze with AI">
-              <span>
-                <IconButton
-                  onClick={handleAnalyzeContent}
-                  color={isSuggestionPanelOpen ? 'primary' : 'default'}
-                  sx={{ 
-                    bgcolor: 'background.paper',
-                    boxShadow: 1,
-                    '&:hover': { bgcolor: 'background.default' }
-                  }}
-                  disabled={!content || content.length < 100}
-                >
-                  <AnalyzeIcon />
-                </IconButton>
-              </span>
+            <Tooltip title="AI Assistant">
+              <IconButton
+                onClick={handleAnalyzeContent}
+                sx={{ 
+                  bgcolor: isSuggestionPanelOpen ? 'primary.main' : 'background.paper',
+                  color: isSuggestionPanelOpen ? 'white' : 'primary.main',
+                  boxShadow: 3,
+                  width: 56,
+                  height: 56,
+                  '&:hover': { 
+                    bgcolor: isSuggestionPanelOpen ? 'primary.dark' : 'primary.light',
+                    transform: 'scale(1.05)',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <AnalyzeIcon />
+              </IconButton>
             </Tooltip>
           </Box>
         )}
         
-        {/* Saving indicator */}
+        {/* Saving indicator - subtle and unobtrusive */}
         {saving && (
           <Box sx={{ 
-            position: 'absolute', 
-            bottom: 10, 
-            right: 10,
+            position: 'fixed', 
+            bottom: 20, 
+            left: '50%',
+            transform: 'translateX(-50%)',
             display: 'flex',
             alignItems: 'center',
-            bgcolor: 'background.paper',
+            bgcolor: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
             p: 0.5,
-            px: 1,
-            borderRadius: 1,
-            boxShadow: 1,
+            px: 2,
+            borderRadius: 20,
+            zIndex: 1000,
           }}>
-            <CircularProgress size={16} sx={{ mr: 1 }} />
-            <Typography variant="caption">Saving changes...</Typography>
+            <CircularProgress size={14} sx={{ mr: 1, color: 'white' }} />
+            <Typography variant="caption">Saving...</Typography>
           </Box>
         )}
       </Box>

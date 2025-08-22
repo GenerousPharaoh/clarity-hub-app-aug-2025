@@ -1,94 +1,108 @@
-/* Lexical Editor Styles */
-.lexical-content-editable {
-  min-height: 400px !important;
-  width: 100% !important;
-  height: 100% !important;
-  cursor: text !important;
-  caret-color: #1a1a1a !important;
-  position: relative !important;
-  z-index: 10 !important;
-  background-color: #ffffff !important;
-  user-select: text !important;
-  -webkit-user-select: text !important;
-  -moz-user-select: text !important;
-  -ms-user-select: text !important;
-}
+/* Sleek TinyMCE Editor Styles */
 
-.lexical-content-editable:focus {
-  outline: none !important;
+/* Remove all unnecessary borders and shadows */
+.tox.tox-tinymce {
+  border: none !important;
   box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
 }
 
-.lexical-content-editable p {
-  margin: 0 0 8px 0;
-  min-height: 20px;
+/* Clean toolbar styling */
+.tox .tox-toolbar,
+.tox .tox-toolbar__overflow,
+.tox .tox-toolbar__primary {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 8px !important;
 }
 
-.lexical-content-editable p:empty::before {
-  content: '\200B'; /* Zero-width space to maintain height */
+/* Toolbar buttons */
+.tox .tox-tbtn {
+  color: #444 !important;
+  border-radius: 4px !important;
+  margin: 0 2px !important;
 }
 
-.lexical-placeholder {
-  position: absolute !important;
-  top: 24px !important;
-  left: 32px !important;
-  color: #9ca3af !important;
-  pointer-events: none !important;
-  user-select: none !important;
-  z-index: 0 !important;
+.tox .tox-tbtn:hover {
+  background-color: #f0f0f0 !important;
 }
 
-/* Ensure editor content is visible */
-.lexical-editor {
-  height: 100%;
-  width: 100%;
-  position: relative;
+.tox .tox-tbtn--enabled,
+.tox .tox-tbtn--enabled:hover {
+  background-color: #e8f4fd !important;
+  color: #0066cc !important;
 }
 
-.lexical-paragraph {
-  margin: 0 0 8px 0;
-  color: #1a1a1a;
+/* Editor content area */
+.tox .tox-edit-area {
+  border: none !important;
 }
 
-.lexical-heading-h1,
-.lexical-heading-h2,
-.lexical-heading-h3 {
-  color: #1a1a1a;
+.tox .tox-edit-area__iframe {
+  background: #ffffff !important;
 }
 
-.lexical-text-bold {
-  font-weight: 600;
+/* Status bar */
+.tox .tox-statusbar {
+  background: #fafafa !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 4px 12px !important;
+  font-size: 12px !important;
 }
 
-.lexical-text-italic {
-  font-style: italic;
+/* Remove promotion and branding */
+.tox-promotion,
+.tox-statusbar__branding {
+  display: none !important;
 }
 
-.lexical-text-underline {
-  text-decoration: underline;
+/* Fullscreen mode */
+.tox.tox-fullscreen {
+  z-index: 1500 !important;
 }
 
-/* Fix for contentEditable focus */
-[contenteditable="true"] {
-  cursor: text !important;
-  user-select: text !important;
-  -webkit-user-select: text !important;
+/* Quick toolbar */
+.tox .tox-toolbar__primary.tox-toolbar--scrolling {
+  scrollbar-width: thin;
 }
 
-[contenteditable="true"]:focus {
-  outline: none !important;
+/* Dialog styling */
+.tox .tox-dialog {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
 }
 
-/* Ensure proper z-index layering */
-.editor-container {
-  position: relative;
-  z-index: 1;
+/* Menu styling */
+.tox .tox-collection--list .tox-collection__item {
+  border-radius: 4px !important;
+  margin: 2px 4px !important;
 }
 
-/* Fix for panel overlap */
-.center-panel .lexical-content-editable {
-  position: relative !important;
-  z-index: 10 !important;
-  margin-left: 0 !important;
-  padding-left: 32px !important;
+.tox .tox-collection--list .tox-collection__item:hover {
+  background-color: #f0f0f0 !important;
+}
+
+/* Editor scrollbar */
+.tox-edit-area__iframe::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tox-edit-area__iframe::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.tox-edit-area__iframe::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.tox-edit-area__iframe::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

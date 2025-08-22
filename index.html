@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10b981" />
+    <title>Clarity Hub Pro - Legal Case Management Platform</title>
+    <!-- TinyMCE script - load from local public folder instead of CDN -->
+    <script src="/tinymce/tinymce.min.js"></script>
+    <!-- Custom style fixes -->
+    <link rel="stylesheet" href="/style-fixes.css">
+    <!-- IMMEDIATE PROFESSIONAL STYLING -->
+    <link rel="stylesheet" href="/immediate-fix.css">
+    <script type="module" crossorigin src="/assets/index-DZp60Vkn.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/react-vendor-B4YHSBsh.js">
+    <link rel="modulepreload" crossorigin href="/assets/mui-vendor-DOedHO9w.js">
+    <link rel="modulepreload" crossorigin href="/assets/pdf-vendor--DKs459r.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CZCse1Q0.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Auto-load UI fixes after page loads
+      window.addEventListener('load', () => {
+        const script = document.createElement('script');
+        script.src = '/ui-fixes.js';
+        document.body.appendChild(script);
+      });
+    </script>
+  </body>
+</html>

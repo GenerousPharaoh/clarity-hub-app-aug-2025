@@ -102,7 +102,7 @@ const CenterPanelWrapper: React.FC<CenterPanelWrapperProps> = ({ children }) => 
           />
           <Tab 
             icon={<UploadIcon />} 
-            label="Smart Upload" 
+            label="Upload Files" 
             id="center-panel-tab-1"
             aria-controls="center-panel-tabpanel-1"
             sx={{ minHeight: 48 }}
@@ -135,7 +135,7 @@ const CenterPanelWrapper: React.FC<CenterPanelWrapperProps> = ({ children }) => 
         )}
       </TabPanel>
 
-      {/* Smart Upload Tab */}
+      {/* File Upload Tab */}
       <TabPanel value={tabValue} index={1}>
         <IntelligentUploadZone />
       </TabPanel>

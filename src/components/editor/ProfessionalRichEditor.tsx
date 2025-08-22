@@ -142,13 +142,13 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
     readonly: readOnly,
     skin: themeMode === 'dark' ? 'oxide-dark' : 'oxide',
     content_css: themeMode === 'dark' ? 'dark' : 'default',
+    license_key: 'gpl', // Use GPL license for open source
     plugins: [
       'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
       'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
       'insertdatetime', 'media', 'table', 'wordcount', 'help',
       'emoticons', 'codesample', 'autosave', 'directionality',
-      'visualchars', 'nonbreaking', 'pagebreak', 'quickbars',
-      'contextmenu', 'paste', 'advlist'
+      'visualchars', 'nonbreaking', 'pagebreak', 'quickbars', 'advlist'
     ],
     toolbar: 'undo redo | cut copy paste | formatselect | ' +
       'bold italic underline strikethrough subscript superscript | ' +
@@ -161,8 +161,6 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
     toolbar_mode: 'sliding',
     quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote',
     quickbars_insert_toolbar: 'quickimage quicktable',
-    contextmenu: 'undo redo | cut copy paste pastetext | selectall | bold italic underline strikethrough | link unlink | image media table | bullist numlist | removeformat | help',
-    contextmenu_never_use_native: true,
     paste_data_images: true,
     paste_as_text: false,
     browser_spellcheck: true,

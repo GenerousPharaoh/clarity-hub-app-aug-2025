@@ -1,2 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
-export const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY); 
+// This file is deprecated - use src/lib/supabase.ts instead
+// Re-export the main client to maintain compatibility
+export { supabase } from './supabase'; 

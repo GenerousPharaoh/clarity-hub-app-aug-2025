@@ -340,7 +340,7 @@ export const IntelligentUploadZone: React.FC = () => {
           {isDragActive ? 'Drop files here...' : 'Drag & drop files or click to browse'}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Supports PDF, images, audio, video, and documents • AI analysis included
+          Supports PDF, images, audio, video, and documents • Automatic AI analysis and exhibit generation
         </Typography>
       </Paper>
 

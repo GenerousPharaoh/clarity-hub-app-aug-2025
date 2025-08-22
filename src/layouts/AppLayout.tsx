@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import ResizablePanels from '../components/ResizablePanels';
 import LeftPanel from './panels/LeftPanel';
 import CenterPanel from './panels/CenterPanel';
-import RightPanel from './panels/RightPanel';
+import RightPanelWrapper from './panels/RightPanelWrapper';
 import usePanelStore from '../store/panelSlice';
 
 interface AppLayoutProps {
@@ -38,7 +38,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <ResizablePanels
           leftPanel={<LeftPanel isCollapsed={isLeftCollapsed} />}
           centerPanel={children || <CenterPanel />}
-          rightPanel={<RightPanel isCollapsed={isRightCollapsed} />}
+          rightPanel={<RightPanelWrapper />}
           minLeftWidth={250}
           minCenterWidth={400}
           minRightWidth={300}

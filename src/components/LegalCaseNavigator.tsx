@@ -1,8 +1,8 @@
 /**
- * LegalCaseNavigator - Sophisticated Three-Panel Layout System
- * "Notion meets LexisNexis" - Professional legal software interface
+ * LegalCaseNavigator - Professional Three-Panel Layout System
+ * Clean and modern legal software interface
  * 
- * A sophisticated legal case management interface with three resizable panels:
+ * A professional legal case management interface with three resizable panels:
  * - Left Panel (300px default): File navigation, exhibit management
  * - Center Panel (flex-grow): Rich text editor for legal documents  
  * - Right Panel (400px default): PDF viewer, document preview, media viewer
@@ -10,18 +10,18 @@
  * Key Features:
  * - Panels NEVER disappear when collapsed - they minimize to 48px strips
  * - Smooth 200ms animations with professional easing for premium feel
- * - Drag-to-resize functionality with emerald visual feedback
+ * - Drag-to-resize functionality with navy blue visual feedback
  * - Keyboard shortcuts: Ctrl/Cmd+1 (left panel), Ctrl/Cmd+3 (right panel)
  * - Proper focus management and accessibility
- * - Sophisticated dark theme with midnight blue and emerald accents
+ * - Clean light theme with professional navy blue accents
  * 
  * Design System:
- * - Background: #0a0f1b (deep midnight blue)
- * - Panels: #111827 (dark slate) with professional shadows
- * - Primary: #10b981 (emerald green) for trust and sophistication
+ * - Background: #f8f9fa (clean light gray)
+ * - Panels: #ffffff (white) with subtle professional shadows
+ * - Primary: #1e3a8a (navy blue) for trust and professionalism
  * - Secondary: #6366f1 (indigo) for professional accents
- * - Text: #f3f4f6 primary, #9ca3af secondary for optimal contrast
- * - Professional shadows: Enhanced dark mode with emerald glows
+ * - Text: #1f2937 primary, #6b7280 secondary for optimal contrast
+ * - Professional shadows: Clean light mode with navy accents
  * - Smooth transitions: 200ms cubic-bezier(0.4, 0, 0.2, 1)
  */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -195,13 +195,13 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
           backgroundColor: 'transparent',
           transition: 'all 120ms cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
-            backgroundColor: '#10b981', // Emerald for resize handle
+            backgroundColor: '#1e3a8a', // Navy blue for resize handle
             '&::after': {
               opacity: 1,
             }
           },
           '&:active': {
-            backgroundColor: '#059669', // Darker emerald
+            backgroundColor: '#1e40af', // Darker navy
           },
           '&::after': {
             content: '""',
@@ -241,17 +241,17 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
           top: 16,
           width: 32,
           height: 32,
-          backgroundColor: '#111827', // Dark slate surface
-          border: '1px solid #374151', // Subtle border
-          color: '#f3f4f6', // High contrast text
-          boxShadow: '0 4px 20px rgba(0,0,0,0.6)', // Enhanced dark shadow
+          backgroundColor: '#ffffff', // Clean white surface
+          border: '1px solid #e5e7eb', // Subtle gray border
+          color: '#374151', // Professional dark gray text
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)', // Clean subtle shadow
           transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 20,
           '&:hover': {
-            backgroundColor: '#1f2937', // Elevated dark surface
-            borderColor: '#10b981', // Emerald border on hover
+            backgroundColor: '#f9fafb', // Light gray hover surface
+            borderColor: '#1e3a8a', // Navy border on hover
             transform: 'scale(1.05)',
-            boxShadow: '0 6px 25px rgba(16, 185, 129, 0.2)', // Emerald glow
+            boxShadow: '0 6px 25px rgba(30, 58, 138, 0.15)', // Navy glow
           },
           '&:active': {
             transform: 'scale(0.98)',
@@ -276,7 +276,7 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
         display: 'flex',
         width: '100%',
         height: '100%',
-        backgroundColor: '#0a0f1b', // Deep midnight blue background
+        backgroundColor: '#f8f9fa', // Clean light gray background
         overflow: 'hidden',
         outline: 'none',
       }}
@@ -288,9 +288,9 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
           width: actualLeftWidth,
           height: '100%',
           position: 'relative',
-          backgroundColor: '#111827', // Dark slate surface
-          borderRight: '1px solid #374151', // Subtle border
-          boxShadow: '0 8px 32px rgba(0,0,0,0.6)', // Enhanced dark shadow
+          backgroundColor: '#ffffff', // Clean white surface
+          borderRight: '1px solid #e5e7eb', // Light gray border
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)', // Clean subtle shadow
           transition: 'width 200ms cubic-bezier(0.4, 0, 0.2, 1)',
           overflow: 'hidden',
           zIndex: 1,
@@ -306,23 +306,9 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
           sx={{
             width: '100%',
             height: '100%',
-            overflow: leftCollapsed ? 'hidden' : 'auto',
             opacity: leftCollapsed ? 0 : 1,
             transition: 'opacity 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-            '&::-webkit-scrollbar': {
-              width: 6,
-            },
-            '&::-webkit-scrollbar-track': {
-              backgroundColor: '#0a0f1b', // Midnight blue track
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#10b981', // Emerald scrollbar
-              borderRadius: 3,
-              '&:hover': {
-                backgroundColor: '#059669', // Darker emerald on hover
-                boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)', // Emerald glow
-              }
-            },
+            overflow: 'hidden',
           }}
         >
           {leftPanel}
@@ -341,7 +327,7 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
         sx={{
           flex: 1,
           height: '100%',
-          backgroundColor: '#111827', // Dark slate surface
+          backgroundColor: '#ffffff', // Clean white surface
           position: 'relative',
           overflow: 'auto',
           zIndex: 0,
@@ -350,14 +336,14 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
             height: 8,
           },
           '&::-webkit-scrollbar-track': {
-            backgroundColor: '#0a0f1b', // Midnight blue track
+            backgroundColor: '#f8f9fa', // Light gray track
           },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#10b981', // Emerald scrollbar
+            backgroundColor: '#1e3a8a', // Navy scrollbar
             borderRadius: 4,
             '&:hover': {
-              backgroundColor: '#059669', // Darker emerald on hover
-              boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)', // Emerald glow
+              backgroundColor: '#1e40af', // Darker navy on hover
+              boxShadow: '0 0 10px rgba(30, 58, 138, 0.3)', // Navy glow
             }
           },
         }}
@@ -372,9 +358,9 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
           width: actualRightWidth,
           height: '100%',
           position: 'relative',
-          backgroundColor: '#111827', // Dark slate surface
-          borderLeft: '1px solid #374151', // Subtle border
-          boxShadow: '0 8px 32px rgba(0,0,0,0.6)', // Enhanced dark shadow
+          backgroundColor: '#ffffff', // Clean white surface
+          borderLeft: '1px solid #e5e7eb', // Light gray border
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)', // Clean subtle shadow
           transition: 'width 200ms cubic-bezier(0.4, 0, 0.2, 1)',
           overflow: 'hidden',
           zIndex: 1,
@@ -397,14 +383,14 @@ const LegalCaseNavigator: React.FC<LegalCaseNavigatorProps> = ({
               width: 6,
             },
             '&::-webkit-scrollbar-track': {
-              backgroundColor: '#0a0f1b', // Midnight blue track
+              backgroundColor: '#f8f9fa', // Light gray track
             },
             '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#10b981', // Emerald scrollbar
+              backgroundColor: '#1e3a8a', // Navy scrollbar
               borderRadius: 3,
               '&:hover': {
-                backgroundColor: '#059669', // Darker emerald on hover
-                boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)', // Emerald glow
+                backgroundColor: '#1e40af', // Darker navy on hover
+                boxShadow: '0 0 10px rgba(30, 58, 138, 0.3)', // Navy glow
               }
             },
           }}

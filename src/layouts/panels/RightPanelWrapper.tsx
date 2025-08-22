@@ -4,6 +4,7 @@ import useAppStore from '../../store';
 import UniversalFileViewer from '../../components/viewers/UniversalFileViewer';
 import FunctionalFileViewer from '../../components/viewers/FunctionalFileViewer';
 import ProfessionalViewerContainer from '../../components/viewers/ProfessionalViewerContainer';
+import MockFileViewer from '../../components/viewers/MockFileViewer';
 import { supabase } from '../../lib/supabaseClient';
 import { publicUrl } from '../../utils/publicUrl';
 
@@ -96,13 +97,19 @@ const RightPanelWrapper = () => {
       data-test="right-panel"
     >
       {isDemoMode && selectedFile ? (
-        // Demo mode - use existing functional viewer
+        // Demo mode - use mock file viewer that doesn't need actual file URLs
         <Box sx={{ 
           flex: 1, 
           overflow: 'hidden',
-          p: 1,
         }}>
-          <FunctionalFileViewer file={selectedFile} />
+          <MockFileViewer
+            fileName={selectedFile.name}
+            fileType={selectedFile.file_type}
+            onCopyLink={() => {
+              console.log('Demo: copied link for file:', selectedFile.name);
+              // Could add a notification here if needed
+            }}
+          />
         </Box>
       ) : (
         // Production mode - use professional viewers with citation linking

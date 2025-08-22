@@ -79,37 +79,37 @@ const createProfessionalTheme = (mode: 'light' | 'dark' = 'light'): ThemeOptions
         contrastText: '#ffffff',
       },
       
-      // Background colors - Sophisticated dark theme with midnight blue
+      // Background colors - Clean professional light theme
       background: {
-        default: isLight ? colors.neutral[50] : colors.dark[50], // Deep midnight blue for dark mode
-        paper: isLight ? '#ffffff' : colors.dark[100], // Dark slate for panels
+        default: isLight ? colors.neutral[50] : colors.neutral[100], // Clean light backgrounds
+        paper: isLight ? '#ffffff' : colors.neutral[200], // Clean white/light gray panels
       },
       
-      // Text colors - High contrast for legal documents with sophisticated dark theme
+      // Text colors - High contrast for legal documents
       text: {
-        primary: isLight ? colors.neutral[900] : colors.dark[900], // Maximum contrast text
-        secondary: isLight ? colors.neutral[600] : colors.dark[600], // Secondary text
-        disabled: isLight ? colors.neutral[500] : colors.dark[500], // Disabled text
+        primary: isLight ? colors.neutral[900] : colors.neutral[800], // Maximum contrast text
+        secondary: isLight ? colors.neutral[600] : colors.neutral[500], // Secondary text
+        disabled: isLight ? colors.neutral[500] : colors.neutral[400], // Disabled text
       },
       
       // Dividers and borders
       divider: isLight 
         ? alpha(colors.neutral[900], 0.08)
-        : alpha(colors.dark[600], 0.12),
+        : alpha(colors.neutral[600], 0.12),
       
       // Professional action colors
       action: {
-        active: isLight ? colors.neutral[700] : colors.dark[500],
+        active: isLight ? colors.neutral[700] : colors.neutral[600],
         hover: isLight 
           ? alpha(colors.neutral[900], 0.04)
-          : alpha(colors.dark[600], 0.08),
+          : alpha(colors.neutral[700], 0.08),
         selected: isLight
           ? alpha(colors.primary[500], 0.08)
           : alpha(colors.primary[400], 0.16),
-        disabled: isLight ? colors.neutral[500] : colors.dark[400],
+        disabled: isLight ? colors.neutral[500] : colors.neutral[400],
         disabledBackground: isLight 
           ? alpha(colors.neutral[900], 0.02)
-          : alpha(colors.dark[600], 0.04),
+          : alpha(colors.neutral[600], 0.04),
         focus: isLight
           ? alpha(colors.primary[500], 0.12)
           : alpha(colors.primary[400], 0.24),

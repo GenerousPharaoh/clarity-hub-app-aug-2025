@@ -34,6 +34,13 @@ const fileVersions: Record<string, FileVersion[]> = {};
 // Test Supabase connection on startup and set fallback mode if needed
 (async function testSupabaseConnection() {
   try {
+    // Check if we're in demo mode first
+    if (window.DEMO_MODE) {
+      console.log('Demo mode detected, enabling fallback storage');
+      useLocalFallback = true;
+      return;
+    }
+    
     // Try to access the files bucket
     const { data, error } = await supabase.storage.from('files').list('', { limit: 1 });
     
@@ -83,12 +90,11 @@ export const resetFallbackMode = async (): Promise<boolean> => {
  * This avoids the redirect issue that can cause iframe embedding problems.
  */
 export const getPublicUrl = (bucket: string, path: string): string => {
-  if (useLocalFallback) {
-    // Return fallback URL if operating in offline mode
-    const urlPromise = fallbackStorage.getFileUrl(bucket, path).then((url) => url || '');
-    // Because this utility is expected to be synchronous in most call-sites, return empty string synchronously 
-    console.warn('[storageService] Using fallback URL – some components may need to await this promise');
-    return new String(urlPromise) as unknown as string;
+  if (useLocalFallback || window.DEMO_MODE) {
+    // In fallback mode, we can't return a synchronous URL for async local storage
+    // Components should use getFileUrl() for async URL resolution
+    console.warn('[storageService] Fallback mode active - use getFileUrl() for proper async handling');
+    return '';
   }
 
   if (!path || !bucket) return '';
@@ -173,7 +179,7 @@ export const uploadFile = async (
     retryCount?: number;
     createVersion?: boolean;
   }
-) => {
+): Promise<{ path: string; publicUrl: string; versionId?: string }> => {
   try {
     // Set default options
     const { 
@@ -184,32 +190,38 @@ export const uploadFile = async (
       createVersion = true
     } = options || {};
     
-    // Check if we're in fallback mode
-    if (useLocalFallback) {
-      console.log('Using local fallback for uploadFile');
+    // Check if we're in fallback mode or demo mode
+    if (useLocalFallback || window.DEMO_MODE) {
+      console.log('Using local fallback for uploadFile (fallback mode or demo)');
       
       // Extract project ID and user ID from the path
       // Assuming path format like: projects/{projectId}/{fileId}_{filename}
       const parts = path.split('/');
       const projectId = parts.length > 1 ? parts[1] : 'unknown-project';
       
-      // Get user ID from Supabase auth or use a default
-      const userId = supabase.auth.getUser().then(({ data }) => data?.user?.id || 'anonymous');
+      // Get user ID from Supabase auth or use demo user ID
+      let userId = 'demo-user-123';
+      try {
+        const { data } = await supabase.auth.getUser();
+        userId = data?.user?.id || 'demo-user-123';
+      } catch (error) {
+        console.warn('Could not get user ID, using demo user');
+      }
       
-      // Simulate upload progress
+      // Simulate upload progress for better UX
       if (onProgress) {
-        // Send 10% progress
+        // Send 10% progress immediately
         onProgress({ loaded: file.size * 0.1, total: file.size });
         
         // After a delay, send 50% progress
         setTimeout(() => {
           onProgress({ loaded: file.size * 0.5, total: file.size });
-        }, 300);
+        }, 150);
         
         // After another delay, send 90% progress
         setTimeout(() => {
           onProgress({ loaded: file.size * 0.9, total: file.size });
-        }, 600);
+        }, 300);
       }
       
       // Upload to local storage
@@ -218,7 +230,7 @@ export const uploadFile = async (
         path, 
         file, 
         projectId, 
-        await userId
+        userId
       );
       
       // Send 100% progress

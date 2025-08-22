@@ -477,9 +477,11 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
       
       // Set general error for common failures
       if (errorMessage.includes('bucket') || errorMessage.includes('storage')) {
-        setGeneralError('Storage system error. Please contact support if this persists.');
+        setGeneralError('Storage system error. Files are being stored locally instead.');
       } else if (errorMessage.includes('auth') || errorMessage.includes('permission')) {
-        setGeneralError('Login session may have expired. Try refreshing the page and logging in again.');
+        setGeneralError('Using local storage mode. Files will be stored in your browser.');
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        setGeneralError('Network error. Files are being stored locally and will sync when connection is restored.');
       }
       
       // Call onError callback
@@ -745,6 +747,15 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         <Alert 
           severity="info" 
           sx={{ mb: 2 }}
+          action={
+            <Button 
+              color="inherit" 
+              size="small" 
+              onClick={() => window.location.reload()}
+            >
+              Retry Cloud Connection
+            </Button>
+          }
         >
           <strong>Local Storage Mode Active:</strong> Files are being stored in your browser. They will be available on this device only and won't sync to the cloud.
         </Alert>
@@ -810,7 +821,11 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
             {acceptedFileTypes && acceptedFileTypes.length > 0 && (
               ` • Accepted formats: ${acceptedFileTypes.join(', ')}`
             )}
-            {fallbackModeActive && ` • Local storage mode active`}
+            {fallbackModeActive && (
+              <Box component="span" sx={{ color: 'warning.main', fontWeight: 500 }}>
+                {` • Local storage mode active`}
+              </Box>
+            )}
           </Typography>
           
           <VisuallyHiddenInput

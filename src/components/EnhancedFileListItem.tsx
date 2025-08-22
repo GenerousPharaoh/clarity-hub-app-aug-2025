@@ -58,23 +58,37 @@ interface EnhancedFileListItemProps {
 const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   margin: '2px 0',
-  transition: 'all 0.2s ease',
+  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
   padding: '6px 8px',
+  position: 'relative',
+  overflow: 'hidden',
   '&:hover': {
     backgroundColor: theme.palette.mode === 'dark' 
       ? 'rgba(255, 255, 255, 0.08)' 
       : 'rgba(0, 0, 0, 0.04)',
+    transform: 'translateX(4px)',
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 2px 8px rgba(0, 0, 0, 0.3)'
+      : '0 2px 8px rgba(0, 0, 0, 0.1)',
   },
   '&.Mui-selected': {
     backgroundColor: theme.palette.mode === 'dark' 
       ? 'rgba(67, 129, 250, 0.2)' 
       : 'rgba(67, 129, 250, 0.1)',
     borderLeft: `3px solid ${theme.palette.primary.main}`,
+    transform: 'translateX(4px)',
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 4px 12px rgba(67, 129, 250, 0.3)'
+      : '0 4px 12px rgba(67, 129, 250, 0.2)',
     '&:hover': {
       backgroundColor: theme.palette.mode === 'dark' 
         ? 'rgba(67, 129, 250, 0.25)' 
         : 'rgba(67, 129, 250, 0.15)',
+      transform: 'translateX(6px)',
     },
+  },
+  '&:active': {
+    transform: 'scale(0.98) translateX(2px)',
   },
 }));
 
@@ -214,10 +228,16 @@ const EnhancedFileListItem: React.FC<EnhancedFileListItemProps> = ({
               width: 36,
               height: 36,
               bgcolor: 'background.paper',
-              boxShadow: 1,
+              boxShadow: isSelected ? 2 : 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: 2,
+              },
             }}
           >
             {getFileIcon(file.file_type, file.content_type)}
@@ -257,31 +277,31 @@ const EnhancedFileListItem: React.FC<EnhancedFileListItemProps> = ({
             </Box>
           }
           secondary={
-            <Box sx={{ 
+            <span style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              mt: 0.5,
-              gap: 1,
+              marginTop: '0.25rem',
+              gap: '0.5rem',
               fontSize: '0.7rem',
-              color: 'text.secondary',
+              color: 'inherit',
             }}>
-              <Typography variant="caption">
+              <span style={{ fontSize: '0.7rem' }}>
                 {formatFileSize(file.size || 0)}
-              </Typography>
+              </span>
               
-              <Typography variant="caption" noWrap>
+              <span style={{ fontSize: '0.7rem' }}>
                 •
-              </Typography>
+              </span>
               
-              <Typography variant="caption" noWrap>
+              <span style={{ fontSize: '0.7rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {timeAgo}
-              </Typography>
+              </span>
               
               {primaryTag && (
                 <>
-                  <Typography variant="caption" noWrap>
+                  <span style={{ fontSize: '0.7rem' }}>
                     •
-                  </Typography>
+                  </span>
                   <Chip 
                     label={primaryTag} 
                     size="small" 
@@ -295,32 +315,25 @@ const EnhancedFileListItem: React.FC<EnhancedFileListItemProps> = ({
               )}
               
               {isProcessing && (
-                <Box
-                  component="span"
-                  sx={{
+                <span
+                  style={{
                     width: 8,
                     height: 8,
                     borderRadius: '50%',
-                    bgcolor: 'warning.main',
+                    backgroundColor: '#ff9800',
                     animation: 'pulse 1.5s infinite',
                     display: 'inline-block',
-                    ml: 0.5,
-                    '@keyframes pulse': {
-                      '0%': { opacity: 1 },
-                      '50%': { opacity: 0.4 },
-                      '100%': { opacity: 1 },
-                    },
+                    marginLeft: '0.25rem',
                   }}
                 />
               )}
-            </Box>
+            </span>
           }
           primaryTypographyProps={{ 
             variant: 'body2' 
           }}
           secondaryTypographyProps={{ 
-            variant: 'caption',
-            component: 'div'
+            component: 'span'
           }}
         />
       </StyledListItemButton>

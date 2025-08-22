@@ -1,6 +1,52 @@
 import { useEffect, useState } from 'react';
-import { Box, AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Avatar, Container, Tooltip, CircularProgress, Button, Divider, useTheme } from '@mui/material';
-import { Menu as MenuIcon, DarkMode, LightMode, Logout, Settings, Dashboard, NotificationsNone, Apps as AppsIcon } from '@mui/icons-material';
+import { 
+  Box, 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  IconButton, 
+  Menu, 
+  MenuItem, 
+  Avatar, 
+  Container, 
+  Tooltip, 
+  CircularProgress, 
+  Button, 
+  Divider, 
+  useTheme,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
+  Badge,
+  ListItemIcon,
+  ListItemText,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  alpha,
+} from '@mui/material';
+import { 
+  Menu as MenuIcon, 
+  DarkMode, 
+  LightMode, 
+  Logout, 
+  Settings, 
+  Dashboard, 
+  NotificationsNone, 
+  Apps as AppsIcon,
+  Folder as FolderIcon,
+  Add as AddIcon,
+  Home as HomeIcon,
+  Message as MessageIcon,
+  Help as HelpIcon,
+  AccountCircle,
+  Close as CloseIcon,
+  ChevronRight,
+  ViewSidebar,
+  ViewSidebarRounded,
+} from '@mui/icons-material';
 import { useNavigate, useParams, Outlet, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import useAppStore from '../store';
@@ -11,59 +57,8 @@ import { useNotification } from '../contexts/NotificationContext';
 import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
-import LegalCaseNavigator from '../components/LegalCaseNavigator';
-import DemoLeftPanel from '../components/DemoLeftPanel';
-
-// Add proper type definitions for the NavLink component
-interface NavLinkProps {
-  to: string;
-  label: string;
-  icon: React.ReactNode;
-  onClick?: () => void;
-}
-
-// Add a custom NavLink component with loading indicator
-const NavLink = ({ to, label, icon, onClick }: NavLinkProps) => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  
-  const handleNavigation = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    // Call the onClick handler if provided
-    if (onClick) onClick();
-    
-    // Slight delay for visual feedback
-    setTimeout(() => {
-      navigate(to);
-      setLoading(false);
-    }, 100);
-  };
-  
-  return (
-    <Tooltip title={label} placement="right">
-      <IconButton
-        color="inherit"
-        onClick={handleNavigation}
-        disabled={loading}
-        sx={{ 
-          position: 'relative',
-          borderRadius: 1.5,
-          transition: 'all 0.2s ease',
-          mx: 0.5,
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)'
-          }
-        }}
-      >
-        {loading ? (
-          <CircularProgress size={24} color="inherit" />
-        ) : icon}
-      </IconButton>
-    </Tooltip>
-  );
-};
+import ProfessionalPanelLayout from '../components/ProfessionalPanelLayout';
+import SimplifiedLeftPanel from '../components/SimplifiedLeftPanel';
 
 const MainLayout = () => {
   const theme = useTheme();
@@ -72,18 +67,20 @@ const MainLayout = () => {
   const { signOut, user } = useAuth();
   const { showNotification } = useNotification();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const menuOpen = Boolean(anchorEl);
 
-  // Use individual selectors for each state value to prevent infinite re-renders
-  const isLeftPanelOpen = useAppStore((state) => state.isLeftPanelOpen);
-  const isRightPanelOpen = useAppStore((state) => state.isRightPanelOpen);
+  // Store state
+  const projects = useAppStore((state) => state.projects);
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
-  const toggleLeftPanel = useAppStore((state) => state.toggleLeftPanel);
-  const toggleRightPanel = useAppStore((state) => state.toggleRightPanel);
+  const setSelectedProject = useAppStore((state) => state.setSelectedProject);
   const toggleTheme = useAppStore((state) => state.toggleTheme);
   const themeMode = useAppStore((state) => state.themeMode);
-  const setSelectedProject = useAppStore((state) => state.setSelectedProject);
   const setSelectedFile = useAppStore((state) => state.setSelectedFile);
+  const isLeftPanelOpen = useAppStore((state) => state.isLeftPanelOpen);
+  const isRightPanelOpen = useAppStore((state) => state.isRightPanelOpen);
+  const toggleLeftPanel = useAppStore((state) => state.toggleLeftPanel);
+  const toggleRightPanel = useAppStore((state) => state.toggleRightPanel);
 
   // Set the selected project from the URL parameter
   useEffect(() => {
@@ -92,22 +89,78 @@ const MainLayout = () => {
     }
   }, [projectId, setSelectedProject]);
 
+  // Keyboard shortcuts for panel toggling
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === '[') {
+          e.preventDefault();
+          toggleLeftPanel();
+        } else if (e.key === ']') {
+          e.preventDefault();
+          toggleRightPanel();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleLeftPanel, toggleRightPanel]);
+
   // Reset selectedFile when selectedProject changes
   useEffect(() => {
     setSelectedFile(null);
   }, [selectedProjectId, setSelectedFile]);
 
-  // Open user menu
+  // Handle project change
+  const handleProjectChange = (projectId: string) => {
+    setSelectedProject(projectId);
+    navigate(`/project/${projectId}`);
+    showNotification(`Switched to project: ${projects.find(p => p.id === projectId)?.name}`, 'info');
+  };
+
+  // Create new project
+  const handleCreateProject = () => {
+    const projectName = prompt('Enter project name:', `Case ${projects.length + 1}`);
+    if (!projectName) return;
+    
+    const newId = `demo-project-${Date.now()}`;
+    const newProject = {
+      id: newId,
+      name: projectName,
+      description: prompt('Enter project description (optional):', '') || undefined,
+      created_at: new Date().toISOString(),
+      owner_id: user?.id || '00000000-0000-0000-0000-000000000000'
+    };
+    
+    useAppStore.setState(state => ({
+      projects: [...state.projects, newProject],
+      selectedProjectId: newId
+    }));
+    
+    navigate(`/project/${newId}`);
+    showNotification(`Created new project: ${projectName}`, 'success');
+  };
+
+  // Navigation items for drawer
+  const navigationItems = [
+    { icon: <HomeIcon />, label: 'Home', path: '/' },
+    { icon: <Dashboard />, label: 'Dashboard', path: '/dashboard' },
+    { icon: <MessageIcon />, label: 'Messages', path: '/messages' },
+    { icon: <Settings />, label: 'Settings', path: '/settings' },
+    { icon: <HelpIcon />, label: 'Help & Support', path: '/help' },
+  ];
+
+  // Handle user menu
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
   
-  // Close user menu
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
   
-  // Handle user logout
+  // Handle logout
   const handleLogout = async () => {
     try {
       await signOut();
@@ -129,141 +182,219 @@ const MainLayout = () => {
         height: '100vh', 
         width: '100vw',
         overflow: 'hidden', 
-        bgcolor: '#0a0f1b', // Deep midnight blue background
+        bgcolor: theme.palette.background.default,
       }}
     >
-      {/* App Bar */}
+      {/* Modern App Bar */}
       <AppBar 
         position="fixed" 
         elevation={0}
         sx={{ 
           zIndex: theme => theme.zIndex.drawer + 1,
           backdropFilter: 'blur(20px)',
-          background: 'linear-gradient(135deg, #111827 0%, #1f2937 100%)', // Dark slate gradient
-          color: '#f3f4f6', // High contrast text
-          borderBottom: '1px solid rgba(16, 185, 129, 0.1)', // Subtle emerald border
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6)', // Enhanced dark shadow
+          background: theme.palette.mode === 'dark' 
+            ? alpha(theme.palette.background.paper, 0.9)
+            : 'rgba(255, 255, 255, 0.95)',
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          boxShadow: theme.palette.mode === 'dark'
+            ? '0 1px 3px rgba(0, 0, 0, 0.3)'
+            : '0 1px 3px rgba(0, 0, 0, 0.05)',
         }}
       >
-        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
-          {/* App logo */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 }, px: { xs: 2, sm: 3 } }}>
+          {/* Burger Menu */}
+          <Tooltip title="Menu">
             <IconButton
-              color="inherit"
               edge="start"
-              onClick={toggleLeftPanel}
+              color="inherit"
+              onClick={() => setDrawerOpen(!drawerOpen)}
               sx={{ 
                 mr: 2,
-                borderRadius: 1.5,
-                transition: 'all 0.2s ease',
+                color: theme.palette.text.primary,
                 '&:hover': {
-                  backgroundColor: theme => theme.palette.mode === 'dark' 
-                    ? 'rgba(255, 255, 255, 0.05)'
-                    : 'rgba(0, 0, 0, 0.04)'
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
                 }
               }}
             >
               <MenuIcon />
             </IconButton>
-            <Typography
-              variant="h6"
-              noWrap
-              component={RouterLink}
-              to="/"
-              sx={{ 
-                flexGrow: 0, 
-                display: { xs: 'none', sm: 'block' },
-                fontWeight: 700,
-                textDecoration: 'none',
-                color: 'transparent',
-                background: 'linear-gradient(90deg, #10b981, #34d399)', // Emerald gradient
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 20px rgba(16, 185, 129, 0.3)', // Emerald glow
-                mr: 2
-              }}
-            >
-              LEGAL CASE MANAGER PRO
-            </Typography>
-          </Box>
-          
-          {/* Spacer */}
-          <Box sx={{ flexGrow: 1 }} />
-          
-          {/* Center navigation/action icons */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              mx: 2
+          </Tooltip>
+
+          {/* App Logo/Title */}
+          <Typography
+            variant="h6"
+            noWrap
+            sx={{ 
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              color: theme.palette.primary.main,
+              letterSpacing: '-0.5px',
+              mr: 3,
+              display: { xs: 'none', sm: 'block' }
             }}
           >
-            <NavLink
-              to="/"
-              label="Cases Dashboard"
-              icon={<Dashboard fontSize="small" />}
-            />
-          </Box>
-          
-          {/* Right side app bar icons */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {/* Add the sync button here with improved styling */}
-            <Box sx={{ mx: 1 }}>
-              <AutoSyncButton variant="icon" showCount />
-            </Box>
+            CLARITY HUB
+          </Typography>
+
+          {/* Project Selector */}
+          <FormControl 
+            size="small" 
+            sx={{ 
+              minWidth: 200, 
+              mr: 2,
+              '& .MuiOutlinedInput-root': {
+                bgcolor: 'white',
+                '&:hover': {
+                  bgcolor: alpha('#1e3a8a', 0.02),
+                },
+              },
+            }}
+          >
+            <Select
+              value={selectedProjectId || ''}
+              onChange={(e) => handleProjectChange(e.target.value)}
+              displayEmpty
+              renderValue={(value) => {
+                if (!value) return <em style={{ color: '#9ca3af' }}>Select a project</em>;
+                const project = projects.find(p => p.id === value);
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <FolderIcon sx={{ fontSize: 18, color: theme.palette.primary.main }} />
+                    <span>{project?.name}</span>
+                  </Box>
+                );
+              }}
+            >
+              <MenuItem value="" disabled>
+                <em>Select a project</em>
+              </MenuItem>
+              <Divider />
+              {projects.map((project) => (
+                <MenuItem key={project.id} value={project.id}>
+                  <ListItemIcon>
+                    <FolderIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={project.name}
+                    secondary={project.description}
+                  />
+                </MenuItem>
+              ))}
+              <Divider />
+              <MenuItem onClick={(e) => {
+                e.stopPropagation();
+                handleCreateProject();
+              }}>
+                <ListItemIcon>
+                  <AddIcon fontSize="small" color="primary" />
+                </ListItemIcon>
+                <ListItemText primary="Create New Project" />
+              </MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Spacer */}
+          <Box sx={{ flexGrow: 1 }} />
+
+          {/* Action Buttons */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* Panel Toggles */}
+            <Tooltip title="Toggle Left Panel (⌘[)">
+              <IconButton
+                onClick={() => toggleLeftPanel()}
+                sx={{ 
+                  color: theme.palette.text.primary,
+                  bgcolor: isLeftPanelOpen ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.15),
+                  }
+                }}
+              >
+                <ViewSidebar sx={{ transform: 'scaleX(-1)' }} />
+              </IconButton>
+            </Tooltip>
             
+            <Tooltip title="Toggle Right Panel (⌘])">
+              <IconButton
+                onClick={() => toggleRightPanel()}
+                sx={{ 
+                  color: theme.palette.text.primary,
+                  bgcolor: isRightPanelOpen ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.15),
+                  }
+                }}
+              >
+                <ViewSidebar />
+              </IconButton>
+            </Tooltip>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
+            
+            {/* Sync Button */}
+            <AutoSyncButton variant="icon" showCount />
+
+            {/* Notifications */}
+            <Tooltip title="Notifications">
+              <IconButton
+                sx={{ 
+                  color: theme.palette.text.primary,
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  }
+                }}
+                onClick={() => showNotification('No new notifications', 'info')}
+              >
+                <Badge badgeContent={0} color="error">
+                  <NotificationsNone />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+
+            {/* Theme Toggle */}
             <Tooltip title={`Switch to ${themeMode === 'dark' ? 'light' : 'dark'} mode`}>
               <IconButton
-                color="inherit"
                 onClick={toggleTheme}
                 sx={{ 
-                  mx: 1,
-                  borderRadius: 1.5,
-                  transition: 'all 0.2s ease',
+                  color: theme.palette.text.primary,
                   '&:hover': {
-                    transform: 'translateY(-1px)',
-                    backgroundColor: theme => theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.05)'
-                      : 'rgba(0, 0, 0, 0.04)'
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
                   }
                 }}
               >
                 {themeMode === 'dark' ? <LightMode /> : <DarkMode />}
               </IconButton>
             </Tooltip>
-            
-            {/* User avatar and menu */}
+
+            {/* User Menu */}
             {user ? (
               <>
                 <IconButton
                   onClick={handleMenuOpen}
                   size="small"
-                  sx={{ ml: 2 }}
-                  aria-controls={menuOpen ? 'account-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={menuOpen ? 'true' : undefined}
+                  sx={{ ml: 1 }}
                 >
                   <Avatar 
-                    sx={{ width: 36, height: 36 }}
+                    sx={{ 
+                      width: 32, 
+                      height: 32,
+                      bgcolor: theme.palette.primary.main,
+                      fontSize: '0.9rem',
+                    }}
                     src={user.avatar_url || undefined}
-                    alt={user.full_name || user.email}
                   >
                     {(user.full_name || user.email || 'U')[0].toUpperCase()}
                   </Avatar>
                 </IconButton>
                 <Menu
                   anchorEl={anchorEl}
-                  id="account-menu"
                   open={menuOpen}
                   onClose={handleMenuClose}
-                  onClick={handleMenuClose}
                   PaperProps={{
                     elevation: 3,
                     sx: {
-                      overflow: 'visible',
-                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
-                      minWidth: 200,
                       mt: 1.5,
+                      minWidth: 200,
                       '& .MuiMenuItem-root': {
                         px: 2,
                         py: 1,
@@ -282,8 +413,29 @@ const MainLayout = () => {
                     </Typography>
                   </Box>
                   <Divider />
+                  <MenuItem onClick={() => {
+                    handleMenuClose();
+                    navigate('/profile');
+                  }}>
+                    <ListItemIcon>
+                      <AccountCircle fontSize="small" />
+                    </ListItemIcon>
+                    Profile
+                  </MenuItem>
+                  <MenuItem onClick={() => {
+                    handleMenuClose();
+                    navigate('/settings');
+                  }}>
+                    <ListItemIcon>
+                      <Settings fontSize="small" />
+                    </ListItemIcon>
+                    Settings
+                  </MenuItem>
+                  <Divider />
                   <MenuItem onClick={handleLogout}>
-                    <Logout fontSize="small" sx={{ mr: 2 }} />
+                    <ListItemIcon>
+                      <Logout fontSize="small" />
+                    </ListItemIcon>
                     Logout
                   </MenuItem>
                 </Menu>
@@ -293,8 +445,14 @@ const MainLayout = () => {
                 component={RouterLink}
                 to="/auth/login"
                 variant="contained"
-                color="primary"
-                sx={{ ml: 2 }}
+                size="small"
+                sx={{ 
+                  ml: 2,
+                  bgcolor: theme.palette.primary.main,
+                  '&:hover': {
+                    bgcolor: theme.palette.primary.dark,
+                  }
+                }}
               >
                 Sign In
               </Button>
@@ -303,45 +461,100 @@ const MainLayout = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Main Content - Full viewport without padding */}
+      {/* Navigation Drawer */}
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: 280,
+            boxSizing: 'border-box',
+            bgcolor: 'background.paper',
+            borderRight: `1px solid ${alpha('#000', 0.1)}`,
+          },
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          p: 2,
+          borderBottom: `1px solid ${alpha('#000', 0.1)}`,
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
+            Navigation
+          </Typography>
+          <IconButton onClick={() => setDrawerOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <List>
+          {navigationItems.map((item) => (
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  navigate(item.path);
+                  setDrawerOpen(false);
+                }}
+                sx={{
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: theme.palette.primary.main }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.label} />
+                <ChevronRight sx={{ color: 'text.secondary' }} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+
+      {/* Main Content with Professional Panel System */}
       <Box sx={{ 
         flexGrow: 1,
         display: 'flex',
         width: '100vw',
         height: 'calc(100vh - 64px)',
-        mt: '64px', // Just below the AppBar
+        mt: '64px',
         overflow: 'hidden',
         position: 'relative',
       }}>
-        <LegalCaseNavigator
+        <ProfessionalPanelLayout
           leftPanel={
-            /* Use demo left panel if user is in demo mode, otherwise use regular LeftPanel */
-            user?.id === '00000000-0000-0000-0000-000000000000' ? 
-              <DemoLeftPanel /> : 
-              <LeftPanel />
+            <Box className="panel-content panel-left">
+              {user?.id === '00000000-0000-0000-0000-000000000000' ? 
+                <SimplifiedLeftPanel /> : 
+                <SimplifiedLeftPanel />}
+            </Box>
           }
           centerPanel={
-            <CenterPanelWrapper>
-              <Outlet />
-            </CenterPanelWrapper>
+            <Box className="panel-content">
+              <CenterPanelWrapper>
+                <Outlet />
+              </CenterPanelWrapper>
+            </Box>
           }
-          rightPanel={<RightPanelWrapper />}
-          leftPanelConfig={{
-            defaultWidth: 320,
-            minWidth: 260,
-            maxWidth: 500
-          }}
-          rightPanelConfig={{
-            defaultWidth: 420,
-            minWidth: 350,
-            maxWidth: 700
+          rightPanel={
+            <Box className="panel-content panel-right">
+              <RightPanelWrapper />
+            </Box>
+          }
+          leftPanelOpen={isLeftPanelOpen}
+          rightPanelOpen={isRightPanelOpen}
+          onLeftPanelToggle={toggleLeftPanel}
+          onRightPanelToggle={toggleRightPanel}
+          onWidthChange={(widths) => {
+            console.log('Panel widths changed:', widths);
           }}
         />
       </Box>
-
-      {/* Removed footer to maximize vertical space */}
     </Box>
   );
 };
 
-export default MainLayout; 
+export default MainLayout;

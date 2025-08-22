@@ -19,18 +19,18 @@ export const colors = {
     900: '#202124',   // Text primary dark
   },
   
-  // Sophisticated emerald primary - Legal confidence and trust
+  // Professional navy blue primary - Legal confidence and trust
   primary: {
-    50: '#ecfdf5',    // Lightest emerald
-    100: '#d1fae5',   // Very light emerald
-    200: '#a7f3d0',   // Light emerald
-    300: '#6ee7b7',   // Medium light emerald
-    400: '#34d399',   // Medium emerald
-    500: '#10b981',   // Main emerald primary - sophisticated professional
-    600: '#059669',   // Dark emerald
-    700: '#047857',   // Darker emerald
-    800: '#065f46',   // Very dark emerald
-    900: '#064e3b',   // Darkest emerald
+    50: '#eff6ff',    // Lightest navy
+    100: '#dbeafe',   // Very light navy
+    200: '#bfdbfe',   // Light navy
+    300: '#93c5fd',   // Medium light navy
+    400: '#60a5fa',   // Medium navy
+    500: '#1e3a8a',   // Main navy primary - sophisticated professional
+    600: '#1e40af',   // Dark navy
+    700: '#1d4ed8',   // Darker navy
+    800: '#1e3a8a',   // Very dark navy
+    900: '#1e3a8a',   // Darkest navy
   },
   
   // Indigo secondary - Professional accent
@@ -49,16 +49,16 @@ export const colors = {
   
   // Semantic colors - Enhanced for legal software
   success: {
-    50: '#ecfdf5',
-    100: '#d1fae5',
-    200: '#a7f3d0',
-    300: '#6ee7b7',
-    400: '#34d399',
-    500: '#10b981',    // Consistent with primary emerald
-    600: '#059669',
-    700: '#047857',
-    800: '#065f46',
-    900: '#064e3b',
+    50: '#f0fdf4',
+    100: '#dcfce7',
+    200: '#bbf7d0',
+    300: '#86efac',
+    400: '#4ade80',
+    500: '#22c55e',    // Clean green for success
+    600: '#16a34a',
+    700: '#15803d',
+    800: '#166534',
+    900: '#14532d',
   },
   
   warning: {
@@ -104,9 +104,9 @@ export const colors = {
   // Professional legal status colors
   status: {
     draft: '#6b7280',      // Neutral gray
-    active: '#10b981',     // Emerald green - active cases
+    active: '#1e3a8a',     // Navy blue - active cases
     pending: '#f59e0b',    // Amber - pending review
-    completed: '#059669',  // Dark emerald - completed
+    completed: '#22c55e',  // Clean green - completed
     archived: '#4b5563',   // Muted gray - archived
     urgent: '#ef4444',     // Red - urgent attention
     review: '#6366f1',     // Indigo - under review
@@ -114,7 +114,7 @@ export const colors = {
   
   // Document priority colors
   priority: {
-    low: '#10b981',        // Green - low priority
+    low: '#22c55e',        // Green - low priority
     medium: '#f59e0b',     // Amber - medium priority
     high: '#f97316',       // Orange - high priority
     critical: '#ef4444',   // Red - critical priority
@@ -214,9 +214,9 @@ export const shadows = {
   xl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
   '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
   
-  // Professional interactive shadows - emerald accent
-  interactive: '0 8px 32px rgba(16, 185, 129, 0.15)', // Emerald glow
-  primaryGlow: '0 0 20px rgba(16, 185, 129, 0.3)',    // Strong emerald glow
+  // Professional interactive shadows - navy accent
+  interactive: '0 8px 32px rgba(30, 58, 138, 0.15)', // Navy glow
+  primaryGlow: '0 0 20px rgba(30, 58, 138, 0.3)',    // Strong navy glow
   panel: '0 4px 20px rgba(0, 0, 0, 0.08)',
   float: '0 12px 24px rgba(0, 0, 0, 0.15)',
   
@@ -232,8 +232,8 @@ export const shadows = {
     
     // Enhanced dark mode specific shadows
     panel: '0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4)',
-    interactive: '0 8px 32px rgba(16, 185, 129, 0.2)', // Stronger emerald glow for dark
-    primaryGlow: '0 0 24px rgba(16, 185, 129, 0.4)',
+    interactive: '0 8px 32px rgba(30, 58, 138, 0.2)', // Stronger navy glow for dark
+    primaryGlow: '0 0 24px rgba(30, 58, 138, 0.4)',
     float: '0 16px 32px rgba(0, 0, 0, 0.7), 0 8px 16px rgba(0, 0, 0, 0.5)',
     
     // Sophisticated surface elevation

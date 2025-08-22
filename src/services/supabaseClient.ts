@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '../types/supabase';
 
-// Use dummy values for demo mode - we won't actually connect to Supabase
-const url = 'https://example.supabase.co'; 
-const key = 'dummy-key-for-demo-mode';
+// Get Supabase credentials from environment variables
+const url = import.meta.env.VITE_SUPABASE_URL || 'https://swtkpfpyjjkkemmvkhmz.supabase.co';
+const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dGtwZnB5ampra2VtbXZraG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMDM5NTIsImV4cCI6MjA2MDg3OTk1Mn0.8herIfBAFOFUXro03pQxiS4Htnljavfncz-FvPj3sGw';
 
-console.log('Using mock Supabase client for demo mode');
+console.log('Connecting to Supabase:', url);
 
 // Create a stable globally-accessible singleton
 // This prevents the "Multiple GoTrueClient instances detected" warning
@@ -36,7 +36,7 @@ const createSingletonClient = () => {
 export const supabase = createSingletonClient();
 
 // Service client with service role key for admin operations (if available)
-const serviceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+const serviceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dGtwZnB5ampra2VtbXZraG16Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTMwMzk1MiwiZXhwIjoyMDYwODc5OTUyfQ.Jp8Vhvs-rvVvjx0L0wEtm4Cblh-DTjoXExjNWNIaV_M';
 export const serviceClient = serviceKey ? createClient<Database>(url, serviceKey, {
   auth: { persistSession: false }
 }) : null;

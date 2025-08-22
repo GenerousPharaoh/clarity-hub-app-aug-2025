@@ -3,9 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { CssBaseline, Button, Box } from '@mui/material';
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-// Professional theme system for sophisticated legal software
+// Modern theme system for sophisticated legal software
 import { ThemeProvider } from '@mui/material/styles';
-import { createProfessionalMuiTheme } from './theme/professionalTheme';
+import { createModernTheme } from './theme/modernTheme';
 import ProfessionalGlobalStyles from './theme/GlobalStyles';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -20,6 +20,9 @@ import ProjectLayout from './layouts/ProjectLayout';
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Auth = React.lazy(() => import('./pages/auth/Auth'));
 const ProjectView = React.lazy(() => import('./pages/ProjectView'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+const Messages = React.lazy(() => import('./pages/Messages'));
+const Help = React.lazy(() => import('./pages/Help'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 // Add type definition for window.DEMO_MODE
@@ -44,8 +47,9 @@ export default function App() {
   // Debug mode state - enable in demo mode
   const [debugMode, setDebugMode] = React.useState(true);
   
-  // Professional theme mode state - default to dark for sophisticated look
-  const [themeMode, setThemeMode] = React.useState<'light' | 'dark'>('dark');
+  // Get theme mode from store
+  const themeMode = useAppStore((state) => state.themeMode);
+  const toggleTheme = useAppStore((state) => state.toggleTheme);
   
   // Set up demo mode on first render
   React.useEffect(() => {
@@ -128,20 +132,15 @@ export default function App() {
   
 
 
-  // Professional sophisticated theme for legal software
-  const professionalTheme = React.useMemo(() => 
-    createProfessionalMuiTheme(themeMode), 
+  // Modern sophisticated theme for legal software
+  const modernTheme = React.useMemo(() => 
+    createModernTheme(themeMode), 
     [themeMode]
   );
-  
-  // Toggle theme mode function
-  const toggleTheme = React.useCallback(() => {
-    setThemeMode(prev => prev === 'dark' ? 'light' : 'dark');
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={professionalTheme}>
+      <ThemeProvider theme={modernTheme}>
         <CssBaseline />
         <ProfessionalGlobalStyles />
         
@@ -200,6 +199,12 @@ export default function App() {
                     {/* Main app routes */}
                     <Route path="/" element={<MainLayout />}>
                       <Route index element={<Dashboard />} />
+                      <Route path="dashboard" element={<Dashboard />} />
+                      <Route path="messages" element={<Messages />} />
+                      <Route path="settings" element={<Settings />} />
+                      <Route path="help" element={<Help />} />
+                      <Route path="project/:projectId" element={<ProjectView />} />
+                      <Route path="profile" element={<Settings />} />
                     </Route>
                     
                     {/* Project routes with specialized layout */}

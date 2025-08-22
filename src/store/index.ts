@@ -194,7 +194,18 @@ export const useAppStore = create<AppState>()(
         // Project state
         selectedProjectId: null,
         projects: [],
-        setSelectedProject: (projectId) => a[0]({ selectedProjectId: projectId }),
+        setSelectedProject: (projectId) => a[0]((state) => {
+          // Auto-select first file when switching projects
+          if (projectId && projectId !== state.selectedProjectId) {
+            const projectFiles = state.files.filter(file => file.project_id === projectId);
+            const firstFileId = projectFiles.length > 0 ? projectFiles[0].id : null;
+            return { 
+              selectedProjectId: projectId, 
+              selectedFileId: firstFileId 
+            };
+          }
+          return { selectedProjectId: projectId };
+        }),
         setProjects: (projects) => a[0]({ projects }),
         addProject: (project) => a[0]((state) => ({ 
           projects: [...state.projects, project] 

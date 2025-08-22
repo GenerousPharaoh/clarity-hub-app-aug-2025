@@ -1,39 +1,50 @@
-/* Custom TinyMCE styling for Legal Case Tracker */
+/* Professional TinyMCE styling for Clarity Hub */
 
 /* TinyMCE container styling */
 .tox-tinymce {
   border: none !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   overflow: hidden !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
   height: 100% !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 /* TinyMCE toolbar styling */
 .tox-toolbar__primary {
-  background-color: #f8f9fa !important;
-  padding: 2px !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  padding: 8px 12px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  backdrop-filter: blur(10px) !important;
 }
 
 .tox-toolbar__group {
   border: none !important;
-  padding: 0 6px !important;
+  padding: 0 8px !important;
+  margin: 0 4px !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.6) !important;
 }
 
 /* TinyMCE toolbar button styling */
 .tox-tbtn {
-  border-radius: 4px !important;
-  margin: 0 1px !important;
+  border-radius: 6px !important;
+  margin: 0 2px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  color: #475569 !important;
+  font-weight: 500 !important;
 }
 
 .tox-tbtn:hover {
-  background-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: #3b82f6 !important;
+  transform: translateY(-1px) !important;
 }
 
 .tox-tbtn--enabled, .tox-tbtn--enabled:hover {
-  background-color: #e8f4fc !important;
-  color: #0d6efd !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
 }
 
 /* TinyMCE editor area */
@@ -45,17 +56,23 @@
   background-color: white !important;
 }
 
-/* Content specific styling */
+/* Professional content styling */
 .mce-content-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   font-size: 16px !important;
-  line-height: 1.6 !important;
-  padding: 24px !important;
-  color: #333 !important;
+  line-height: 1.65 !important;
+  padding: 48px 64px !important;
+  color: #1e293b !important;
+  max-width: 900px !important;
+  margin: 0 auto !important;
+  background: #ffffff !important;
+  min-height: 100vh !important;
 }
 
 .mce-content-body p {
-  margin-bottom: 1em !important;
+  margin-bottom: 1.25em !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
 }
 
 .mce-content-body h1, 
@@ -64,19 +81,41 @@
 .mce-content-body h4, 
 .mce-content-body h5, 
 .mce-content-body h6 {
-  margin-top: 1.2em !important;
-  margin-bottom: 0.8em !important;
-  line-height: 1.3 !important;
-  color: #2c3e50 !important;
-  font-weight: 600 !important;
+  margin-top: 2.5em !important;
+  margin-bottom: 1em !important;
+  line-height: 1.25 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em !important;
 }
 
-.mce-content-body h1 { font-size: 2.0em !important; }
-.mce-content-body h2 { font-size: 1.75em !important; }
-.mce-content-body h3 { font-size: 1.5em !important; }
-.mce-content-body h4 { font-size: 1.25em !important; }
-.mce-content-body h5 { font-size: 1.1em !important; }
-.mce-content-body h6 { font-size: 1em !important; }
+.mce-content-body h1 { 
+  font-size: 2.5em !important; 
+  border-bottom: 3px solid #3b82f6 !important;
+  padding-bottom: 0.5em !important;
+}
+.mce-content-body h2 { 
+  font-size: 2em !important;
+  color: #1e40af !important;
+}
+.mce-content-body h3 { 
+  font-size: 1.5em !important;
+  color: #3730a3 !important;
+}
+.mce-content-body h4 { 
+  font-size: 1.25em !important;
+  color: #4338ca !important;
+}
+.mce-content-body h5 { 
+  font-size: 1.125em !important;
+  color: #5b21b6 !important;
+}
+.mce-content-body h6 { 
+  font-size: 1em !important;
+  color: #6b21a8 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
 
 /* Table styling */
 .mce-content-body table {
@@ -132,24 +171,32 @@
   margin: 20px 0 !important;
 }
 
-/* Citation styling */
-.mce-content-body .exhibit-citation {
-  background-color: #e3f2fd !important;
-  color: #1976d2 !important;
-  padding: 2px 6px !important;
-  border-radius: 4px !important;
+/* Professional citation styling */
+.mce-content-body .exhibit-citation,
+.mce-content-body span[style*="color: rgb(59, 130, 246)"] {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  color: #1e40af !important;
+  padding: 4px 12px !important;
+  border-radius: 8px !important;
   text-decoration: none !important;
-  font-weight: bold !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
   white-space: nowrap !important;
   display: inline-block !important;
-  margin: 0 2px !important;
-  border: 1px solid rgba(25, 118, 210, 0.2) !important;
+  margin: 0 3px !important;
+  border: 1px solid rgba(30, 64, 175, 0.2) !important;
+  font-size: 0.9em !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.1) !important;
 }
 
-.mce-content-body .exhibit-citation:hover {
-  background-color: #bbdefb !important;
-  border-color: rgba(25, 118, 210, 0.4) !important;
+.mce-content-body .exhibit-citation:hover,
+.mce-content-body span[style*="color: rgb(59, 130, 246)"]:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: white !important;
+  border-color: rgba(30, 64, 175, 0.6) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
 }
 
 /* List styling */
@@ -163,15 +210,31 @@
   margin-bottom: 0.5em !important;
 }
 
-/* Status bar styling */
+/* Professional status bar styling */
 .tox-statusbar {
-  border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: #666 !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  border-top: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+  backdrop-filter: blur(10px) !important;
 }
 
-/* Make fullscreen mode work properly */
+.tox-statusbar__text-container {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13px !important;
+}
+
+/* Professional fullscreen mode */
 .tox.tox-tinymce.tox-fullscreen {
-  z-index: 1300 !important;
+  z-index: 9999 !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 /* Dark mode support */

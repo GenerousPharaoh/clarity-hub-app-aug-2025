@@ -272,20 +272,17 @@ const CenterPanel = () => {
     }
   };
 
-  // TinyMCE configuration - sleek and modern
+  // TinyMCE configuration - minimal and clean
   const editorConfig = {
     height: '100%',
-    menubar: false, // Hide menubar for cleaner look
+    menubar: false,
     plugins: [
-      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-      'insertdatetime', 'media', 'table', 'help', 'wordcount',
-      'autoresize', 'pagebreak', 'quickbars', 'codesample'
+      'lists', 'link', 'image', 'table', 'wordcount', 'fullscreen', 'autosave'
     ],
-    toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent | link image table | cite | removeformat fullscreen',
-    toolbar_mode: 'sliding',
-    toolbar_sticky: true,
-    toolbar_sticky_offset: 0,
+    toolbar: 'bold italic | bullist numlist | link image | removeformat',
+    toolbar_location: 'top',
+    toolbar_sticky: false,
+    inline: false,
     // Add base_url to ensure TinyMCE can find its resources
     base_url: '/tinymce',
     // Add skin_url to ensure TinyMCE can find its skin
@@ -315,21 +312,17 @@ const CenterPanel = () => {
         font-style: italic;
       }
     `,
-    // Add license key for TinyMCE
+    // Clean UI settings
     license_key: 'gpl',
-    inline_styles: true,
-    extended_valid_elements: 'a[*]',
-    resize: false,
-    branding: false,
     promotion: false,
-    statusbar: true,
-    elementpath: false, // Hide element path for cleaner look
-    // Quick insert toolbar
-    quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote',
-    quickbars_insert_toolbar: 'quicktable image media',
-    // Word count settings
-    wordcount_countcharacters: false,
-    wordcount_cleanregex: /[0-9.(),;:!?%#$?\x27\x22_+=\\\/\-]*/g,
+    branding: false,
+    resize: false,
+    statusbar: false, // Remove status bar completely
+    elementpath: false,
+    contextmenu: false,
+    // Auto-save
+    autosave_interval: '30s',
+    autosave_restore_when_empty: false,
     // Setup editor
     setup: (editor) => {
       // Store editor instance for later use
@@ -351,11 +344,23 @@ const CenterPanel = () => {
           editorBody.style.minHeight = '100%';
         }
         
-        // Style the toolbar for a sleeker look
+        // Hide unwanted UI elements directly
+        const promotion = document.querySelector('.tox-promotion');
+        if (promotion) promotion.style.display = 'none';
+        
+        const statusbar = document.querySelector('.tox-statusbar');
+        if (statusbar) statusbar.style.display = 'none';
+        
+        const menubar = document.querySelector('.tox-menubar');
+        if (menubar) menubar.style.display = 'none';
+        
+        // Clean up the toolbar
         const toolbar = editorContainer?.querySelector('.tox-toolbar');
         if (toolbar) {
-          toolbar.style.borderBottom = '1px solid #e0e0e0';
-          toolbar.style.backgroundColor = '#fafafa';
+          toolbar.style.border = 'none';
+          toolbar.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
+          toolbar.style.backgroundColor = 'transparent';
+          toolbar.style.minHeight = '40px';
         }
       });
       

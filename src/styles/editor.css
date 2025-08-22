@@ -1,23 +1,36 @@
-/* Sleek TinyMCE Editor Styles */
+/* Clean Minimal Editor Styles */
 
-/* Remove all unnecessary borders and shadows */
+/* Hide all TinyMCE chrome */
+.tox-promotion,
+.tox-statusbar,
+.tox-menubar {
+  display: none !important;
+}
+
+/* Remove all borders and shadows from main container */
 .tox.tox-tinymce {
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   background: transparent !important;
+  height: 100% !important;
 }
 
-/* Clean toolbar styling */
+/* Ultra-minimal toolbar */
 .tox .tox-toolbar,
 .tox .tox-toolbar__overflow,
 .tox .tox-toolbar__primary {
-  background: #ffffff !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
-  padding: 8px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  padding: 4px 8px !important;
+  min-height: auto !important;
+}
+
+/* Hide toolbar overflow button */
+.tox-toolbar__overflow {
+  display: none !important;
 }
 
 /* Toolbar buttons */
@@ -37,29 +50,41 @@
   color: #0066cc !important;
 }
 
-/* Editor content area */
+/* Editor content area - full height */
 .tox .tox-edit-area {
   border: none !important;
+  height: calc(100% - 40px) !important; /* Subtract toolbar height */
 }
 
 .tox .tox-edit-area__iframe {
   background: #ffffff !important;
+  height: 100% !important;
 }
 
-/* Status bar */
-.tox .tox-statusbar {
-  background: #fafafa !important;
-  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
-  border-bottom: none !important;
-  border-left: none !important;
-  border-right: none !important;
-  padding: 4px 12px !important;
-  font-size: 12px !important;
+/* Hide the editor header completely if menubar shows */
+.tox-editor-header {
+  min-height: auto !important;
 }
 
-/* Remove promotion and branding */
-.tox-promotion,
-.tox-statusbar__branding {
+/* Make sure the editor container fills space */
+.tox-editor-container {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Completely hide status bar and path */
+.tox .tox-statusbar,
+.tox-statusbar__path,
+.tox-statusbar__wordcount,
+.tox-statusbar__branding,
+.tox-statusbar__resize-handle,
+.tox-statusbar__help-text {
+  display: none !important;
+}
+
+/* Hide any path indicators */
+.tox-statusbar__path-item {
   display: none !important;
 }
 

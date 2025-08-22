@@ -42,6 +42,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - File upload pipeline with SHA256 hashing and storage
 - Row Level Security (RLS) policies for data protection
 - Real-time subscriptions for collaborative features
+- Complete environment variables configured in Vercel
 
 ### Key Components
 

@@ -15,6 +15,7 @@ import {
   AccordionDetails,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   ListItemIcon,
   IconButton,
@@ -411,9 +412,8 @@ const AIEnhancedExhibitManager: React.FC<AIEnhancedExhibitManagerProps> = ({
               </Typography>
               <List>
                 {similarDocs.results.slice(0, 5).map((doc, index) => (
-                  <ListItem
+                  <ListItemButton
                     key={doc.file_id}
-                    button
                     onClick={() => onFileSelect?.(doc.file_id)}
                   >
                     <ListItemIcon>
@@ -427,7 +427,7 @@ const AIEnhancedExhibitManager: React.FC<AIEnhancedExhibitManagerProps> = ({
                       badgeContent={`${Math.round(doc.similarity_score * 100)}%`}
                       color="secondary"
                     />
-                  </ListItem>
+                  </ListItemButton>
                 ))}
               </List>
             </Box>

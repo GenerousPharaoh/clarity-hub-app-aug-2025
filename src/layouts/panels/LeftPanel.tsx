@@ -63,6 +63,7 @@ import { useNavigate } from 'react-router-dom';
 import ProjectList from '../../components/search/ProjectList';
 import FileList from '../../components/search/FileList';
 import ExhibitManager from '../../components/legal/ExhibitManager';
+import CloudUploadZone from '../../components/upload/CloudUploadZone';
 
 // Props interface definition
 interface LeftPanelProps {
@@ -109,7 +110,7 @@ const LeftPanel = ({
   const [activeFileMenuId, setActiveFileMenuId] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<'added_at' | 'name' | 'exhibit_id'>('added_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [activeTab, setActiveTab] = useState<'files' | 'exhibits'>('files');
+  const [activeTab, setActiveTab] = useState<'upload' | 'files' | 'exhibits'>('upload');
   
   // React Query hooks
   const { 
@@ -216,13 +217,21 @@ const LeftPanel = ({
   const fetchProjects = async () => {
     try {
       setProjectsLoading(true);
+      
       // Guard against fetching when user is not available
       if (!user) {
         console.log('Skipping project fetch - no authenticated user');
         return;
       }
       
-      // Verify authentication status before proceeding
+      // Handle demo user - don't try to fetch from Supabase
+      if (user?.id === '00000000-0000-0000-0000-000000000000' || window.DEMO_MODE) {
+        console.log('Demo user detected - using local projects');
+        // Demo user uses store projects, no need to fetch from Supabase
+        return;
+      }
+      
+      // Verify authentication status before proceeding for real users
       const { data: session, error: sessionError } = await supabaseClient.auth.getSession();
       
       if (sessionError) {
@@ -246,13 +255,16 @@ const LeftPanel = ({
       setProjects(data || []);
     } catch (error) {
       logError(error, 'fetchProjects');
-      // If this is the common API key error, provide a more helpful message
-      if (error?.message?.includes('No API key found')) {
-        showNotification({
-          message: 'Session expired. Please refresh your browser or log in again.',
-          severity: 'warning',
-          autoHideDuration: 6000
-        });
+      // Don't show session expired message for demo users
+      if (!window.DEMO_MODE && user?.id !== '00000000-0000-0000-0000-000000000000') {
+        // If this is the common API key error, provide a more helpful message
+        if (error?.message?.includes('No API key found')) {
+          showNotification(
+            'Session expired. Please refresh your browser or log in again.',
+            'warning',
+            6000
+          );
+        }
       }
     } finally {
       setProjectsLoading(false);
@@ -308,11 +320,11 @@ const LeftPanel = ({
         navigate(`/projects/${mockProject.id}`);
         
         // Show a demo mode notification
-        showNotification({
-          message: 'Project created in demo mode (changes won\'t be saved)',
-          severity: 'info',
-          autoHideDuration: 6000
-        });
+        showNotification(
+          'Project created in demo mode (changes won\'t be saved)',
+          'info',
+          6000
+        );
         
         return;
       }
@@ -342,11 +354,11 @@ const LeftPanel = ({
       
     } catch (error) {
       logError(error, 'handleCreateProject');
-      showNotification({
-        message: getErrorMessage(error, 'Error creating project'),
-        severity: 'error',
-        autoHideDuration: 6000
-      });
+      showNotification(
+        getErrorMessage(error, 'Error creating project'),
+        'error',
+        6000
+      );
     }
   };
 
@@ -377,10 +389,10 @@ const LeftPanel = ({
             console.log('Upload successful:', data);
             
             // Show success message via notification system
-            showNotification({
-              message: 'File uploaded successfully',
-              severity: 'success'
-            });
+            showNotification(
+              'File uploaded successfully',
+              'success'
+            );
             
             // Also select the new file for immediate viewing
             if (data && data.id) {
@@ -392,11 +404,11 @@ const LeftPanel = ({
           },
           onError: (error) => {
             logError(error, 'fileUpload');
-            showNotification({
-              message: getErrorMessage(error, 'Error uploading file'),
-              severity: 'error',
-              autoHideDuration: 6000
-            });
+            showNotification(
+              getErrorMessage(error, 'Error uploading file'),
+              'error',
+              6000
+            );
           }
         }
       );
@@ -584,11 +596,11 @@ const LeftPanel = ({
       }
     } catch (error) {
       logError(error, 'handleDeleteFile.database');
-      showNotification({
-        message: getErrorMessage(error, 'Error deleting file'),
-        severity: 'error',
-        autoHideDuration: 6000
-      });
+      showNotification(
+        getErrorMessage(error, 'Error deleting file'),
+        'error',
+        6000
+      );
     } finally {
       setDeleteConfirmOpen(false);
       setFileToDelete(null);
@@ -621,11 +633,11 @@ const LeftPanel = ({
       }
     } catch (error) {
       logError(error, 'handleDownloadFile');
-      showNotification({
-        message: getErrorMessage(error, 'Error downloading file'),
-        severity: 'error',
-        autoHideDuration: 6000
-      });
+      showNotification(
+        getErrorMessage(error, 'Error downloading file'),
+        'error',
+        6000
+      );
     }
   };
 
@@ -689,7 +701,7 @@ const LeftPanel = ({
 
         <Divider />
 
-        {/* Tabs for Files and Exhibits */}
+        {/* Tabs for Upload, Files and Exhibits */}
         {selectedProjectId && (
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs
@@ -699,6 +711,13 @@ const LeftPanel = ({
               textColor="primary"
               indicatorColor="primary"
             >
+              <Tab
+                icon={<UploadIcon fontSize="small" />}
+                iconPosition="start"
+                label="Upload"
+                value="upload"
+                sx={{ minHeight: 48, textTransform: 'none' }}
+              />
               <Tab
                 icon={<FileIcon fontSize="small" />}
                 iconPosition="start"
@@ -720,7 +739,12 @@ const LeftPanel = ({
         {/* Tab Content */}
         {selectedProjectId && (
           <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {activeTab === 'files' ? (
+            {activeTab === 'upload' ? (
+              /* Upload Tab - Cloud Native with Gemini 2.5 Pro */
+              <Box sx={{ flex: 1, overflow: 'auto' }}>
+                <CloudUploadZone />
+              </Box>
+            ) : activeTab === 'files' ? (
               <>
                 {/* Search bar for files */}
                 <Box sx={{ p: 2 }}>
@@ -792,10 +816,10 @@ const LeftPanel = ({
                     onRenameFile={handleOpenRenameDialog}
                     onUploadFile={() => {
                       // Redirect to upload tab in center panel
-                      showNotification({
-                        message: 'Use the "Upload Files" tab in the center panel for AI-powered uploads',
-                        type: 'info'
-                      });
+                      showNotification(
+                        'Use the "Upload Files" tab in the center panel for AI-powered uploads',
+                        'info'
+                      );
                     }}
                     searchActive={!!searchFilters.searchTerm || 
                                   (searchFilters.tags && searchFilters.tags.length > 0) ||

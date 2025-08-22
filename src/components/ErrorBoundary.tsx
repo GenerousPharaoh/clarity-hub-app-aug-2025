@@ -44,30 +44,20 @@ interface State {
 
 // Component to provide navigation functionality within class component
 export const ErrorBoundaryWithNavigation = (props: Props) => {
-  // Prevent error during initial render by handling case where navigate is not available
-  try {
-    const navigate = useNavigate();
-    const location = useLocation();
-    
-    return <ErrorBoundaryClass {...props} navigate={navigate} location={location} />;
-  } catch (error) {
-    console.error('Error rendering ErrorBoundaryWithNavigation:', error);
-    
-    // Provide a fallback component that doesn't require router context
-    return (
-      <ErrorBoundaryClass 
-        {...props} 
-        navigate={(path) => { 
-          console.log('Navigation attempted but not available:', path);
-          // Fallback to direct location change if we're not in a router context
-          if (typeof path === 'string') {
-            window.location.href = path;
-          }
-        }} 
-        location={{pathname: window.location.pathname}} 
-      />
-    );
-  }
+  // Always use the fallback approach to avoid router context issues
+  return (
+    <ErrorBoundaryClass 
+      {...props} 
+      navigate={(path) => { 
+        console.log('Navigation attempted:', path);
+        // Use direct location change to avoid router context dependencies
+        if (typeof path === 'string') {
+          window.location.href = path;
+        }
+      }} 
+      location={{pathname: window.location.pathname}} 
+    />
+  );
 };
 
 // Error code extraction helper

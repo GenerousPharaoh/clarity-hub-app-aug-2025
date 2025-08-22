@@ -42,6 +42,7 @@ import {
   Redo,
 } from '@mui/icons-material';
 import useAppStore from '../../store';
+import demoStorage from '../../services/demoStorageService';
 
 interface ProfessionalRichEditorProps {
   initialContent?: string;
@@ -66,6 +67,7 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
 }) => {
   const editorRef = useRef<any>(null);
   const [content, setContent] = useState(initialContent);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -76,6 +78,31 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
   const [isDirty, setIsDirty] = useState(false);
   
   const themeMode = useAppStore((state) => state.themeMode);
+  const user = useAppStore(state => state.user);
+  const selectedProjectId = useAppStore(state => state.selectedProjectId);
+
+  // Load saved content for demo mode
+  useEffect(() => {
+    const loadDemoContent = async () => {
+      if (user?.id === '00000000-0000-0000-0000-000000000000' && selectedProjectId && !initialContent) {
+        setIsLoadingContent(true);
+        try {
+          const documentId = `editor-${selectedProjectId}`;
+          const savedDoc = await demoStorage.getDocument(documentId);
+          if (savedDoc?.content) {
+            setContent(savedDoc.content);
+            console.log('Loaded saved document from demo storage');
+          }
+        } catch (error) {
+          console.error('Failed to load demo content:', error);
+        } finally {
+          setIsLoadingContent(false);
+        }
+      }
+    };
+
+    loadDemoContent();
+  }, [user, selectedProjectId, initialContent]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -88,13 +115,22 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
     }
   }, [content, autoSave, autoSaveInterval, isDirty]);
 
-  // Handle save
+  // Handle save with demo mode persistence
   const handleSave = useCallback(async () => {
-    if (!onSave) return;
-    
     setIsSaving(true);
     try {
-      await onSave(content);
+      // Save to demo storage if in demo mode
+      if (user?.id === '00000000-0000-0000-0000-000000000000' && selectedProjectId) {
+        const documentId = `editor-${selectedProjectId}`;
+        await demoStorage.saveDocument(documentId, selectedProjectId, content, 'Document Editor');
+        console.log('Document saved to demo storage');
+      }
+      
+      // Also call the provided onSave if available
+      if (onSave) {
+        await onSave(content);
+      }
+      
       setLastSaved(new Date());
       setShowSaveNotification(true);
       setIsDirty(false);
@@ -103,7 +139,7 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
     } finally {
       setIsSaving(false);
     }
-  }, [content, onSave]);
+  }, [content, onSave, user, selectedProjectId]);
 
   // Handle content change
   const handleEditorChange = (newContent: string) => {

@@ -38,13 +38,20 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
   });
 
   const showNotification = (
-    message: string,
+    message: string | any,
     type: NotificationType = 'info',
     duration: number = 4000
   ) => {
+    // Ensure message is always a string to prevent objects being rendered as children
+    const messageText = typeof message === 'string' 
+      ? message 
+      : typeof message === 'object' && message?.message 
+      ? String(message.message)
+      : String(message);
+    
     setNotification({
       open: true,
-      message,
+      message: messageText,
       type,
       duration,
     });

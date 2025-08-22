@@ -74,8 +74,18 @@ const ExhibitManager: React.FC<ExhibitManagerProps> = ({
   onCitationInsert,
 }) => {
   // Store state
-  const exhibits = useAppStore(state => state.exhibits.filter(e => e.project_id === projectId));
-  const files = useAppStore(state => state.files.filter(f => f.project_id === projectId));
+  const allExhibits = useAppStore(state => state.exhibits);
+  const allFiles = useAppStore(state => state.files);
+  
+  // Filter outside of selector to prevent infinite loops
+  const exhibits = React.useMemo(() => 
+    allExhibits.filter(e => e.project_id === projectId), 
+    [allExhibits, projectId]
+  );
+  const files = React.useMemo(() => 
+    allFiles.filter(f => f.project_id === projectId), 
+    [allFiles, projectId]
+  );
   const selectedExhibitId = useAppStore(state => state.selectedExhibitId);
   const setSelectedExhibit = useAppStore(state => state.setSelectedExhibit);
   const addExhibit = useAppStore(state => state.addExhibit);

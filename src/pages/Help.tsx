@@ -15,6 +15,7 @@ import {
   InputAdornment,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Chip,
@@ -290,9 +291,8 @@ const Help = () => {
             
             <List disablePadding>
               {resources.map((resource, index) => (
-                <ListItem 
+                <ListItemButton 
                   key={index}
-                  button
                   sx={{ 
                     borderRadius: 1,
                     mb: 1,
@@ -308,7 +308,7 @@ const Help = () => {
                     primary={resource.title}
                     secondary={resource.description}
                   />
-                </ListItem>
+                </ListItemButton>
               ))}
             </List>
           </Paper>

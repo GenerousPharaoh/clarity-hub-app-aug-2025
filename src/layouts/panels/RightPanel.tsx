@@ -674,7 +674,14 @@ const RightPanel = ({
       return (
         <Box sx={{ p: 3, textAlign: 'center' }}>
           <Alert severity="error" sx={{ mb: 2 }}>
-            {typeof errorMessage === 'string' ? errorMessage : errorMessage instanceof Error ? errorMessage.message : 'An unknown error occurred'}
+            {typeof errorMessage === 'string' 
+              ? errorMessage 
+              : errorMessage instanceof Error 
+              ? errorMessage.message 
+              : typeof errorMessage === 'object' && errorMessage?.message
+              ? String(errorMessage.message)
+              : 'An unknown error occurred'
+            }
           </Alert>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2, alignItems: 'center' }}>
             <Button 

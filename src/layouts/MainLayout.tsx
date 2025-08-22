@@ -58,7 +58,6 @@ import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
 import ProfessionalPanelLayout from '../components/ProfessionalPanelLayout';
-import SimplifiedLeftPanel from '../components/SimplifiedLeftPanel';
 
 const MainLayout = () => {
   const theme = useTheme();
@@ -527,9 +526,7 @@ const MainLayout = () => {
         <ProfessionalPanelLayout
           leftPanel={
             <Box className="panel-content panel-left">
-              {user?.id === '00000000-0000-0000-0000-000000000000' ? 
-                <SimplifiedLeftPanel /> : 
-                <SimplifiedLeftPanel />}
+              <LeftPanel />
             </Box>
           }
           centerPanel={

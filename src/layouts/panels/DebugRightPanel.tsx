@@ -210,7 +210,14 @@ const DebugRightPanel: React.FC = () => {
       return (
         <Box sx={{ p: 3 }}>
           <Alert severity="error" sx={{ mb: 2 }}>
-            {errorMessage}
+            {typeof errorMessage === 'string' 
+              ? errorMessage 
+              : errorMessage instanceof Error 
+              ? errorMessage.message 
+              : typeof errorMessage === 'object' && errorMessage?.message
+              ? String(errorMessage.message)
+              : 'An unknown error occurred'
+            }
           </Alert>
           <Button 
             variant="outlined" 

@@ -15,6 +15,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { CollaborationProvider } from './contexts/CollaborationContext';
 import useAppStore from './store';
 import ProjectLayout from './layouts/ProjectLayout';
+import demoStorage from './services/demoStorageService';
 import './styles/editor.css';
 
 // Lazy-loaded components for better performance
@@ -52,56 +53,85 @@ export default function App() {
   const themeMode = useAppStore((state) => state.themeMode);
   const toggleTheme = useAppStore((state) => state.toggleTheme);
   
-  // Set up demo mode on first render
+  // Set up demo mode with persistent storage
   React.useEffect(() => {
     console.log('App initialized in demo mode');
     
-    // Create a demo user for testing
-    const demoUser = {
-      id: '00000000-0000-0000-0000-000000000000',
-      email: 'demo@example.com',
-      avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
-      full_name: 'Demo User',
+    const initializeDemoMode = async () => {
+      // Initialize demo storage
+      await demoStorage.initializeDemoData();
+      
+      // Create a demo user for testing
+      const demoUser = {
+        id: '00000000-0000-0000-0000-000000000000',
+        email: 'demo@example.com',
+        avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
+        full_name: 'Demo User',
+      };
+      
+      // Set the user in the store directly
+      useAppStore.setState({
+        user: demoUser,
+      });
+      
+      // Load persistent demo data
+      try {
+        const [projects, files] = await Promise.all([
+          demoStorage.getProjects(),
+          demoStorage.getFiles('11111111-1111-1111-1111-111111111111')
+        ]);
+
+        // Convert demo files to app format
+        const appFiles = files.map(demoFile => ({
+          id: demoFile.id,
+          name: demoFile.name,
+          project_id: demoFile.project_id,
+          owner_id: '00000000-0000-0000-0000-000000000000',
+          file_type: demoFile.type.split('/')[0],
+          content_type: demoFile.type,
+          size: demoFile.size,
+          storage_path: `demo/${demoFile.id}`,
+          added_at: demoFile.uploaded_at,
+          exhibit_id: demoFile.exhibit_id,
+          exhibit_title: demoFile.exhibit_title
+        }));
+
+        // Set persistent data in store
+        useAppStore.setState({
+          projects,
+          files: appFiles,
+          selectedProjectId: '11111111-1111-1111-1111-111111111111'
+        });
+
+        console.log('Demo data loaded:', { 
+          projects: projects.length, 
+          files: appFiles.length 
+        });
+      } catch (error) {
+        console.error('Failed to load demo data:', error);
+        
+        // Fallback to basic demo data
+        const projectId = '11111111-1111-1111-1111-111111111111';
+        const fallbackProjects = [
+          {
+            id: projectId,
+            name: 'Acme Corp. v. Widget Industries',
+            owner_id: demoUser.id,
+            created_at: new Date().toISOString(),
+            description: 'Contract dispute regarding manufacturing components',
+            status: 'active'
+          }
+        ];
+        
+        useAppStore.setState({
+          projects: fallbackProjects,
+          files: [],
+          selectedProjectId: projectId
+        });
+      }
     };
-    
-    // Set the user in the store directly
-    useAppStore.setState({
-      user: demoUser,
-    });
-    
-    // Create demo projects
-    const projectId = '11111111-1111-1111-1111-111111111111';
-    const demoProjects = [
-      {
-        id: projectId,
-        name: 'Acme Corp. v. Widget Industries',
-        owner_id: demoUser.id,
-        created_at: new Date().toISOString(),
-        description: 'Contract dispute regarding manufacturing components',
-        status: 'active'
-      }
-    ];
-    
-    // Create demo files
-    const demoFiles = [
-      {
-        id: '22222222-2222-2222-2222-222222222222',
-        name: 'Client Contract.pdf',
-        project_id: projectId,
-        owner_id: demoUser.id,
-        file_type: 'pdf',
-        content_type: 'application/pdf',
-        size: 12345,
-        added_at: new Date().toISOString(),
-      }
-    ];
-    
-    // Set projects and files in the store
-    useAppStore.setState({
-      projects: demoProjects,
-      files: demoFiles,
-      selectedProjectId: projectId
-    });
+
+    initializeDemoMode();
   }, []);
   
   // Function to load and execute the reset script

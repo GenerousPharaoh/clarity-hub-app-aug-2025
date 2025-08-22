@@ -15,6 +15,7 @@ import {
   AccordionDetails,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
@@ -385,8 +386,7 @@ const AISearchPanel: React.FC<AISearchPanelProps> = ({
           <List>
             {results.map((result, index) => (
               <React.Fragment key={result.file_id}>
-                <ListItem
-                  button
+                <ListItemButton
                   onClick={() => onFileSelect?.(result.file_id)}
                   sx={{ alignItems: 'flex-start' }}
                 >
@@ -448,7 +448,7 @@ const AISearchPanel: React.FC<AISearchPanelProps> = ({
                       <VisibilityIcon />
                     </IconButton>
                   </ListItemSecondaryAction>
-                </ListItem>
+                </ListItemButton>
                 {index < results.length - 1 && <Divider />}
               </React.Fragment>
             ))}

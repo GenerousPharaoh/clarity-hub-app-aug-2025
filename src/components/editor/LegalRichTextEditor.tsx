@@ -64,6 +64,7 @@ import CitationInsertionPlugin from './CitationInsertionPlugin';
 import CitationAutoCompletePlugin from './CitationAutoCompletePlugin';
 import ExportPlugin from './ExportPlugin';
 import EditorToolbar from './EditorToolbar';
+import ContentEditableWrapper from './ContentEditableWrapper';
 import useAppStore from '../../store';
 
 interface LegalRichTextEditorProps {
@@ -187,6 +188,7 @@ const EditorContent: React.FC<{
   hasUnsavedChanges: boolean;
   isSaving: boolean;
   onSave: () => void;
+  onEditorChange?: (state: EditorState) => void;
 }> = ({ 
   onCitationClick,
   selectedFile,
@@ -194,16 +196,22 @@ const EditorContent: React.FC<{
   hasUnsavedChanges,
   isSaving,
   onSave,
+  onEditorChange,
 }) => {
   const [toolbarFormats, setToolbarFormats] = useState<{[key: string]: boolean}>({});
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
 
-  // Handle editor change
+  // Handle editor change - notify parent component
   const handleEditorChange = useCallback((state: EditorState) => {
     setEditorState(state);
-  }, []);
+    // Notify parent component of changes
+    const root = state.read(() => $getRoot());
+    console.log('Editor content changed:', root.getTextContent());
+    // Pass change to parent
+    onEditorChange?.(state);
+  }, [onEditorChange]);
 
   // Handle citation clicks (inside component)
   const handleCitationClick = useCallback((payload: CitationClickPayload) => {
@@ -262,45 +270,37 @@ const EditorContent: React.FC<{
           flex: 1, 
           overflow: 'hidden', 
           position: 'relative',
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          minHeight: '400px',
         }}
       >
         <RichTextPlugin
             contentEditable={
-              <ContentEditable
-                className="lexical-content-editable"
-                style={{
-                  height: '100%',
-                  padding: '24px 32px',
-                  outline: 'none',
-                  fontSize: '16px',
-                  lineHeight: '1.6',
-                  fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                  color: '#1a1a1a',
-                  overflow: 'auto',
-                }}
+              <ContentEditableWrapper
+                placeholder={
+                  <div 
+                    className="lexical-placeholder"
+                    style={{
+                      position: 'absolute',
+                      top: '24px',
+                      left: '32px',
+                      color: '#9ca3af',
+                      fontSize: '16px',
+                      pointerEvents: 'none',
+                      userSelect: 'none',
+                    }}
+                  >
+                    {selectedFile 
+                      ? `Start writing your legal document...`
+                      : selectedProject
+                      ? 'Select a file to edit or create a new document'
+                      : 'Create or select a project to begin'
+                    }
+                  </div>
+                }
               />
             }
-            placeholder={
-              <div 
-                className="lexical-placeholder"
-                style={{
-                  position: 'absolute',
-                  top: '24px',
-                  left: '32px',
-                  color: '#9ca3af',
-                  fontSize: '16px',
-                  pointerEvents: 'none',
-                }}
-              >
-                {selectedFile 
-                  ? `Start writing your legal document...`
-                  : selectedProject
-                  ? 'Select a file to edit or create a new document'
-                  : 'Create or select a project to begin'
-                }
-              </div>
-            }
+            placeholder={null}
             ErrorBoundary={LexicalErrorBoundary}
           />
           
@@ -460,10 +460,14 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
     }
   }, [editorState, hasUnsavedChanges, selectedFileId]);
 
-  // Update editor state when it changes
+  // Update editor state when it changes (from EditorContent)
   const handleEditorStateChange = useCallback((state: EditorState) => {
     setEditorState(state);
     setHasUnsavedChanges(true);
+    
+    // Debug logging
+    const textContent = state.read(() => $getRoot().getTextContent());
+    console.log('Main editor received update:', textContent.length, 'chars');
   }, []);
 
   return (
@@ -484,6 +488,7 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
           hasUnsavedChanges={hasUnsavedChanges}
           isSaving={isSaving}
           onSave={handleSave}
+          onEditorChange={handleEditorStateChange}
         />
       </LexicalComposer>
 

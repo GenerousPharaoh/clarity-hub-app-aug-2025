@@ -15,6 +15,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { CollaborationProvider } from './contexts/CollaborationContext';
 import useAppStore from './store';
 import ProjectLayout from './layouts/ProjectLayout';
+import './styles/editor.css';
 
 // Lazy-loaded components for better performance
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));

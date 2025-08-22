@@ -50,23 +50,29 @@ const CenterPanelWrapper: React.FC<CenterPanelWrapperProps> = ({ children }) => 
       data-test="center-panel"
     >
       {isDemoMode ? (
-        <ProfessionalRichEditor 
-          initialContent="<h1>Welcome to Clarity Hub</h1><p>Start creating your professional legal documents here.</p>"
-          onSave={handleSave}
-          onChange={handleChange}
-          autoSave={true}
-          autoSaveInterval={30000}
-          height="100%"
-        />
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <ProfessionalRichEditor 
+            initialContent="<h1>Welcome to Clarity Hub</h1><p>Start creating your professional legal documents here.</p>"
+            onSave={handleSave}
+            onChange={handleChange}
+            autoSave={true}
+            autoSaveInterval={30000}
+            height="100%"
+          />
+        </Box>
       ) : (
-        children || <ProfessionalRichEditor 
-          initialContent="<h1>Welcome to Clarity Hub</h1><p>Start creating your professional legal documents here.</p>"
-          onSave={handleSave}
-          onChange={handleChange}
-          autoSave={true}
-          autoSaveInterval={30000}
-          height="100%"
-        />
+        children || (
+          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <ProfessionalRichEditor 
+              initialContent="<h1>Welcome to Clarity Hub</h1><p>Start creating your professional legal documents here.</p>"
+              onSave={handleSave}
+              onChange={handleChange}
+              autoSave={true}
+              autoSaveInterval={30000}
+              height="100%"
+            />
+          </Box>
+        )
       )}
     </Box>
   );

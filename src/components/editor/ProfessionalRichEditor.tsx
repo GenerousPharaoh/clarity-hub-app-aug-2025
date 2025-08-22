@@ -60,7 +60,7 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
   onSave,
   autoSave = true,
   autoSaveInterval = 30000,
-  height = '600px',
+  height = '100%',
   placeholder = 'Start typing your document...',
   readOnly = false,
 }) => {
@@ -135,8 +135,8 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
 
   // TinyMCE configuration
   const editorConfig = {
-    height: isFullscreen ? '100vh' : height,
-    menubar: false,
+    height: isFullscreen ? 'calc(100vh - 60px)' : 'calc(100vh - 250px)',
+    menubar: 'file edit view insert format tools table help',
     branding: false,
     placeholder,
     readonly: readOnly,
@@ -147,20 +147,38 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
       'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
       'insertdatetime', 'media', 'table', 'wordcount', 'help',
       'emoticons', 'codesample', 'autosave', 'directionality',
-      'visualchars', 'nonbreaking', 'pagebreak', 'quickbars'
+      'visualchars', 'nonbreaking', 'pagebreak', 'quickbars',
+      'contextmenu', 'paste', 'advlist'
     ],
-    toolbar: 'undo redo | formatselect | ' +
-      'bold italic underline strikethrough | ' +
+    toolbar: 'undo redo | cut copy paste | formatselect | ' +
+      'bold italic underline strikethrough subscript superscript | ' +
       'alignleft aligncenter alignright alignjustify | ' +
-      'bullist numlist outdent indent | ' +
-      'link image media table | ' +
-      'forecolor backcolor | ' +
+      'bullist numlist checklist outdent indent | ' +
+      'link unlink anchor image media table | ' +
+      'forecolor backcolor | fontfamily fontsize | ' +
       'codesample blockquote | ' +
-      'removeformat help',
+      'searchreplace | removeformat | fullscreen help',
     toolbar_mode: 'sliding',
     quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote',
     quickbars_insert_toolbar: 'quickimage quicktable',
-    contextmenu: 'link image table',
+    contextmenu: 'undo redo | cut copy paste pastetext | selectall | bold italic underline strikethrough | link unlink | image media table | bullist numlist | removeformat | help',
+    contextmenu_never_use_native: true,
+    paste_data_images: true,
+    paste_as_text: false,
+    browser_spellcheck: true,
+    allow_html_in_named_anchor: true,
+    link_context_toolbar: true,
+    link_quicklink: true,
+    default_link_target: '_blank',
+    link_assume_external_targets: true,
+    table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+    table_appearance_options: true,
+    table_grid: true,
+    table_class_list: [
+      {title: 'None', value: ''},
+      {title: 'Bordered', value: 'table-bordered'},
+      {title: 'Striped', value: 'table-striped'}
+    ],
     content_style: `
       body { 
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -257,7 +275,7 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
     <Paper
       elevation={0}
       sx={{
-        height: isFullscreen ? '100vh' : 'auto',
+        height: isFullscreen ? '100vh' : '100%',
         width: isFullscreen ? '100vw' : '100%',
         position: isFullscreen ? 'fixed' : 'relative',
         top: isFullscreen ? 0 : 'auto',
@@ -379,7 +397,7 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
       )}
 
       {/* TinyMCE Editor */}
-      <Box sx={{ flex: 1, overflow: 'auto' }}>
+      <Box sx={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
         <Editor
           tinymceScriptSrc="/tinymce/tinymce.min.js"
           onInit={(evt, editor) => editorRef.current = editor}

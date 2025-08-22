@@ -1,0 +1,94 @@
+/* Lexical Editor Styles */
+.lexical-content-editable {
+  min-height: 400px !important;
+  width: 100% !important;
+  height: 100% !important;
+  cursor: text !important;
+  caret-color: #1a1a1a !important;
+  position: relative !important;
+  z-index: 10 !important;
+  background-color: #ffffff !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+.lexical-content-editable:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.lexical-content-editable p {
+  margin: 0 0 8px 0;
+  min-height: 20px;
+}
+
+.lexical-content-editable p:empty::before {
+  content: '\200B'; /* Zero-width space to maintain height */
+}
+
+.lexical-placeholder {
+  position: absolute !important;
+  top: 24px !important;
+  left: 32px !important;
+  color: #9ca3af !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  z-index: 0 !important;
+}
+
+/* Ensure editor content is visible */
+.lexical-editor {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.lexical-paragraph {
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.lexical-heading-h1,
+.lexical-heading-h2,
+.lexical-heading-h3 {
+  color: #1a1a1a;
+}
+
+.lexical-text-bold {
+  font-weight: 600;
+}
+
+.lexical-text-italic {
+  font-style: italic;
+}
+
+.lexical-text-underline {
+  text-decoration: underline;
+}
+
+/* Fix for contentEditable focus */
+[contenteditable="true"] {
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+[contenteditable="true"]:focus {
+  outline: none !important;
+}
+
+/* Ensure proper z-index layering */
+.editor-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix for panel overlap */
+.center-panel .lexical-content-editable {
+  position: relative !important;
+  z-index: 10 !important;
+  margin-left: 0 !important;
+  padding-left: 32px !important;
+}

@@ -21,7 +21,11 @@ import {
 } from '@mui/material';
 import {
   Save,
+  AutoAwesome,
 } from '@mui/icons-material';
+
+import '../../styles/premium-editor.css';
+import '../../styles/premium-editor-enhancements.css';
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -70,6 +74,8 @@ import useAppStore from '../../store';
 interface LegalRichTextEditorProps {
   className?: string;
   onCitationClick?: (payload: CitationClickPayload) => void;
+  focusMode?: boolean;
+  onFocusModeChange?: (focusMode: boolean) => void;
 }
 
 // Toolbar state tracking plugin
@@ -189,6 +195,8 @@ const EditorContent: React.FC<{
   isSaving: boolean;
   onSave: () => void;
   onEditorChange?: (state: EditorState) => void;
+  focusMode?: boolean;
+  onFocusModeToggle?: () => void;
 }> = ({ 
   onCitationClick,
   selectedFile,
@@ -197,11 +205,14 @@ const EditorContent: React.FC<{
   isSaving,
   onSave,
   onEditorChange,
+  focusMode,
+  onFocusModeToggle,
 }) => {
   const [toolbarFormats, setToolbarFormats] = useState<{[key: string]: boolean}>({});
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
+  const [isEditorFocused, setIsEditorFocused] = useState(false);
 
   // Handle editor change - notify parent component
   const handleEditorChange = useCallback((state: EditorState) => {
@@ -225,69 +236,122 @@ const EditorContent: React.FC<{
     onCitationClick?.(payload);
   }, [onCitationClick]);
 
+  const handleEditorFocusChange = useCallback((focused: boolean) => {
+    setIsEditorFocused(focused);
+  }, []);
+
   return (
-    <>
+    <div className={`premium-editor-focus-container ${focusMode ? 'premium-editor-focus-mode' : ''}`}>
       {/* Editor Toolbar - Now using the new component */}
       <EditorToolbar 
         toolbarFormats={toolbarFormats}
         canUndo={canUndo}
         canRedo={canRedo}
+        focusMode={focusMode}
+        onFocusModeToggle={onFocusModeToggle}
       />
       
-      {/* Save button section */}
+      {/* Premium Save button */}
       <Box sx={{ 
-        position: 'absolute', 
-        top: 16, 
-        right: 16, 
+        position: 'fixed', 
+        top: 24, 
+        right: 24, 
         zIndex: 1000,
         display: 'flex',
         alignItems: 'center',
-        gap: 1
+        gap: 2
       }}>
         {hasUnsavedChanges && (
-          <Typography variant="caption" color="text.secondary">
-            Unsaved changes
-          </Typography>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            bgcolor: 'rgba(245, 158, 11, 0.1)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            borderRadius: '20px',
+            padding: '4px 12px',
+            animation: 'premiumPulse 2s infinite'
+          }}>
+            <div style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: '#f59e0b',
+            }} />
+            <Typography variant="caption" color="#b45309" fontWeight={500}>
+              Unsaved changes
+            </Typography>
+          </Box>
         )}
         <Button
+          className="premium-floating-button"
           variant="contained"
           size="small"
-          startIcon={<Save />}
+          startIcon={<Save fontSize="small" />}
           onClick={onSave}
           disabled={!selectedFile || isSaving || !hasUnsavedChanges}
           sx={{
-            backgroundColor: '#2563eb',
-            '&:hover': { backgroundColor: '#1d4ed8' }
+            position: 'static',
+            minWidth: 'auto',
+            height: '36px',
+            borderRadius: '18px',
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            background: hasUnsavedChanges 
+              ? 'linear-gradient(135deg, #4299e1, #63b3ed)' 
+              : 'linear-gradient(135deg, #e2e8f0, #cbd5e0)',
+            color: hasUnsavedChanges ? 'white' : '#718096',
+            boxShadow: hasUnsavedChanges 
+              ? '0 4px 12px rgba(66, 153, 225, 0.4)' 
+              : '0 2px 8px rgba(0, 0, 0, 0.1)',
+            '&:hover': {
+              background: hasUnsavedChanges 
+                ? 'linear-gradient(135deg, #3182ce, #4299e1)' 
+                : 'linear-gradient(135deg, #cbd5e0, #a0aec0)',
+              transform: 'translateY(-2px)',
+              boxShadow: hasUnsavedChanges 
+                ? '0 6px 16px rgba(66, 153, 225, 0.5)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.15)',
+            },
+            '&:disabled': {
+              background: '#f1f5f9',
+              color: '#cbd5e0',
+              boxShadow: 'none',
+            }
           }}
         >
           {isSaving ? 'Saving...' : 'Save'}
         </Button>
       </Box>
 
-      {/* Editor Content Area */}
+      {/* Premium Editor Content Area */}
       <Box 
         sx={{ 
           flex: 1, 
           overflow: 'hidden', 
           position: 'relative',
-          backgroundColor: '#ffffff',
-          minHeight: '400px',
+          backgroundColor: 'transparent',
+          minHeight: '500px',
         }}
       >
         <RichTextPlugin
             contentEditable={
               <ContentEditableWrapper
+                focusMode={focusMode}
+                onFocusChange={handleEditorFocusChange}
                 placeholder={
                   <div 
-                    className="lexical-placeholder"
+                    className="premium-placeholder"
                     style={{
                       position: 'absolute',
-                      top: '24px',
-                      left: '32px',
-                      color: '#9ca3af',
-                      fontSize: '16px',
+                      top: '48px',
+                      left: '64px',
+                      right: '64px',
                       pointerEvents: 'none',
                       userSelect: 'none',
+                      transition: 'all 0.3s ease',
+                      opacity: isEditorFocused ? 0 : 1,
                     }}
                   >
                     {selectedFile 
@@ -323,31 +387,25 @@ const EditorContent: React.FC<{
         <CitationAutoCompletePlugin />
       </Box>
 
-      {/* Status Bar */}
-      <Paper
-        elevation={0}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          px: 3,
-          py: 1,
-          borderTop: 1,
-          borderColor: 'divider',
-          backgroundColor: '#f8f9fa',
-        }}
-      >
-        <Typography variant="caption" color="text.secondary">
-          {selectedFile ? selectedFile.name : selectedProject ? selectedProject.name : 'No file selected'}
-        </Typography>
-        <Box sx={{ flex: 1 }} />
-        <Typography variant="caption" color="text.secondary">
-          {editorState 
-            ? `${editorState.read(() => $getRoot().getTextContent()).split(/\s+/).filter(w => w).length} words • ${editorState.read(() => $getRoot().getTextContent()).length} characters`
-            : '0 words • 0 characters'
-          }
-        </Typography>
-      </Paper>
-    </>
+      {/* Premium Status Bar */}
+      <div className="premium-status-bar">
+        <div className="premium-status-item">
+          <AutoAwesome fontSize="small" style={{ opacity: 0.7 }} />
+          <span>
+            {selectedFile ? selectedFile.name : selectedProject ? selectedProject.name : 'No file selected'}
+          </span>
+        </div>
+        
+        <div className="premium-status-item">
+          <span>
+            {editorState 
+              ? `${editorState.read(() => $getRoot().getTextContent()).split(/\s+/).filter(w => w).length} words • ${editorState.read(() => $getRoot().getTextContent()).length} characters`
+              : '0 words • 0 characters'
+            }
+          </span>
+        </div>
+      </div>
+    </div>
 
   );
 };
@@ -355,7 +413,9 @@ const EditorContent: React.FC<{
 // Main Component with proper context structure
 const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({ 
   className,
-  onCitationClick 
+  onCitationClick,
+  focusMode = false,
+  onFocusModeChange
 }) => {
   const selectedProjectId = useAppStore(state => state.selectedProjectId);
   const selectedFileId = useAppStore(state => state.selectedFileId);
@@ -367,6 +427,19 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [localFocusMode, setLocalFocusMode] = useState(focusMode);
+
+  // Handle focus mode changes
+  const handleFocusModeToggle = useCallback(() => {
+    const newFocusMode = !localFocusMode;
+    setLocalFocusMode(newFocusMode);
+    onFocusModeChange?.(newFocusMode);
+  }, [localFocusMode, onFocusModeChange]);
+
+  // Sync external focus mode changes
+  useEffect(() => {
+    setLocalFocusMode(focusMode);
+  }, [focusMode]);
 
   // Get selected file data
   const selectedFile = selectedFileId ? files.find(f => f.id === selectedFileId) : null;
@@ -471,13 +544,12 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
   }, []);
 
   return (
-    <Box
-      className={className}
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
+    <div
+      className={`premium-editor-container ${className || ''} ${localFocusMode ? 'premium-editor-focus-mode' : ''}`}
+      style={{
         height: '100%',
         overflow: 'hidden',
+        position: 'relative',
       }}
     >
       <LexicalComposer initialConfig={initialConfig}>
@@ -489,6 +561,8 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
           isSaving={isSaving}
           onSave={handleSave}
           onEditorChange={handleEditorStateChange}
+          focusMode={localFocusMode}
+          onFocusModeToggle={handleFocusModeToggle}
         />
       </LexicalComposer>
 
@@ -507,6 +581,23 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
           {selectedFileId ? 'Document saved successfully!' : 'Select a file to save your work'}
         </Alert>
       </Snackbar>
+
+      {/* Focus Mode Overlay */}
+      {localFocusMode && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.05)',
+            backdropFilter: 'blur(2px)',
+            zIndex: -1,
+            transition: 'all 0.3s ease',
+          }}
+        />
+      )}
 
       <style>{`
         .lexical-editor {
@@ -575,8 +666,33 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
           color: #4b5563;
           font-style: italic;
         }
+        
+        /* Custom scrollbar for editor */
+        .premium-content-editable::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .premium-content-editable::-webkit-scrollbar-track {
+          background: rgba(226, 232, 240, 0.3);
+          border-radius: 4px;
+        }
+        
+        .premium-content-editable::-webkit-scrollbar-thumb {
+          background: rgba(148, 163, 184, 0.5);
+          border-radius: 4px;
+          transition: background 0.2s ease;
+        }
+        
+        .premium-content-editable::-webkit-scrollbar-thumb:hover {
+          background: rgba(148, 163, 184, 0.8);
+        }
+        
+        /* Focus mode transition */
+        .premium-editor-focus-mode {
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
       `}</style>
-    </Box>
+    </div>
   );
 };
 

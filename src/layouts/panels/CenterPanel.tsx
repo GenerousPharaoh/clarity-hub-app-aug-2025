@@ -2,32 +2,24 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   IconButton,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Typography,
   CircularProgress,
   Tooltip,
-  Paper,
   Button,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
-  ZoomOut,
-  ZoomIn,
   AutoAwesome as AnalyzeIcon,
   NoteAddOutlined,
 } from '@mui/icons-material';
-import { Editor } from '@tinymce/tinymce-react';
 import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store';
 import supabaseClient from '../../services/supabaseClient';
 import { Note, Link } from '../../types';
 import SuggestionPanel from '../../components/ai/SuggestionPanel';
-import CitationFinder from '../../components/dialogs/CitationFinder';
+import LegalRichTextEditor from '../../components/editor/LegalRichTextEditor';
+import { $getRoot } from 'lexical';
 import { debounce } from 'lodash';
-import '../../theme/tinymce-custom.css'; // Import custom TinyMCE CSS
-import '../../styles/editor.css'; // Import sleek editor styles
 
 // Define a local interface to match the actual database schema
 interface NoteData {
@@ -44,14 +36,12 @@ const CenterPanel = () => {
   const [note, setNote] = useState<NoteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isCitationFinderOpen, setCitationFinderOpen] = useState(false);
-  const [editorInstance, setEditorInstance] = useState<any>(null);
+  const [editorState, setEditorState] = useState<any>(null);
   const fetchedRef = useRef(false);
   
   // Use individual selectors instead of object destructuring
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
   const selectedFileId = useAppStore((state) => state.selectedFileId);
-  const selectedNoteId = useAppStore((state) => state.selectedNoteId);
   const isSuggestionPanelOpen = useAppStore((state) => state.isSuggestionPanelOpen);
   const toggleSuggestionPanel = useAppStore((state) => state.toggleSuggestionPanel);
   const linkActivation = useAppStore((state) => state.linkActivation);
@@ -81,42 +71,25 @@ const CenterPanel = () => {
     []
   );
 
-  // Auto-save content changes
-  useEffect(() => {
-    if (note && content !== note.content) {
-      debouncedSaveNote(note, content);
-    }
-  }, [content, note, debouncedSaveNote]);
+  // Auto-save content changes (temporarily disabled while using LegalRichTextEditor)
+  // The LegalRichTextEditor handles its own auto-save functionality
+  // useEffect(() => {
+  //   if (note && content !== note.content) {
+  //     debouncedSaveNote(note, content);
+  //   }
+  // }, [content, note, debouncedSaveNote]);
 
-  // Link activation handler - scroll to and highlight citation when a link is activated
-  useEffect(() => {
-    if (linkActivation && editorInstance) {
-      highlightLinkedCitation(linkActivation.fileId);
-    }
-  }, [linkActivation, editorInstance]);
-
-  // Highlight citation in the editor
-  const highlightLinkedCitation = (fileId: string) => {
-    if (!editorInstance) return;
+  // Handle Lexical editor state changes  
+  const handleEditorStateChange = useCallback((newEditorState: any) => {
+    setEditorState(newEditorState);
+    // Extract plain text content for auto-save and AI suggestions
+    const textContent = newEditorState.read(() => $getRoot().getTextContent());
+    setContent(textContent);
     
-    const editor = editorInstance;
-    const content = editor.getContent();
-    
-    // Find all citation elements with the matching file ID
-    const body = editor.getBody();
-    const citations = body.querySelectorAll(`a.exhibit-citation[data-file-id="${fileId}"]`);
-    
-    if (citations.length > 0) {
-      // Scroll to the first occurrence
-      citations[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Highlight all matching citations
-      citations.forEach((citation: HTMLElement) => {
-        editor.selection.select(citation);
-        editor.focus();
-      });
-    }
-  };
+    // For now, we'll rely on the LegalRichTextEditor's own auto-save
+    // In the future, we could integrate this with our note system
+    console.log('Editor content updated:', textContent.length, 'characters');
+  }, []);
 
   // Fetch the note for the current project
   const fetchNote = async () => {
@@ -272,164 +245,22 @@ const CenterPanel = () => {
     }
   };
 
-  // TinyMCE configuration - minimal and clean
-  const editorConfig = {
-    height: '100%',
-    menubar: false,
-    plugins: [
-      'lists', 'link', 'image', 'table', 'wordcount', 'fullscreen', 'autosave'
-    ],
-    toolbar: 'bold italic | bullist numlist | link image | removeformat',
-    toolbar_location: 'top',
-    toolbar_sticky: false,
-    inline: false,
-    // Add base_url to ensure TinyMCE can find its resources
-    base_url: '/tinymce',
-    // Add skin_url to ensure TinyMCE can find its skin
-    skin_url: '/tinymce/skins/ui/oxide',
-    // Add content_css to ensure TinyMCE loads the proper CSS for the editor content
-    content_css: [
-      '/tinymce/skins/content/default/content.min.css',
-    ],
-    content_style: `
-      body { 
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-        font-size: 16px;
-        line-height: 1.6;
-        color: #333;
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 40px 60px;
-      }
-      h1 { font-size: 2.5em; margin-bottom: 0.5em; }
-      h2 { font-size: 2em; margin-bottom: 0.5em; }
-      h3 { font-size: 1.5em; margin-bottom: 0.5em; }
-      p { margin-bottom: 1em; }
-      blockquote { 
-        border-left: 4px solid #e0e0e0;
-        padding-left: 20px;
-        margin-left: 0;
-        font-style: italic;
-      }
-    `,
-    // Clean UI settings
-    license_key: 'gpl',
-    promotion: false,
-    branding: false,
-    resize: false,
-    statusbar: false, // Remove status bar completely
-    elementpath: false,
-    contextmenu: false,
-    // Auto-save
-    autosave_interval: '30s',
-    autosave_restore_when_empty: false,
-    // Setup editor
-    setup: (editor) => {
-      // Store editor instance for later use
-      editor.on('init', () => {
-        setEditorInstance(editor);
-        
-        // Remove all borders and shadows for seamless integration
-        const editorContainer = editor.getContainer();
-        if (editorContainer) {
-          editorContainer.style.border = 'none';
-          editorContainer.style.boxShadow = 'none';
-          editorContainer.style.borderRadius = '0';
-          editorContainer.style.height = '100%';
-        }
-        
-        // Make editor body use the full height
-        const editorBody = editor.getBody();
-        if (editorBody) {
-          editorBody.style.minHeight = '100%';
-        }
-        
-        // Hide unwanted UI elements directly
-        const promotion = document.querySelector('.tox-promotion');
-        if (promotion) promotion.style.display = 'none';
-        
-        const statusbar = document.querySelector('.tox-statusbar');
-        if (statusbar) statusbar.style.display = 'none';
-        
-        const menubar = document.querySelector('.tox-menubar');
-        if (menubar) menubar.style.display = 'none';
-        
-        // Clean up the toolbar
-        const toolbar = editorContainer?.querySelector('.tox-toolbar');
-        if (toolbar) {
-          toolbar.style.border = 'none';
-          toolbar.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
-          toolbar.style.backgroundColor = 'transparent';
-          toolbar.style.minHeight = '40px';
-        }
-      });
-      
-      // Add custom cite button
-      editor.ui.registry.addButton('cite', {
-        text: 'Cite Exhibit',
-        tooltip: 'Insert citation to an exhibit',
-        onAction: () => {
-          setCitationFinderOpen(true);
-        }
-      });
-      
-      // Auto-save indication
-      let saveTimer = null;
-      editor.on('KeyUp', () => {
-        if (saveTimer) clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => {
-          // This will trigger the content change handler which handles saving
-          editor.fire('change');
-        }, 1000);
-      });
-      
-      // Add citation click handler
-      editor.on('click', (e) => {
-        const clickedEl = e.target as HTMLElement;
-        
-        if (clickedEl.classList.contains('exhibit-citation')) {
-          e.preventDefault();
-          
-          const fileId = clickedEl.getAttribute('data-file-id');
-          const exhibitId = clickedEl.getAttribute('data-exhibit-id');
-          
-          if (fileId) {
-            // Activate the file in the right panel
-            setLinkActivation({
-              fileId,
-              page: undefined, // Will be set by the viewer if applicable
-              timestamp: undefined, // Will be set by the viewer if applicable
-            });
-          }
-        }
+  // Handle citation clicks from the Lexical editor
+  const handleCitationClick = useCallback((payload: any) => {
+    console.log('Citation clicked:', payload);
+    
+    if (payload.fileId) {
+      // Activate the file in the right panel
+      setLinkActivation({
+        type: 'citation',
+        fileId: payload.fileId,
+        exhibitId: payload.exhibitId,
+        targetPage: payload.pageNumber,
+        timestamp: Date.now(),
       });
     }
-  };
+  }, [setLinkActivation]);
 
-  // Editor change handler
-  const handleEditorChange = (newContent: string) => {
-    setContent(newContent);
-  };
-
-  // Citation insertion handler
-  const handleInsertCitation = async (exhibitId: string, fileId: string) => {
-    setCitationFinderOpen(false);
-    
-    // Get the file details
-    const file = files.find(f => f.id === fileId);
-    const displayName = file?.exhibit_id || exhibitId;
-    
-    // Save link to database
-    await saveLink(fileId, displayName);
-    
-    // Insert the citation at cursor position
-    const citation = `<a href="#" data-exhibit-id="${displayName}" data-file-id="${fileId}" class="exhibit-citation">[Exhibit ${displayName}]</a>`;
-    
-    // Get editor instance
-    if (editorInstance) {
-      editorInstance.execCommand('mceInsertContent', false, citation);
-    }
-  };
 
   // Toggle AI suggestions panel
   const handleAnalyzeContent = () => {
@@ -461,32 +292,7 @@ const CenterPanel = () => {
     );
   }
   
-  if (!selectedNoteId) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          p: 4,
-          textAlign: 'center',
-        }}
-      >
-        <NoteAddOutlined sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
-        <Typography variant="h6" gutterBottom>
-          No note selected
-        </Typography>
-        <Typography variant="body2" color="text.secondary" paragraph>
-          Select a note or create a new one to start editing
-        </Typography>
-        <Button variant="contained" color="primary">
-          Create New Note
-        </Button>
-      </Box>
-    );
-  }
+  // For notes, we use selectedProjectId since each project has one note per user
   
   return (
     <Box
@@ -521,28 +327,15 @@ const CenterPanel = () => {
           {/* Empty placeholder - this should never be seen */}
         </Box>
       ) : (
-        <Editor
-          apiKey={import.meta.env.VITE_TINYMCE_API_KEY as string}
-          value={content}
-          onEditorChange={handleEditorChange}
-          init={editorConfig}
-          // Add onInit handler to log successful initialization
-          onInit={(evt, editor) => {
-            console.log('TinyMCE initialized successfully');
-            setEditorInstance(editor);
-            if (editor.getContainer()) {
-              editor.getContainer().setAttribute('data-test', 'note-editor');
-            }
-          }}
-          // Add onError handler to catch any editor loading errors
-          onLoadError={(err) => {
-            console.error('TinyMCE failed to load:', err);
-          }}
-        />
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <LegalRichTextEditor
+            onCitationClick={handleCitationClick}
+          />
+        </Box>
       )}
-        
-        {/* Floating AI Assistant button */}
-        {selectedProjectId && !loading && content && content.length > 100 && (
+      
+      {/* Floating AI Assistant button */}
+      {selectedProjectId && !loading && content && content.length > 100 && (
           <Box sx={{ 
             position: 'fixed', 
             bottom: 80, 
@@ -569,29 +362,28 @@ const CenterPanel = () => {
               </IconButton>
             </Tooltip>
           </Box>
-        )}
-        
-        {/* Saving indicator - subtle and unobtrusive */}
-        {saving && (
-          <Box sx={{ 
-            position: 'fixed', 
-            bottom: 20, 
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            bgcolor: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            p: 0.5,
-            px: 2,
-            borderRadius: 20,
-            zIndex: 1000,
-          }}>
-            <CircularProgress size={14} sx={{ mr: 1, color: 'white' }} />
-            <Typography variant="caption">Saving...</Typography>
-          </Box>
-        )}
-      </Box>
+      )}
+      
+      {/* Saving indicator - subtle and unobtrusive */}
+      {saving && (
+        <Box sx={{ 
+          position: 'fixed', 
+          bottom: 20, 
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          bgcolor: 'rgba(0, 0, 0, 0.7)',
+          color: 'white',
+          p: 0.5,
+          px: 2,
+          borderRadius: 20,
+          zIndex: 1000,
+        }}>
+          <CircularProgress size={14} sx={{ mr: 1, color: 'white' }} />
+          <Typography variant="caption">Saving...</Typography>
+        </Box>
+      )}
       
       {/* Suggestion Panel */}
       {isSuggestionPanelOpen && (
@@ -611,13 +403,6 @@ const CenterPanel = () => {
           <SuggestionPanel content={content} />
         </Box>
       )}
-      
-      {/* Citation Finder Dialog */}
-      <CitationFinder
-        open={isCitationFinderOpen}
-        onClose={() => setCitationFinderOpen(false)}
-        onSelectFile={handleInsertCitation}
-      />
     </Box>
   );
 };

@@ -22,6 +22,7 @@ import {
   ExhibitLinkActivation
 } from '../types';
 import { createPanelSlice, PanelState } from './panelSlice';
+import { demoService, DEMO_PROJECT_ID, DEMO_USER_ID } from '../services/demoService';
 
 export interface AppState extends PanelState {
   // User state
@@ -37,6 +38,7 @@ export interface AppState extends PanelState {
   projects: Project[];
   setSelectedProject: (projectId: string | null) => void;
   setProjects: (projects: Project[]) => void;
+  initializeDemoProject: () => Promise<void>;
   addProject: (project: Project) => void;
   updateProject: (projectId: string, updates: Partial<Project>) => void;
   deleteProject: (projectId: string) => void;
@@ -207,6 +209,21 @@ export const useAppStore = create<AppState>()(
           return { selectedProjectId: projectId };
         }),
         setProjects: (projects) => a[0]({ projects }),
+        
+        initializeDemoProject: async () => {
+          if (window.DEMO_MODE) {
+            try {
+              const { project } = await demoService.initializeDemoAccount();
+              a[0]((state) => ({
+                projects: [project, ...state.projects.filter(p => p.id !== DEMO_PROJECT_ID)],
+                selectedProjectId: DEMO_PROJECT_ID
+              }));
+            } catch (error) {
+              console.error('Failed to initialize demo project:', error);
+            }
+          }
+        },
+        
         addProject: (project) => a[0]((state) => ({ 
           projects: [...state.projects, project] 
         })),

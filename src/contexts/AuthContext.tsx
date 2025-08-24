@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode, useMemo, use
 import { Session, User } from '@supabase/supabase-js';
 import supabaseClient from '../services/supabaseClient';
 import { useAppStore } from '../store';
+import { demoService, DEMO_USER_ID } from '../services/demoService';
 
 // Admin user ID for special handling
 const ADMIN_EMAIL = 'kareem.hassanein@gmail.com';
@@ -33,21 +34,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false); // Start with false to avoid loading state
   const setStoreUser = useAppStore((state) => state.setUser);
   
-  // Create and set demo user immediately for demo mode
+  // Initialize persistent demo account for demo mode
   React.useEffect(() => {
     if (window.DEMO_MODE) {
-      const demoUser = {
-        id: '00000000-0000-0000-0000-000000000000',
-        email: 'demo@example.com',
-        user_metadata: {
-          avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
-          full_name: 'Demo User'
+      const initDemo = async () => {
+        try {
+          const { user: demoUserData } = await demoService.initializeDemoAccount();
+          
+          const demoUser = {
+            id: DEMO_USER_ID,
+            email: demoUserData.email,
+            user_metadata: {
+              avatar_url: demoUserData.avatar_url,
+              full_name: demoUserData.full_name
+            }
+          } as User;
+          
+          setUser(demoUser);
+          setLoading(false);
+          console.log('Persistent demo user initialized');
+        } catch (error) {
+          console.error('Failed to initialize demo:', error);
+          // Fallback to basic demo user
+          const fallbackUser = {
+            id: DEMO_USER_ID,
+            email: 'demo@clarityhub.ai',
+            user_metadata: {
+              avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=3B82F6&color=fff',
+              full_name: 'Demo User'
+            }
+          } as User;
+          setUser(fallbackUser);
+          setLoading(false);
         }
-      } as User;
+      };
       
-      setUser(demoUser);
-      setLoading(false);
-      console.log('Demo user set in AuthContext');
+      initDemo();
     }
   }, []);
 

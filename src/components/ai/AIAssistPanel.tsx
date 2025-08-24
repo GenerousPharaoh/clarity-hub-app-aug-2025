@@ -33,6 +33,7 @@ import {
 import supabaseClient from '../../services/supabaseClient';
 import { File as FileType } from '../../types';
 import useAppStore from '../../store';
+import { demoAI } from '../../services/demoAIService';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -100,39 +101,72 @@ const AIAssistPanel = ({ fileId }: AIAssistPanelProps) => {
   }, [selectedFile]);
   
   const handleAnalyze = async () => {
-    if (!fileId) return;
+    if (!fileId || !selectedFile) return;
     
     try {
       setAnalyzing(true);
       setError(null);
       
-      // Call the analyze-file edge function
-      const { data, error } = await supabaseClient.functions.invoke('analyze-file', {
-        body: { fileId }
-      });
-      
-      if (error) throw new Error(error.message);
-      
-      if (data?.analysis) {
-        setAnalysis(data.analysis);
+      // Use demo AI for demo mode
+      if (window.DEMO_MODE) {
+        // Simulate analysis with demo AI
+        const demoAnalysis = await demoAI.analyzeDocument(
+          '', // Empty content for demo
+          selectedFile.name,
+          selectedFile.content_type || '',
+          `Analyzing file ${selectedFile.id}`
+        );
         
-        // Update the file metadata with the analysis
-        const updateResult = await supabaseClient
-          .from('files')
-          .update({
-            metadata: {
-              ...selectedFile?.metadata,
-              analysis: data.analysis,
-              analyzed_at: new Date().toISOString()
-            }
-          })
-          .eq('id', fileId);
-          
-        if (updateResult.error) {
-          console.error('Error updating file metadata:', updateResult.error);
-        }
+        const analysisResult: AnalysisResult = {
+          summary: demoAnalysis.summary,
+          documentType: demoAnalysis.documentType,
+          keyEntities: demoAnalysis.keyEntities.map(e => ({ name: e, role: 'Entity' })),
+          keyDates: [],
+          legalIssues: ['Document review required', 'Legal compliance check needed'],
+          keyFacts: demoAnalysis.insights.map(i => i.description),
+          relevantLaw: [],
+          suggestedKeywords: demoAnalysis.keyEntities
+        };
+        
+        setAnalysis(analysisResult);
+        
+        // Update file metadata in store
+        useAppStore.getState().updateFile(selectedFile.id, {
+          metadata: {
+            ...selectedFile.metadata,
+            analysis: analysisResult,
+            analyzed_at: new Date().toISOString()
+          }
+        });
       } else {
-        throw new Error('No analysis results returned');
+        // Call the analyze-file edge function for real mode
+        const { data, error } = await supabaseClient.functions.invoke('analyze-file', {
+          body: { fileId }
+        });
+        
+        if (error) throw new Error(error.message);
+        
+        if (data?.analysis) {
+          setAnalysis(data.analysis);
+          
+          // Update the file metadata with the analysis
+          const updateResult = await supabaseClient
+            .from('files')
+            .update({
+              metadata: {
+                ...selectedFile?.metadata,
+                analysis: data.analysis,
+                analyzed_at: new Date().toISOString()
+              }
+            })
+            .eq('id', fileId);
+            
+          if (updateResult.error) {
+            console.error('Error updating file metadata:', updateResult.error);
+          }
+        } else {
+          throw new Error('No analysis results returned');
+        }
       }
     } catch (err) {
       console.error('Error analyzing file:', err);

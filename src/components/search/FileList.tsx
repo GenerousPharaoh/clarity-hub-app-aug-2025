@@ -41,7 +41,7 @@ interface FileListProps {
   onDeleteFile: (fileId: string) => Promise<void>;
   onDownloadFile: (fileId: string) => Promise<void>;
   onRenameFile: (fileId: string) => void;
-  onUploadFile: () => void;
+  onSwitchToUpload?: () => void;
   searchActive: boolean;
 }
 
@@ -56,7 +56,7 @@ const FileList: React.FC<FileListProps> = ({
   onDeleteFile,
   onDownloadFile,
   onRenameFile,
-  onUploadFile,
+  onSwitchToUpload,
   searchActive,
 }) => {
   const [fileMenuAnchorEl, setFileMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -126,17 +126,6 @@ const FileList: React.FC<FileListProps> = ({
             </Typography>
           )}
         </Typography>
-        
-        <Tooltip title="Upload file">
-          <IconButton 
-            onClick={onUploadFile} 
-            color="primary" 
-            size="small"
-            data-test="upload-file-button"
-          >
-            <UploadIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
       </Box>
 
       {/* Upload progress */}
@@ -194,9 +183,32 @@ const FileList: React.FC<FileListProps> = ({
                 : "No files in this project yet"
               }
               secondary={!searchActive && (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  Upload files to get started
-                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Upload files to get started
+                  </Typography>
+                  {onSwitchToUpload && (
+                    <Box sx={{ mt: 2 }}>
+                      <IconButton 
+                        onClick={onSwitchToUpload}
+                        color="primary"
+                        size="large"
+                        sx={{ 
+                          bgcolor: 'primary.main',
+                          color: 'white',
+                          '&:hover': {
+                            bgcolor: 'primary.dark',
+                          }
+                        }}
+                      >
+                        <UploadIcon />
+                      </IconButton>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                        Click to upload or drag & drop files
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
               )}
             />
           </ListItem>

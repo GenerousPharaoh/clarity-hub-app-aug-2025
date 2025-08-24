@@ -814,13 +814,7 @@ const LeftPanel = ({
                     onDeleteFile={handleDeleteFile}
                     onDownloadFile={handleDownloadFile}
                     onRenameFile={handleOpenRenameDialog}
-                    onUploadFile={() => {
-                      // Redirect to upload tab in center panel
-                      showNotification(
-                        'Use the "Upload Files" tab in the center panel for AI-powered uploads',
-                        'info'
-                      );
-                    }}
+                    onSwitchToUpload={() => setActiveTab('upload')}
                     searchActive={!!searchFilters.searchTerm || 
                                   (searchFilters.tags && searchFilters.tags.length > 0) ||
                                   (searchFilters.fileTypes && searchFilters.fileTypes.length > 0) ||

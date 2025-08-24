@@ -58,6 +58,7 @@ import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';
 import RightPanelWrapper from './panels/RightPanelWrapper';
 import ProfessionalPanelLayout from '../components/ProfessionalPanelLayout';
+import CollapsedPanel from '../components/CollapsedPanel';
 
 const MainLayout = () => {
   const theme = useTheme();
@@ -120,25 +121,9 @@ const MainLayout = () => {
 
   // Create new project
   const handleCreateProject = () => {
-    const projectName = prompt('Enter project name:', `Case ${projects.length + 1}`);
-    if (!projectName) return;
-    
-    const newId = `demo-project-${Date.now()}`;
-    const newProject = {
-      id: newId,
-      name: projectName,
-      description: prompt('Enter project description (optional):', '') || undefined,
-      created_at: new Date().toISOString(),
-      owner_id: user?.id || '00000000-0000-0000-0000-000000000000'
-    };
-    
-    useAppStore.setState(state => ({
-      projects: [...state.projects, newProject],
-      selectedProjectId: newId
-    }));
-    
-    navigate(`/project/${newId}`);
-    showNotification(`Created new project: ${projectName}`, 'success');
+    // Don't use browser prompt - redirect to proper project creation UI
+    navigate('/dashboard');
+    showNotification('Use the project creation dialog to create a new project', 'info');
   };
 
   // Navigation items for drawer
@@ -529,6 +514,9 @@ const MainLayout = () => {
               <LeftPanel />
             </Box>
           }
+          leftPanelCollapsed={
+            <CollapsedPanel side="left" onExpand={toggleLeftPanel} />
+          }
           centerPanel={
             <Box className="panel-content">
               <CenterPanelWrapper>
@@ -540,6 +528,9 @@ const MainLayout = () => {
             <Box className="panel-content panel-right">
               <RightPanelWrapper />
             </Box>
+          }
+          rightPanelCollapsed={
+            <CollapsedPanel side="right" onExpand={toggleRightPanel} />
           }
           leftPanelOpen={isLeftPanelOpen}
           rightPanelOpen={isRightPanelOpen}

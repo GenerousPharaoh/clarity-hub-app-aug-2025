@@ -102,6 +102,12 @@ class CloudFileService {
    * Get all files for a project
    */
   async getProjectFiles(projectId: string): Promise<CloudFile[]> {
+    // Validate projectId to prevent undefined queries
+    if (!projectId || projectId === 'undefined') {
+      console.warn('getProjectFiles called with invalid projectId:', projectId);
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('files')
       .select('*')
@@ -267,6 +273,16 @@ class CloudFileService {
     projectId: string,
     callback: (payload: any) => void
   ) {
+    // Validate projectId to prevent undefined queries
+    if (!projectId || projectId === 'undefined') {
+      console.warn('subscribeToFileUpdates called with invalid projectId:', projectId);
+      return {
+        unsubscribe: () => {
+          console.warn('Unsubscribe called on invalid subscription');
+        }
+      };
+    }
+    
     return supabase
       .channel(`files_${projectId}`)
       .on(

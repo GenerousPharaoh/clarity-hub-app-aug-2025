@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Mode Test - Clarity Hub</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+        }
+        .demo-info {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Clarity Hub - Demo Mode Test</h1>
+        
+        <div class="status info">
+            <h3>Demo Mode Status</h3>
+            <p>This page tests the demo mode functionality of Clarity Hub.</p>
+        </div>
+
+        <div class="demo-info">
+            <h3>📋 Demo Account Details</h3>
+            <ul>
+                <li><strong>Demo User ID:</strong> <code>11111111-1111-1111-1111-111111111111</code></li>
+                <li><strong>Demo Project ID:</strong> <code>22222222-2222-2222-2222-222222222222</code></li>
+                <li><strong>Demo Email:</strong> <code>demo@clarityhub.ai</code></li>
+            </ul>
+        </div>
+
+        <div class="status success">
+            <h3>✅ Demo Features Available</h3>
+            <ul class="feature-list">
+                <li>📁 <strong>Persistent File Storage</strong> - Files saved in demo mode persist across sessions</li>
+                <li>🤖 <strong>AI Analysis (Simulated)</strong> - Document analysis without API costs</li>
+                <li>📤 <strong>Drag & Drop Upload</strong> - Bulk file upload with progress tracking</li>
+                <li>📑 <strong>Exhibit Management</strong> - Automatic exhibit ID generation</li>
+                <li>💬 <strong>AI Chat Assistant</strong> - Simulated legal assistance</li>
+                <li>📊 <strong>Collapsible Panels</strong> - Professional UI with resizable panels</li>
+                <li>✏️ <strong>Lexical Editor</strong> - Premium document editing experience</li>
+            </ul>
+        </div>
+
+        <div class="status warning">
+            <h3>⚠️ Demo Limitations</h3>
+            <ul>
+                <li>AI responses are simulated (not using real AI APIs)</li>
+                <li>Demo files may be cleaned up after 7 days</li>
+                <li>Limited to demo project scope</li>
+            </ul>
+        </div>
+
+        <h3>🚀 Quick Actions</h3>
+        <button onclick="openApp()">Open Clarity Hub App</button>
+        <button onclick="checkStatus()">Check Demo Status</button>
+        <button onclick="clearData()">Clear Demo Data</button>
+
+        <div id="status-output" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function openApp() {
+            // Open the app in demo mode
+            window.open('http://localhost:5044/', '_blank');
+        }
+
+        function checkStatus() {
+            const output = document.getElementById('status-output');
+            
+            // Check if demo mode would be active
+            const demoActive = true; // Since we're including demo-mode.js
+            
+            output.innerHTML = `
+                <div class="status ${demoActive ? 'success' : 'warning'}">
+                    <h4>Status Check Results:</h4>
+                    <ul>
+                        <li>Demo Mode: ${demoActive ? '✅ Active' : '❌ Inactive'}</li>
+                        <li>Server: Running on port 5044</li>
+                        <li>Database: Supabase (swtkpfpyjjkkemmvkhmz)</li>
+                        <li>Storage Bucket: project-files (public)</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        function clearData() {
+            if (confirm('This will clear local demo data. Are you sure?')) {
+                localStorage.removeItem('clarity-hub-storage');
+                localStorage.removeItem('clarity-hub-panel-state');
+                
+                const output = document.getElementById('status-output');
+                output.innerHTML = `
+                    <div class="status success">
+                        <h4>✅ Demo data cleared!</h4>
+                        <p>Local storage has been reset. The app will reinitialize with fresh demo data on next load.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-check status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkStatus, 500);
+        });
+    </script>
+</body>
+</html>

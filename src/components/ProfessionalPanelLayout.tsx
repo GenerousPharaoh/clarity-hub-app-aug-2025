@@ -11,6 +11,8 @@ interface ProfessionalPanelLayoutProps {
   onLeftPanelToggle?: (open: boolean) => void;
   onRightPanelToggle?: (open: boolean) => void;
   onWidthChange?: (widths: { left: number; center: number; right: number }) => void;
+  leftPanelCollapsed?: React.ReactNode;
+  rightPanelCollapsed?: React.ReactNode;
 }
 
 const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
@@ -22,6 +24,8 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
   onLeftPanelToggle,
   onRightPanelToggle,
   onWidthChange,
+  leftPanelCollapsed,
+  rightPanelCollapsed,
 }) => {
   // Panel visibility states - use props if provided, otherwise internal state
   const [isLeftOpen, setIsLeftOpen] = useState(leftPanelOpen);
@@ -35,6 +39,9 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
   useEffect(() => {
     setIsRightOpen(rightPanelOpen);
   }, [rightPanelOpen]);
+  
+  // Collapsed width in pixels
+  const COLLAPSED_WIDTH = 48; // px for icon-only sidebar
   
   // Panel width system using percentages that always sum to 100%
   const [panelWidths, setPanelWidths] = useState({
@@ -67,15 +74,20 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
 
   // Calculate panel widths when panels open/close
   const calculatePanelWidths = useCallback((leftOpen: boolean, rightOpen: boolean) => {
-    if (!leftOpen && !rightOpen) {
-      return { left: 20, center: 100, right: 25 };
-    } else if (leftOpen && !rightOpen) {
-      return { left: 20, center: 80, right: 25 };
-    } else if (!leftOpen && rightOpen) {
-      return { left: 20, center: 75, right: 25 };
-    } else {
-      // All panels open - distribute space
+    // Note: When collapsed, panels use fixed pixel width
+    // The percentages here are for expanded panels only
+    if (leftOpen && rightOpen) {
+      // Both panels expanded
       return { left: 20, center: 55, right: 25 };
+    } else if (leftOpen && !rightOpen) {
+      // Only left panel expanded
+      return { left: 20, center: 75, right: 5 };
+    } else if (!leftOpen && rightOpen) {
+      // Only right panel expanded
+      return { left: 5, center: 70, right: 25 };
+    } else {
+      // Both panels collapsed
+      return { left: 5, center: 90, right: 5 };
     }
   }, []);
 
@@ -233,150 +245,149 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
         position: 'relative',
       }}
     >
-      {/* Left Panel */}
-      {isLeftOpen && (
-        <>
-          <Box
-            ref={leftPanelRef}
-            sx={{
-              width: `${panelWidths.left}%`,
-              height: '100%',
-              overflow: 'hidden',
-              bgcolor: 'background.paper',
-              borderRight: '1px solid',
-              borderColor: 'divider',
-              transition: isResizing ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-              position: 'relative',
-            }}
-          >
-            {leftPanel}
-          </Box>
+      {/* Left Panel - Always rendered, but collapsed when not open */}
+      <Box
+        ref={leftPanelRef}
+        sx={{
+          width: isLeftOpen ? `${panelWidths.left}%` : `${COLLAPSED_WIDTH}px`,
+          height: '100%',
+          overflow: 'hidden',
+          bgcolor: 'background.paper',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          transition: isResizing ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {isLeftOpen ? leftPanel : leftPanelCollapsed}
+      </Box>
 
-          {/* Left Resize Handle */}
-          <Box
-            className="panel-resize-handle"
-            onMouseDown={createResizeHandler('left')}
-            sx={{
-              width: '8px',
-              height: '100%',
+      {/* Left Resize Handle - Only show when expanded */}
+      {isLeftOpen && (
+        <Box
+          className="panel-resize-handle"
+          onMouseDown={createResizeHandler('left')}
+          sx={{
+            width: '8px',
+            height: '100%',
+            background: theme => 
+              `linear-gradient(90deg, ${theme.palette.primary.main}30 0%, ${theme.palette.primary.light}30 100%)`,
+            cursor: 'col-resize',
+            position: 'relative',
+            zIndex: 50,
+            transition: 'background-color 0.2s ease',
+            borderRadius: '0 4px 4px 0',
+            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            '&:hover': {
               background: theme => 
-                `linear-gradient(90deg, ${theme.palette.primary.main}30 0%, ${theme.palette.primary.light}30 100%)`,
-              cursor: 'col-resize',
-              position: 'relative',
-              zIndex: 50,
-              transition: 'background-color 0.2s ease',
-              borderRadius: '0 4px 4px 0',
-              boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              '&:hover': {
-                background: theme => 
-                  `linear-gradient(90deg, ${theme.palette.primary.main}50 0%, ${theme.palette.primary.light}50 100%)`,
-                '& .grip-icon': {
-                  opacity: 1,
-                },
+                `linear-gradient(90deg, ${theme.palette.primary.main}50 0%, ${theme.palette.primary.light}50 100%)`,
+              '& .grip-icon': {
+                opacity: 1,
               },
-              '&:active': {
-                background: theme => 
-                  `linear-gradient(90deg, ${theme.palette.primary.main}80 0%, ${theme.palette.primary.light}80 100%)`,
-              },
+            },
+            '&:active': {
+              background: theme => 
+                `linear-gradient(90deg, ${theme.palette.primary.main}80 0%, ${theme.palette.primary.light}80 100%)`,
+            },
+          }}
+        >
+          <DragIndicator 
+            className="grip-icon"
+            sx={{
+              color: 'white',
+              opacity: 0.6,
+              transition: 'opacity 0.2s',
+              pointerEvents: 'none',
+              fontSize: 20,
             }}
-          >
-            <DragIndicator 
-              className="grip-icon"
-              sx={{
-                color: 'white',
-                opacity: 0.6,
-                transition: 'opacity 0.2s',
-                pointerEvents: 'none',
-                fontSize: 20,
-              }}
-            />
-          </Box>
-        </>
+          />
+        </Box>
       )}
 
       {/* Center Panel */}
       <Box
         ref={centerPanelRef}
         sx={{
-          width: isLeftOpen 
-            ? (isRightOpen ? `${panelWidths.center}%` : `${panelWidths.center + panelWidths.right}%`)
-            : (isRightOpen ? `${panelWidths.left + panelWidths.center}%` : '100%'),
+          flex: 1,
           height: '100%',
           overflow: 'hidden',
           bgcolor: 'background.default',
           transition: isResizing ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
           position: 'relative',
+          minWidth: '400px', // Minimum width for center panel
         }}
       >
         {centerPanel}
       </Box>
 
-      {/* Right Panel */}
+      {/* Right Resize Handle - Only show when expanded */}
       {isRightOpen && (
-        <>
-          {/* Right Resize Handle */}
-          <Box
-            className="panel-resize-handle"
-            onMouseDown={createResizeHandler('right')}
-            sx={{
-              width: '8px',
-              height: '100%',
+        <Box
+          className="panel-resize-handle"
+          onMouseDown={createResizeHandler('right')}
+          sx={{
+            width: '8px',
+            height: '100%',
+            background: theme => 
+              `linear-gradient(90deg, ${theme.palette.primary.main}30 0%, ${theme.palette.primary.light}30 100%)`,
+            cursor: 'col-resize',
+            position: 'relative',
+            zIndex: 50,
+            transition: 'background-color 0.2s ease',
+            borderRadius: '4px 0 0 4px',
+            boxShadow: '-2px 0 8px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            '&:hover': {
               background: theme => 
-                `linear-gradient(90deg, ${theme.palette.primary.main}30 0%, ${theme.palette.primary.light}30 100%)`,
-              cursor: 'col-resize',
-              position: 'relative',
-              zIndex: 50,
-              transition: 'background-color 0.2s ease',
-              borderRadius: '4px 0 0 4px',
-              boxShadow: '-2px 0 8px rgba(0, 0, 0, 0.1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              '&:hover': {
-                background: theme => 
-                  `linear-gradient(90deg, ${theme.palette.primary.main}50 0%, ${theme.palette.primary.light}50 100%)`,
-                '& .grip-icon': {
-                  opacity: 1,
-                },
+                `linear-gradient(90deg, ${theme.palette.primary.main}50 0%, ${theme.palette.primary.light}50 100%)`,
+              '& .grip-icon': {
+                opacity: 1,
               },
-              '&:active': {
-                background: theme => 
-                  `linear-gradient(90deg, ${theme.palette.primary.main}80 0%, ${theme.palette.primary.light}80 100%)`,
-              },
-            }}
-          >
-            <DragIndicator 
-              className="grip-icon"
-              sx={{
-                color: 'white',
-                opacity: 0.6,
-                transition: 'opacity 0.2s',
-                pointerEvents: 'none',
-                fontSize: 20,
-              }}
-            />
-          </Box>
-
-          <Box
-            ref={rightPanelRef}
+            },
+            '&:active': {
+              background: theme => 
+                `linear-gradient(90deg, ${theme.palette.primary.main}80 0%, ${theme.palette.primary.light}80 100%)`,
+            },
+          }}
+        >
+          <DragIndicator 
+            className="grip-icon"
             sx={{
-              width: `${panelWidths.right}%`,
-              height: '100%',
-              overflow: 'hidden',
-              bgcolor: 'background.paper',
-              borderLeft: '1px solid',
-              borderColor: 'divider',
-              transition: isResizing ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-              position: 'relative',
+              color: 'white',
+              opacity: 0.6,
+              transition: 'opacity 0.2s',
+              pointerEvents: 'none',
+              fontSize: 20,
             }}
-          >
-            {rightPanel}
-          </Box>
-        </>
+          />
+        </Box>
       )}
+
+      {/* Right Panel - Always rendered, but collapsed when not open */}
+      <Box
+        ref={rightPanelRef}
+        sx={{
+          width: isRightOpen ? `${panelWidths.right}%` : `${COLLAPSED_WIDTH}px`,
+          height: '100%',
+          overflow: 'hidden',
+          bgcolor: 'background.paper',
+          borderLeft: '1px solid',
+          borderColor: 'divider',
+          transition: isResizing ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {isRightOpen ? rightPanel : rightPanelCollapsed}
+      </Box>
     </Box>
   );
 };

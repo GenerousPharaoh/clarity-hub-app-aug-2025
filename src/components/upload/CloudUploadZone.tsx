@@ -32,7 +32,8 @@ import {
   Psychology as ProcessingIcon,
   Visibility as ViewIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon
+  Edit as EditIcon,
+  Clear as ClearIcon
 } from '@mui/icons-material';
 import { useDropzone } from 'react-dropzone';
 import { v4 as uuid } from 'uuid';
@@ -40,6 +41,8 @@ import useAppStore from '../../store';
 import { cloudFileService } from '../../services/cloudFileService';
 import { geminiAI } from '../../services/geminiAIService';
 import ExhibitEditor from '../exhibits/ExhibitEditor';
+import { demoService, DEMO_USER_ID, DEMO_PROJECT_ID } from '../../services/demoService';
+import { demoAI } from '../../services/demoAIService';
 
 interface UploadFile {
   id: string;
@@ -61,13 +64,12 @@ export const CloudUploadZone: React.FC = () => {
   const [expandedUploads, setExpandedUploads] = useState<Set<string>>(new Set());
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (!user || !selectedProjectId) {
-      console.error('User or project not selected');
-      // For demo user, still allow uploads
-      if (!selectedProjectId) {
-        alert('Please select or create a project first');
-        return;
-      }
+    // Use demo project if in demo mode
+    const projectId = window.DEMO_MODE ? DEMO_PROJECT_ID : selectedProjectId;
+    
+    if (!projectId) {
+      alert('Please select or create a project first');
+      return;
     }
 
     for (const file of acceptedFiles) {
@@ -84,8 +86,9 @@ export const CloudUploadZone: React.FC = () => {
       })));
 
       try {
-        const userId = user?.id || '00000000-0000-0000-0000-000000000000';
-        await processCloudUpload(file, uploadId, userId, selectedProjectId);
+        const userId = window.DEMO_MODE ? DEMO_USER_ID : (user?.id || '00000000-0000-0000-0000-000000000000');
+        const targetProjectId = window.DEMO_MODE ? DEMO_PROJECT_ID : selectedProjectId;
+        await processCloudUpload(file, uploadId, userId, targetProjectId!);
       } catch (error) {
         console.error('Upload failed:', error);
         updateUpload(uploadId, { stage: 'error', error: error.message });
@@ -100,44 +103,58 @@ export const CloudUploadZone: React.FC = () => {
     projectId: string
   ) => {
     try {
-      // Handle demo user differently - simulate upload but don't actually upload to Supabase
-      if (userId === '00000000-0000-0000-0000-000000000000') {
-        updateUpload(uploadId, { stage: 'uploading', progress: 20 });
+      // Handle demo mode with persistent storage
+      if (window.DEMO_MODE || userId === DEMO_USER_ID) {
+        updateUpload(uploadId, { stage: 'uploading', progress: 10 });
         
-        // Simulate upload progress
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        updateUpload(uploadId, { progress: 50 });
+        // Use demo service for persistent storage
+        const cloudFile = await demoService.uploadDemoFile(
+          file,
+          (progress) => updateUpload(uploadId, { progress: Math.min(progress * 0.5, 50) })
+        );
         
-        // Create a mock file object for demo
-        const cloudFile = {
-          id: `demo-${uploadId}`,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          project_id: projectId,
-          owner_id: userId,
-          storage_path: `demo/${file.name}`,
-          public_url: URL.createObjectURL(file), // Create a temporary URL for demo
-          processing_status: 'processing' as const,
-          created_at: new Date().toISOString()
-        };
+        updateUpload(uploadId, { progress: 50, stage: 'analyzing' });
         
-        updateUpload(uploadId, { progress: 50 });
+        // Use demo AI for analysis
+        const fileContent = await file.text();
+        const analysis = await demoAI.analyzeDocument(
+          fileContent,
+          file.name,
+          file.type,
+          `Demo project: ${DEMO_PROJECT_ID}`
+        );
         
-        // Skip Stage 2 (AI Analysis) for demo user to avoid API costs
+        updateUpload(uploadId, { progress: 80 });
+        
+        // Update file with AI results
+        await cloudFileService.updateFile(cloudFile.id, {
+          exhibit_id: analysis.suggestedExhibitId,
+          exhibit_title: analysis.suggestedExhibitTitle,
+          processing_status: 'completed',
+          processed_at: new Date().toISOString()
+        });
+        
         updateUpload(uploadId, { 
           stage: 'completed', 
           progress: 100,
-          exhibitId: 'D1',
-          exhibitTitle: `Demo: ${file.name}`,
-          insights: [
-            {
-              type: 'info',
-              title: 'Demo Mode',
-              description: 'This is a demo upload. Real uploads would use cloud storage and AI analysis.',
-              importance: 'low'
-            }
-          ]
+          exhibitId: analysis.suggestedExhibitId,
+          exhibitTitle: analysis.suggestedExhibitTitle,
+          insights: analysis.insights
+        });
+        
+        // Add to store for immediate UI update
+        useAppStore.getState().addFile({
+          id: cloudFile.id,
+          name: file.name,
+          project_id: DEMO_PROJECT_ID,
+          owner_id: DEMO_USER_ID,
+          file_type: file.type.split('/')[0],
+          content_type: file.type,
+          size: file.size,
+          storage_path: cloudFile.storage_path,
+          added_at: new Date().toISOString(),
+          exhibit_id: cloudFile.exhibit_id,
+          exhibit_title: cloudFile.exhibit_title || file.name
         });
         
         return;
@@ -271,6 +288,18 @@ export const CloudUploadZone: React.FC = () => {
     });
   };
 
+  const clearCompleted = () => {
+    setUploads(prev => {
+      const map = new Map(prev);
+      Array.from(map.entries()).forEach(([id, upload]) => {
+        if (upload.stage === 'completed') {
+          map.delete(id);
+        }
+      });
+      return map;
+    });
+  };
+
   const getStageLabel = (stage: string): string => {
     switch (stage) {
       case 'uploading': return 'Uploading to Cloud';
@@ -291,53 +320,145 @@ export const CloudUploadZone: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', p: 2 }}>
-      {/* Drop Zone */}
+    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', p: 2 }}>
+      {/* Drop Zone - Enhanced for bulk uploads */}
       <Paper
         {...getRootProps()}
         sx={{
-          border: '2px dashed',
+          border: '3px dashed',
           borderColor: isDragActive ? 'primary.main' : 'divider',
-          borderRadius: 2,
-          p: 4,
+          borderRadius: 3,
+          p: 6,
           textAlign: 'center',
           cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          backgroundColor: isDragActive ? 'action.hover' : 'background.paper',
+          transition: 'all 0.3s ease',
+          backgroundColor: isDragActive 
+            ? 'rgba(25, 118, 210, 0.08)' 
+            : 'background.paper',
+          background: isDragActive 
+            ? 'linear-gradient(135deg, rgba(25, 118, 210, 0.08) 0%, rgba(25, 118, 210, 0.02) 100%)'
+            : 'none',
+          transform: isDragActive ? 'scale(1.02)' : 'scale(1)',
           '&:hover': {
             borderColor: 'primary.main',
-            backgroundColor: 'action.hover'
+            backgroundColor: 'rgba(25, 118, 210, 0.04)',
+            transform: 'scale(1.01)'
           }
         }}
       >
         <input {...getInputProps()} />
-        <UploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-        <Typography variant="h6" gutterBottom>
-          {isDragActive ? 'Drop files here...' : 'Upload Legal Documents'}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Drag & drop or click to browse • Max 50MB per file
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Chip size="small" label="PDF" />
-          <Chip size="small" label="Word" />
-          <Chip size="small" label="Images" />
-          <Chip size="small" label="Email" />
-          <Chip size="small" label="Audio/Video" />
+        
+        {/* Enhanced Upload Icon with animation */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          mb: 3,
+          animation: isDragActive ? 'pulse 1s infinite' : 'none',
+          '@keyframes pulse': {
+            '0%': { transform: 'scale(1)' },
+            '50%': { transform: 'scale(1.1)' },
+            '100%': { transform: 'scale(1)' }
+          }
+        }}>
+          <UploadIcon sx={{ fontSize: 64, color: 'primary.main' }} />
         </Box>
-        <Typography variant="caption" display="block" sx={{ mt: 2, color: 'primary.main' }}>
-          Powered by Gemini 2.5 Pro AI • Automatic exhibit generation • Cloud storage
+        
+        <Typography variant="h5" gutterBottom fontWeight="bold">
+          {isDragActive ? '📂 Drop your files here!' : 'Upload Documents'}
+        </Typography>
+        
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          Drag & drop multiple files or click to browse
+        </Typography>
+        
+        {/* Features highlight */}
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          justifyContent: 'center', 
+          mb: 3,
+          flexWrap: 'wrap'
+        }}>
+          <Chip 
+            icon={<AIIcon />} 
+            label="AI-Powered Analysis" 
+            color="primary" 
+            variant="outlined"
+          />
+          <Chip 
+            label="Bulk Upload" 
+            color="success" 
+            variant="outlined"
+          />
+          <Chip 
+            label="Auto-Exhibit Generation" 
+            color="secondary" 
+            variant="outlined"
+          />
+        </Box>
+        
+        {/* Supported formats */}
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+            Supported formats:
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Chip size="small" label="PDF" />
+            <Chip size="small" label="Word (.doc, .docx)" />
+            <Chip size="small" label="Images (.jpg, .png)" />
+            <Chip size="small" label="Email (.eml)" />
+            <Chip size="small" label="Excel (.xls, .xlsx)" />
+            <Chip size="small" label="Text (.txt)" />
+            <Chip size="small" label="Audio/Video" />
+          </Box>
+        </Box>
+        
+        <Typography variant="caption" color="text.secondary">
+          Max 50MB per file • Unlimited files • Secure cloud storage
         </Typography>
       </Paper>
 
-      {/* Upload Progress List */}
+      {/* Upload Progress List - Scrollable for bulk uploads */}
       {uploads.size > 0 && (
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Processing Files
-          </Typography>
+        <Box sx={{ 
+          mt: 3, 
+          flex: 1, 
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 2 
+          }}>
+            <Typography variant="h6">
+              Processing {uploads.size} {uploads.size === 1 ? 'File' : 'Files'}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              {Array.from(uploads.values()).every(u => u.stage === 'completed') && (
+                <>
+                  <Chip 
+                    label="All Complete!" 
+                    color="success" 
+                    icon={<CompleteIcon />}
+                  />
+                  <Tooltip title="Clear completed">
+                    <IconButton 
+                      onClick={clearCompleted}
+                      size="small"
+                      color="primary"
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+            </Box>
+          </Box>
           
-          <List>
+          <List sx={{ flex: 1, overflow: 'auto' }}>
             {Array.from(uploads.values()).map((upload) => {
               const isExpanded = expandedUploads.has(upload.id);
               

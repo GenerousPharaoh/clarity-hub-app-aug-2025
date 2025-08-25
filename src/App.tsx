@@ -10,7 +10,7 @@ import ProfessionalGlobalStyles from './theme/GlobalStyles';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
-import SimpleDemoFixProvider from './SimpleDemoFixProvider';
+// import SimpleDemoFixProvider from './SimpleDemoFixProvider';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { CollaborationProvider } from './contexts/CollaborationContext';
 import useAppStore from './store';
@@ -63,6 +63,7 @@ export default function App() {
   const toggleTheme = useAppStore((state) => state.toggleTheme);
   
   // Set up demo mode with persistent storage
+  /* Commented out to prevent infinite loop
   React.useEffect(() => {
     console.log('App initialized in demo mode');
     
@@ -142,6 +143,7 @@ export default function App() {
 
     initializeDemoMode();
   }, []);
+  */
   
   // Function to load and execute the reset script
   const resetApplication = () => {
@@ -228,7 +230,7 @@ export default function App() {
         
         <ErrorBoundary>
           <NotificationProvider>
-            <SimpleDemoFixProvider />
+            {/* <SimpleDemoFixProvider /> */}
             <AuthProvider>
               <CollaborationProvider>
                 <React.Suspense fallback={<div className="app-loading">Loading...</div>}>

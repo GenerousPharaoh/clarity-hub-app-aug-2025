@@ -64,7 +64,7 @@ const MainLayout = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { projectId } = useParams<{ projectId: string }>();
-  const { signOut, user } = useAuth();
+  const { signOut, user, loading } = useAuth();
   const { showNotification } = useNotification();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -81,6 +81,13 @@ const MainLayout = () => {
   const isRightPanelOpen = useAppStore((state) => state.isRightPanelOpen);
   const toggleLeftPanel = useAppStore((state) => state.toggleLeftPanel);
   const toggleRightPanel = useAppStore((state) => state.toggleRightPanel);
+
+  // Redirect to auth if no user (after loading is complete)
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth/login');
+    }
+  }, [loading, user, navigate]);
 
   // Set the selected project from the URL parameter
   useEffect(() => {
@@ -156,6 +163,20 @@ const MainLayout = () => {
       showNotification('Failed to log out. Please try again.', 'error');
     }
   };
+
+  // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Don't render layout if no user
+  if (!user) {
+    return null;
+  }
 
   return (
     <Box 

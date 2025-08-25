@@ -47,13 +47,13 @@ const queryClient = new QueryClient({
 export default function App() {
   const { initializeDemoProject } = useAppStore();
   
-  // Initialize demo project on app load if in demo mode
-  React.useEffect(() => {
-    if (window.DEMO_MODE || window.FORCE_DEMO_MODE) {
-      console.log('🚀 Initializing demo project in App.tsx');
-      initializeDemoProject();
-    }
-  }, [initializeDemoProject]);
+  // Initialize demo project on app load if in demo mode - DISABLED
+  // React.useEffect(() => {
+  //   if (window.DEMO_MODE || window.FORCE_DEMO_MODE) {
+  //     console.log('🚀 Initializing demo project in App.tsx');
+  //     initializeDemoProject();
+  //   }
+  // }, [initializeDemoProject]);
   
   // Debug mode state - enable in demo mode
   const [debugMode, setDebugMode] = React.useState(true);

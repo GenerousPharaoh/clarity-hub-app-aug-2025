@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   // Initialize persistent demo account for demo mode
   React.useEffect(() => {
-    if (window.DEMO_MODE) {
+    if (false) { // Disabled demo mode
       const initDemo = async () => {
         try {
           const { user: demoUserData } = await demoService.initializeDemoAccount();
@@ -129,16 +129,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!mounted) return;
         if (error) {
           console.error('getSession error:', error.message);
-          // Create demo user if auth fails
-          const demoUser = {
-            id: '00000000-0000-0000-0000-000000000000',
-            email: 'demo@example.com',
-            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
-            full_name: 'Demo User',
-            is_admin: false
-          };
-          setStoreUser(demoUser);
-          setUser(demoUser as unknown as User);
+          // Don't create demo user - just clear session
+          setSession(null);
+          setUser(null);
           setLoading(false);
           return;
         }
@@ -157,16 +150,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             is_admin: isAdmin
           });
         } else {
-          // Create demo user if no session
-          const demoUser = {
-            id: '00000000-0000-0000-0000-000000000000',
-            email: 'demo@example.com',
-            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
-            full_name: 'Demo User',
-            is_admin: false
-          };
-          setStoreUser(demoUser);
-          setUser(demoUser as unknown as User);
+          // No session - clear user
+          setUser(null);
+          setStoreUser(null);
         }
         
         setLoading(false);
@@ -174,16 +160,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .catch(error => {
         console.error('Error getting session:', error);
         
-        // Fallback to demo user on error
-        const demoUser = {
-          id: '00000000-0000-0000-0000-000000000000',
-          email: 'demo@example.com',
-          avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
-          full_name: 'Demo User',
-          is_admin: false
-        };
-        setStoreUser(demoUser);
-        setUser(demoUser as unknown as User);
+        // Clear user on error
+        setUser(null);
+        setStoreUser(null);
         
         if (mounted) setLoading(false);
       });
@@ -208,29 +187,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             is_admin: isAdmin
           });
         } else if (event === 'SIGNED_OUT') {
-          // Create demo user on sign out
-          const demoUser = {
-            id: '00000000-0000-0000-0000-000000000000',
-            email: 'demo@example.com',
-            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
-            full_name: 'Demo User',
-            is_admin: false
-          };
-          setUser(demoUser as unknown as User);
-          setStoreUser(demoUser);
-          console.log('Created demo user after sign out');
+          // Clear user on sign out
+          setUser(null);
+          setStoreUser(null);
+          console.log('User signed out');
         } else {
-          // Default to demo user if there's no session
-          const demoUser = {
-            id: '00000000-0000-0000-0000-000000000000',
-            email: 'demo@example.com',
-            avatar_url: 'https://ui-avatars.com/api/?name=Demo+User&background=0D8ABC&color=fff',
-            full_name: 'Demo User',
-            is_admin: false
-          };
-          setUser(demoUser as unknown as User);
-          setStoreUser(demoUser);
-          console.log('Created demo user by default');
+          // No session - clear user
+          setUser(null);
+          setStoreUser(null);
         }
         
         setLoading(false);

@@ -208,7 +208,10 @@ const RightPanel = ({
             .single();
             
           if (data?.storage_path) {
-            const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
+            const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1];
+            if (!supabaseProjectId) {
+              throw new Error('Unable to extract project ID from Supabase URL');
+            }
             const directUrl = `https://${supabaseProjectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
             console.log('Trying last resort URL:', directUrl);
             
@@ -701,7 +704,14 @@ const RightPanel = ({
                   if (!selectedFileId) return;
                   
                   // Try with a direct public URL approach as a last resort
-                  const projectId = 'swtkpfpyjjkkemmvkhmz';
+                  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+                  if (!supabaseUrl) {
+                    throw new Error('VITE_SUPABASE_URL not configured');
+                  }
+                  const projectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1];
+                  if (!projectId) {
+                    throw new Error('Unable to extract project ID from Supabase URL');
+                  }
                   
                   supabaseClient
                     .from('files')

@@ -58,6 +58,7 @@ import {
   supabase 
 } from '../../lib/supabase';
 import useAppStore from '../../store';
+import { FileValidationService } from '../../services/fileValidationService';
 
 interface FileUploadItem {
   id: string;
@@ -85,16 +86,8 @@ const SupabaseFileUpload: React.FC<SupabaseFileUploadProps> = ({
   projectId,
   documentId,
   onUploadComplete,
-  maxFileSize = 100, // 100MB default
-  acceptedTypes = [
-    'application/pdf',
-    'image/*',
-    'audio/*',
-    'video/*',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-  ],
+  maxFileSize = 50, // 50MB default (consistent security policy)
+  acceptedTypes = FileValidationService.getAllowedExtensions().map(ext => `.${ext}`), // Use secure validation service
 }) => {
   const [files, setFiles] = useState<FileUploadItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -129,37 +122,40 @@ const SupabaseFileUpload: React.FC<SupabaseFileUploadProps> = ({
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
-  // Handle file selection
+  // Handle file selection with security validation
   const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
 
-    const newFiles: FileUploadItem[] = [];
-    const maxSizeBytes = maxFileSize * 1024 * 1024;
+    // SECURITY: Validate all files using secure validation service
+    const { validFiles, invalidFiles } = FileValidationService.validateFiles(Array.from(selectedFiles));
 
-    Array.from(selectedFiles).forEach(file => {
-      // Validate file size
-      if (file.size > maxSizeBytes) {
-        console.error(`File ${file.name} exceeds ${maxFileSize}MB limit`);
-        return;
-      }
+    // Show errors for invalid files
+    if (invalidFiles.length > 0) {
+      const errorMessages = invalidFiles.map(({ file, errors }) => 
+        `${file.name}: ${errors.join(', ')}`
+      ).join('\n');
+      alert(`Some files failed validation:\n${errorMessages}`);
+    }
 
-      // Create file upload item
-      const fileItem: FileUploadItem = {
+    // Process only valid files
+    const newFiles: FileUploadItem[] = validFiles.map(file => {
+      const validation = FileValidationService.validateFile(file);
+      return {
         id: `${Date.now()}-${Math.random()}`,
         file,
-        name: file.name,
+        name: validation.sanitizedFileName, // Use sanitized filename
         size: file.size,
         type: file.type || 'application/octet-stream',
         status: 'pending',
         progress: 0,
       };
-
-      newFiles.push(fileItem);
     });
 
-    setSelectedFiles(prev => [...prev, ...newFiles]);
-    setUploadDialog(true);
-  }, [maxFileSize]);
+    if (newFiles.length > 0) {
+      setSelectedFiles(prev => [...prev, ...newFiles]);
+      setUploadDialog(true);
+    }
+  }, []);
 
   // Upload single file to Supabase
   const uploadSingleFile = async (fileItem: FileUploadItem) => {

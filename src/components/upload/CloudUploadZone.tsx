@@ -43,6 +43,7 @@ import { geminiAI } from '../../services/geminiAIService';
 import ExhibitEditor from '../exhibits/ExhibitEditor';
 import { demoService, DEMO_USER_ID, DEMO_PROJECT_ID } from '../../services/demoService';
 import { demoAI } from '../../services/demoAIService';
+import { FileValidationService } from '../../services/fileValidationService';
 
 interface UploadFile {
   id: string;
@@ -72,7 +73,19 @@ export const CloudUploadZone: React.FC = () => {
       return;
     }
 
-    for (const file of acceptedFiles) {
+    // SECURITY: Validate files before processing
+    const { validFiles, invalidFiles } = FileValidationService.validateFiles(acceptedFiles);
+    
+    // Show errors for invalid files
+    if (invalidFiles.length > 0) {
+      const errorMessages = invalidFiles.map(({ file, errors }) => 
+        `${file.name}: ${errors.join(', ')}`
+      ).join('\n');
+      alert(`Some files failed validation:\n${errorMessages}`);
+    }
+
+    // Process only valid files
+    for (const file of validFiles) {
       const uploadId = uuid();
       
       // Initialize upload tracking
@@ -260,20 +273,9 @@ export const CloudUploadZone: React.FC = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff'],
-      'audio/*': ['.mp3', '.wav', '.m4a', '.aac'],
-      'video/*': ['.mp4', '.mov', '.avi', '.mkv'],
-      'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'text/plain': ['.txt'],
-      'message/rfc822': ['.eml'],
-      'application/vnd.ms-excel': ['.xls'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
-    },
+    accept: FileValidationService.getDropzoneAcceptTypes(), // Use secure validation service
     multiple: true,
-    maxSize: 50 * 1024 * 1024 // 50MB (Supabase free tier limit)
+    maxSize: FileValidationService.getMaxFileSize() // Consistent 50MB limit
   });
 
   const toggleExpanded = (uploadId: string) => {
@@ -414,7 +416,7 @@ export const CloudUploadZone: React.FC = () => {
         </Box>
         
         <Typography variant="caption" color="text.secondary">
-          Max 50MB per file • Unlimited files • Secure cloud storage
+          Max {FileValidationService.getMaxFileSize() / 1024 / 1024}MB per file • Unlimited files • Secure cloud storage
         </Typography>
       </Paper>
 

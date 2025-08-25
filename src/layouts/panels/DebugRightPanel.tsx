@@ -131,8 +131,15 @@ const DebugRightPanel: React.FC = () => {
     setLoading(true);
     
     try {
-      // Method 1: Direct URL construction
-      const projectId = 'swtkpfpyjjkkemmvkhmz';
+      // Method 1: Direct URL construction using environment variables
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) {
+        throw new Error('VITE_SUPABASE_URL not configured');
+      }
+      const projectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1];
+      if (!projectId) {
+        throw new Error('Unable to extract project ID from Supabase URL');
+      }
       const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${fileDetails.storage_path}`;
       
       addDebugInfo(`Constructed direct URL: ${directUrl}`);

@@ -1,7 +1,10 @@
 import { supabase } from '@/lib/supabaseClient';
 
 // Base Supabase project URL for direct public path construction
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://swtkpfpyjjkkemmvkhmz.supabase.co';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+if (!supabaseUrl) {
+  throw new Error('VITE_SUPABASE_URL environment variable is required');
+}
 
 /**
  * Enhanced version of getFileUrl that provides detailed logging and fallbacks
@@ -21,7 +24,10 @@ export const getFileUrl = async (
   try {
     // APPROACH 1: Direct public URL (most reliable)
     try {
-      const projectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
+      const projectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1];
+      if (!projectId) {
+        throw new Error('Unable to extract project ID from Supabase URL');
+      }
       const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${path}`;
       
       console.log(`[storageServiceDebug] Trying direct URL: ${directUrl}`);
@@ -111,7 +117,10 @@ export const getFileUrl = async (
     }
 
     // All approaches failed - construct a new direct URL as last resort
-    const projectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
+    const projectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1];
+      if (!projectId) {
+        throw new Error('Unable to extract project ID from Supabase URL');
+      }
     const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${path}`;
     
     console.log(`[storageServiceDebug] ⚠️ All approaches failed, returning direct URL as fallback: ${directUrl}`);

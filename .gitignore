@@ -25,12 +25,15 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment
+# Environment variables - NEVER commit these files
 .env
 .env.local
+.env.development
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
+.env.staging
 
 # Build output
 /build
@@ -52,6 +55,7 @@ google-credentials.json
 # IDE files
 .vscode/
 .idea/
+.cursor/
 *.iml
 *.iws
 *.ipr
@@ -69,18 +73,8 @@ google-credentials.json
 /dist
 /build
 
-# local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
 # misc
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
 # Ignore large media files
 *.mp4

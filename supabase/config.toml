@@ -307,8 +307,3 @@ s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
 
-[[cors]]
-allowed_origins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "https://clarity-hub-production.com"]
-allowed_methods = ["GET", "HEAD", "POST", "OPTIONS"]
-allowed_headers = ["authorization", "apikey", "content-type"]
-max_age = 3600

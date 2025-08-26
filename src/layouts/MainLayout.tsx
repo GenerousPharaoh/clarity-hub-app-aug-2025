@@ -82,28 +82,7 @@ const MainLayout = () => {
   const toggleLeftPanel = useAppStore((state) => state.toggleLeftPanel);
   const toggleRightPanel = useAppStore((state) => state.toggleRightPanel);
 
-  // Show loading state while auth is being checked
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          backgroundColor: theme.palette.background.default,
-        }}
-      >
-        <CircularProgress size={48} />
-      </Box>
-    );
-  }
-
-  // If not authenticated, redirect to login
-  if (!user) {
-    navigate('/auth/login');
-    return null;
-  }
+  // Remove auth checking from MainLayout - let App.tsx handle it
 
   // Set the selected project from the URL parameter
   useEffect(() => {

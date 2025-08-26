@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
 import { CssBaseline, Button, Box } from '@mui/material';
 import { Settings as SettingsIcon } from '@mui/icons-material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,25 +6,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import { createModernTheme } from './theme/modernTheme';
 import ProfessionalGlobalStyles from './theme/GlobalStyles';
-import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
-import SimpleDemoFixProvider from './SimpleDemoFixProvider';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { CollaborationProvider } from './contexts/CollaborationContext';
+import AppRoutes from './components/AppRoutes';
 import useAppStore from './store';
-import ProjectLayout from './layouts/ProjectLayout';
-import demoStorage from './services/demoStorageService';
 import './styles/editor.css';
-
-// Lazy-loaded components for better performance
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const Auth = React.lazy(() => import('./pages/auth/Auth'));
-const ProjectView = React.lazy(() => import('./pages/ProjectView'));
-const Settings = React.lazy(() => import('./pages/Settings'));
-const Messages = React.lazy(() => import('./pages/Messages'));
-const Help = React.lazy(() => import('./pages/Help'));
-const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 // Add type definition for window.DEMO_MODE
 declare global {
@@ -233,32 +220,7 @@ export default function App() {
             {/* <SimpleDemoFixProvider /> */}
             <AuthProvider>
               <CollaborationProvider>
-                <React.Suspense fallback={<div className="app-loading">Loading...</div>}>
-                  <Routes>
-                    {/* Auth routes */}
-                    <Route path="/auth/*" element={<Auth />} />
-                    
-                    {/* Main app routes */}
-                    <Route path="/" element={<MainLayout />}>
-                      <Route index element={<Dashboard />} />
-                      <Route path="dashboard" element={<Dashboard />} />
-                      <Route path="messages" element={<Messages />} />
-                      <Route path="settings" element={<Settings />} />
-                      <Route path="help" element={<Help />} />
-                      <Route path="project/:projectId" element={<ProjectView />} />
-                      <Route path="profile" element={<Settings />} />
-                    </Route>
-                    
-                    {/* Project routes with specialized layout */}
-                    <Route path="/projects/:projectId/*" element={<ProjectLayout />}>
-                      <Route index element={<ProjectView />} />
-                    </Route>
-                    
-                    {/* Fallback routes */}
-                    <Route path="/not-found" element={<NotFound />} />
-                    <Route path="*" element={<Navigate to="/not-found" replace />} />
-                  </Routes>
-                </React.Suspense>
+                <AppRoutes />
               </CollaborationProvider>
             </AuthProvider>
           </NotificationProvider>

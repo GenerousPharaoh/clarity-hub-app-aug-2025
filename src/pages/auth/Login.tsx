@@ -9,18 +9,27 @@ import {
   Stack,
   Divider 
 } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { Google as GoogleIcon } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabaseClient';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const location = useLocation();
+  const { signIn, user } = useAuth();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
+  
+  // If already logged in, redirect
+  React.useEffect(() => {
+    if (user) {
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

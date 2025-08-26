@@ -7,6 +7,7 @@ const Login = React.lazy(() => import('./Login'));
 const Register = React.lazy(() => import('./Register'));
 const ForgotPassword = React.lazy(() => import('./ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./ResetPassword'));
+const OAuthCallback = React.lazy(() => import('./OAuthCallback'));
 
 export default function Auth() {
   return (
@@ -38,6 +39,7 @@ export default function Auth() {
               <Route path="register" element={<Register />} />
               <Route path="forgot-password" element={<ForgotPassword />} />
               <Route path="reset-password" element={<ResetPassword />} />
+              <Route path="callback" element={<OAuthCallback />} />
               <Route path="*" element={<Navigate to="login" replace />} />
             </Routes>
           </React.Suspense>

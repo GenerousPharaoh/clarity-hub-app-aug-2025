@@ -3,17 +3,10 @@
  * 
  * Replaces IndexedDB with direct Supabase Storage integration
  * All files stored in cloud with real-time sync
- * 
- * SECURITY ENHANCED:
- * - File validation and sanitization
- * - Path traversal prevention
- * - File type validation
- * - Size limits enforcement
  */
 
 import { supabase } from '../lib/supabase';
 import { v4 as uuid } from 'uuid';
-import { FileValidationService } from './fileValidationService';
 
 export interface CloudFile {
   id: string;
@@ -37,7 +30,7 @@ class CloudFileService {
   private bucketName = 'project-files';
 
   /**
-   * Upload file directly to Supabase Storage with security validation
+   * Upload file directly to Supabase Storage
    */
   async uploadFile(
     file: File,
@@ -45,15 +38,9 @@ class CloudFileService {
     userId: string,
     onProgress?: (progress: number) => void
   ): Promise<CloudFile> {
-    // SECURITY: Validate file before processing
-    const validation = FileValidationService.validateFile(file);
-    if (!validation.isValid) {
-      throw new Error(`File validation failed: ${validation.errors.join(', ')}`);
-    }
-
     const fileId = uuid();
-    // SECURITY: Use safe path generation to prevent path traversal
-    const fileName = FileValidationService.generateSafeStoragePath(userId, projectId, file.name);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}/${projectId}/${fileId}.${fileExt}`;
 
     try {
       // Upload to Supabase Storage
@@ -77,10 +64,10 @@ class CloudFileService {
         .from(this.bucketName)
         .getPublicUrl(fileName);
 
-      // Create database record with sanitized data
+      // Create database record
       const fileRecord: Partial<CloudFile> = {
         id: fileId,
-        name: validation.sanitizedFileName, // Use sanitized filename
+        name: file.name,
         size: file.size,
         type: file.type,
         project_id: projectId,

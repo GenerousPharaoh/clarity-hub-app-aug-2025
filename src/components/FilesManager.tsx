@@ -512,7 +512,7 @@ const FilesManager: React.FC<FilesManagerProps> = ({ projectId }) => {
             projectId={projectId}
             userId={user?.id || ''}
             onSuccess={handleUploadSuccess}
-            maxFileSizeMB={50}
+            maxFileSizeMB={100}
             multiple={true}
           />
         </DialogContent>

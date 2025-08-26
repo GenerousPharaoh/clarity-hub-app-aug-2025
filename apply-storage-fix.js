@@ -1,26 +1,9 @@
-// SECURITY WARNING: This script contained hardcoded credentials which have been removed
-// To use this script, you must provide credentials via environment variables
-
-console.error('SECURITY NOTICE: This script has been disabled due to hardcoded credentials.');
-console.error('Please set up environment variables and update this script to use them:');
-console.error('- VITE_SUPABASE_URL');
-console.error('- SUPABASE_SERVICE_ROLE_KEY');
-console.error('');
-console.error('This script has been disabled for security reasons.');
-process.exit(1);
-
-/*
-// Original script template - update to use environment variables:
+// Run this script to apply storage permissions fixes using the service role key
 import { createClient } from '@supabase/supabase-js';
 
-// Get credentials from environment variables
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing required environment variables: VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
-}
-*/
+// Supabase credentials
+const supabaseUrl = 'https://swtkpfpyjjkkemmvkhmz.supabase.co';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dGtwZnB5ampra2VtbXZraG16Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTMwMzk1MiwiZXhwIjoyMDYwODc5OTUyfQ.Jp8Vhvs-rvVvjx0L0wEtm4Cblh-DTjoXExjNWNIaV_M';
 
 // Create admin client
 const adminClient = createClient(supabaseUrl, supabaseServiceKey);

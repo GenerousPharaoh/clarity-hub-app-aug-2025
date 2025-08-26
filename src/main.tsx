@@ -4,10 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 
-// Simple demo mode flag
+// Demo mode disabled - use real auth only
 // window.DEMO_MODE = true;
-
-// console.log('App starting in demo mode');
 
 // Render the app
 ReactDOM.createRoot(document.getElementById('root')!).render(

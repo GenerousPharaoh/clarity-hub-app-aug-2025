@@ -40,7 +40,6 @@ import { AdaptiveAIService } from '../../services/adaptiveAIService';
 import ExhibitEditor from '../exhibits/ExhibitEditor';
 import useAppStore from '../../store';
 import demoStorage from '../../services/demoStorageService';
-import { FileValidationService } from '../../services/fileValidationService';
 
 interface UploadProgress {
   id: string;
@@ -107,19 +106,7 @@ export const IntelligentUploadZone: React.FC = () => {
       return;
     }
 
-    // SECURITY: Validate files before processing
-    const { validFiles, invalidFiles } = FileValidationService.validateFiles(acceptedFiles);
-    
-    // Show errors for invalid files
-    if (invalidFiles.length > 0) {
-      const errorMessages = invalidFiles.map(({ file, errors }) => 
-        `${file.name}: ${errors.join(', ')}`
-      ).join('\n');
-      alert(`Some files failed validation:\n${errorMessages}`);
-    }
-
-    // Process only valid files
-    for (const file of validFiles) {
+    for (const file of acceptedFiles) {
       const uploadId = uuid();
       
       // Initialize upload tracking
@@ -142,9 +129,19 @@ export const IntelligentUploadZone: React.FC = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: FileValidationService.getDropzoneAcceptTypes(), // Use secure validation service
+    accept: {
+      'application/pdf': ['.pdf'],
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff'],
+      'audio/*': ['.mp3', '.wav', '.m4a', '.aac'],
+      'video/*': ['.mp4', '.mov', '.avi', '.mkv'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'text/plain': ['.txt'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+    },
     multiple: true,
-    maxSize: FileValidationService.getMaxFileSize() // Consistent 50MB limit
+    maxSize: 100 * 1024 * 1024 // 100MB limit
   });
 
   const processFileUpload = async (

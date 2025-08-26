@@ -1,26 +1,15 @@
 #!/bin/bash
 
 # Vercel environment variables setup script
-# SECURITY WARNING: This script contained hardcoded credentials which have been removed
-# You must manually set these environment variables in your Vercel dashboard
+echo "Setting up Vercel environment variables..."
 
-echo "SECURITY NOTICE: This script has been sanitized for security."
-echo "You must manually configure the following environment variables in Vercel:"
-echo ""
-echo "Required environment variables:"
-echo "- VITE_SUPABASE_URL"
-echo "- VITE_SUPABASE_ANON_KEY"
-echo "- SUPABASE_SERVICE_ROLE_KEY"
-echo "- POSTGRES_URL"
-echo "- DATABASE_URL"
-echo ""
-echo "Instructions:"
-echo "1. Go to your Vercel project dashboard"
-echo "2. Navigate to Settings > Environment Variables"
-echo "3. Add each variable with the appropriate values from your Supabase project"
-echo "4. Get these values from your Supabase project dashboard > Settings"
-echo ""
-echo "This script has been disabled for security reasons."
-echo "Please set environment variables manually to avoid credential exposure."
+# Supabase configuration
+vercel env add VITE_SUPABASE_URL production --force <<< "https://swtkpfpyjjkkemmvkhmz.supabase.co"
+vercel env add VITE_SUPABASE_ANON_KEY production --force <<< "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dGtwZnB5ampra2VtbXZraG16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzMDM5NTIsImV4cCI6MjA2MDg3OTk1Mn0.8herIfBAFOFUXro03pQxiS4Htnljavfncz-FvPj3sGw"
+vercel env add SUPABASE_SERVICE_ROLE_KEY production --force <<< "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dGtwZnB5ampra2VtbXZraG16Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTMwMzk1MiwiZXhwIjoyMDYwODc5OTUyfQ.Jp8Vhvs-rvVvjx0L0wEtm4Cblh-DTjoXExjNWNIaV_M"
 
-exit 1
+# Database URLs
+vercel env add POSTGRES_URL production --force <<< "postgres://postgres.swtkpfpyjjkkemmvkhmz:2xCv756AiutwXpRM@aws-0-ca-central-1.pooler.supabase.com:6543/postgres?sslmode=require&supa=base-pooler.x"
+vercel env add DATABASE_URL production --force <<< "postgresql://postgres.swtkpfpyjjkkemmvkhmz:2xCv756AiutwXpRM@aws-0-ca-central-1.pooler.supabase.com:6543/postgres"
+
+echo "Environment variables set up successfully!"

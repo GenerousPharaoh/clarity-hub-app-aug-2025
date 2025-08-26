@@ -34,9 +34,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false); // Start with false to avoid loading state
   const setStoreUser = useAppStore((state) => state.setUser);
   
-  // Initialize persistent demo account for demo mode
+  // Demo mode disabled
+  /*
   React.useEffect(() => {
-    if (false) { // Disabled demo mode
+    if (window.DEMO_MODE) {
       const initDemo = async () => {
         try {
           const { user: demoUserData } = await demoService.initializeDemoAccount();
@@ -72,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       initDemo();
     }
   }, []);
+  */
 
   // Memoize functions to prevent unnecessary re-renders
   const signIn = useCallback(async (email: string, password: string) => {
@@ -129,9 +131,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!mounted) return;
         if (error) {
           console.error('getSession error:', error.message);
-          // Don't create demo user - just clear session
+          // Don't create demo user - clear session
           setSession(null);
           setUser(null);
+          setStoreUser(null);
           setLoading(false);
           return;
         }
@@ -192,7 +195,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setStoreUser(null);
           console.log('User signed out');
         } else {
-          // No session - clear user
+          // No session - clear user  
           setUser(null);
           setStoreUser(null);
         }

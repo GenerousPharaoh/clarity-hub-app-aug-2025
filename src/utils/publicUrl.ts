@@ -11,13 +11,9 @@
  */
 export const publicUrl = (key: string, bucket?: string): string => {
   // Get Supabase project URL from environment
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  if (!supabaseUrl) {
-    throw new Error('VITE_SUPABASE_URL environment variable is required');
-  }
-  
   // Strip any trailing slashes to avoid double slashes in the final URL
-  const base = supabaseUrl.replace(/\/+$/, '');
+  const base = (import.meta.env.VITE_SUPABASE_URL || 'https://swtkpfpyjjkkemmvkhmz.supabase.co')
+    .replace(/\/+$/, '');
   
   // Parse bucket from key if not provided separately
   let storagePath: string;

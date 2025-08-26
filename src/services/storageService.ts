@@ -2,10 +2,7 @@ import { supabase } from '../lib/supabaseClient';
 import { fallbackStorage } from './fallbackStorageService';
 
 // Get Supabase URL for public URL construction
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-if (!supabaseUrl) {
-  throw new Error('VITE_SUPABASE_URL environment variable is required');
-}
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://swtkpfpyjjkkemmvkhmz.supabase.co';
 
 // Initialize fallback mode based on prior failures
 let useLocalFallback = false;
@@ -553,10 +550,7 @@ export function getFileUrl(filePath: string, options?: { cacheBuster?: boolean }
     
     try {
       // Get environment variables or fallback values
-      const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1];
-      if (!supabaseProjectId) {
-        throw new Error('Unable to extract project ID from Supabase URL');
-      }
+      const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
       
       // APPROACH 1: Use the Supabase JS client's built-in getPublicUrl method
       try {

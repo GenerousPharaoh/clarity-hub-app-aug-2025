@@ -10,7 +10,7 @@ import ProfessionalGlobalStyles from './theme/GlobalStyles';
 import MainLayout from './layouts/MainLayout';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
-// import SimpleDemoFixProvider from './SimpleDemoFixProvider';
+import SimpleDemoFixProvider from './SimpleDemoFixProvider';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { CollaborationProvider } from './contexts/CollaborationContext';
 import useAppStore from './store';
@@ -47,7 +47,7 @@ const queryClient = new QueryClient({
 export default function App() {
   const { initializeDemoProject } = useAppStore();
   
-  // Initialize demo project on app load if in demo mode - DISABLED
+  // Demo mode disabled
   // React.useEffect(() => {
   //   if (window.DEMO_MODE || window.FORCE_DEMO_MODE) {
   //     console.log('🚀 Initializing demo project in App.tsx');
@@ -62,8 +62,8 @@ export default function App() {
   const themeMode = useAppStore((state) => state.themeMode);
   const toggleTheme = useAppStore((state) => state.toggleTheme);
   
-  // Set up demo mode with persistent storage
-  /* Commented out to prevent infinite loop
+  // Demo mode disabled
+  /*
   React.useEffect(() => {
     console.log('App initialized in demo mode');
     

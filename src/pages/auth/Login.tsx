@@ -10,7 +10,9 @@ import {
   Divider 
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Google as GoogleIcon } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../services/supabaseClient';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -31,6 +33,25 @@ export default function Login() {
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) throw error;
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in with Google');
       setLoading(false);
     }
   };
@@ -61,6 +82,33 @@ export default function Login() {
       )}
       
       <Stack spacing={3}>
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={handleGoogleSignIn}
+          disabled={loading}
+          startIcon={<GoogleIcon />}
+          sx={{ 
+            py: 1.2,
+            borderColor: 'divider',
+            color: 'text.primary',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+              borderColor: 'divider'
+            }
+          }}
+        >
+          Sign in with Google
+        </Button>
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', my: 2 }}>
+          <Divider sx={{ flex: 1 }} />
+          <Typography variant="body2" sx={{ px: 2, color: 'text.secondary' }}>
+            Or continue with email
+          </Typography>
+          <Divider sx={{ flex: 1 }} />
+        </Box>
+        
         <TextField
           label="Email Address"
           type="email"

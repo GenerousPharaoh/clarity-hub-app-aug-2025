@@ -82,12 +82,28 @@ const MainLayout = () => {
   const toggleLeftPanel = useAppStore((state) => state.toggleLeftPanel);
   const toggleRightPanel = useAppStore((state) => state.toggleRightPanel);
 
-  // Redirect to auth if no user (after loading is complete)
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth/login');
-    }
-  }, [loading, user, navigate]);
+  // Show loading state while auth is being checked
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          backgroundColor: theme.palette.background.default,
+        }}
+      >
+        <CircularProgress size={48} />
+      </Box>
+    );
+  }
+
+  // If not authenticated, redirect to login
+  if (!user) {
+    navigate('/auth/login');
+    return null;
+  }
 
   // Set the selected project from the URL parameter
   useEffect(() => {

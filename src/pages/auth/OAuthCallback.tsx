@@ -11,33 +11,50 @@ export default function OAuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Get the code from the URL
+        // Check for hash fragment (implicit flow)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        
+        // Check for code parameter (PKCE flow)
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         
-        if (code) {
-          // Exchange the code for a session
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (accessToken) {
+          // Implicit flow - session is already established
+          console.log('OAuth implicit flow detected');
+          // The session should already be set by Supabase
+          // Just redirect to dashboard
+          setTimeout(() => {
+            navigate('/');
+          }, 100);
+        } else if (code) {
+          // PKCE flow - exchange code for session
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
           
           if (error) {
             console.error('OAuth callback error:', error);
             setError(error.message);
             setTimeout(() => navigate('/auth/login'), 3000);
           } else {
-            // Success - redirect to dashboard
-            navigate('/');
+            console.log('OAuth PKCE success, session:', data.session);
+            // Wait a bit for auth state to propagate
+            setTimeout(() => {
+              // Success - redirect to dashboard
+              navigate('/');
+            }, 100);
           }
         } else {
           // Check for error in URL
-          const error = urlParams.get('error');
-          const errorDescription = urlParams.get('error_description');
+          const error = urlParams.get('error') || hashParams.get('error');
+          const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
           
           if (error) {
             console.error('OAuth error:', error, errorDescription);
             setError(errorDescription || error);
             setTimeout(() => navigate('/auth/login'), 3000);
           } else {
-            // No code or error - redirect to login
+            // No token, code, or error - redirect to login
+            console.log('No OAuth data found in callback');
             navigate('/auth/login');
           }
         }

@@ -3,20 +3,29 @@
  * Re-export the singleton client to prevent multiple instances
  */
 
-// Re-export everything from the main supabaseClient to maintain compatibility
-export { 
-  supabase,
+// Import the singleton client
+import supabaseClient, { 
   serviceClient,
   STORAGE_BUCKETS,
   initStorageBuckets,
   isAdminUser,
   manualRefresh,
-  type Supabase,
-  default 
+  type Supabase 
 } from '../services/supabaseClient';
 
-// Re-export the supabase instance as both named and default export for compatibility
-import supabaseClient from '../services/supabaseClient';
+// Re-export for compatibility
+export { 
+  serviceClient,
+  STORAGE_BUCKETS,
+  initStorageBuckets,
+  isAdminUser,
+  manualRefresh,
+  type Supabase
+};
+
+// Export the client as both named and default
+export { supabaseClient as supabase };
+export default supabaseClient;
 
 // Helper functions for common operations
 /**

@@ -3,7 +3,7 @@ import { Box, Typography, Button, Paper, Grid, Card, CardContent, CardActions, T
 import { Add as AddIcon, Folder as FolderIcon } from '@mui/icons-material';
 import useAppStore from '../store';
 import { useAuth } from '../contexts/AuthContext';
-import supabaseClient from '../services/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -29,7 +29,7 @@ export default function Dashboard() {
     try {
       setLoading(true);
       
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('projects')
         .select('*')
         .order('created_at', { ascending: false });
@@ -51,7 +51,7 @@ export default function Dashboard() {
     try {
       setLoading(true);
       
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('projects')
         .insert({
           name: newProjectName.trim(),

@@ -32,7 +32,7 @@ import {
   ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import useAppStore from '../../store';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase as supabaseClient } from '../../lib/supabase';
 import { File as FileType, FileWithUrl, LinkActivation } from '../../types';
 import FileViewer, { SupportedFileType } from '../../components/viewers/FileViewer';
 import { getErrorMessage, logError } from '../../utils/errorHandler';

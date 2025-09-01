@@ -30,7 +30,7 @@ import {
   PsychologyAlt,
   Cancel,
 } from '@mui/icons-material';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase as supabaseClient } from '../../lib/supabase';
 import { File as FileType } from '../../types';
 import useAppStore from '../../store';
 import { demoAI } from '../../services/demoAIService';

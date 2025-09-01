@@ -14,7 +14,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase as supabaseClient } from '../../lib/supabase';
 import { Note, Link } from '../../types';
 import SuggestionPanel from '../../components/ai/SuggestionPanel';
 import LegalRichTextEditor from '../../components/editor/LegalRichTextEditor';

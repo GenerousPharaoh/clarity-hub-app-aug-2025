@@ -12,7 +12,7 @@ import {
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { Google as GoogleIcon } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../lib/supabase';
 
 export default function Login() {
   const navigate = useNavigate();

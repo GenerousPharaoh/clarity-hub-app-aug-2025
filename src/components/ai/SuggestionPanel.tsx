@@ -35,7 +35,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase as supabaseClient } from '../../lib/supabase';
 import { AiSuggestionResponse } from '../../types';
 import { debounce } from 'lodash';
 

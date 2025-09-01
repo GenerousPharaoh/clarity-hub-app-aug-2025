@@ -1,4 +1,4 @@
-import { supabase } from '../services/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { openDB } from 'idb';
 
 // Define required buckets

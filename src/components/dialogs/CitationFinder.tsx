@@ -36,7 +36,7 @@ import {
 import FileTypeIcon from '../../components/icons/FileTypeIcon';
 import { debounce } from 'lodash';
 import useAppStore from '../../store';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase as supabaseClient } from '../../lib/supabase';
 import { FileWithUrl, Link } from '../../types';
 
 interface CitationFinderProps {

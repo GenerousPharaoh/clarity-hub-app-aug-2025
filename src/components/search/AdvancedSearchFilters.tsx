@@ -31,7 +31,7 @@ import {
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import useAppStore from '../../store';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase as supabaseClient } from '../../lib/supabase';
 
 interface EntityOption {
   entity_text: string;

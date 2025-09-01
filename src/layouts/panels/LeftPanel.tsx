@@ -50,7 +50,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase as supabaseClient } from '../../lib/supabase';
 import { Project } from '../../types';
 import AdvancedSearchFilters from '../../components/search/AdvancedSearchFilters';
 import RenameFileDialog from '../../components/dialogs/RenameFileDialog';

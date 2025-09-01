@@ -247,7 +247,7 @@ const SimplifiedLeftPanel: React.FC<SimplifiedLeftPanelProps> = ({ className, sx
                 <SearchIcon sx={{ color: 'text.secondary' }} />
               </InputAdornment>
             ),
-            endAdornment: searchQuery && (
+            endAdornment: searchQuery ? (
               <InputAdornment position="end">
                 <IconButton
                   size="small"
@@ -257,7 +257,7 @@ const SimplifiedLeftPanel: React.FC<SimplifiedLeftPanelProps> = ({ className, sx
                   <ClearIcon />
                 </IconButton>
               </InputAdornment>
-            ),
+            ) : undefined,
           }}
           sx={{
             '& .MuiOutlinedInput-root': {

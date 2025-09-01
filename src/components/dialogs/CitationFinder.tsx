@@ -333,7 +333,7 @@ const CitationFinder = ({ open, onClose, onSelectFile }: CitationFinderProps) =>
                   <SearchIcon />
                 </InputAdornment>
               ),
-              endAdornment: searchTerm && (
+              endAdornment: searchTerm ? (
                 <InputAdornment position="end">
                   <Tooltip title="Clear search">
                     <span>
@@ -346,7 +346,7 @@ const CitationFinder = ({ open, onClose, onSelectFile }: CitationFinderProps) =>
                     </span>
                   </Tooltip>
                 </InputAdornment>
-              ),
+              ) : undefined,
             }}
           />
           

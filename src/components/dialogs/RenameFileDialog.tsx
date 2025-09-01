@@ -17,7 +17,7 @@ import {
   Chip,
 } from '@mui/material';
 import { Refresh as RefreshIcon, ContentPaste as PasteIcon } from '@mui/icons-material';
-import supabaseClient from '../../services/supabaseClient';
+import { supabase } from '../../lib/supabase';
 import useAppStore from '../../store';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileRecord } from '../../hooks/useProjectFiles';
@@ -95,7 +95,7 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
     try {
       setLoadingFilenameSuggestions(true);
       
-      const response = await supabaseClient.functions.invoke('suggest-filename', {
+      const response = await supabase.functions.invoke('suggest-filename', {
         body: {
           projectId: selectedProjectId,
           filename,
@@ -125,7 +125,7 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
     try {
       setLoadingExhibitId(true);
       
-      const response = await supabaseClient.functions.invoke('get-next-exhibit-id', {
+      const response = await supabase.functions.invoke('get-next-exhibit-id', {
         body: {
           projectId: selectedProjectId,
         },
@@ -171,7 +171,7 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
       }
       
       // Update the file
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('files')
         .update(updateData)
         .eq('id', fileId)
@@ -278,12 +278,12 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
                 onChange={(e) => setNewName(e.target.value)}
                 disabled={isPending}
                 InputProps={{
-                  endAdornment: loadingFilenameSuggestions && (
+                  endAdornment: loadingFilenameSuggestions ? (
                     <CircularProgress size={20} />
-                  ),
+                  ) : undefined,
                 }}
                 error={!newName.trim()}
-                helperText={!newName.trim() && "File name is required"}
+                helperText={!newName.trim() ? "File name is required" : undefined}
               />
               
               {/* Filename Suggestions */}

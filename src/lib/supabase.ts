@@ -1,38 +1,24 @@
 /**
  * Supabase Client Configuration
- * Provides database and storage access for the Clarity Hub application
+ * Re-export the singleton client to prevent multiple instances
  */
-import { createClient } from '@supabase/supabase-js';
 
-// Validate environment variables (trim to remove any whitespace/newlines)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
+// Re-export everything from the main supabaseClient to maintain compatibility
+export { 
+  supabase,
+  serviceClient,
+  STORAGE_BUCKETS,
+  initStorageBuckets,
+  isAdminUser,
+  manualRefresh,
+  type Supabase,
+  default 
+} from '../services/supabaseClient';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
-}
-
-// Create Supabase client with auth persistence
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: window.localStorage,
-    storageKey: 'clarity-hub-auth',
-  },
-  db: {
-    schema: 'public',
-  },
-  global: {
-    headers: {
-      'x-application-name': 'clarity-hub',
-    },
-  },
-});
+// Re-export the supabase instance as both named and default export for compatibility
+import supabaseClient from '../services/supabaseClient';
 
 // Helper functions for common operations
-
 /**
  * Upload a file to Supabase Storage
  */
@@ -42,7 +28,7 @@ export async function uploadFile(
   file: File,
   options?: { upsert?: boolean; contentType?: string }
 ) {
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from(bucket)
     .upload(path, file, {
       upsert: options?.upsert || false,
@@ -65,7 +51,7 @@ export async function getSignedUrl(
   path: string,
   expiresIn: number = 3600 // 1 hour default
 ) {
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from(bucket)
     .createSignedUrl(path, expiresIn);
 
@@ -81,7 +67,7 @@ export async function getSignedUrl(
  * Download a file from Supabase Storage
  */
 export async function downloadFile(bucket: string, path: string) {
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from(bucket)
     .download(path);
 
@@ -97,7 +83,7 @@ export async function downloadFile(bucket: string, path: string) {
  * Delete a file from Supabase Storage
  */
 export async function deleteFile(bucket: string, paths: string[]) {
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from(bucket)
     .remove(paths);
 
@@ -121,7 +107,7 @@ export async function listFiles(
     sortBy?: { column: string; order: 'asc' | 'desc' };
   }
 ) {
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from(bucket)
     .list(path, {
       limit: options?.limit || 100,
@@ -148,7 +134,7 @@ export async function createDocument(document: {
   document_type?: string;
   description?: string;
 }) {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('documents')
     .insert(document)
     .select()
@@ -171,13 +157,13 @@ export async function saveDocumentContent(
   plainText: string
 ) {
   // First, mark all existing versions as non-current
-  await supabase
+  await supabaseClient
     .from('document_content')
     .update({ is_current: false })
     .eq('document_id', documentId);
 
   // Get the latest version number
-  const { data: latestVersion } = await supabase
+  const { data: latestVersion } = await supabaseClient
     .from('document_content')
     .select('version')
     .eq('document_id', documentId)
@@ -188,7 +174,7 @@ export async function saveDocumentContent(
   const newVersion = (latestVersion?.version || 0) + 1;
 
   // Insert new version
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('document_content')
     .insert({
       document_id: documentId,
@@ -213,7 +199,7 @@ export async function saveDocumentContent(
  * Load document content (latest version)
  */
 export async function loadDocumentContent(documentId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('document_content')
     .select('*')
     .eq('document_id', documentId)
@@ -242,7 +228,7 @@ export async function createFileRecord(file: {
   sha256_hash?: string;
   metadata?: any;
 }) {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('files')
     .insert(file)
     .select()
@@ -260,7 +246,7 @@ export async function createFileRecord(file: {
  * Get files for a project
  */
 export async function getProjectFiles(projectId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('files')
     .select('*')
     .eq('project_id', projectId)
@@ -284,7 +270,7 @@ export async function createCitation(citation: {
   page_number?: number;
   position_data?: any;
 }) {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('document_citations')
     .insert(citation)
     .select()
@@ -302,7 +288,7 @@ export async function createCitation(citation: {
  * Get citations for a document
  */
 export async function getDocumentCitations(documentId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('document_citations')
     .select(`
       *,
@@ -322,7 +308,7 @@ export async function getDocumentCitations(documentId: string) {
 // Auth helpers
 export const auth = {
   signUp: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await supabaseClient.auth.signUp({
       email,
       password,
     });
@@ -330,7 +316,7 @@ export const auth = {
   },
 
   signIn: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
       email,
       password,
     });
@@ -338,18 +324,16 @@ export const auth = {
   },
 
   signOut: async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
     return { error };
   },
 
   getUser: async () => {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabaseClient.auth.getUser();
     return { user, error };
   },
 
   onAuthStateChange: (callback: (event: string, session: any) => void) => {
-    return supabase.auth.onAuthStateChange(callback);
+    return supabaseClient.auth.onAuthStateChange(callback);
   },
 };
-
-export default supabase;

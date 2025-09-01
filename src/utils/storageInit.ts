@@ -200,17 +200,24 @@ const initIfNeeded = () => {
 if (typeof window !== 'undefined') {
   console.log('Initializing local storage in browser environment...');
   
-  // Enable fallback storage
-  try {
-    localStorage.setItem('USE_FALLBACK_STORAGE', 'true');
-    console.log('Fallback storage enabled for demo mode');
-    
-    // Initialize immediately
+  // Only enable fallback storage in demo mode
+  if (window.DEMO_MODE) {
+    try {
+      localStorage.setItem('USE_FALLBACK_STORAGE', 'true');
+      console.log('Fallback storage enabled for demo mode');
+      
+      // Initialize immediately
+      initIndexedDB()
+        .then(() => console.log('IndexedDB initialized for fallback storage'))
+        .catch(err => console.error('IndexedDB initialization failed:', err));
+    } catch (err) {
+      console.error('Failed to enable fallback storage:', err);
+    }
+  } else {
+    // Initialize IndexedDB for file sync in production
     initIndexedDB()
-      .then(() => console.log('IndexedDB initialized for fallback storage'))
+      .then(() => console.log('IndexedDB initialized for file sync'))
       .catch(err => console.error('IndexedDB initialization failed:', err));
-  } catch (err) {
-    console.error('Failed to enable fallback storage:', err);
   }
 }
 

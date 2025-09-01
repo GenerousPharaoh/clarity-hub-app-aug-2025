@@ -553,7 +553,7 @@ const MainLayout = () => {
           onLeftPanelToggle={toggleLeftPanel}
           onRightPanelToggle={toggleRightPanel}
           onWidthChange={(widths) => {
-            console.log('Panel widths changed:', widths);
+            // Panel widths changed
           }}
         />
       </Box>

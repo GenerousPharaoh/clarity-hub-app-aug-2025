@@ -256,7 +256,12 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
           <>
             {(isError || error) && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                {error ? String(error) : (mutationError instanceof Error ? mutationError.message : 'Failed to rename file')}
+                {error || 
+                 (mutationError ? 
+                   (typeof mutationError === 'object' && 'message' in mutationError ? 
+                     String(mutationError.message) : 
+                     String(mutationError)) : 
+                   'Failed to rename file')}
               </Alert>
             )}
             

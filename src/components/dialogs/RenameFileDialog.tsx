@@ -51,7 +51,7 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
   const queryClient = useQueryClient();
   
   // Get the file from the store
-  const file = fileId ? files.find(f => f.id === fileId) : null;
+  const file = fileId && files ? files.find(f => f.id === fileId) : null;
   
   // Set up initial values when dialog opens
   useEffect(() => {
@@ -76,7 +76,7 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
 
   // Check if exhibit ID already exists
   useEffect(() => {
-    if (newExhibitId && newExhibitId !== file?.exhibit_id) {
+    if (newExhibitId && newExhibitId !== file?.exhibit_id && files) {
       const exists = files.some(f => 
         f.id !== fileId && 
         f.exhibit_id?.toLowerCase() === newExhibitId.toLowerCase()
@@ -183,8 +183,10 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
     },
     onSuccess: (data) => {
       // Update files in the store
-      const updatedFiles = files.map(f => f.id === data.id ? data : f);
-      useAppStore.getState().setFiles(updatedFiles);
+      if (files) {
+        const updatedFiles = files.map(f => f.id === data.id ? data : f);
+        useAppStore.getState().setFiles(updatedFiles);
+      }
       
       // Invalidate query cache
       if (data.project_id) {

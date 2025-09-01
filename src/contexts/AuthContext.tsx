@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import supabaseClient from '../services/supabaseClient';
+import { supabase as supabaseClient } from '../lib/supabase';
 import { useAppStore } from '../store';
 import { demoService, DEMO_USER_ID } from '../services/demoService';
 

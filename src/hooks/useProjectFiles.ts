@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { uploadFile, getPublicUrl } from '../services/storageService';
 import fileProcessingService from '../services/fileProcessingService';
 import useAppStore from '../store';

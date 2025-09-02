@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 
 // Get the configured base URL or use default edge function path
 const BASE_URL = import.meta.env.VITE_AI_API_BASE?.replace(/\/+$/, '') || 

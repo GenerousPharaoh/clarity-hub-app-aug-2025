@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, CircularProgress, Typography, Alert } from '@mui/material';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../lib/supabase';
 import { publicUrl } from '../../utils/publicUrl';
 import ViewerContainer, { FileType } from './core/ViewerContainer';
 import { FileRecord } from '../../hooks/useProjectFiles';

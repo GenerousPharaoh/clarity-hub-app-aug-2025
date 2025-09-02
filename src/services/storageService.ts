@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { fallbackStorage } from './fallbackStorageService';
 
 // Get Supabase URL for public URL construction

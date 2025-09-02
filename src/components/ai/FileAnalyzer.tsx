@@ -26,7 +26,7 @@ import {
   FactCheckOutlined,
   AutoAwesomeOutlined
 } from '@mui/icons-material';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../lib/supabase';
 import { FileRecord } from '../../hooks/useProjectFiles';
 
 interface FileAnalyzerProps {

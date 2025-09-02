@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../lib/supabase';
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Configure PDF.js worker

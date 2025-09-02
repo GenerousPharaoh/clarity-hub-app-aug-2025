@@ -27,7 +27,7 @@ import {
 } from '@mui/icons-material';
 import MainLayout from '../layouts/MainLayout';
 import FilesManager from '../components/FilesManager';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Project {

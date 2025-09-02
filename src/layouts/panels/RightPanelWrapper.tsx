@@ -7,7 +7,7 @@ import FunctionalFileViewer from '../../components/viewers/FunctionalFileViewer'
 import ProfessionalViewerContainer from '../../components/viewers/ProfessionalViewerContainer';
 import MockFileViewer from '../../components/viewers/MockFileViewer';
 import AdaptiveLegalAIChat from '../../components/ai/AdaptiveLegalAIChat';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '../../lib/supabase';
 import { publicUrl } from '../../utils/publicUrl';
 
 interface TabPanelProps {

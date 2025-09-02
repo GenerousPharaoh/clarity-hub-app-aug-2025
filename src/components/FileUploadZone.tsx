@@ -28,7 +28,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useFileUpload } from '../hooks/useProjectFiles';
 import { uploadFile as uploadFileService, isUsingFallback } from '../services/storageService';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import FileStatusIndicator, { FileStatus } from './FileStatusIndicator';
 
 // Split file into chunks for upload

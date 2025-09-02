@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Paper, Button, Container, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 import { GavelRounded, FolderOpenOutlined } from '@mui/icons-material';
 import useAppStore from '../store';
-import supabase from '../services/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';

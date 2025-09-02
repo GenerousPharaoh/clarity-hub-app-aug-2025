@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Box, Typography, CircularProgress, Alert, Paper, Tabs, Tab, Button, Divider } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import useAppStore from '../store';
-import supabaseClient from '../services/supabaseClient';
+import { supabase as supabaseClient } from '../lib/supabase';
 import { Editor } from '@tinymce/tinymce-react';
 import { FileUpload, Delete, ContentCopy, NoteAdd, Gavel } from '@mui/icons-material';
 import { LegalCaseManager } from '../components/legal';

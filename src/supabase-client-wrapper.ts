@@ -1,4 +1,4 @@
-import { supabase } from './lib/supabaseClient';
+import { supabase } from './lib/supabase';
 
 // Wrapper to safely access storage URL is now deprecated
 // The SDK methods should be used directly instead

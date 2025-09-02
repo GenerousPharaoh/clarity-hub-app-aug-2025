@@ -1,4 +1,4 @@
-import supabaseClient from './supabaseClient';
+import { supabase as supabaseClient } from '../lib/supabase';
 import { SearchFilters } from '../types';
 
 export interface SearchResult {

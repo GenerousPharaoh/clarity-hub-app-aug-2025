@@ -3,7 +3,7 @@ import { Box, AppBar, Toolbar, Typography, IconButton, Skeleton, useTheme, Circu
 import { Home as HomeIcon, Menu as MenuIcon, DarkMode, LightMode, ChevronRight, ArrowBack } from '@mui/icons-material';
 import { Link as RouterLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import useAppStore from '../store';
-import supabaseClient from '../services/supabaseClient';
+import { supabase as supabaseClient } from '../lib/supabase';
 import ResizablePanels from '../components/ResizablePanels';
 import LeftPanel from './panels/LeftPanel';
 import CenterPanelWrapper from './panels/CenterPanelWrapper';

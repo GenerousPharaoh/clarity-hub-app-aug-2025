@@ -44,7 +44,7 @@ import FileUploadZone from './FileUploadZone';
 import UniversalFileViewer from './viewers/UniversalFileViewer';
 import { FileRecord, useProjectFiles } from '../hooks/useProjectFiles';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import FileVersionHistory from './FileVersionHistory';
 import FileStatusIndicator, { FileStatus } from './FileStatusIndicator';
 import { isUsingFallback, syncLocalFilesToCloud } from '../services/storageService';

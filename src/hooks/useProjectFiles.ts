@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase';
 import { uploadFile, getPublicUrl } from '../services/storageService';
 import fileProcessingService from '../services/fileProcessingService';
 import useAppStore from '../store';
-import { demoService, DEMO_USER_ID, DEMO_PROJECT_ID } from '../services/demoService';
 
 // Define common file categories and their extensions
 const FILE_TYPES = {
@@ -78,25 +77,11 @@ export function useProjectFiles(projectId: string | null) {
   return useQuery<FileRecord[], Error>({
     queryKey: ['files', projectId],
     queryFn: async () => {
-      // Use demo project ID if in demo mode
-      const targetProjectId = window.DEMO_MODE ? DEMO_PROJECT_ID : projectId;
-      
-      if (!targetProjectId || targetProjectId === 'undefined') {
-        console.warn('useProjectFiles called with invalid projectId:', targetProjectId);
+      if (!projectId || projectId === 'undefined') {
+        console.warn('useProjectFiles called with invalid projectId:', projectId);
         return [];
       }
-      
-      // Use demo service for demo mode
-      if (window.DEMO_MODE) {
-        const demoFiles = await demoService.getDemoFiles();
-        // Convert demo files to FileRecord format
-        return demoFiles.map(file => ({
-          ...file,
-          metadata: typeof file.metadata === 'object' ? file.metadata : {},
-          file_type: file.file_type || determineFileType(file.name, file.content_type || ''),
-        })) as FileRecord[];
-      }
-      
+
       const { data, error } = await supabase
         .from('files')
         .select('*')

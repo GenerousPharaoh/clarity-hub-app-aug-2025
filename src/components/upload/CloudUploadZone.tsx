@@ -41,7 +41,6 @@ import useAppStore from '../../store';
 import { cloudFileService } from '../../services/cloudFileService';
 import { geminiAI } from '../../services/geminiAIService';
 import ExhibitEditor from '../exhibits/ExhibitEditor';
-import { demoService, DEMO_USER_ID, DEMO_PROJECT_ID } from '../../services/demoService';
 import { demoAI } from '../../services/demoAIService';
 
 interface UploadFile {
@@ -64,9 +63,8 @@ export const CloudUploadZone: React.FC = () => {
   const [expandedUploads, setExpandedUploads] = useState<Set<string>>(new Set());
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    // Use demo project if in demo mode
-    const projectId = window.DEMO_MODE ? DEMO_PROJECT_ID : selectedProjectId;
-    
+    const projectId = selectedProjectId;
+
     if (!projectId) {
       alert('Please select or create a project first');
       return;
@@ -86,9 +84,8 @@ export const CloudUploadZone: React.FC = () => {
       })));
 
       try {
-        const userId = window.DEMO_MODE ? DEMO_USER_ID : (user?.id || '00000000-0000-0000-0000-000000000000');
-        const targetProjectId = window.DEMO_MODE ? DEMO_PROJECT_ID : selectedProjectId;
-        await processCloudUpload(file, uploadId, userId, targetProjectId!);
+        const userId = user?.id || '';
+        await processCloudUpload(file, uploadId, userId, projectId!);
       } catch (error) {
         console.error('Upload failed:', error);
         updateUpload(uploadId, { stage: 'error', error: error.message });
@@ -103,64 +100,7 @@ export const CloudUploadZone: React.FC = () => {
     projectId: string
   ) => {
     try {
-      // Handle demo mode with persistent storage
-      if (window.DEMO_MODE || userId === DEMO_USER_ID) {
-        updateUpload(uploadId, { stage: 'uploading', progress: 10 });
-        
-        // Use demo service for persistent storage
-        const cloudFile = await demoService.uploadDemoFile(
-          file,
-          (progress) => updateUpload(uploadId, { progress: Math.min(progress * 0.5, 50) })
-        );
-        
-        updateUpload(uploadId, { progress: 50, stage: 'analyzing' });
-        
-        // Use demo AI for analysis
-        const fileContent = await file.text();
-        const analysis = await demoAI.analyzeDocument(
-          fileContent,
-          file.name,
-          file.type,
-          `Demo project: ${DEMO_PROJECT_ID}`
-        );
-        
-        updateUpload(uploadId, { progress: 80 });
-        
-        // Update file with AI results
-        await cloudFileService.updateFile(cloudFile.id, {
-          exhibit_id: analysis.suggestedExhibitId,
-          exhibit_title: analysis.suggestedExhibitTitle,
-          processing_status: 'completed',
-          processed_at: new Date().toISOString()
-        });
-        
-        updateUpload(uploadId, { 
-          stage: 'completed', 
-          progress: 100,
-          exhibitId: analysis.suggestedExhibitId,
-          exhibitTitle: analysis.suggestedExhibitTitle,
-          insights: analysis.insights
-        });
-        
-        // Add to store for immediate UI update
-        useAppStore.getState().addFile({
-          id: cloudFile.id,
-          name: file.name,
-          project_id: DEMO_PROJECT_ID,
-          owner_id: DEMO_USER_ID,
-          file_type: file.type.split('/')[0],
-          content_type: file.type,
-          size: file.size,
-          storage_path: cloudFile.storage_path,
-          added_at: new Date().toISOString(),
-          exhibit_id: cloudFile.exhibit_id,
-          exhibit_title: cloudFile.exhibit_title || file.name
-        });
-        
-        return;
-      }
-      
-      // Stage 1: Upload to Supabase Storage with progress tracking (real users only)
+      // Stage 1: Upload to Supabase Storage with progress tracking
       updateUpload(uploadId, { stage: 'uploading', progress: 10 });
       
       const cloudFile = await cloudFileService.uploadFile(

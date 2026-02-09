@@ -36,47 +36,125 @@ export default function Login() {
         flexDirection: 'column',
         alignItems: 'center',
         textAlign: 'center',
-        py: 2,
       }}
     >
+      {/* Logo mark */}
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: '16px',
+          background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 3,
+          boxShadow: '0 4px 14px rgba(30, 58, 95, 0.25)',
+        }}
+      >
+        <Typography
+          sx={{
+            color: '#fff',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            lineHeight: 1,
+          }}
+        >
+          CH
+        </Typography>
+      </Box>
+
       <Typography
         component="h1"
-        variant="h4"
-        sx={{ mb: 1, fontWeight: 700, color: 'text.primary' }}
+        sx={{
+          fontSize: '1.75rem',
+          fontWeight: 700,
+          color: 'text.primary',
+          letterSpacing: '-0.025em',
+          mb: 0.75,
+        }}
       >
         Clarity Hub
       </Typography>
 
-      <Typography variant="body2" sx={{ mb: 4, color: 'text.secondary' }}>
+      <Typography
+        sx={{
+          fontSize: '0.875rem',
+          color: 'text.secondary',
+          mb: 4,
+          fontWeight: 400,
+          letterSpacing: '0.01em',
+        }}
+      >
         Organize evidence. Build arguments. Win cases.
       </Typography>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3, width: '100%' }}>
+        <Alert
+          severity="error"
+          sx={{
+            mb: 3,
+            width: '100%',
+            borderRadius: '10px',
+            fontSize: '0.8125rem',
+          }}
+        >
           {error}
         </Alert>
       )}
 
       <Button
         fullWidth
-        variant="outlined"
+        variant="contained"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        startIcon={loading ? <CircularProgress size={20} /> : <GoogleIcon />}
+        startIcon={
+          loading ? (
+            <CircularProgress size={18} sx={{ color: 'inherit' }} />
+          ) : (
+            <GoogleIcon sx={{ fontSize: '1.125rem' }} />
+          )
+        }
         sx={{
-          py: 1.5,
-          borderColor: 'divider',
-          color: 'text.primary',
-          fontSize: '0.95rem',
+          py: 1.4,
+          px: 3,
+          borderRadius: '10px',
+          fontSize: '0.9rem',
+          fontWeight: 600,
           textTransform: 'none',
+          letterSpacing: '0.01em',
+          backgroundColor: '#1e3a5f',
+          color: '#fff',
+          boxShadow: '0 2px 8px rgba(30, 58, 95, 0.3)',
+          transition: 'all 0.2s ease',
           '&:hover': {
-            backgroundColor: 'action.hover',
-            borderColor: 'text.secondary',
+            backgroundColor: '#2d5a87',
+            boxShadow: '0 4px 16px rgba(30, 58, 95, 0.35)',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            transform: 'translateY(0)',
+          },
+          '&.Mui-disabled': {
+            backgroundColor: '#1e3a5f',
+            color: 'rgba(255,255,255,0.7)',
           },
         }}
       >
-        {loading ? 'Redirecting...' : 'Sign in with Google'}
+        {loading ? 'Signing in...' : 'Continue with Google'}
       </Button>
+
+      <Typography
+        sx={{
+          fontSize: '0.7rem',
+          color: 'text.disabled',
+          mt: 3,
+          letterSpacing: '0.02em',
+        }}
+      >
+        Secure authentication powered by Google
+      </Typography>
     </Box>
   );
 }

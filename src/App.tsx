@@ -173,48 +173,6 @@ export default function App() {
         <CssBaseline />
         <ProfessionalGlobalStyles />
         
-        {/* Debug mode controls */}
-        {debugMode && (
-          <Box 
-            sx={{ 
-              position: 'fixed', 
-              bottom: 16, 
-              right: 16, 
-              zIndex: 9999,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1,
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={toggleTheme}
-              sx={{ 
-                fontWeight: 'bold',
-                boxShadow: 2,
-                mb: 1
-              }}
-            >
-              {themeMode === 'dark' ? 'Light Mode' : 'Dark Mode'}
-            </Button>
-            <Button
-              variant="contained"
-              color="warning"
-              size="small"
-              onClick={resetApplication}
-              startIcon={<SettingsIcon />}
-              sx={{ 
-                fontWeight: 'bold',
-                boxShadow: 2
-              }}
-            >
-              Reset App
-            </Button>
-          </Box>
-        )}
-        
         <ErrorBoundary>
           <NotificationProvider>
             {/* <SimpleDemoFixProvider /> */}

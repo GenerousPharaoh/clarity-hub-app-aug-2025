@@ -268,58 +268,27 @@ const LeftPanel = ({
     // Close the dialog immediately to prevent UI issues
     setProjectDialogOpen(false);
     
-    // Check if we are in demo mode (no real user)
-    const isDemoMode = !user || user.id === 'demo-user-123';
-    
     try {
-      console.log('Creating new project:', newProjectName, isDemoMode ? '(DEMO MODE)' : '');
-      
+      if (!user) {
+        throw new Error('You must be signed in to create a project');
+      }
+
+      console.log('Creating new project:', newProjectName);
+
       // Verify authentication status before proceeding
       const { data: session, error: sessionError } = await supabaseClient.auth.getSession();
-      
+
       if (sessionError) {
         throw new Error(`Authentication error: ${sessionError.message}`);
       }
-      
+
       if (!session?.session?.access_token) {
         throw new Error('Authentication error: No API key found in request');
       }
-      
-      // Use user ID if available, otherwise use a fallback for demo mode
-      const ownerId = user?.id || 'demo-user-123';
-      
-      // In demo mode, create a mock project without database call
-      if (isDemoMode) {
-        // Generate a mock project with proper UUID instead of demo- prefix
-        const mockProject = {
-          id: crypto.randomUUID(), // Using standard UUID format
-          name: newProjectName.trim(),
-          owner_id: ownerId,
-          created_at: new Date().toISOString(),
-        };
-        
-        console.log('Created mock project (demo mode):', mockProject);
-        
-        // Add to local projects array
-        setProjects([mockProject, ...projects]);
-        setSelectedProject(mockProject.id);
-        setNewProjectName('');
-        
-        // Navigate to the new project page
-        console.log('Navigating to:', `/projects/${mockProject.id}`);
-        navigate(`/projects/${mockProject.id}`);
-        
-        // Show a demo mode notification
-        showNotification(
-          'Project created in demo mode (changes won\'t be saved)',
-          'info',
-          6000
-        );
-        
-        return;
-      }
-      
-      // Normal mode - create project in database
+
+      const ownerId = user.id;
+
+      // Create project in database
       const { data, error } = await supabaseClient
         .from('projects')
         .insert({

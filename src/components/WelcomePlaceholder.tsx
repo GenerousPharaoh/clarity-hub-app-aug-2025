@@ -90,36 +90,6 @@ const WelcomePlaceholder: React.FC<WelcomePlaceholderProps> = ({
   const handleCreateProject = () => {
     if (!newProjectName.trim()) return;
     
-    // Check if we are in demo mode
-    const isDemoMode = !user || user.id === 'demo-user-123';
-    
-    if (isDemoMode) {
-      console.log('Creating project in demo mode');
-      
-      // Generate a proper UUID for the mock project instead of a demo- prefix
-      const mockProject = {
-        id: crypto.randomUUID(), // Using standard UUID format instead of demo-timestamp
-        name: newProjectName.trim(),
-        owner_id: user?.id || 'demo-user-123',
-        created_at: new Date().toISOString(),
-      };
-      
-      // Add to projects list
-      queryClient.setQueryData(['projects'], (oldData: any) => 
-        [mockProject, ...(oldData || [])]
-      );
-      
-      // Update store
-      setSelectedProject(mockProject.id);
-      
-      // Close dialog and navigate
-      setOpenDialog(false);
-      setNewProjectName('');
-      navigate(`/projects/${mockProject.id}`);
-      return;
-    }
-    
-    // Normal mode - use mutation
     createProjectMutation.mutate(newProjectName);
   };
   

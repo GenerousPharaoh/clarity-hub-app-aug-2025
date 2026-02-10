@@ -173,21 +173,12 @@ const UniversalFileViewer: React.FC<{ file: FileRecord | null }> = ({ file }) =>
         </Alert>
       )}
       
-      {/* Use mock file viewer in demo mode to avoid backend requests */}
-      {isDemoMode && file ? (
-        <MockFileViewer
-          fileName={file.name}
-          fileType={file.file_type}
-          onCopyLink={handleCopyLink}
-        />
-      ) : (
-        <ViewerContainer
-          url={fileUrl}
-          fileType={mapFileType(file.file_type)}
-          fileName={file.name}
-          metadata={file.metadata}
-        />
-      )}
+      <ViewerContainer
+        url={fileUrl}
+        fileType={mapFileType(file.file_type)}
+        fileName={file.name}
+        metadata={file.metadata}
+      />
     </Box>
   );
 };

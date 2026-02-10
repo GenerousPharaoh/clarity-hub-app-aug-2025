@@ -97,14 +97,8 @@ export const AdaptiveLegalAIChat: React.FC = () => {
   }, [messages]);
 
   const initializeChat = async () => {
-    const isDemoMode = user.id === '00000000-0000-0000-0000-000000000000';
-    
     try {
-      if (isDemoMode) {
-        await initializeDemoChat();
-      } else {
-        await initializeProductionChat();
-      }
+      await initializeProductionChat();
     } catch (error) {
       console.error('Failed to initialize chat:', error);
     }

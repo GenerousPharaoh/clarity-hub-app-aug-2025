@@ -63,32 +63,32 @@ const CenterPanel = () => {
     }
   }, [selectedProjectId, user]);
 
+  // Ref to track serialized content for auto-save
+  const serializedContentRef = useRef<string>('');
+
   // Create debounced save function
   const debouncedSaveNote = useCallback(
     debounce((noteToSave: NoteData, contentToSave: string) => {
       saveNote(noteToSave, contentToSave);
-    }, 2000),
+    }, 3000),
     []
   );
 
-  // Auto-save content changes (temporarily disabled while using LegalRichTextEditor)
-  // The LegalRichTextEditor handles its own auto-save functionality
-  // useEffect(() => {
-  //   if (note && content !== note.content) {
-  //     debouncedSaveNote(note, content);
-  //   }
-  // }, [content, note, debouncedSaveNote]);
+  // Auto-save: persist editor content to database when it changes
+  useEffect(() => {
+    if (note && serializedContentRef.current && serializedContentRef.current !== note.content) {
+      debouncedSaveNote(note, serializedContentRef.current);
+    }
+  }, [content, note, debouncedSaveNote]);
 
-  // Handle Lexical editor state changes  
+  // Handle Lexical editor state changes
   const handleEditorStateChange = useCallback((newEditorState: any) => {
     setEditorState(newEditorState);
-    // Extract plain text content for auto-save and AI suggestions
+    // Extract plain text for AI suggestions
     const textContent = newEditorState.read(() => $getRoot().getTextContent());
     setContent(textContent);
-    
-    // For now, we'll rely on the LegalRichTextEditor's own auto-save
-    // In the future, we could integrate this with our note system
-    console.log('Editor content updated:', textContent.length, 'characters');
+    // Serialize full Lexical state for persistence
+    serializedContentRef.current = JSON.stringify(newEditorState.toJSON());
   }, []);
 
   // Fetch the note for the current project
@@ -108,7 +108,6 @@ const CenterPanel = () => {
       
       const userId = authUser.id;
       
-      console.log('Fetching note for project:', selectedProjectId, 'and user:', userId);
       const { data, error } = await supabaseClient
         .from('notes')
         .select('id, project_id, user_id, content, updated_at')
@@ -122,12 +121,10 @@ const CenterPanel = () => {
       }
       
       if (data) {
-        console.log('Found existing note:', data);
         setNote(data);
         setContent(data.content || '');
       } else {
         // Create a new note if one doesn't exist
-        console.log('Creating new note for project:', selectedProjectId);
         
         const newNote = {
           project_id: selectedProjectId,
@@ -149,7 +146,6 @@ const CenterPanel = () => {
           throw createError;
         }
         
-        console.log('Created new note:', createdNote);
         setNote(createdNote);
         setContent('');
       }
@@ -238,7 +234,6 @@ const CenterPanel = () => {
       
       if (error) throw error;
       
-      console.log('Link saved successfully:', data);
       return data;
     } catch (error) {
       console.error('Error saving link:', error);
@@ -247,8 +242,6 @@ const CenterPanel = () => {
 
   // Handle citation clicks from the Lexical editor
   const handleCitationClick = useCallback((payload: any) => {
-    console.log('Citation clicked:', payload);
-    
     if (payload.fileId) {
       // Activate the file in the right panel
       setLinkActivation({
@@ -330,6 +323,8 @@ const CenterPanel = () => {
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <LegalRichTextEditor
             onCitationClick={handleCitationClick}
+            onEditorStateChange={handleEditorStateChange}
+            initialEditorState={note?.content || undefined}
           />
         </Box>
       )}

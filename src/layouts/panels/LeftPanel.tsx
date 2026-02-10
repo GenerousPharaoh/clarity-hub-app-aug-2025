@@ -194,7 +194,7 @@ const LeftPanel = ({
         if (response.data?.results) {
           // We could update the file list directly here, but for now we'll just filter the existing files
           // This would need to be updated to fully use the semantic search results when ready
-          console.log('Search results:', response.data.results);
+          // Search results available but not yet integrated with UI filtering
         }
       } catch (error) {
         console.error('Error during search:', error);
@@ -220,7 +220,6 @@ const LeftPanel = ({
       
       // Guard against fetching when user is not available
       if (!user) {
-        console.log('Skipping project fetch - no authenticated user');
         return;
       }
       
@@ -273,7 +272,6 @@ const LeftPanel = ({
         throw new Error('You must be signed in to create a project');
       }
 
-      console.log('Creating new project:', newProjectName);
 
       // Verify authentication status before proceeding
       const { data: session, error: sessionError } = await supabaseClient.auth.getSession();
@@ -302,13 +300,11 @@ const LeftPanel = ({
         throw error;
       }
 
-      console.log('Project created successfully:', data);
       setProjects([data, ...projects]);
       setSelectedProject(data.id);
       setNewProjectName('');
       
       // Navigate to the new project page
-      console.log('Navigating to:', `/projects/${data.id}`);
       navigate(`/projects/${data.id}`);
       
     } catch (error) {
@@ -345,7 +341,6 @@ const LeftPanel = ({
         },
         {
           onSuccess: (data) => {
-            console.log('Upload successful:', data);
             
             // Show success message via notification system
             showNotification(
@@ -805,7 +800,6 @@ const LeftPanel = ({
                   });
                   window.dispatchEvent(event);
                   
-                  console.log('Dispatched citation insertion event:', citationReference);
                 }}
               />
             )}

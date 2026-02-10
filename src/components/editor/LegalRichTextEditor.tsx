@@ -74,6 +74,8 @@ import useAppStore from '../../store';
 interface LegalRichTextEditorProps {
   className?: string;
   onCitationClick?: (payload: CitationClickPayload) => void;
+  onEditorStateChange?: (state: EditorState) => void;
+  initialEditorState?: string;
   focusMode?: boolean;
   onFocusModeChange?: (focusMode: boolean) => void;
 }
@@ -218,16 +220,12 @@ const EditorContent: React.FC<{
   const handleEditorChange = useCallback((state: EditorState) => {
     setEditorState(state);
     // Notify parent component of changes
-    const root = state.read(() => $getRoot());
-    console.log('Editor content changed:', root.getTextContent());
     // Pass change to parent
     onEditorChange?.(state);
   }, [onEditorChange]);
 
   // Handle citation clicks (inside component)
   const handleCitationClick = useCallback((payload: CitationClickPayload) => {
-    console.log('Citation clicked:', payload);
-    
     // Use the store's navigation function to handle exhibit navigation
     const navigateToExhibit = useAppStore.getState().navigateToExhibit;
     navigateToExhibit(payload.citationReference, 'editor');
@@ -411,9 +409,11 @@ const EditorContent: React.FC<{
 };
 
 // Main Component with proper context structure
-const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({ 
+const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
   className,
   onCitationClick,
+  onEditorStateChange: externalOnChange,
+  initialEditorState,
   focusMode = false,
   onFocusModeChange
 }) => {
@@ -445,9 +445,23 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
   const selectedFile = selectedFileId ? files.find(f => f.id === selectedFileId) : null;
   const selectedProject = selectedProjectId ? projects.find(p => p.id === selectedProjectId) : null;
 
+  // Parse initial editor state from saved note content
+  const parsedEditorState = (() => {
+    if (!initialEditorState) return undefined;
+    try {
+      // Verify it's valid Lexical JSON before using it
+      const parsed = JSON.parse(initialEditorState);
+      if (parsed?.root) return initialEditorState;
+      return undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+
   // Editor configuration
   const initialConfig = {
     namespace: 'LegalEditor',
+    editorState: parsedEditorState,
     theme: {
       root: 'lexical-editor',
       paragraph: 'lexical-paragraph',
@@ -537,11 +551,9 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
   const handleEditorStateChange = useCallback((state: EditorState) => {
     setEditorState(state);
     setHasUnsavedChanges(true);
-    
-    // Debug logging
-    const textContent = state.read(() => $getRoot().getTextContent());
-    console.log('Main editor received update:', textContent.length, 'chars');
-  }, []);
+    // Notify parent (CenterPanel) of state changes for database persistence
+    externalOnChange?.(state);
+  }, [externalOnChange]);
 
   return (
     <div

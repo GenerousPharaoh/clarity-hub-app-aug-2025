@@ -38,14 +38,11 @@ const fileVersions: Record<string, FileVersion[]> = {};
     const { data, error } = await supabase.storage.from('files').list('', { limit: 1 });
     
     if (error) {
-      console.warn('Supabase storage connection test failed, enabling fallback mode:', error);
       useLocalFallback = true;
     } else {
-      console.log('Supabase storage connection test succeeded');
       useLocalFallback = false;
     }
   } catch (error) {
-    console.warn('Supabase connection error, enabling fallback mode:', error);
     useLocalFallback = true;
   }
 })();
@@ -65,11 +62,9 @@ export const resetFallbackMode = async (): Promise<boolean> => {
   try {
     const { data, error } = await supabase.storage.from('files').list('', { limit: 1 });
     if (error) {
-      console.warn('Supabase storage still unavailable:', error);
       return false;
     }
-    
-    console.log('Supabase storage connection restored');
+
     useLocalFallback = false;
     return true;
   } catch (error) {
@@ -185,7 +180,7 @@ export const uploadFile = async (
     
     // Check if we're in fallback mode or demo mode
     if (useLocalFallback) {
-      console.log('Using local fallback for uploadFile (fallback mode or demo)');
+      // Using local fallback storage
       
       // Extract project ID and user ID from the path
       // Assuming path format like: projects/{projectId}/{fileId}_{filename}
@@ -198,7 +193,7 @@ export const uploadFile = async (
         const { data } = await supabase.auth.getUser();
         userId = data?.user?.id || 'unknown';
       } catch (error) {
-        console.warn('Could not get user ID');
+        // Could not get user ID
       }
       
       // Simulate upload progress for better UX
@@ -286,13 +281,6 @@ export const uploadFile = async (
       return { message, originalError: error };
     };
     
-    console.log(`Uploading file to ${bucket}/${path}`, { 
-      fileName: file.name, 
-      fileSize: file.size,
-      fileType: file.type,
-      upsert,
-      retryCount,
-    });
     
     // Use a simpler approach first - just try to upload
     try {
@@ -317,7 +305,6 @@ export const uploadFile = async (
         throw error;
       }
       
-      console.log('File uploaded successfully', { path: data.path });
       
       // Generate version ID for the file
       const versionId = crypto.randomUUID();
@@ -338,7 +325,6 @@ export const uploadFile = async (
       
       // If we're under the retry limit, try again
       if (retryCount < MAX_RETRIES) {
-        console.log(`Retrying upload (${retryCount + 1}/${MAX_RETRIES})...`);
         
         // Wait longer between each retry attempt (exponential backoff)
         const delayTime = Math.pow(2, retryCount) * 1000;
@@ -486,7 +472,6 @@ export const syncLocalFilesToCloud = async (): Promise<boolean> => {
   const localFiles = await fallbackStorage.getAllFiles();
   if (!localFiles.length) return true; // No files to sync
   
-  console.log(`Syncing ${localFiles.length} files to Supabase...`);
   
   // Upload each file to Supabase
   let successCount = 0;
@@ -509,7 +494,6 @@ export const syncLocalFilesToCloud = async (): Promise<boolean> => {
     }
   }
   
-  console.log(`Synced ${successCount}/${localFiles.length} files to Supabase`);
   
   // Only switch to cloud mode if all files were synced successfully
   return successCount === localFiles.length;
@@ -527,129 +511,55 @@ const parsePath = (fullPath: string): { bucket: string; path: string } => {
 };
 
 /**
- * Get a public URL for a file in the storage bucket
- * Enhanced with improved reliability and error handling
- * Now supports cross-environment compatibility
+ * Get a public URL for a file in the storage bucket.
+ * Tries multiple resolution strategies in order of reliability.
  */
-export function getFileUrl(filePath: string, options?: { cacheBuster?: boolean }): Promise<{ url: string; error?: any }> {
-  if (!filePath) return Promise.resolve({ url: '', error: 'No file path provided' });
+export async function getFileUrl(filePath: string, options?: { cacheBuster?: boolean }): Promise<{ url: string; error?: any }> {
+  if (!filePath) return { url: '', error: 'No file path provided' };
 
-  // Add cache busting if needed
-  const useCache = options?.cacheBuster !== false;
-  const timestamp = useCache ? `?t=${Date.now()}` : '';
+  const timestamp = options?.cacheBuster !== false ? `?t=${Date.now()}` : '';
 
-  return new Promise(async (resolve) => {
-    console.log(`[storageService] Getting URL for file: ${filePath}`);
-    
+  try {
+    // 1. Supabase client getPublicUrl (fastest, no network call)
     try {
-      // Get environment variables or fallback values
-      const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || '';
-      
-      // APPROACH 1: Use the Supabase JS client's built-in getPublicUrl method
-      try {
-        console.log('[storageService] Using getPublicUrl from Supabase client');
-        const { data } = supabase.storage.from('files').getPublicUrl(filePath);
-        
-        if (data?.publicUrl) {
-          const publicUrl = data.publicUrl + (data.publicUrl.includes('?') ? '&' : '?') + `_cb=${Date.now()}`;
-          console.log(`[storageService] Got public URL: ${publicUrl}`);
-          
-          // Test if the URL is accessible
-          try {
-            const response = await fetch(publicUrl, { method: 'HEAD', mode: 'no-cors' });
-            console.log(`[storageService] Public URL test response:`, response);
-            return resolve({ url: publicUrl });
-          } catch (e) {
-            console.log('[storageService] Public URL test failed, trying alternative methods');
-          }
-        }
-      } catch (e) {
-        console.log('[storageService] getPublicUrl error:', e);
+      const { data } = supabase.storage.from('files').getPublicUrl(filePath);
+      if (data?.publicUrl) {
+        const url = data.publicUrl + (data.publicUrl.includes('?') ? '&' : '?') + `_cb=${Date.now()}`;
+        // Quick HEAD check (no-cors won't throw for blocked, but catches network errors)
+        await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+        return { url };
       }
-      
-      // APPROACH 2: Direct URL construction (works across environments)
+    } catch { /* fall through */ }
+
+    // 2. Direct URL construction
+    if (supabaseUrl) {
+      const directUrl = `${supabaseUrl}/storage/v1/object/public/files/${filePath}${timestamp}`;
       try {
-        const directUrl = `${supabaseUrl}/storage/v1/object/public/files/${filePath}${timestamp}`;
-        console.log(`[storageService] Trying direct URL: ${directUrl}`);
-        
-        // Test if URL is accessible with a HEAD request
-        try {
-          const headResponse = await fetch(directUrl, { 
-            method: 'HEAD',
-            cache: 'no-cache', // Force fresh request
-            mode: 'no-cors' // Allow cross-origin requests
-          });
-          
-          console.log(`[storageService] Direct URL test response:`, headResponse);
-          return resolve({ url: directUrl });
-        } catch (directError) {
-          console.log(`[storageService] Direct URL test failed:`, directError);
-        }
-      } catch (directError) {
-        console.log(`[storageService] Direct URL error:`, directError);
-      }
-      
-      // APPROACH 3: Signed URL
-      try {
-        console.log(`[storageService] Trying signed URL for ${filePath}`);
-        const { data, error } = await supabase.storage
-          .from('files')
-          .createSignedUrl(filePath, 3600);
-        
-        if (data?.signedUrl) {
-          console.log(`[storageService] Signed URL created successfully`);
-          return resolve({ url: data.signedUrl });
-        } else {
-          console.log(`[storageService] Signed URL failed:`, error);
-        }
-      } catch (signedError) {
-        console.log(`[storageService] Signed URL error:`, signedError);
-      }
-      
-      // APPROACH 4: Alternative public URL format (absolute URL)
-      try {
-        const absolutePublicUrl = `https://${supabaseProjectId}.supabase.co/storage/v1/object/public/files/${filePath}${timestamp}`;
-        console.log(`[storageService] Trying absolute public URL: ${absolutePublicUrl}`);
-        return resolve({ url: absolutePublicUrl });
-      } catch (publicError) {
-        console.log(`[storageService] Public URL helper error:`, publicError);
-      }
-      
-      // APPROACH 5: Direct download and blob URL
-      try {
-        console.log(`[storageService] Trying direct download for blob URL`);
-        const { data, error } = await supabase.storage
-          .from('files')
-          .download(filePath);
-        
-        if (data) {
-          const blobUrl = URL.createObjectURL(data);
-          console.log(`[storageService] Created blob URL from download`);
-          return resolve({ url: blobUrl });
-        } else {
-          console.log(`[storageService] Download failed:`, error);
-        }
-      } catch (downloadError) {
-        console.log(`[storageService] Download error:`, downloadError);
-      }
-      
-      // LAST RESORT: Construct a direct URL again with alt path format
-      const lastResortUrl = `${supabaseUrl}/storage/v1/object/public/files/${filePath}${timestamp}`;
-      
-      console.log(`[storageService] All methods failed. Using last resort URL: ${lastResortUrl}`);
-      resolve({ 
-        url: lastResortUrl,
-        error: "All URL resolution methods failed, using direct URL as last resort" 
-      });
-      
-    } catch (finalError) {
-      console.error(`[storageService] Critical error in getFileUrl:`, finalError);
-      resolve({ 
-        url: '',
-        error: finalError
-      });
+        await fetch(directUrl, { method: 'HEAD', mode: 'no-cors', cache: 'no-cache' });
+        return { url: directUrl };
+      } catch { /* fall through */ }
     }
-  });
+
+    // 3. Signed URL (requires auth, more reliable for private buckets)
+    try {
+      const { data } = await supabase.storage.from('files').createSignedUrl(filePath, 3600);
+      if (data?.signedUrl) return { url: data.signedUrl };
+    } catch { /* fall through */ }
+
+    // 4. Direct download → blob URL (most reliable, but uses bandwidth)
+    try {
+      const { data } = await supabase.storage.from('files').download(filePath);
+      if (data) return { url: URL.createObjectURL(data) };
+    } catch { /* fall through */ }
+
+    // 5. Last resort: return constructed URL without testing
+    const lastResortUrl = `${supabaseUrl}/storage/v1/object/public/files/${filePath}${timestamp}`;
+    return { url: lastResortUrl, error: 'All URL resolution methods failed' };
+
+  } catch (finalError) {
+    console.error('[storageService] Critical error in getFileUrl:', finalError);
+    return { url: '', error: finalError };
+  }
 }
 
 // Export the supabase client for direct use

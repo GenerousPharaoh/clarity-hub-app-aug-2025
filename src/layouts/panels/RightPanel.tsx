@@ -38,6 +38,8 @@ import FileViewer, { SupportedFileType } from '../../components/viewers/FileView
 import { getErrorMessage, logError } from '../../utils/errorHandler';
 import storageService from '../../services/storageService';
 import { useNotification } from '../../contexts/NotificationContext';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 import AIAssistPanel from '../../components/ai/AIAssistPanel';
 
 interface TabPanelProps {
@@ -125,12 +127,11 @@ const RightPanel = ({
     }
   }, [linkActivation]);
 
-  // Fetch file details with better error handling and retries
+  // Fetch file details with error handling and retry
   const fetchFileDetails = async (fileId: string, retryCount = 0) => {
-    console.log('Fetching file details for ID:', fileId);
     setLoading(true);
     setErrorMessage('');
-    
+
     try {
       // Get basic file metadata
       const { data, error } = await supabaseClient
@@ -138,49 +139,24 @@ const RightPanel = ({
         .select('*')
         .eq('id', fileId)
         .single();
-      
+
       if (error) {
-        console.error('Error fetching file details:', error);
         throw new Error(`Failed to fetch file details: ${error.message}`);
       }
-      
+
       if (!data) {
         throw new Error('File not found');
       }
-      
-      console.log('File metadata retrieved:', { 
-        id: data.id, 
-        name: data.name, 
-        content_type: data.content_type, 
-        storage_path: data.storage_path 
-      });
-      
-      // Generate URL for storage file using enhanced getFileUrl helper
-      const resolvedUrlData = await storageService.getFileUrl(data.storage_path, {
-        cacheBuster: true // Add cache buster to prevent stale cache issues
-      });
 
-      // Check if we got an error from URL resolution
-      if (resolvedUrlData.error) {
-        console.error('Error generating URL:', resolvedUrlData.error);
-        throw new Error(`Failed to generate file URL: ${resolvedUrlData.error}`);
-      }
+      // Generate URL using storageService (handles multiple approaches internally)
+      const resolvedUrlData = await storageService.getFileUrl(data.storage_path, {
+        cacheBuster: true
+      });
 
       if (!resolvedUrlData.url) {
         throw new Error('Failed to generate a valid URL for the file');
       }
 
-      console.log('Resolved file URL:', resolvedUrlData.url);
-      
-      // Test the URL is actually accessible before setting the file
-      try {
-        await fetch(resolvedUrlData.url, { method: 'HEAD', mode: 'no-cors' });
-        console.log('URL is accessible, setting file data');
-      } catch (e) {
-        console.warn('URL might have access issues:', e);
-        // Continue anyway, as the no-cors mode might not give accurate results
-      }
-      
       // Set the file with the resolved URL
       setSelectedFile({
         ...data,
@@ -188,61 +164,39 @@ const RightPanel = ({
       });
     } catch (error) {
       console.error('Error in fetchFileDetails:', error);
-      
-      if (retryCount < 2) {
-        // Wait briefly before retrying
+
+      // Retry once with a delay
+      if (retryCount < 1) {
         setTimeout(() => {
-          console.log(`Retrying fetchFileDetails (${retryCount + 1}/2)...`);
           fetchFileDetails(fileId, retryCount + 1);
         }, 1000);
         return;
       }
-      
-      // Last resort - try with a direct Supabase URL pattern
-      if (retryCount === 2) {
-        try {
-          const { data } = await supabaseClient
+
+      // Final fallback: try direct blob download
+      try {
+        const { data: metaData } = await supabaseClient
+          .from('files')
+          .select('*')
+          .eq('id', fileId)
+          .single();
+
+        if (metaData?.storage_path) {
+          const { data: fileBlob } = await supabaseClient.storage
             .from('files')
-            .select('storage_path')
-            .eq('id', fileId)
-            .single();
-            
-          if (data?.storage_path) {
-            const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || '';
-            const directUrl = `https://${supabaseProjectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
-            console.log('Trying last resort URL:', directUrl);
-            
-            // Try to download the file directly
-            const { data: fileData } = await supabaseClient.storage
-              .from('files')
-              .download(data.storage_path);
-              
-            if (fileData) {
-              const blobUrl = URL.createObjectURL(fileData);
-              console.log('Created blob URL as absolute fallback');
-              
-              // Get the full file data again
-              const { data: fullData } = await supabaseClient
-                .from('files')
-                .select('*')
-                .eq('id', fileId)
-                .single();
-                
-              if (fullData) {
-                setSelectedFile({
-                  ...fullData,
-                  url: blobUrl,
-                });
-                setLoading(false);
-                return;
-              }
-            }
+            .download(metaData.storage_path);
+
+          if (fileBlob) {
+            const blobUrl = URL.createObjectURL(fileBlob);
+            setSelectedFile({ ...metaData, url: blobUrl });
+            setLoading(false);
+            return;
           }
-        } catch (lastError) {
-          console.error('Final fallback attempt failed:', lastError);
         }
+      } catch (fallbackError) {
+        console.error('Fallback download failed:', fallbackError);
       }
-      
+
       setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
       setSelectedFile(null);
     } finally {
@@ -567,7 +521,7 @@ const RightPanel = ({
         throw error;
       }
       
-      console.log('Link saved to database');
+      // Link saved successfully
     } catch (error) {
       console.error('Error saving link to database:', error);
     }
@@ -650,7 +604,7 @@ const RightPanel = ({
       link.click();
       document.body.removeChild(link);
       
-      console.log(`[RightPanel] Downloaded file: ${selectedFile.name}`);
+      // Downloaded file
     } catch (error) {
       console.error('[RightPanel] Download error:', error);
       setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred during download');
@@ -711,7 +665,7 @@ const RightPanel = ({
                     .then(({ data }) => {
                       if (data?.storage_path) {
                         const directUrl = `${supabaseProjectUrl}/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
-                        console.log('Trying alternative URL method:', directUrl);
+                        // Try alternative URL method
                         
                         // Open in new tab to test access
                         window.open(directUrl, '_blank');

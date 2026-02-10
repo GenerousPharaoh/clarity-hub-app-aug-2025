@@ -5,27 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="#1e293b" />
     <title>Clarity Hub Pro - Legal Case Management Platform</title>
     <!-- TinyMCE script - load from local public folder instead of CDN -->
     <script src="/tinymce/tinymce.min.js"></script>
-    <!-- Custom style fixes -->
-    <link rel="stylesheet" href="/style-fixes.css">
-    <!-- IMMEDIATE PROFESSIONAL STYLING -->
-    <link rel="stylesheet" href="/immediate-fix.css">
   </head>
   <body>
-    <!-- Demo Mode Disabled for Production -->
-    <!-- <script src="/demo-mode.js"></script> -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Auto-load UI fixes after page loads
-      window.addEventListener('load', () => {
-        const script = document.createElement('script');
-        script.src = '/ui-fixes.js';
-        document.body.appendChild(script);
-      });
-    </script>
   </body>
 </html>

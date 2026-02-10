@@ -70,6 +70,7 @@
     "jotai": "^2.12.4",
     "lexical": "^0.34.0",
     "node-fetch": "^2.7.0",
+    "openai": "^6.19.0",
     "papaparse": "^5.5.2",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^5.4.54",

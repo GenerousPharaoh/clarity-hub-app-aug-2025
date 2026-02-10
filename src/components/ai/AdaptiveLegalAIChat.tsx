@@ -45,6 +45,7 @@ import { v4 as uuid } from 'uuid';
 import { supabase } from '../../lib/supabase';
 import { AdaptiveAIService, UserAIProfile, PersonalizedResponse } from '../../services/adaptiveAIService';
 import { legalKnowledge } from '../../services/legalKnowledgeService';
+import { aiRouter } from '../../services/aiRouter';
 import useAppStore from '../../store';
 
 interface ChatMessage {
@@ -58,6 +59,7 @@ interface ChatMessage {
   timestamp: Date;
   feedback?: 'positive' | 'negative';
   tokens_used?: number;
+  modelUsed?: 'gemini' | 'gpt';
 }
 
 interface ConversationContext {
@@ -209,30 +211,33 @@ What would you like to work on today?`,
       // Save user message
       await saveMessageToDatabase(userMessage, currentConversation.id);
 
-      // Get user's relevant context and legal knowledge in parallel
-      const [userContext, legalContext] = await Promise.all([
-        getUserRelevantContext(inputValue),
-        getLegalKnowledgeContext(inputValue),
-      ]);
+      // Smart route: picks Gemini for general queries, GPT-5.2 for deep legal reasoning
+      const conversationHistory = messages.slice(-10).map(m => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }));
 
-      // Generate AI response with combined context
-      const aiResponse = await aiService.generatePersonalizedResponse({
-        userMessage: inputValue,
-        userProfile,
-        userContext,
-        legalContext,
-        conversationHistory: messages.slice(-10), // Last 10 messages for context
-        attachments
+      // Get user's case-specific context in parallel with routing
+      const userContext = await getUserRelevantContext(inputValue);
+      const caseContextStr = userContext
+        .map((c: any) => c.content?.substring(0, 300))
+        .filter(Boolean)
+        .join('\n');
+
+      const routerResult = await aiRouter.routeQuery({
+        query: inputValue,
+        conversationHistory,
+        caseContext: caseContextStr || undefined,
       });
 
       const aiMessage: ChatMessage = {
         id: uuid(),
         role: 'assistant',
-        content: aiResponse.content,
-        insights: aiResponse.personalizedInsights || [],
-        citations: aiResponse.citations || [],
+        content: routerResult.response,
+        citations: routerResult.citations,
+        insights: [],
         timestamp: new Date(),
-        tokens_used: aiResponse.learningSignals?.tokens_used
+        modelUsed: routerResult.model,
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -244,11 +249,10 @@ What would you like to work on today?`,
       await recordUserInteraction(userMessage, aiMessage, userContext);
 
     } catch (error) {
-      console.error('Failed to generate AI response:', error);
       const errorMessage: ChatMessage = {
         id: uuid(),
         role: 'assistant',
-        content: 'I apologize, but I encountered an error processing your request. Please try again.',
+        content: 'I encountered an error processing your request. Please check that your AI API keys are configured and try again.',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -544,6 +548,16 @@ What would you like to work on today?`,
                           <ThumbDownIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
+
+                      {message.modelUsed && (
+                        <Chip
+                          label={message.modelUsed === 'gpt' ? 'GPT-5.2' : 'Gemini'}
+                          size="small"
+                          variant="outlined"
+                          color={message.modelUsed === 'gpt' ? 'secondary' : 'primary'}
+                          sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
+                        />
+                      )}
 
                       <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
                         {formatDistanceToNow(message.timestamp, { addSuffix: true })}

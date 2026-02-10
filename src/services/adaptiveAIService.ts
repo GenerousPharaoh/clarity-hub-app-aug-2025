@@ -190,7 +190,7 @@ export class AdaptiveAIService {
    * Generate smart exhibit title using AI analysis
    */
   private async generateSmartExhibitTitle(fileName: string, analysis: ContentAnalysis): Promise<string> {
-    const model = this.gemini.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = this.gemini.getGenerativeModel({ model: "gemini-3.0-pro" });
 
     const prompt = `
     Based on this file analysis, generate a clear, professional exhibit title for a legal case.
@@ -265,7 +265,7 @@ export class AdaptiveAIService {
    * Extract content using Gemini multimodal capabilities
    */
   private async extractContentWithGemini(file: File, mimeType: string): Promise<any> {
-    const model = this.gemini.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = this.gemini.getGenerativeModel({ model: "gemini-3.0-pro" });
 
     // Convert file to base64 for Gemini
     const arrayBuffer = await file.arrayBuffer();
@@ -314,7 +314,7 @@ export class AdaptiveAIService {
     const userContext = await this.getUserRelevantContext(userProfile.user_id, content.extractedText);
 
     const model = this.gemini.getGenerativeModel({ 
-      model: "gemini-2.5-pro",
+      model: "gemini-3.0-pro",
       generationConfig: {
         temperature: 0.1, // Low temperature for legal accuracy
         topP: 0.8,
@@ -462,7 +462,7 @@ export class AdaptiveAIService {
     userProfile: UserAIProfile,
     file: any
   ): Promise<any[]> {
-    const model = this.gemini.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = this.gemini.getGenerativeModel({ model: "gemini-3.0-pro" });
 
     const prompt = `
     Based on this analysis and user profile, generate personalized insights:
@@ -600,7 +600,7 @@ export class AdaptiveAIService {
     conversationHistory: any[];
     attachments?: File[];
   }): Promise<PersonalizedResponse> {
-    const model = this.gemini.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = this.gemini.getGenerativeModel({ model: "gemini-3.0-pro" });
 
     const contextSummary = params.userContext
       .map(c => c.content.substring(0, 300))

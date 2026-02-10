@@ -10,7 +10,7 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
   const isLight = mode === 'light';
 
   // --- Palette ---
-  const dividerColor = isLight ? alpha('#94a3b8', 0.18) : alpha('#475569', 0.22);
+  const dividerColor = isLight ? alpha('#94a3b8', 0.20) : alpha('#475569', 0.24);
 
   return createTheme({
     palette: {
@@ -48,7 +48,7 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
         dark: '#0891b2',
       },
       background: {
-        default: isLight ? '#f8fafc' : '#0c0f1a',
+        default: isLight ? '#f1f5f9' : '#0c0f1a',   // Slate 100 — visible contrast vs paper
         paper: isLight ? '#ffffff' : '#151928',
       },
       text: {
@@ -87,33 +87,33 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
 
     shape: { borderRadius: 10 },
 
-    // --- Shadows — cool-tinted, layered ---
+    // --- Shadows — cool-tinted, progressively deeper ---
     shadows: [
       'none',
-      `0 1px 2px ${isLight ? 'rgba(15,23,42,0.04)' : 'rgba(0,0,0,0.20)'}`,
-      `0 1px 4px ${isLight ? 'rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.25)'}`,
-      `0 2px 8px ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.30)'}`,
-      `0 4px 12px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 6px 16px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 8px 20px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 10px 24px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 12px 28px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 14px 32px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 16px 36px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 18px 40px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 20px 44px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 22px 48px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 32px 64px ${isLight ? 'rgba(15,23,42,0.14)' : 'rgba(0,0,0,0.50)'}`,
+      `0 1px 2px ${isLight ? 'rgba(15,23,42,0.05)' : 'rgba(0,0,0,0.20)'}`,                                                    // 1
+      `0 1px 3px ${isLight ? 'rgba(15,23,42,0.07), 0 1px 2px rgba(15,23,42,0.04)' : 'rgba(0,0,0,0.25)'}`,                      // 2
+      `0 3px 6px ${isLight ? 'rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04)' : 'rgba(0,0,0,0.30)'}`,                      // 3
+      `0 4px 8px ${isLight ? 'rgba(15,23,42,0.09), 0 2px 4px rgba(15,23,42,0.05)' : 'rgba(0,0,0,0.32)'}`,                      // 4
+      `0 6px 12px ${isLight ? 'rgba(15,23,42,0.10), 0 3px 6px rgba(15,23,42,0.05)' : 'rgba(0,0,0,0.34)'}`,                     // 5
+      `0 8px 16px ${isLight ? 'rgba(15,23,42,0.10), 0 4px 8px rgba(15,23,42,0.05)' : 'rgba(0,0,0,0.36)'}`,                     // 6
+      `0 10px 20px ${isLight ? 'rgba(15,23,42,0.10), 0 4px 8px rgba(15,23,42,0.05)' : 'rgba(0,0,0,0.38)'}`,                    // 7
+      `0 12px 24px ${isLight ? 'rgba(15,23,42,0.11), 0 5px 10px rgba(15,23,42,0.05)' : 'rgba(0,0,0,0.40)'}`,                   // 8
+      `0 14px 28px ${isLight ? 'rgba(15,23,42,0.11), 0 5px 10px rgba(15,23,42,0.05)' : 'rgba(0,0,0,0.40)'}`,                   // 9
+      `0 16px 32px ${isLight ? 'rgba(15,23,42,0.12), 0 6px 12px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.42)'}`,                   // 10
+      `0 18px 36px ${isLight ? 'rgba(15,23,42,0.12), 0 6px 12px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.42)'}`,                   // 11
+      `0 20px 40px ${isLight ? 'rgba(15,23,42,0.12), 0 8px 16px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.44)'}`,                   // 12
+      `0 22px 44px ${isLight ? 'rgba(15,23,42,0.13), 0 8px 16px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.44)'}`,                   // 13
+      `0 24px 48px ${isLight ? 'rgba(15,23,42,0.13), 0 8px 16px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.46)'}`,                   // 14
+      `0 26px 52px ${isLight ? 'rgba(15,23,42,0.13), 0 10px 20px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.46)'}`,                  // 15
+      `0 28px 56px ${isLight ? 'rgba(15,23,42,0.14), 0 10px 20px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.48)'}`,                  // 16
+      `0 30px 60px ${isLight ? 'rgba(15,23,42,0.14), 0 10px 20px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.48)'}`,                  // 17
+      `0 30px 60px ${isLight ? 'rgba(15,23,42,0.14), 0 10px 20px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.48)'}`,                  // 18
+      `0 30px 60px ${isLight ? 'rgba(15,23,42,0.14), 0 10px 20px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.48)'}`,                  // 19
+      `0 30px 60px ${isLight ? 'rgba(15,23,42,0.14), 0 10px 20px rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.48)'}`,                  // 20
+      `0 32px 64px ${isLight ? 'rgba(15,23,42,0.15), 0 12px 24px rgba(15,23,42,0.07)' : 'rgba(0,0,0,0.50)'}`,                  // 21
+      `0 32px 64px ${isLight ? 'rgba(15,23,42,0.15), 0 12px 24px rgba(15,23,42,0.07)' : 'rgba(0,0,0,0.50)'}`,                  // 22
+      `0 32px 64px ${isLight ? 'rgba(15,23,42,0.15), 0 12px 24px rgba(15,23,42,0.07)' : 'rgba(0,0,0,0.50)'}`,                  // 23
+      `0 36px 72px ${isLight ? 'rgba(15,23,42,0.16), 0 14px 28px rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.55)'}`,                  // 24
     ],
 
     // --- Component overrides ---
@@ -135,13 +135,15 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
         },
       },
 
-      // ---- AppBar — clean white with subtle border ----
+      // ---- AppBar — clean with shadow for depth ----
       MuiAppBar: {
         styleOverrides: {
           root: {
             background: isLight ? '#ffffff' : '#151928',
             color: isLight ? '#0f172a' : '#f1f5f9',
-            boxShadow: 'none',
+            boxShadow: isLight
+              ? '0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04)'
+              : '0 1px 3px rgba(0,0,0,0.3)',
             borderBottom: `1px solid ${dividerColor}`,
           },
         },

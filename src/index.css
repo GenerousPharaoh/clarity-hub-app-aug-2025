@@ -68,25 +68,7 @@ code {
   text-size-adjust: 100%;
 }
 
-/* Modern scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
+/* Scrollbar styling — defers to MUI theme via CssBaseline */
 
 
 /* Enhanced animations and transitions */
@@ -222,7 +204,7 @@ body.resizing-panel * {
   height: 100%;
   overflow: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: var(--theme-border, rgba(0, 0, 0, 0.15)) transparent;
 }
 
 .panel-content::-webkit-scrollbar {
@@ -235,12 +217,13 @@ body.resizing-panel * {
 }
 
 .panel-content::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--theme-border, rgba(0, 0, 0, 0.15));
   border-radius: 3px;
 }
 
 .panel-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-neutral-400, rgba(0, 0, 0, 0.25));
+  border-radius: 3px;
 }
 
 /* Performance optimizations */

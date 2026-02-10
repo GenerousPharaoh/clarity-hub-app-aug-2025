@@ -1,14 +1,13 @@
 import React from 'react';
-import { Box, IconButton, Tooltip, Stack, useTheme, alpha } from '@mui/material';
+import { Box, IconButton, Tooltip, Stack, useTheme, alpha, Typography } from '@mui/material';
 import {
   ChevronRight,
   ChevronLeft,
   Folder,
   FileUpload,
   Search,
-  ChatBubbleOutline,
-  Memory,
-  Analytics,
+  InsertDriveFile,
+  SmartToy,
 } from '@mui/icons-material';
 
 interface CollapsedPanelProps {
@@ -20,15 +19,14 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
   const theme = useTheme();
 
   const leftIcons = [
-    { icon: <Folder />, tooltip: 'Files', key: 'files' },
-    { icon: <FileUpload />, tooltip: 'Upload', key: 'upload' },
-    { icon: <Search />, tooltip: 'Search', key: 'search' },
+    { icon: <Folder fontSize="small" />, tooltip: 'Projects', key: 'files' },
+    { icon: <FileUpload fontSize="small" />, tooltip: 'Upload', key: 'upload' },
+    { icon: <Search fontSize="small" />, tooltip: 'Search', key: 'search' },
   ];
 
   const rightIcons = [
-    { icon: <ChatBubbleOutline />, tooltip: 'Chat', key: 'chat' },
-    { icon: <Memory />, tooltip: 'Context', key: 'context' },
-    { icon: <Analytics />, tooltip: 'Analytics', key: 'analytics' },
+    { icon: <InsertDriveFile fontSize="small" />, tooltip: 'File Viewer', key: 'viewer' },
+    { icon: <SmartToy fontSize="small" />, tooltip: 'AI Assistant', key: 'ai' },
   ];
 
   const icons = side === 'left' ? leftIcons : rightIcons;
@@ -41,55 +39,44 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        py: 2,
+        pt: 1.5,
+        pb: 2,
         bgcolor: 'background.paper',
         position: 'relative',
       }}
     >
-      {/* Accent Line */}
-      <Box sx={{
-        width: 20,
-        height: 2,
-        background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-        borderRadius: 1,
-        mx: 'auto',
-        mb: 2,
-      }} />
-
       {/* Expand Button */}
       <Tooltip title={`Expand ${side} panel`} placement={side === 'left' ? 'right' : 'left'}>
         <IconButton
           onClick={onExpand}
           size="small"
           sx={{
-            mb: 3,
-            bgcolor: alpha(theme.palette.primary.main, 0.12),
+            mb: 2,
+            width: 30,
+            height: 30,
+            bgcolor: alpha(theme.palette.primary.main, 0.08),
+            color: 'text.secondary',
             '&:hover': {
-              bgcolor: alpha(theme.palette.primary.main, 0.2),
-              transform: 'scale(1.15)',
-              boxShadow: theme.shadows[4],
+              bgcolor: alpha(theme.palette.primary.main, 0.16),
+              color: 'primary.main',
             },
-            transition: 'all 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            transition: 'all 150ms ease',
           }}
         >
-          {side === 'left' ? <ChevronRight /> : <ChevronLeft />}
+          {side === 'left' ? <ChevronRight fontSize="small" /> : <ChevronLeft fontSize="small" />}
         </IconButton>
       </Tooltip>
 
-      {/* Icon Stack with dot separators */}
-      <Stack
-        spacing={1}
-        divider={
-          <Box sx={{
-            width: 4,
-            height: 4,
-            borderRadius: '50%',
-            bgcolor: alpha(theme.palette.primary.main, 0.12),
-            mx: 'auto',
-          }} />
-        }
-        sx={{ width: '100%', alignItems: 'center' }}
-      >
+      {/* Divider line */}
+      <Box sx={{
+        width: 20,
+        height: 1,
+        bgcolor: 'divider',
+        mb: 2,
+      }} />
+
+      {/* Icon Stack — each icon expands the panel */}
+      <Stack spacing={0.5} sx={{ width: '100%', alignItems: 'center' }}>
         {icons.map((item) => (
           <Tooltip
             key={item.key}
@@ -98,12 +85,17 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
           >
             <IconButton
               size="small"
+              onClick={onExpand}
               sx={{
-                color: 'text.secondary',
+                width: 32,
+                height: 32,
+                color: 'text.disabled',
+                borderRadius: '8px',
                 '&:hover': {
                   color: 'primary.main',
                   bgcolor: alpha(theme.palette.primary.main, 0.08),
                 },
+                transition: 'all 150ms ease',
               }}
             >
               {item.icon}
@@ -111,6 +103,24 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
           </Tooltip>
         ))}
       </Stack>
+
+      {/* Rotated label at bottom */}
+      <Box sx={{ mt: 'auto', mb: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+            transform: side === 'left' ? 'rotate(180deg)' : 'none',
+            color: 'text.disabled',
+            fontSize: '0.65rem',
+            letterSpacing: '0.05em',
+            userSelect: 'none',
+          }}
+        >
+          {side === 'left' ? 'Navigation' : 'Viewer & AI'}
+        </Typography>
+      </Box>
     </Box>
   );
 };

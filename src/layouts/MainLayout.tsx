@@ -45,7 +45,6 @@ import {
   Close as CloseIcon,
   ChevronRight,
   ViewSidebar,
-  ViewSidebarRounded,
 } from '@mui/icons-material';
 import { useNavigate, useParams, Outlet, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -235,14 +234,18 @@ const MainLayout = () => {
             size="small"
             sx={{
               minWidth: 200,
+              maxWidth: 280,
               mr: 2,
               '& .MuiOutlinedInput-root': {
-                bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : alpha(theme.palette.primary.main, 0.06),
+                bgcolor: theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.background.paper, 0.6)
+                  : 'background.default',
                 border: '1px solid',
                 borderColor: theme.palette.divider,
-                borderRadius: '8px',
+                borderRadius: '10px',
+                fontSize: '0.8125rem',
                 '&:hover': {
-                  bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.10),
+                  borderColor: alpha(theme.palette.primary.main, 0.3),
                 },
                 '& .MuiOutlinedInput-notchedOutline': {
                   border: 'none',
@@ -299,33 +302,45 @@ const MainLayout = () => {
           {/* Action Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {/* Panel Toggles */}
-            <Tooltip title="Toggle Left Panel (⌘[)">
+            <Tooltip title={`${isLeftPanelOpen ? 'Hide' : 'Show'} Left Panel (⌘[)`}>
               <IconButton
                 onClick={() => toggleLeftPanel()}
-                sx={{ 
-                  color: theme.palette.text.primary,
-                  bgcolor: isLeftPanelOpen ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
+                size="small"
+                sx={{
+                  color: isLeftPanelOpen ? 'primary.main' : 'text.disabled',
+                  bgcolor: isLeftPanelOpen ? alpha(theme.palette.primary.main, 0.10) : 'transparent',
+                  border: '1px solid',
+                  borderColor: isLeftPanelOpen ? alpha(theme.palette.primary.main, 0.20) : 'transparent',
                   '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.20),
-                  }
+                    bgcolor: alpha(theme.palette.primary.main, 0.14),
+                    borderColor: alpha(theme.palette.primary.main, 0.30),
+                    color: 'primary.main',
+                  },
+                  transition: 'all 150ms ease',
                 }}
               >
-                <ViewSidebar sx={{ transform: 'scaleX(-1)' }} />
+                <ViewSidebar sx={{ transform: 'scaleX(-1)', fontSize: 20 }} />
               </IconButton>
             </Tooltip>
-            
-            <Tooltip title="Toggle Right Panel (⌘])">
+
+            <Tooltip title={`${isRightPanelOpen ? 'Hide' : 'Show'} Right Panel (⌘])`}>
               <IconButton
                 onClick={() => toggleRightPanel()}
-                sx={{ 
-                  color: theme.palette.text.primary,
-                  bgcolor: isRightPanelOpen ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
+                size="small"
+                sx={{
+                  color: isRightPanelOpen ? 'primary.main' : 'text.disabled',
+                  bgcolor: isRightPanelOpen ? alpha(theme.palette.primary.main, 0.10) : 'transparent',
+                  border: '1px solid',
+                  borderColor: isRightPanelOpen ? alpha(theme.palette.primary.main, 0.20) : 'transparent',
                   '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.20),
-                  }
+                    bgcolor: alpha(theme.palette.primary.main, 0.14),
+                    borderColor: alpha(theme.palette.primary.main, 0.30),
+                    color: 'primary.main',
+                  },
+                  transition: 'all 150ms ease',
                 }}
               >
-                <ViewSidebar />
+                <ViewSidebar sx={{ fontSize: 20 }} />
               </IconButton>
             </Tooltip>
 

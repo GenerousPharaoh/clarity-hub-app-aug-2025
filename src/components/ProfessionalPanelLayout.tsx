@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Box } from '@mui/material';
-// DragIndicator removed — using minimal resize handles
+import { Box, alpha, useTheme } from '@mui/material';
 
 interface ProfessionalPanelLayoutProps {
   leftPanel: React.ReactNode;
@@ -40,6 +39,8 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
     setIsRightOpen(rightPanelOpen);
   }, [rightPanelOpen]);
   
+  const theme = useTheme();
+
   // Collapsed width in pixels
   const COLLAPSED_WIDTH = 48; // px for icon-only sidebar
   
@@ -264,26 +265,39 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
         {isLeftOpen ? leftPanel : leftPanelCollapsed}
       </Box>
 
-      {/* Left Resize Handle — minimal 4px, no shadow, subtle hover */}
+      {/* Left Resize Handle */}
       {isLeftOpen && (
         <Box
-          className="panel-resize-handle"
           onMouseDown={createResizeHandler('left')}
           sx={{
-            width: '4px',
+            width: '6px',
             height: '100%',
             background: 'transparent',
             cursor: 'col-resize',
             position: 'relative',
             zIndex: 50,
-            transition: 'background-color 120ms ease',
+            transition: 'background-color 150ms ease',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 2,
+              height: 32,
+              borderRadius: 1,
+              bgcolor: alpha(theme.palette.primary.main, 0.15),
+              transition: 'all 150ms ease',
+            },
             '&:hover': {
-              backgroundColor: theme => theme.palette.primary.main,
-              opacity: 0.3,
+              bgcolor: alpha(theme.palette.primary.main, 0.06),
+              '&::after': {
+                height: 48,
+                bgcolor: alpha(theme.palette.primary.main, 0.4),
+              },
             },
             '&:active': {
-              backgroundColor: theme => theme.palette.primary.main,
-              opacity: 0.5,
+              bgcolor: alpha(theme.palette.primary.main, 0.12),
             },
           }}
         />
@@ -305,26 +319,39 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
         {centerPanel}
       </Box>
 
-      {/* Right Resize Handle — minimal 4px, no shadow, subtle hover */}
+      {/* Right Resize Handle */}
       {isRightOpen && (
         <Box
-          className="panel-resize-handle"
           onMouseDown={createResizeHandler('right')}
           sx={{
-            width: '4px',
+            width: '6px',
             height: '100%',
             background: 'transparent',
             cursor: 'col-resize',
             position: 'relative',
             zIndex: 50,
-            transition: 'background-color 120ms ease',
+            transition: 'background-color 150ms ease',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 2,
+              height: 32,
+              borderRadius: 1,
+              bgcolor: alpha(theme.palette.primary.main, 0.15),
+              transition: 'all 150ms ease',
+            },
             '&:hover': {
-              backgroundColor: theme => theme.palette.primary.main,
-              opacity: 0.3,
+              bgcolor: alpha(theme.palette.primary.main, 0.06),
+              '&::after': {
+                height: 48,
+                bgcolor: alpha(theme.palette.primary.main, 0.4),
+              },
             },
             '&:active': {
-              backgroundColor: theme => theme.palette.primary.main,
-              opacity: 0.5,
+              bgcolor: alpha(theme.palette.primary.main, 0.12),
             },
           }}
         />

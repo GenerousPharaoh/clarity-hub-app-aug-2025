@@ -46,6 +46,16 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
         position: 'relative',
       }}
     >
+      {/* Accent Line */}
+      <Box sx={{
+        width: 20,
+        height: 2,
+        background: 'linear-gradient(90deg, #6366F1, #8B5CF6)',
+        borderRadius: 1,
+        mx: 'auto',
+        mb: 2,
+      }} />
+
       {/* Expand Button */}
       <Tooltip title={`Expand ${side} panel`} placement={side === 'left' ? 'right' : 'left'}>
         <IconButton
@@ -66,12 +76,24 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
         </IconButton>
       </Tooltip>
 
-      {/* Icon Stack */}
-      <Stack spacing={1} sx={{ width: '100%', alignItems: 'center' }}>
+      {/* Icon Stack with dot separators */}
+      <Stack
+        spacing={1}
+        divider={
+          <Box sx={{
+            width: 4,
+            height: 4,
+            borderRadius: '50%',
+            bgcolor: alpha(theme.palette.primary.main, 0.12),
+            mx: 'auto',
+          }} />
+        }
+        sx={{ width: '100%', alignItems: 'center' }}
+      >
         {icons.map((item) => (
-          <Tooltip 
-            key={item.key} 
-            title={item.tooltip} 
+          <Tooltip
+            key={item.key}
+            title={item.tooltip}
             placement={side === 'left' ? 'right' : 'left'}
           >
             <IconButton

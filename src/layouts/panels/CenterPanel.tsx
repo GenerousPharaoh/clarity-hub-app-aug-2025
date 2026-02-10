@@ -12,6 +12,8 @@ import {
   AutoAwesome as AnalyzeIcon,
   NoteAddOutlined,
 } from '@mui/icons-material';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { PanelSkeleton } from '../../components/ui/LoadingSkeleton';
 import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store';
 import { supabase as supabaseClient } from '../../lib/supabase';
@@ -264,24 +266,12 @@ const CenterPanel = () => {
 
   if (!selectedProjectId) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          p: 4,
-          textAlign: 'center',
-        }}
-      >
-        <Typography variant="h5" gutterBottom>
-          Welcome to Clarity Hub
-        </Typography>
-        <Typography variant="body1" color="text.secondary" paragraph>
-          Select a project from the left panel to get started
-        </Typography>
-      </Box>
+      <EmptyState
+        illustration="legal"
+        title="Welcome to Clarity Hub"
+        description="Select a project from the left panel to begin organizing evidence and building arguments."
+        size="large"
+      />
     );
   }
   
@@ -300,14 +290,7 @@ const CenterPanel = () => {
       }}
     >
       {loading && selectedProjectId ? (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          height: '100%',
-        }}>
-          <CircularProgress />
-        </Box>
+        <PanelSkeleton title="Loading notes..." />
       ) : !selectedProjectId ? (
         <Box sx={{ 
           display: 'flex', 

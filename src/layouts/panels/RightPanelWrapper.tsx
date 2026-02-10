@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Paper, Tabs, Tab } from '@mui/material';
+import { Box, Paper, Tabs, Tab, alpha, useTheme } from '@mui/material';
 import { Description as FileIcon, Psychology as AIIcon } from '@mui/icons-material';
 import useAppStore from '../../store';
 import ProfessionalViewerContainer from '../../components/viewers/ProfessionalViewerContainer';
@@ -34,6 +34,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const RightPanelWrapper = () => {
+  const theme = useTheme();
   // Get selected file directly from store
   const selectedFileId = useAppStore((state) => state.selectedFileId);
   const files = useAppStore((state) => state.files);
@@ -118,26 +119,34 @@ const RightPanelWrapper = () => {
       data-test="right-panel"
     >
       {/* Tab Navigation */}
-      <Paper elevation={0} sx={{ borderRadius: 0, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Tabs 
-          value={tabValue} 
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 0,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          background: `linear-gradient(180deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+        }}
+      >
+        <Tabs
+          value={tabValue}
           onChange={handleTabChange}
           variant="fullWidth"
           sx={{ minHeight: 48 }}
         >
-          <Tab 
-            icon={<FileIcon />} 
-            label="Viewer" 
+          <Tab
+            icon={<FileIcon />}
+            label="Viewer"
             id="right-panel-tab-0"
             aria-controls="right-panel-tabpanel-0"
-            sx={{ minHeight: 48 }}
+            sx={{ minHeight: 48, fontSize: '0.8125rem', fontWeight: 500 }}
           />
-          <Tab 
-            icon={<AIIcon />} 
-            label="AI Assistant" 
+          <Tab
+            icon={<AIIcon />}
+            label="AI Assistant"
             id="right-panel-tab-1"
             aria-controls="right-panel-tabpanel-1"
-            sx={{ minHeight: 48 }}
+            sx={{ minHeight: 48, fontSize: '0.8125rem', fontWeight: 500 }}
           />
         </Tabs>
       </Paper>

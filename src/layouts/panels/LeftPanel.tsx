@@ -64,6 +64,7 @@ import ProjectList from '../../components/search/ProjectList';
 import FileList from '../../components/search/FileList';
 import ExhibitManager from '../../components/legal/ExhibitManager';
 import CloudUploadZone from '../../components/upload/CloudUploadZone';
+import { ProfessionalTextField } from '../../components/ui/ProfessionalTextField';
 
 // Props interface definition
 interface LeftPanelProps {
@@ -670,7 +671,7 @@ const LeftPanel = ({
 
         {/* Tabs for Upload, Files and Exhibits */}
         {selectedProjectId && (
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 1.5, pt: 1 }}>
             <Tabs
               value={activeTab}
               onChange={(_, newValue) => setActiveTab(newValue)}
@@ -683,21 +684,54 @@ const LeftPanel = ({
                 iconPosition="start"
                 label="Upload"
                 value="upload"
-                sx={{ minHeight: 48, textTransform: 'none' }}
+                sx={{
+                  minHeight: 42,
+                  textTransform: 'none',
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  borderRadius: '8px 8px 0 0',
+                  transition: 'all 150ms ease',
+                  '&.Mui-selected': {
+                    fontWeight: 600,
+                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
+                  },
+                }}
               />
               <Tab
                 icon={<FileIcon fontSize="small" />}
                 iconPosition="start"
                 label="Files"
                 value="files"
-                sx={{ minHeight: 48, textTransform: 'none' }}
+                sx={{
+                  minHeight: 42,
+                  textTransform: 'none',
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  borderRadius: '8px 8px 0 0',
+                  transition: 'all 150ms ease',
+                  '&.Mui-selected': {
+                    fontWeight: 600,
+                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
+                  },
+                }}
               />
               <Tab
                 icon={<ExhibitIcon fontSize="small" />}
                 iconPosition="start"
                 label="Exhibits"
                 value="exhibits"
-                sx={{ minHeight: 48, textTransform: 'none' }}
+                sx={{
+                  minHeight: 42,
+                  textTransform: 'none',
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
+                  borderRadius: '8px 8px 0 0',
+                  transition: 'all 150ms ease',
+                  '&.Mui-selected': {
+                    fontWeight: 600,
+                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
+                  },
+                }}
               />
             </Tabs>
           </Box>
@@ -715,11 +749,12 @@ const LeftPanel = ({
               <>
                 {/* Search bar for files */}
                 <Box sx={{ p: 2 }}>
-                  <TextField
+                  <ProfessionalTextField
                     fullWidth
                     placeholder="Search files..."
                     value={searchFilters.searchTerm || ''}
                     onChange={handleSearchTermChange}
+                    clearable
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -730,16 +765,7 @@ const LeftPanel = ({
                         <InputAdornment position="end">
                           {searchLoading ? (
                             <CircularProgress size={20} />
-                          ) : searchFilters.searchTerm ? (
-                            <IconButton
-                              size="small"
-                              onClick={handleClearSearch}
-                              edge="end"
-                              aria-label="clear search"
-                            >
-                              <ClearIcon fontSize="small" />
-                            </IconButton>
-                          ) : (
+                          ) : !searchFilters.searchTerm ? (
                             <IconButton
                               size="small"
                               onClick={() => setSearchExpanded(!searchExpanded)}
@@ -749,7 +775,7 @@ const LeftPanel = ({
                             >
                               <FilterListIcon fontSize="small" />
                             </IconButton>
-                          )}
+                          ) : null}
                         </InputAdornment>
                       ),
                     }}

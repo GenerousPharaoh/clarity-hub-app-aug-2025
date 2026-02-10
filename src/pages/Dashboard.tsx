@@ -114,6 +114,11 @@ export default function Dashboard() {
                   display: 'flex',
                   flexDirection: 'column',
                   cursor: 'pointer',
+                  transition: 'all 200ms ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: 4,
+                  },
                 }}
               >
                 <CardContent sx={{ flexGrow: 1 }}>

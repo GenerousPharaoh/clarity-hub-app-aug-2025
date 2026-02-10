@@ -23,7 +23,9 @@ import {
   Tooltip,
   CircularProgress,
   Fade,
-  Collapse
+  Collapse,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -36,8 +38,13 @@ import {
   ExpandMore as ExpandIcon,
   Lightbulb as InsightIcon,
   Link as CitationIcon,
-  AutoAwesome as PersonalizedIcon
+  AutoAwesome as PersonalizedIcon,
+  Gavel as GavelIcon,
+  Search as SearchIcon,
+  EditNote as EditNoteIcon,
+  Summarize as SummarizeIcon,
 } from '@mui/icons-material';
+import { animationKeyframes } from '../../theme/animations';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { formatDistanceToNow } from 'date-fns';
@@ -69,7 +76,15 @@ interface ConversationContext {
   last_message_at: string;
 }
 
+const suggestedPrompts = [
+  { icon: <GavelIcon sx={{ fontSize: 20 }} />, label: 'Analyze case strength', description: 'Evaluate strengths and weaknesses' },
+  { icon: <SearchIcon sx={{ fontSize: 20 }} />, label: 'Find relevant precedents', description: 'Search landmark case law' },
+  { icon: <EditNoteIcon sx={{ fontSize: 20 }} />, label: 'Draft a legal argument', description: 'Build a persuasive position' },
+  { icon: <SummarizeIcon sx={{ fontSize: 20 }} />, label: 'Summarize uploaded evidence', description: 'Key findings overview' },
+];
+
 export const AdaptiveLegalAIChat: React.FC = () => {
+  const theme = useTheme();
   const user = useAppStore(state => state.user);
   const selectedProjectId = useAppStore(state => state.selectedProjectId);
   
@@ -387,18 +402,28 @@ What would you like to work on today?`,
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Chat Header */}
-      <Paper elevation={1} sx={{ p: 2, borderRadius: 0 }}>
+      <Box sx={{
+        p: 2,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        background: alpha(theme.palette.primary.main, 0.03),
+      }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Avatar sx={{ bgcolor: 'primary.main' }}>
-            <AIIcon />
+          <Avatar sx={{
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            width: 36,
+            height: 36,
+            boxShadow: '0 2px 8px rgba(99,102,241,0.25)',
+          }}>
+            <AIIcon sx={{ fontSize: 20 }} />
           </Avatar>
           <Box>
-            <Typography variant="h6">
+            <Typography sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
               Legal AI Assistant
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {userProfile?.legal_specialties.length ? 
-                `Specialized in ${userProfile.legal_specialties.join(', ')}` : 
+              {userProfile?.legal_specialties.length ?
+                `Specialized in ${userProfile.legal_specialties.join(', ')}` :
                 'Learning your practice areas'
               }
             </Typography>
@@ -413,60 +438,132 @@ What would you like to work on today?`,
             />
           </Box>
         </Box>
-      </Paper>
+      </Box>
 
       {/* Messages */}
       <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
+        {/* Suggested prompts when chat is empty */}
+        {messages.length === 0 && !isLoading && (
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+          }}>
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 1.5,
+              maxWidth: 440,
+              width: '100%',
+              px: 2,
+            }}>
+              {suggestedPrompts.map((prompt) => (
+                <Box
+                  key={prompt.label}
+                  onClick={() => {
+                    setInputValue(prompt.label);
+                    // Small delay so user sees the value before sending
+                    setTimeout(() => handleSendMessage(), 100);
+                  }}
+                  sx={{
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    borderRadius: '12px',
+                    p: 2,
+                    cursor: 'pointer',
+                    transition: 'all 150ms ease',
+                    '&:hover': {
+                      borderColor: alpha(theme.palette.primary.main, 0.3),
+                      transform: 'translateY(-1px)',
+                      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.08)}`,
+                    },
+                  }}
+                >
+                  <Box sx={{ color: 'primary.main', mb: 1 }}>{prompt.icon}</Box>
+                  <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, mb: 0.5 }}>
+                    {prompt.label}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+                    {prompt.description}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
         <List>
           {messages.map((message) => (
-            <ListItem key={message.id} sx={{ flexDirection: 'column', alignItems: 'flex-start', px: 0 }}>
+            <ListItem
+              key={message.id}
+              sx={{
+                flexDirection: 'column',
+                alignItems: message.role === 'user' ? 'flex-end' : 'flex-start',
+                px: 0,
+                '&:hover .message-actions': { opacity: 1 },
+              }}
+            >
               <Box
                 sx={{
                   display: 'flex',
                   flexDirection: message.role === 'user' ? 'row-reverse' : 'row',
                   width: '100%',
-                  gap: 1
+                  gap: 1,
                 }}
               >
                 <Avatar
                   sx={{
-                    bgcolor: message.role === 'user' ? 'grey.300' : 'primary.main',
-                    width: 32,
-                    height: 32
+                    ...(message.role === 'user'
+                      ? { bgcolor: 'grey.300', width: 32, height: 32 }
+                      : {
+                          background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                          width: 32,
+                          height: 32,
+                        }),
                   }}
                 >
-                  {message.role === 'user' ? <UserIcon /> : <AIIcon />}
+                  {message.role === 'user' ? <UserIcon sx={{ fontSize: 18 }} /> : <AIIcon sx={{ fontSize: 18 }} />}
                 </Avatar>
 
-                <Paper
-                  elevation={1}
+                <Box
                   sx={{
-                    maxWidth: '80%',
-                    p: 2,
-                    bgcolor: message.role === 'user' ? 'primary.main' : 'background.paper',
-                    color: message.role === 'user' ? 'white' : 'text.primary',
-                    borderRadius: 2,
-                    mb: 1
+                    maxWidth: '85%',
+                    p: 2.5,
+                    ...(message.role === 'user'
+                      ? {
+                          background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                          color: '#fff',
+                          borderRadius: '16px 16px 4px 16px',
+                          boxShadow: '0 2px 8px rgba(99,102,241,0.25)',
+                        }
+                      : {
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: '16px 16px 16px 4px',
+                          bgcolor: 'background.paper',
+                        }),
+                    mb: 1,
                   }}
                 >
-                  <Box 
-                    sx={{ 
+                  <Box
+                    sx={{
                       '& p': { margin: '0.5em 0' },
                       '& ul, & ol': { paddingLeft: '1.5em' },
                       '& li': { marginBottom: '0.25em' },
                       '& strong': { fontWeight: 600 },
-                      '& code': { 
-                        backgroundColor: 'action.hover',
+                      '& code': {
+                        backgroundColor: message.role === 'user' ? 'rgba(255,255,255,0.15)' : 'action.hover',
                         padding: '0.2em 0.4em',
                         borderRadius: '3px',
-                        fontSize: '0.9em'
+                        fontSize: '0.9em',
                       },
                       '& pre': {
-                        backgroundColor: 'action.hover',
+                        backgroundColor: message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'action.hover',
                         padding: '1em',
                         borderRadius: '4px',
-                        overflow: 'auto'
-                      }
+                        overflow: 'auto',
+                      },
                     }}
                   >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -488,6 +585,16 @@ What would you like to work on today?`,
                             label={citation.title || `Citation ${index + 1}`}
                             size="small"
                             variant="outlined"
+                            sx={{
+                              cursor: 'pointer',
+                              fontWeight: 500,
+                              transition: 'all 150ms ease',
+                              '&:hover': {
+                                backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                                borderColor: theme.palette.primary.main,
+                                transform: 'translateY(-1px)',
+                              },
+                            }}
                           />
                         ))}
                       </Box>
@@ -505,7 +612,7 @@ What would you like to work on today?`,
                       >
                         {message.insights.length} Personalized Insights
                       </Button>
-                      
+
                       <Collapse in={expandedInsights.has(message.id)}>
                         <Box sx={{ mt: 1 }}>
                           {message.insights.map((insight, index) => (
@@ -520,32 +627,57 @@ What would you like to work on today?`,
                     </Box>
                   )}
 
-                  {/* Message Actions */}
+                  {/* Message Actions — show on hover */}
                   {message.role === 'assistant' && (
-                    <Box sx={{ display: 'flex', gap: 1, mt: 2, alignItems: 'center' }}>
+                    <Box
+                      className="message-actions"
+                      sx={{
+                        display: 'flex',
+                        gap: 0.5,
+                        mt: 2,
+                        alignItems: 'center',
+                        opacity: 0,
+                        transition: 'opacity 150ms ease',
+                      }}
+                    >
                       <Tooltip title="Copy response">
-                        <IconButton size="small" onClick={() => copyToClipboard(message.content)}>
-                          <CopyIcon fontSize="small" />
+                        <IconButton
+                          size="small"
+                          onClick={() => copyToClipboard(message.content)}
+                          sx={{
+                            borderRadius: '6px',
+                            '&:hover': { color: 'primary.main' },
+                          }}
+                        >
+                          <CopyIcon sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Tooltip>
-                      
+
                       <Tooltip title="Helpful">
-                        <IconButton 
-                          size="small" 
+                        <IconButton
+                          size="small"
                           color={message.feedback === 'positive' ? 'success' : 'default'}
                           onClick={() => handleFeedback(message.id, 'positive')}
+                          sx={{
+                            borderRadius: '6px',
+                            '&:hover': { color: 'success.main' },
+                          }}
                         >
-                          <ThumbUpIcon fontSize="small" />
+                          <ThumbUpIcon sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Tooltip>
-                      
+
                       <Tooltip title="Not helpful">
-                        <IconButton 
+                        <IconButton
                           size="small"
                           color={message.feedback === 'negative' ? 'error' : 'default'}
                           onClick={() => handleFeedback(message.id, 'negative')}
+                          sx={{
+                            borderRadius: '6px',
+                            '&:hover': { color: 'error.main' },
+                          }}
                         >
-                          <ThumbDownIcon fontSize="small" />
+                          <ThumbDownIcon sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Tooltip>
 
@@ -553,9 +685,23 @@ What would you like to work on today?`,
                         <Chip
                           label={message.modelUsed === 'gpt' ? 'GPT-5.2' : 'Gemini'}
                           size="small"
-                          variant="outlined"
-                          color={message.modelUsed === 'gpt' ? 'secondary' : 'primary'}
-                          sx={{ ml: 1, height: 20, fontSize: '0.65rem' }}
+                          sx={{
+                            ml: 1,
+                            height: 24,
+                            fontSize: '0.7rem',
+                            fontWeight: 500,
+                            ...(message.modelUsed === 'gpt'
+                              ? {
+                                  background: alpha('#7c3aed', 0.08),
+                                  color: '#7c3aed',
+                                  border: `1px solid ${alpha('#7c3aed', 0.2)}`,
+                                }
+                              : {
+                                  background: alpha('#6366F1', 0.08),
+                                  color: '#6366F1',
+                                  border: `1px solid ${alpha('#6366F1', 0.2)}`,
+                                }),
+                          }}
                         />
                       )}
 
@@ -564,17 +710,57 @@ What would you like to work on today?`,
                       </Typography>
                     </Box>
                   )}
-                </Paper>
+                </Box>
               </Box>
             </ListItem>
           ))}
-          
+
+          {/* Typing indicator — animated dots */}
           {isLoading && (
-            <ListItem sx={{ justifyContent: 'center' }}>
-              <CircularProgress size={24} />
-              <Typography variant="body2" sx={{ ml: 1 }}>
-                Analyzing with your case context...
-              </Typography>
+            <ListItem sx={{ px: 0 }}>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Avatar
+                  sx={{
+                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                    width: 32,
+                    height: 32,
+                  }}
+                >
+                  <AIIcon sx={{ fontSize: 18 }} />
+                </Avatar>
+                <Box>
+                  <Box
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: '16px 16px 16px 4px',
+                      bgcolor: 'background.paper',
+                      px: 2.5,
+                      py: 2,
+                      display: 'flex',
+                      gap: 0.75,
+                      alignItems: 'center',
+                    }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <Box
+                        key={i}
+                        sx={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: alpha(theme.palette.primary.main, 0.4),
+                          animation: `${animationKeyframes.typingDot} 1.4s ease-in-out infinite`,
+                          animationDelay: `${i * 150}ms`,
+                        }}
+                      />
+                    ))}
+                  </Box>
+                  <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block', ml: 1 }}>
+                    Thinking...
+                  </Typography>
+                </Box>
+              </Box>
             </ListItem>
           )}
         </List>
@@ -601,43 +787,77 @@ What would you like to work on today?`,
       )}
 
       {/* Input */}
-      <Paper elevation={2} sx={{ p: 2, borderRadius: 0 }}>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*,application/pdf,.doc,.docx,.txt"
-            style={{ display: 'none' }}
-            onChange={handleFileSelect}
-          />
-          
-          <IconButton onClick={handleAttachFile} disabled={isLoading}>
-            <AttachIcon />
+      <Box sx={{ borderTop: '1px solid', borderColor: 'divider', p: 2, bgcolor: 'background.paper' }}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*,application/pdf,.doc,.docx,.txt"
+          style={{ display: 'none' }}
+          onChange={handleFileSelect}
+        />
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: 0.5,
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: '16px',
+            px: 1.5,
+            py: 0.5,
+            transition: 'all 150ms ease',
+            '&:focus-within': {
+              borderColor: alpha(theme.palette.primary.main, 0.3),
+              boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.06)}`,
+            },
+          }}
+        >
+          <IconButton onClick={handleAttachFile} disabled={isLoading} size="small">
+            <AttachIcon fontSize="small" />
           </IconButton>
 
           <TextField
             fullWidth
             multiline
             maxRows={4}
-            placeholder="Ask about your cases, upload documents, or request legal analysis..."
+            placeholder="Ask about your cases..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
-            variant="outlined"
+            variant="standard"
             size="small"
+            InputProps={{ disableUnderline: true }}
+            sx={{ '& .MuiInputBase-root': { py: 0.75 } }}
           />
 
-          <IconButton 
-            onClick={handleSendMessage} 
+          <IconButton
+            onClick={handleSendMessage}
             disabled={isLoading || (!inputValue.trim() && attachments.length === 0)}
-            color="primary"
+            size="small"
+            sx={{
+              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+              color: '#fff',
+              borderRadius: '12px',
+              width: 36,
+              height: 36,
+              '&:hover': {
+                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+              },
+              '&.Mui-disabled': {
+                background: 'action.disabledBackground',
+                color: 'action.disabled',
+              },
+            }}
           >
-            <SendIcon />
+            <SendIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Box>
-      </Paper>
+        <Typography variant="caption" color="text.disabled" sx={{ display: 'block', textAlign: 'center', mt: 0.75, fontSize: '0.65rem' }}>
+          Enter to send, Shift+Enter for new line
+        </Typography>
+      </Box>
     </Box>
   );
 };

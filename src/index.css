@@ -251,26 +251,6 @@ button:disabled {
   background-clip: text;
 }
 
-/* Professional Panel System Styles */
-.panel-resize-handle {
-  width: 0.5rem;
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
-  cursor: col-resize;
-  position: relative;
-  z-index: 50;
-  transition: background-color 0.2s ease;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-}
-
-.panel-resize-handle:hover {
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.5) 0%, rgba(59, 130, 246, 0.5) 100%);
-}
-
-.panel-resize-handle:active,
-.panel-resize-handle.active {
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.8) 0%, rgba(59, 130, 246, 0.8) 100%);
-}
-
 /* Global resizing state */
 body.resizing-panel {
   cursor: col-resize !important;

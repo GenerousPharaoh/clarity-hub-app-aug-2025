@@ -8,16 +8,15 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Skeleton,
   Menu,
   MenuItem,
   ListItemSecondaryAction,
   Chip,
   Stack,
   Divider,
-  Badge,
   Box,
   LinearProgress,
+  alpha,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -25,10 +24,11 @@ import {
   Delete as DeleteIcon,
   Download as DownloadIcon,
   Label as LabelIcon,
-  FileUpload as UploadIcon,
 } from '@mui/icons-material';
 import FileTypeIcon from '../../components/icons/FileTypeIcon';
 import { FileRecord } from '../../hooks/useProjectFiles';
+import { NoFilesEmptyState, NoSearchResultsEmptyState } from '../ui/EmptyState';
+import { FileListSkeleton } from '../ui/LoadingSkeleton';
 
 interface FileListProps {
   files: FileRecord[];
@@ -153,69 +153,23 @@ const FileList: React.FC<FileListProps> = ({
         aria-label="files list"
       >
         {loading ? (
-          // Loading skeletons
-          Array.from(new Array(5)).map((_, index) => (
-            <ListItem key={`skeleton-${index}`} disablePadding>
-              <ListItemButton disabled>
-                <ListItemIcon>
-                  <Skeleton variant="circular" width={40} height={40} />
-                </ListItemIcon>
-                <ListItemText
-                  primary={<Skeleton width="80%" />}
-                  secondary={<Skeleton width="40%" />}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))
+          <FileListSkeleton items={5} />
         ) : displayFiles.length === 0 ? (
-          // Empty state
-          <ListItem>
-            <ListItemText
-              primary={searchActive 
-                ? "No files match your search criteria" 
-                : "No files in this project yet"
-              }
-              secondary={!searchActive && (
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Upload files to get started
-                  </Typography>
-                  {onSwitchToUpload && (
-                    <Box sx={{ mt: 2 }}>
-                      <IconButton 
-                        onClick={onSwitchToUpload}
-                        color="primary"
-                        size="large"
-                        sx={{ 
-                          bgcolor: 'primary.main',
-                          color: 'white',
-                          '&:hover': {
-                            bgcolor: 'primary.dark',
-                          }
-                        }}
-                      >
-                        <UploadIcon />
-                      </IconButton>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                        Click to upload or drag & drop files
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
-            />
-          </ListItem>
+          searchActive ? (
+            <NoSearchResultsEmptyState />
+          ) : (
+            <NoFilesEmptyState onUpload={onSwitchToUpload} />
+          )
         ) : (
           // File list
           displayFiles.map((file) => (
-            <ListItem 
-              key={file.id} 
-              disablePadding 
-              divider
+            <ListItem
+              key={file.id}
+              disablePadding
               secondaryAction={
-                <IconButton 
-                  edge="end" 
-                  aria-label="file options" 
+                <IconButton
+                  edge="end"
+                  aria-label="file options"
                   onClick={(e) => handleFileMenuOpen(e, file.id)}
                   size="small"
                 >
@@ -226,8 +180,21 @@ const FileList: React.FC<FileListProps> = ({
               <ListItemButton
                 selected={selectedFileId === file.id}
                 onClick={() => onSelectFile(file.id)}
-                sx={{ pr: 7 }} // Make room for secondary action
                 data-test={`file-item-${file.id}`}
+                sx={{
+                  pr: 7,
+                  borderRadius: '8px',
+                  mx: 0.75,
+                  mb: 0.25,
+                  transition: 'all 150ms ease',
+                  '&:hover': {
+                    transform: 'translateX(2px)',
+                  },
+                  '&.Mui-selected': {
+                    borderLeft: '3px solid',
+                    borderColor: 'primary.main',
+                  },
+                }}
               >
                 <ListItemIcon>
                   <FileTypeIcon fileType={file.file_type} fileName={file.name} size="medium" />

@@ -4,6 +4,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  ListItemIcon,
   Typography,
   Button,
   Dialog,
@@ -16,6 +17,8 @@ import {
   IconButton,
   Tooltip,
   Divider,
+  Box,
+  alpha,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -23,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import { Project } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import { EmptyState } from '../ui/EmptyState';
 
 interface ProjectListProps {
   projects: Project[];
@@ -121,32 +125,51 @@ const ProjectList: React.FC<ProjectListProps> = ({
             </ListItem>
           ))
         ) : projects.length === 0 ? (
-          // Empty state
-          <ListItem>
-            <ListItemText
-              primary="No projects found"
-              secondary={
-                <Button
-                  startIcon={<AddIcon />}
-                  onClick={() => setProjectDialogOpen(true)}
-                  size="small"
-                  sx={{ mt: 1 }}
-                >
-                  Create your first project
-                </Button>
-              }
-            />
-          </ListItem>
+          <EmptyState
+            illustration="folder"
+            title="No projects yet"
+            description="Create your first legal case to get started."
+            action={{
+              label: 'Create Project',
+              onClick: () => setProjectDialogOpen(true),
+            }}
+            size="small"
+          />
         ) : (
           // Project list
           <>
             {projects.map((project) => (
-              <ListItem key={project.id} disablePadding divider>
+              <ListItem key={project.id} disablePadding>
                 <ListItemButton
                   selected={selectedProjectId === project.id}
                   onClick={() => handleProjectSelect(project.id)}
                   data-test={`project-item-${project.id}`}
+                  sx={{
+                    borderRadius: '8px',
+                    mx: 0.75,
+                    mb: 0.25,
+                    transition: 'all 150ms ease',
+                    '&:hover': {
+                      transform: 'translateX(2px)',
+                    },
+                  }}
                 >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <Box sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: '8px',
+                      background: (t) => alpha(t.palette.primary.main, 0.08),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'primary.main',
+                      fontWeight: 600,
+                      fontSize: '0.75rem',
+                    }}>
+                      {project.name.charAt(0).toUpperCase()}
+                    </Box>
+                  </ListItemIcon>
                   <ListItemText
                     primary={project.name}
                     secondary={

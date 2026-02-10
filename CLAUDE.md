@@ -67,6 +67,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Supabase Auth for user management
 - Protected routes with AuthContext
 
+#### Legal Knowledge Base (Ontario Employment Law MVP)
+- **Service:** `src/services/legalKnowledgeService.ts` - Full CRUD + search for legal data
+- **AI Integration:** Legal context is fetched in parallel with user context in `AdaptiveLegalAIChat.tsx`
+- **Database Tables:**
+  - `legal_topics` (34 rows) - Hierarchical topic taxonomy with parent/child relationships
+  - `legal_legislation` (11 rows) - Statutes and regulations (ESA, OHRC, OHSA, WSIA, LRA, etc.)
+  - `legal_legislation_sections` (12 rows) - Key statutory provisions with keyword arrays
+  - `legal_cases` (23 rows) - Landmark case law with citations, holdings, and ratios
+  - `legal_principles` (12 rows) - Legal doctrines (Bardal factors, Waksdale, Honda/Keays, etc.)
+  - `legal_knowledge_chunks` (81 rows) - RAG search table with full-text search (tsvector) and vector embeddings (pgvector HNSW)
+- **Search:** `match_legal_knowledge()` RPC for vector similarity; `fts` tsvector column for full-text search
+- **RLS:** All legal tables are read-only for authenticated users
+
 ### Common Issues and Fixes
 
 1. **Storage Permission Errors:**

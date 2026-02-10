@@ -80,9 +80,10 @@ export default function Auth() {
               justifyContent: 'center',
             }}
           >
-            <Typography
+            <Box
+              component="span"
               sx={{
-                color: '#fff',
+                color: '#ffffff !important',
                 fontSize: '1.125rem',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
@@ -90,20 +91,23 @@ export default function Auth() {
               }}
             >
               CH
-            </Typography>
+            </Box>
           </Box>
         </Box>
 
         {/* Center — headline + features */}
         <Box sx={{ position: 'relative', zIndex: 1, my: 'auto', py: 6 }}>
-          <Typography
+          <Box
+            component="h1"
             sx={{
-              color: '#fff',
+              color: '#ffffff !important',
               fontSize: '2.5rem',
               fontWeight: 700,
               letterSpacing: '-0.035em',
               lineHeight: 1.15,
               mb: 2,
+              m: 0,
+              fontFamily: 'inherit',
             }}
           >
             Legal case
@@ -120,19 +124,23 @@ export default function Auth() {
             >
               refined.
             </Box>
-          </Typography>
-          <Typography
+          </Box>
+          <Box
+            component="p"
             sx={{
-              color: 'rgba(148,163,184,0.8)',
+              color: 'rgba(148,163,184,0.8) !important',
               fontSize: '1.0625rem',
               fontWeight: 400,
               lineHeight: 1.6,
               maxWidth: 340,
               mt: 3,
+              m: 0,
+              mt: 3,
+              fontFamily: 'inherit',
             }}
           >
             Organize evidence, build arguments, and manage exhibits in one focused workspace.
-          </Typography>
+          </Box>
 
           {/* Feature pills */}
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 4 }}>
@@ -146,7 +154,7 @@ export default function Auth() {
                     borderRadius: '100px',
                     border: '1px solid rgba(148,163,184,0.15)',
                     backgroundColor: 'rgba(148,163,184,0.05)',
-                    color: 'rgba(203,213,225,0.75)',
+                    color: 'rgba(203,213,225,0.75) !important',
                     fontSize: '0.75rem',
                     fontWeight: 500,
                     letterSpacing: '0.015em',
@@ -160,17 +168,18 @@ export default function Auth() {
         </Box>
 
         {/* Bottom — copyright */}
-        <Typography
+        <Box
+          component="span"
           sx={{
             position: 'relative',
             zIndex: 1,
-            color: 'rgba(100,116,139,0.5)',
+            color: 'rgba(100,116,139,0.5) !important',
             fontSize: '0.6875rem',
             letterSpacing: '0.03em',
           }}
         >
           Clarity Hub
-        </Typography>
+        </Box>
       </Box>
 
       {/* ── Right login panel ── */}

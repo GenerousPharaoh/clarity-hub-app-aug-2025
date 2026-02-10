@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Tabs, Tab, Badge } from '@mui/material';
-import { Description as FileIcon, Psychology as AIIcon, Insights as InsightsIcon } from '@mui/icons-material';
+import { Description as FileIcon, Psychology as AIIcon } from '@mui/icons-material';
 import useAppStore from '../../store';
-import UniversalFileViewer from '../../components/viewers/UniversalFileViewer';
-import FunctionalFileViewer from '../../components/viewers/FunctionalFileViewer';
 import ProfessionalViewerContainer from '../../components/viewers/ProfessionalViewerContainer';
 import AdaptiveLegalAIChat from '../../components/ai/AdaptiveLegalAIChat';
 import { supabase } from '../../lib/supabase';

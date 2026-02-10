@@ -62,7 +62,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         padding: spacing * 2,
         height: '100%',
         minHeight: 200,
-        color: isDark ? designTokens.colors.dark[600] : designTokens.colors.neutral[600],
+        color: 'text.secondary',
       }}
     >
       {/* Icon — gradient bg circle with indigo icon */}
@@ -98,7 +98,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         sx={{
           fontWeight: 600,
           fontSize: '1rem',
-          color: isDark ? designTokens.colors.dark[800] : designTokens.colors.neutral[800],
+          color: 'text.primary',
           marginBottom: description ? 1 : spacing,
           maxWidth: 360,
         }}
@@ -111,7 +111,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         <Typography
           variant={descVariant}
           sx={{
-            color: isDark ? designTokens.colors.dark[600] : designTokens.colors.neutral[600],
+            color: 'text.secondary',
             marginBottom: spacing,
             maxWidth: 360,
             fontSize: '0.844rem',

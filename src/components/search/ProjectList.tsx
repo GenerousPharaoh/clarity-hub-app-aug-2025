@@ -80,11 +80,11 @@ const ProjectList: React.FC<ProjectListProps> = ({
   return (
     <>
       {/* Projects section */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: 8 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 1 }}>
         <Typography variant="subtitle1" fontWeight="bold">
           Projects
         </Typography>
-        <div>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
           <Tooltip title="Refresh projects">
             <IconButton onClick={handleRefresh} size="small">
               <RefreshIcon fontSize="small" />
@@ -100,8 +100,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
               <AddIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Projects list */}
       <List
@@ -145,27 +145,31 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   onClick={() => handleProjectSelect(project.id)}
                   data-test={`project-item-${project.id}`}
                   sx={{
-                    borderRadius: '8px',
-                    mx: 0.75,
-                    mb: 0.25,
+                    borderRadius: '10px',
+                    mx: 1,
+                    mb: 0.5,
+                    py: 0.75,
                     transition: 'all 150ms ease',
                     '&:hover': {
-                      transform: 'translateX(2px)',
+                      transform: 'translateX(3px)',
+                      bgcolor: (t) => alpha(t.palette.primary.main, 0.04),
                     },
                   }}
                 >
                   <ListItemIcon sx={{ minWidth: 40 }}>
                     <Box sx={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: '8px',
-                      background: (t) => alpha(t.palette.primary.main, 0.08),
+                      width: 30,
+                      height: 30,
+                      borderRadius: '10px',
+                      background: (t) => alpha(t.palette.primary.main, 0.10),
+                      border: '1px solid',
+                      borderColor: (t) => alpha(t.palette.primary.main, 0.08),
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       color: 'primary.main',
                       fontWeight: 600,
-                      fontSize: '0.75rem',
+                      fontSize: '0.8rem',
                     }}>
                       {project.name.charAt(0).toUpperCase()}
                     </Box>

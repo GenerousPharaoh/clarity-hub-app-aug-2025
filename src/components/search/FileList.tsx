@@ -183,16 +183,19 @@ const FileList: React.FC<FileListProps> = ({
                 data-test={`file-item-${file.id}`}
                 sx={{
                   pr: 7,
-                  borderRadius: '8px',
-                  mx: 0.75,
-                  mb: 0.25,
+                  borderRadius: '10px',
+                  mx: 1,
+                  mb: 0.5,
+                  py: 0.5,
                   transition: 'all 150ms ease',
                   '&:hover': {
-                    transform: 'translateX(2px)',
+                    transform: 'translateX(3px)',
+                    bgcolor: (t: any) => alpha(t.palette.primary.main, 0.04),
                   },
                   '&.Mui-selected': {
                     borderLeft: '3px solid',
                     borderColor: 'primary.main',
+                    bgcolor: (t: any) => alpha(t.palette.primary.main, 0.06),
                   },
                 }}
               >

@@ -696,7 +696,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
                   },
                 }}
               />
@@ -714,7 +714,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
                   },
                 }}
               />
@@ -732,7 +732,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: alpha(theme.palette.primary.main, 0.06),
+                    backgroundColor: alpha(theme.palette.primary.main, 0.08),
                   },
                 }}
               />

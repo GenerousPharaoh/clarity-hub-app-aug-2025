@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, alpha, useTheme } from '@mui/material';
 
 const Login = React.lazy(() => import('./Login'));
 const OAuthCallback = React.lazy(() => import('./OAuthCallback'));
 
 export default function Auth() {
+  const theme = useTheme();
   return (
     <Box
       sx={{
@@ -189,7 +190,7 @@ export default function Auth() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#ffffff',
+          bgcolor: 'background.paper',
           position: 'relative',
           px: 3,
         }}
@@ -202,7 +203,7 @@ export default function Auth() {
             right: 0,
             width: 320,
             height: 320,
-            background: 'radial-gradient(circle at 100% 0%, rgba(241,245,249,0.8) 0%, transparent 60%)',
+            background: `radial-gradient(circle at 100% 0%, ${alpha(theme.palette.background.default, 0.8)} 0%, transparent 60%)`,
             pointerEvents: 'none',
           }}
         />
@@ -213,7 +214,7 @@ export default function Auth() {
             left: 0,
             width: 240,
             height: 240,
-            background: 'radial-gradient(circle at 0% 100%, rgba(241,245,249,0.6) 0%, transparent 60%)',
+            background: `radial-gradient(circle at 0% 100%, ${alpha(theme.palette.background.default, 0.6)} 0%, transparent 60%)`,
             pointerEvents: 'none',
           }}
         />
@@ -233,8 +234,9 @@ export default function Auth() {
                   sx={{
                     width: 32,
                     height: 32,
-                    border: '3px solid #e2e8f0',
-                    borderTopColor: '#1e293b',
+                    border: '3px solid',
+                    borderColor: 'divider',
+                    borderTopColor: 'text.primary',
                     borderRadius: '50%',
                     animation: 'spin 0.8s linear infinite',
                     '@keyframes spin': {

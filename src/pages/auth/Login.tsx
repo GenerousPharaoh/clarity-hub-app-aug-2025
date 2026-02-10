@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, Button, Typography, CircularProgress, Alert, useTheme, alpha } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -17,6 +17,7 @@ function GoogleLogo({ size = 18 }: { size?: number }) {
 }
 
 export default function Login() {
+  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { signInWithGoogle, user } = useAuth();
@@ -46,13 +47,8 @@ export default function Login() {
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Mobile-only logo (hidden on md+ where left panel shows) */}
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      {/* Mobile-only logo */}
       <Box
         sx={{
           display: { xs: 'flex', md: 'none' },
@@ -66,19 +62,17 @@ export default function Login() {
             width: 36,
             height: 36,
             borderRadius: '10px',
-            background: '#0f172a',
+            bgcolor: 'primary.dark',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Typography
-            sx={{ color: '#fff', fontSize: '0.875rem', fontWeight: 700, lineHeight: 1 }}
-          >
+          <Typography sx={{ color: 'primary.contrastText', fontSize: '0.875rem', fontWeight: 700, lineHeight: 1 }}>
             CH
           </Typography>
         </Box>
-        <Typography sx={{ fontWeight: 700, fontSize: '1.125rem', color: '#0f172a', letterSpacing: '-0.02em' }}>
+        <Typography sx={{ fontWeight: 700, fontSize: '1.125rem', color: 'text.primary', letterSpacing: '-0.02em' }}>
           Clarity Hub
         </Typography>
       </Box>
@@ -88,7 +82,7 @@ export default function Login() {
         sx={{
           fontSize: '1.625rem',
           fontWeight: 700,
-          color: '#0f172a',
+          color: 'text.primary',
           letterSpacing: '-0.03em',
           lineHeight: 1.2,
         }}
@@ -99,7 +93,7 @@ export default function Login() {
       <Typography
         sx={{
           fontSize: '0.875rem',
-          color: '#64748b',
+          color: 'text.secondary',
           mt: 1,
           mb: 4,
           fontWeight: 400,
@@ -132,7 +126,7 @@ export default function Login() {
         disabled={loading}
         startIcon={
           loading ? (
-            <CircularProgress size={18} sx={{ color: '#64748b' }} />
+            <CircularProgress size={18} sx={{ color: 'text.disabled' }} />
           ) : (
             <GoogleLogo size={18} />
           )
@@ -145,24 +139,24 @@ export default function Login() {
           fontWeight: 600,
           textTransform: 'none',
           letterSpacing: '0.005em',
-          color: '#1e293b',
-          borderColor: '#e2e8f0',
+          color: 'text.primary',
+          borderColor: 'divider',
           borderWidth: '1.5px',
-          backgroundColor: '#fff',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+          bgcolor: 'background.paper',
+          boxShadow: theme.shadows[1],
           transition: 'all 150ms ease',
           '&:hover': {
-            borderColor: '#cbd5e1',
-            backgroundColor: '#f8fafc',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            borderColor: alpha(theme.palette.text.disabled, 0.5),
+            bgcolor: 'background.default',
+            boxShadow: theme.shadows[2],
           },
           '&:active': {
-            backgroundColor: '#f1f5f9',
+            bgcolor: 'action.hover',
             boxShadow: 'none',
           },
           '&.Mui-disabled': {
-            borderColor: '#e2e8f0',
-            color: '#94a3b8',
+            borderColor: 'divider',
+            color: 'text.disabled',
             opacity: 0.8,
           },
         }}
@@ -171,20 +165,12 @@ export default function Login() {
       </Button>
 
       {/* Divider */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          mt: 4,
-          mb: 3,
-          gap: 2,
-        }}
-      >
-        <Box sx={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
-        <Typography sx={{ fontSize: '0.6875rem', color: '#94a3b8', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mt: 4, mb: 3, gap: 2 }}>
+        <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+        <Typography variant="overline" sx={{ color: 'text.disabled', fontWeight: 500 }}>
           Secure login
         </Typography>
-        <Box sx={{ flex: 1, height: '1px', backgroundColor: '#e2e8f0' }} />
+        <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
       </Box>
 
       {/* Trust indicators */}
@@ -194,36 +180,24 @@ export default function Login() {
           { label: 'SOC 2 compliant infrastructure', icon: shieldIcon },
           { label: 'Your data stays yours', icon: userIcon },
         ].map(({ label, icon }) => (
-          <Box
-            key={label}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
+          <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
                 width: 28,
                 height: 28,
                 borderRadius: '8px',
-                backgroundColor: '#f8fafc',
-                border: '1px solid #f1f5f9',
+                bgcolor: 'action.hover',
+                border: '1px solid',
+                borderColor: 'divider',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                color: '#94a3b8',
+                color: 'text.disabled',
               }}
               dangerouslySetInnerHTML={{ __html: icon }}
             />
-            <Typography
-              sx={{
-                fontSize: '0.8125rem',
-                color: '#64748b',
-                fontWeight: 400,
-              }}
-            >
+            <Typography sx={{ fontSize: '0.8125rem', color: 'text.secondary', fontWeight: 400 }}>
               {label}
             </Typography>
           </Box>
@@ -233,7 +207,7 @@ export default function Login() {
   );
 }
 
-/* Tiny inline SVG icons — avoids extra MUI icon imports */
+/* Tiny inline SVG icons */
 const lockIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
 const shieldIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
 const userIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;

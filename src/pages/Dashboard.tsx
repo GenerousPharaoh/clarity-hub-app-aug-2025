@@ -116,10 +116,14 @@ export default function Dashboard() {
                   display: 'flex',
                   flexDirection: 'column',
                   cursor: 'pointer',
+                  borderRadius: '12px',
+                  border: '1px solid',
+                  borderColor: 'divider',
                   transition: 'all 200ms ease',
                   '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: 4,
+                    transform: 'translateY(-3px)',
+                    boxShadow: theme.shadows[4],
+                    borderColor: alpha(theme.palette.primary.main, 0.2),
                   },
                 }}
               >
@@ -161,7 +165,7 @@ export default function Dashboard() {
               width: 80,
               height: 80,
               borderRadius: '50%',
-              background: alpha(theme.palette.primary.main, 0.04),
+              background: alpha(theme.palette.primary.main, 0.08),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -169,7 +173,7 @@ export default function Dashboard() {
               mb: 3,
             }}
           >
-            <FolderIcon sx={{ fontSize: 40, color: theme.palette.text.primary }} />
+            <FolderIcon sx={{ fontSize: 40, color: 'primary.main' }} />
           </Box>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             No legal cases yet

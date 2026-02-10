@@ -105,7 +105,7 @@ export const DocumentViewerSkeleton: React.FC = () => (
 export const PanelSkeleton: React.FC<{ title?: string }> = ({ title }) => (
   <Box sx={{ padding: 2, height: '100%' }}>
     {title && (
-      <Box sx={{ marginBottom: 3, borderBottom: `1px solid ${designTokens.colors.dark[300]}`, paddingBottom: 2 }}>
+      <Box sx={{ marginBottom: 3, borderBottom: '1px solid', borderColor: 'divider', paddingBottom: 2 }}>
         <LoadingSkeleton variant="text" width="40%" height="1.5em" />
       </Box>
     )}

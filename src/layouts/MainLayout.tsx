@@ -186,22 +186,19 @@ const MainLayout = () => {
       }}
     >
       {/* Modern App Bar */}
-      <AppBar 
-        position="fixed" 
+      <AppBar
+        position="fixed"
         elevation={0}
-        sx={{ 
+        sx={{
           zIndex: theme => theme.zIndex.drawer + 1,
-          backdropFilter: 'blur(20px)',
-          background: theme.palette.mode === 'dark' 
-            ? alpha(theme.palette.background.paper, 0.9)
-            : alpha(theme.palette.background.paper, 0.95),
+          background: theme.palette.mode === 'dark'
+            ? theme.palette.background.paper
+            : '#ffffff',
           borderBottom: `1px solid ${theme.palette.divider}`,
-          boxShadow: theme.palette.mode === 'dark'
-            ? '0 1px 3px rgba(0, 0, 0, 0.3)'
-            : '0 1px 3px rgba(0, 0, 0, 0.05)',
+          boxShadow: 'none',
         }}
       >
-        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 }, px: { xs: 2, sm: 3 } }}>
+        <Toolbar sx={{ minHeight: 48, px: { xs: 2, sm: 3 }, gap: 1.5 }}>
           {/* Burger Menu */}
           <Tooltip title="Menu">
             <IconButton
@@ -237,15 +234,21 @@ const MainLayout = () => {
           </Typography>
 
           {/* Project Selector */}
-          <FormControl 
-            size="small" 
-            sx={{ 
-              minWidth: 200, 
+          <FormControl
+            size="small"
+            sx={{
+              minWidth: 200,
               mr: 2,
               '& .MuiOutlinedInput-root': {
-                bgcolor: 'background.paper',
+                bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : '#eceef1',
+                border: '1px solid',
+                borderColor: theme.palette.divider,
+                borderRadius: '6px',
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.primary.main, 0.02),
+                  bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.08) : '#e3e5e8',
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  border: 'none',
                 },
               },
             }}
@@ -519,8 +522,8 @@ const MainLayout = () => {
         flexGrow: 1,
         display: 'flex',
         width: '100vw',
-        height: 'calc(100vh - 64px)',
-        mt: '64px',
+        height: 'calc(100vh - 48px)',
+        mt: '48px',
         overflow: 'hidden',
         position: 'relative',
       }}>

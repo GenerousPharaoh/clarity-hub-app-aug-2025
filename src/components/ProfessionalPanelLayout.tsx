@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Box } from '@mui/material';
-import { DragIndicator } from '@mui/icons-material';
+// DragIndicator removed — using minimal resize handles
 
 interface ProfessionalPanelLayoutProps {
   leftPanel: React.ReactNode;
@@ -245,14 +245,14 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
         position: 'relative',
       }}
     >
-      {/* Left Panel - Always rendered, but collapsed when not open */}
+      {/* Left Panel — recessed bg (hsl 220,14%,98%) with 1px right border */}
       <Box
         ref={leftPanelRef}
         sx={{
           width: isLeftOpen ? `${panelWidths.left}%` : `${COLLAPSED_WIDTH}px`,
           height: '100%',
           overflow: 'hidden',
-          bgcolor: 'background.paper',
+          bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : '#f9fafb',
           borderRight: '1px solid',
           borderColor: 'divider',
           transition: isResizing ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -264,49 +264,29 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
         {isLeftOpen ? leftPanel : leftPanelCollapsed}
       </Box>
 
-      {/* Left Resize Handle - Only show when expanded */}
+      {/* Left Resize Handle — minimal 4px, no shadow, subtle hover */}
       {isLeftOpen && (
         <Box
           className="panel-resize-handle"
           onMouseDown={createResizeHandler('left')}
           sx={{
-            width: '8px',
+            width: '4px',
             height: '100%',
-            background: theme => 
-              `linear-gradient(90deg, ${theme.palette.primary.main}30 0%, ${theme.palette.primary.light}30 100%)`,
+            background: 'transparent',
             cursor: 'col-resize',
             position: 'relative',
             zIndex: 50,
-            transition: 'background-color 0.2s ease',
-            borderRadius: '0 4px 4px 0',
-            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            transition: 'background-color 120ms ease',
             '&:hover': {
-              background: theme => 
-                `linear-gradient(90deg, ${theme.palette.primary.main}50 0%, ${theme.palette.primary.light}50 100%)`,
-              '& .grip-icon': {
-                opacity: 1,
-              },
+              backgroundColor: theme => theme.palette.primary.main,
+              opacity: 0.3,
             },
             '&:active': {
-              background: theme => 
-                `linear-gradient(90deg, ${theme.palette.primary.main}80 0%, ${theme.palette.primary.light}80 100%)`,
+              backgroundColor: theme => theme.palette.primary.main,
+              opacity: 0.5,
             },
           }}
-        >
-          <DragIndicator 
-            className="grip-icon"
-            sx={{
-              color: 'white',
-              opacity: 0.6,
-              transition: 'opacity 0.2s',
-              pointerEvents: 'none',
-              fontSize: 20,
-            }}
-          />
-        </Box>
+        />
       )}
 
       {/* Center Panel */}
@@ -325,59 +305,39 @@ const ProfessionalPanelLayout: React.FC<ProfessionalPanelLayoutProps> = ({
         {centerPanel}
       </Box>
 
-      {/* Right Resize Handle - Only show when expanded */}
+      {/* Right Resize Handle — minimal 4px, no shadow, subtle hover */}
       {isRightOpen && (
         <Box
           className="panel-resize-handle"
           onMouseDown={createResizeHandler('right')}
           sx={{
-            width: '8px',
+            width: '4px',
             height: '100%',
-            background: theme => 
-              `linear-gradient(90deg, ${theme.palette.primary.main}30 0%, ${theme.palette.primary.light}30 100%)`,
+            background: 'transparent',
             cursor: 'col-resize',
             position: 'relative',
             zIndex: 50,
-            transition: 'background-color 0.2s ease',
-            borderRadius: '4px 0 0 4px',
-            boxShadow: '-2px 0 8px rgba(0, 0, 0, 0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            transition: 'background-color 120ms ease',
             '&:hover': {
-              background: theme => 
-                `linear-gradient(90deg, ${theme.palette.primary.main}50 0%, ${theme.palette.primary.light}50 100%)`,
-              '& .grip-icon': {
-                opacity: 1,
-              },
+              backgroundColor: theme => theme.palette.primary.main,
+              opacity: 0.3,
             },
             '&:active': {
-              background: theme => 
-                `linear-gradient(90deg, ${theme.palette.primary.main}80 0%, ${theme.palette.primary.light}80 100%)`,
+              backgroundColor: theme => theme.palette.primary.main,
+              opacity: 0.5,
             },
           }}
-        >
-          <DragIndicator 
-            className="grip-icon"
-            sx={{
-              color: 'white',
-              opacity: 0.6,
-              transition: 'opacity 0.2s',
-              pointerEvents: 'none',
-              fontSize: 20,
-            }}
-          />
-        </Box>
+        />
       )}
 
-      {/* Right Panel - Always rendered, but collapsed when not open */}
+      {/* Right Panel — recessed bg with 1px left border */}
       <Box
         ref={rightPanelRef}
         sx={{
           width: isRightOpen ? `${panelWidths.right}%` : `${COLLAPSED_WIDTH}px`,
           height: '100%',
           overflow: 'hidden',
-          bgcolor: 'background.paper',
+          bgcolor: theme => theme.palette.mode === 'dark' ? 'background.paper' : '#f9fafb',
           borderLeft: '1px solid',
           borderColor: 'divider',
           transition: isResizing ? 'none' : 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',

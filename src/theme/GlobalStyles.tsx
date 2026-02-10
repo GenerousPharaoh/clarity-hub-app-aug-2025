@@ -50,11 +50,11 @@ export const ProfessionalGlobalStyles: React.FC = () => {
           '--easing-ease-out': animations.easing.easeOut,
 
           // Shadow tokens
-          '--shadow-sm': isDark ? '0 1px 3px rgba(0, 0, 0, 0.4)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
-          '--shadow-md': isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.4)' : '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-          '--shadow-lg': isDark ? '0 20px 25px -5px rgba(0, 0, 0, 0.4)' : '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-          '--shadow-interactive': '0 8px 32px rgba(37, 99, 235, 0.15)',
-          '--shadow-panel': '0 4px 20px rgba(0, 0, 0, 0.08)',
+          '--shadow-sm': isDark ? '0 1px 3px rgba(0, 0, 0, 0.4)' : '0 1px 3px rgba(31, 44, 71, 0.04), 0 4px 12px rgba(31, 44, 71, 0.03)',
+          '--shadow-md': isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.4)' : '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',
+          '--shadow-lg': isDark ? '0 20px 25px -5px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(31, 44, 71, 0.08), 0 16px 40px rgba(31, 44, 71, 0.06)',
+          '--shadow-interactive': '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',
+          '--shadow-panel': 'none',
         },
 
         // Reset and base styles

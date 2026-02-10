@@ -79,23 +79,23 @@ const createProfessionalTheme = (mode: 'light' | 'dark' = 'light'): ThemeOptions
         contrastText: '#ffffff',
       },
       
-      // Background colors - Clean professional light theme
+      // Background — three-tier surface hierarchy
       background: {
-        default: isLight ? colors.neutral[50] : colors.neutral[100], // Clean light backgrounds
-        paper: isLight ? '#ffffff' : colors.neutral[200], // Clean white/light gray panels
+        default: isLight ? colors.neutral[50] : colors.dark[50],   // Base layer hsl(220,14%,96%)
+        paper: isLight ? '#ffffff' : colors.dark[100],              // Content panels pure white
       },
-      
-      // Text colors - High contrast for legal documents
+
+      // Text — near-black primary, never pure #000
       text: {
-        primary: isLight ? colors.neutral[900] : colors.neutral[800], // Maximum contrast text
-        secondary: isLight ? colors.neutral[600] : colors.neutral[500], // Secondary text
-        disabled: isLight ? colors.neutral[500] : colors.neutral[400], // Disabled text
+        primary: isLight ? colors.neutral[800] : colors.dark[900],    // hsl(220,14%,12%)
+        secondary: isLight ? colors.neutral[600] : colors.dark[600],  // hsl(220,10%,42%)
+        disabled: isLight ? colors.neutral[500] : colors.dark[500],   // hsl(220,8%,62%)
       },
       
-      // Dividers and borders
-      divider: isLight 
-        ? alpha(colors.neutral[900], 0.08)
-        : alpha(colors.neutral[600], 0.12),
+      // Dividers and borders — hsl(220,10%,90%) solid, not alpha
+      divider: isLight
+        ? colors.neutral[200]
+        : alpha(colors.dark[300], 0.5),
       
       // Professional action colors
       action: {
@@ -149,117 +149,117 @@ const createProfessionalTheme = (mode: 'light' | 'dark' = 'light'): ThemeOptions
       },
     },
     
-    // Professional typography scale
+    // Typography — spec: 20px page title, 14px section, 13.5px body, 12px caption
+    // -0.01em letter-spacing on all weights >= 600
     typography: {
       fontFamily: typography.fontFamily.primary,
-      
-      // Headings optimized for legal documents
+
       h1: {
-        fontSize: typography.fontSize['4xl'],
-        fontWeight: typography.fontWeight.bold,
-        lineHeight: typography.lineHeight.tight,
-        letterSpacing: typography.letterSpacing.tight,
-        color: isLight ? colors.neutral[900] : colors.dark[600],
+        fontSize: '2.25rem',    // 36px
+        fontWeight: 600,
+        lineHeight: 1.25,
+        letterSpacing: '-0.01em',
+        color: isLight ? colors.neutral[800] : colors.dark[900],
       },
-      
+
       h2: {
-        fontSize: typography.fontSize['3xl'],
-        fontWeight: typography.fontWeight.bold,
-        lineHeight: typography.lineHeight.tight,
-        letterSpacing: typography.letterSpacing.tight,
-        color: isLight ? colors.neutral[900] : colors.dark[600],
+        fontSize: '1.5rem',     // 24px
+        fontWeight: 600,
+        lineHeight: 1.3,
+        letterSpacing: '-0.01em',
+        color: isLight ? colors.neutral[800] : colors.dark[900],
       },
-      
+
       h3: {
-        fontSize: typography.fontSize['2xl'],
-        fontWeight: typography.fontWeight.semibold,
-        lineHeight: typography.lineHeight.snug,
-        letterSpacing: typography.letterSpacing.normal,
-        color: isLight ? colors.neutral[800] : colors.dark[600],
+        fontSize: '1.25rem',    // 20px — page title stop
+        fontWeight: 600,
+        lineHeight: 1.4,
+        letterSpacing: '-0.01em',
+        color: isLight ? colors.neutral[800] : colors.dark[900],
       },
-      
+
       h4: {
-        fontSize: typography.fontSize.xl,
-        fontWeight: typography.fontWeight.semibold,
-        lineHeight: typography.lineHeight.snug,
-        letterSpacing: typography.letterSpacing.normal,
-        color: isLight ? colors.neutral[800] : colors.dark[600],
+        fontSize: '1rem',       // 16px
+        fontWeight: 600,
+        lineHeight: 1.4,
+        letterSpacing: '-0.01em',
+        color: isLight ? colors.neutral[800] : colors.dark[900],
       },
-      
+
       h5: {
-        fontSize: typography.fontSize.lg,
-        fontWeight: typography.fontWeight.semibold,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.normal,
-        color: isLight ? colors.neutral[800] : colors.dark[600],
+        fontSize: '0.875rem',   // 14px — section header / card title
+        fontWeight: 600,
+        lineHeight: 1.5,
+        letterSpacing: '-0.01em',
+        color: isLight ? colors.neutral[800] : colors.dark[900],
       },
-      
+
       h6: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.semibold,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.normal,
-        color: isLight ? colors.neutral[800] : colors.dark[600],
+        fontSize: '0.875rem',   // 14px
+        fontWeight: 600,
+        lineHeight: 1.5,
+        letterSpacing: '-0.01em',
+        color: isLight ? colors.neutral[800] : colors.dark[900],
       },
-      
-      // Body text optimized for readability
+
+      // Body — 13.5px, weight 400, line-height 1.6
       body1: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.normal,
-        lineHeight: typography.lineHeight.relaxed,
-        letterSpacing: typography.letterSpacing.normal,
-        color: isLight ? colors.neutral[800] : colors.dark[600],
+        fontSize: '0.844rem',   // ~13.5px
+        fontWeight: 400,
+        lineHeight: 1.6,
+        letterSpacing: '0em',
+        color: isLight ? colors.neutral[600] : colors.dark[600],
       },
-      
+
       body2: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.normal,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.normal,
-        color: isLight ? colors.neutral[700] : colors.dark[500],
+        fontSize: '0.844rem',   // ~13.5px
+        fontWeight: 400,
+        lineHeight: 1.6,
+        letterSpacing: '0em',
+        color: isLight ? colors.neutral[600] : colors.dark[500],
       },
-      
-      // UI text
+
       subtitle1: {
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.medium,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.normal,
-        color: isLight ? colors.neutral[800] : colors.dark[600],
+        fontSize: '0.875rem',   // 14px
+        fontWeight: 600,
+        lineHeight: 1.5,
+        letterSpacing: '-0.01em',
+        color: isLight ? colors.neutral[800] : colors.dark[900],
       },
-      
+
       subtitle2: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.wide,
-        color: isLight ? colors.neutral[700] : colors.dark[500],
+        fontSize: '0.844rem',   // 13.5px
+        fontWeight: 500,
+        lineHeight: 1.5,
+        letterSpacing: '0em',
+        color: isLight ? colors.neutral[600] : colors.dark[600],
       },
-      
+
+      // Caption — 12px, weight 450, letter-spacing 0.01em
       caption: {
-        fontSize: typography.fontSize.xs,
-        fontWeight: typography.fontWeight.normal,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.wide,
-        color: isLight ? colors.neutral[600] : colors.dark[400],
+        fontSize: '0.75rem',    // 12px
+        fontWeight: 450,
+        lineHeight: 1.5,
+        letterSpacing: '0.01em',
+        color: isLight ? colors.neutral[500] : colors.dark[400],
       },
-      
+
       overline: {
-        fontSize: typography.fontSize.xs,
-        fontWeight: typography.fontWeight.medium,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.widest,
-        textTransform: 'uppercase',
-        color: isLight ? colors.neutral[600] : colors.dark[400],
+        fontSize: '0.75rem',
+        fontWeight: 500,
+        lineHeight: 1.5,
+        letterSpacing: '0.01em',
+        textTransform: 'none' as const,  // No uppercase transforms
+        color: isLight ? colors.neutral[500] : colors.dark[400],
       },
-      
-      // Button text
+
+      // Buttons — 13.5px / 500 weight
       button: {
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
-        lineHeight: typography.lineHeight.normal,
-        letterSpacing: typography.letterSpacing.wide,
-        textTransform: 'none',
+        fontSize: '0.844rem',
+        fontWeight: 500,
+        lineHeight: 1.5,
+        letterSpacing: '0em',
+        textTransform: 'none' as const,
       },
     },
     

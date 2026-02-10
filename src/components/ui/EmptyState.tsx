@@ -65,46 +65,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         color: isDark ? designTokens.colors.dark[600] : designTokens.colors.neutral[600],
       }}
     >
-      {/* Icon with sophisticated styling */}
+      {/* Icon — simple, no animation */}
       <Box
         sx={{
           width: iconSize,
           height: iconSize,
-          borderRadius: '50%',
-          backgroundColor: isDark 
-            ? alpha(designTokens.colors.primary[500], 0.1)
-            : alpha(designTokens.colors.primary[500], 0.05),
-          border: `2px solid ${alpha(designTokens.colors.primary[500], 0.2)}`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: spacing,
-          position: 'relative',
-          overflow: 'hidden',
-          
-          // Subtle animation
-          transition: designTokens.animations.transition.all,
-          
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: -2,
-            left: -2,
-            right: -2,
-            bottom: -2,
-            background: `conic-gradient(from 0deg, ${designTokens.colors.primary[500]}, ${designTokens.colors.secondary[500]}, ${designTokens.colors.primary[500]})`,
-            borderRadius: '50%',
-            opacity: 0,
-            zIndex: -1,
-            transition: designTokens.animations.transition.opacity,
-          },
-          
-          '&:hover': {
-            transform: 'scale(1.05)',
-            '&::before': {
-              opacity: 0.1,
-            },
-          },
         }}
       >
         {React.isValidElement(IconComponent) ? (
@@ -113,24 +82,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           <IconComponent
             sx={{
               fontSize: iconSize * 0.5,
-              color: designTokens.colors.primary[500],
+              color: isDark ? designTokens.colors.dark[400] : '#cdd0d5',
             }}
           />
         )}
       </Box>
 
-      {/* Title with emerald accent */}
+      {/* Title — solid color, no gradient */}
       <Typography
         variant={titleVariant}
         sx={{
-          fontWeight: designTokens.typography.fontWeight.semibold,
+          fontWeight: 600,
+          fontSize: '1rem',
           color: isDark ? designTokens.colors.dark[800] : designTokens.colors.neutral[800],
           marginBottom: description ? 1 : spacing,
-          background: `linear-gradient(135deg, ${designTokens.colors.primary[500]}, ${designTokens.colors.secondary[500]})`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          maxWidth: 400,
+          maxWidth: 360,
         }}
       >
         {title}
@@ -143,52 +109,23 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           sx={{
             color: isDark ? designTokens.colors.dark[600] : designTokens.colors.neutral[600],
             marginBottom: spacing,
-            maxWidth: 500,
-            lineHeight: designTokens.typography.lineHeight.relaxed,
+            maxWidth: 360,
+            fontSize: '0.844rem',
+            lineHeight: 1.6,
           }}
         >
           {description}
         </Typography>
       )}
 
-      {/* Action button with professional styling */}
+      {/* Action button */}
       {action && (
         <Button
           variant={action.variant || 'contained'}
           onClick={action.onClick}
           sx={{
-            borderRadius: designTokens.borderRadius.md,
-            fontWeight: designTokens.typography.fontWeight.semibold,
-            padding: '12px 24px',
             textTransform: 'none',
-            
-            ...(action.variant !== 'text' && {
-              background: `linear-gradient(135deg, ${designTokens.colors.primary[500]}, ${designTokens.colors.primary[600]})`,
-              boxShadow: isDark 
-                ? designTokens.shadows.dark.sm
-                : designTokens.shadows.sm,
-              
-              '&:hover': {
-                background: `linear-gradient(135deg, ${designTokens.colors.primary[600]}, ${designTokens.colors.primary[700]})`,
-                boxShadow: isDark 
-                  ? designTokens.shadows.dark.md
-                  : designTokens.shadows.md,
-                transform: 'translateY(-1px)',
-              },
-            }),
-            
-            ...(action.variant === 'outlined' && {
-              borderColor: designTokens.colors.primary[500],
-              color: designTokens.colors.primary[500],
-              background: 'transparent',
-              
-              '&:hover': {
-                backgroundColor: alpha(designTokens.colors.primary[500], 0.08),
-                borderColor: designTokens.colors.primary[600],
-              },
-            }),
-            
-            transition: designTokens.animations.transition.elevation,
+            transition: 'all 120ms ease',
           }}
         >
           {action.label}

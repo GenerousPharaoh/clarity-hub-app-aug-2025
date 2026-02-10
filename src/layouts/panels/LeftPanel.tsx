@@ -615,8 +615,8 @@ const LeftPanel = ({
         display: 'flex', 
         flexDirection: 'column', 
         overflow: 'hidden',
-        pt: 1.5, // Increased padding to prevent content from being cut off
-        backgroundColor: theme => theme.palette.background.default
+        pt: 1.5,
+        backgroundColor: theme => theme.palette.mode === 'dark' ? theme.palette.background.paper : '#f9fafb'
       }}
       data-test="left-panel"
     >

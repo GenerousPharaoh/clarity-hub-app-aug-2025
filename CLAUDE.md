@@ -67,6 +67,49 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Supabase Auth for user management
 - Protected routes with AuthContext
 
+#### AI Architecture (Multi-Model Legal Reasoning)
+
+The app uses a dual-model AI architecture optimized for Ontario employment law:
+
+**Model Routing (`src/services/aiRouter.ts`):**
+- Smart query classification: simple → moderate → deep complexity
+- Routes to optimal model based on query complexity and availability
+- Graceful fallback: if one model is unavailable, uses the other
+
+**Gemini 3.0 Pro (`src/services/geminiAIService.ts`):**
+- Primary model for multimodal processing (text, images, audio, video, documents)
+- Handles general legal chat, document analysis, file understanding
+- Used for simple and moderate complexity queries
+- API Key env var: `VITE_GEMINI_API_KEY`
+
+**GPT-5.2 Deep Reasoning (`src/services/openaiService.ts`):**
+- Activated for deep legal reasoning tasks (strategy, case analysis, complex legal tests)
+- Extended thinking mode with temperature 0.2 for legal accuracy
+- System prompt enforces: only cite from provided context, never fabricate citations
+- Also provides text-embedding-3-small for RAG embeddings (1536-dim, $0.02/1M tokens)
+- API Key env var: `VITE_OPENAI_API_KEY`
+
+**Adaptive AI Service (`src/services/adaptiveAIService.ts`):**
+- Wraps Gemini for contextual chat with user preferences and case context
+- Ontario employment law specialist system prompt
+
+**RAG Pipeline:**
+- Legal knowledge chunks stored with tsvector (full-text) and vector embeddings (pgvector)
+- `legalKnowledgeService.buildLegalContext(query)` searches cases, principles, legislation
+- Context is injected into AI prompts alongside user's case file data
+- HNSW index on embeddings for fast approximate nearest neighbor search
+
+**Query Classification Signals (triggers GPT-5.2):**
+- Legal strategy: "strategy", "advise", "recommend", "pros and cons", "risks"
+- Complex analysis: "analyze", "factors", "elements", "standard", "legal test"
+- Case reasoning: "reasonable notice", "constructive dismissal", "just cause", "damages"
+- Multi-step: "how would a court", "precedent", "argue", "counter-argument"
+
+**UI Integration (`src/components/ai/AdaptiveLegalAIChat.tsx`):**
+- Model indicator chip on each AI response (shows "GPT-5.2" or "Gemini")
+- Conversation history maintained for context continuity
+- Legal knowledge context fetched in parallel with user context
+
 #### Legal Knowledge Base (Ontario Employment Law MVP)
 - **Service:** `src/services/legalKnowledgeService.ts` - Full CRUD + search for legal data
 - **AI Integration:** Legal context is fetched in parallel with user context in `AdaptiveLegalAIChat.tsx`

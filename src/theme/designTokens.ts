@@ -3,48 +3,50 @@
  * Professional "Google Docs for litigation" aesthetic
  */
 
-// Color Palette - Sophisticated legal software colors inspired by "Notion meets LexisNexis"
+// Color Palette — Three-tier surface hierarchy with authoritative accent
+// Inspired by Linear, Notion, Clio: quiet confidence, high information density
 export const colors = {
-  // Light mode neutral colors
+  // Light mode neutral colors — cool off-white surface hierarchy
   neutral: {
-    50: '#f8f9fa',    // Background
-    100: '#f1f3f4',   // Light background
-    200: '#e8eaed',   // Border light
-    300: '#dadce0',   // Border
-    400: '#bdc1c6',   // Border dark
-    500: '#9aa0a6',   // Text disabled
-    600: '#80868b',   // Text secondary
-    700: '#5f6368',   // Text secondary dark
-    800: '#3c4043',   // Text primary
-    900: '#202124',   // Text primary dark
+    50: '#f3f4f6',    // Base layer — hsl(220, 14%, 96%)
+    100: '#f9fafb',   // Recessed regions — hsl(220, 14%, 98%)
+    200: '#e3e5e8',   // Border — hsl(220, 10%, 90%)
+    300: '#dcdfe4',   // Border medium
+    400: '#cdd0d5',   // Border dark / placeholder icons — hsl(220, 8%, 82%)
+    500: '#969ba6',   // Disabled / tertiary text — hsl(220, 8%, 62%)
+    600: '#606876',   // Secondary text — hsl(220, 10%, 42%)
+    700: '#454b57',   // Secondary text dark
+    800: '#1a1d23',   // Primary text — hsl(220, 14%, 12%)
+    900: '#1a1d23',   // Primary text dark (same, near-black, never pure #000)
   },
-  
-  // Professional navy blue primary - Legal confidence and trust
+
+  // Deep desaturated blue primary — authoritative, not cheerful
+  // hsl(224, 60%, 48%) base with lightness-shifted hover/active states
   primary: {
-    50: '#eff6ff',    // Lightest navy
-    100: '#dbeafe',   // Very light navy
-    200: '#bfdbfe',   // Light navy
-    300: '#93c5fd',   // Medium light navy
-    400: '#60a5fa',   // Medium navy
-    500: '#1e3a8a',   // Main navy primary - sophisticated professional
-    600: '#1e40af',   // Dark navy
-    700: '#1d4ed8',   // Darker navy
-    800: '#1e3a8a',   // Very dark navy
-    900: '#1e3a8a',   // Darkest navy
+    50: '#eff2fb',    // Ghost button hover bg — hsl(224, 60%, 96%)
+    100: '#dde3f7',   // Very light accent
+    200: '#b9c5ef',   // Light accent
+    300: '#8da4e3',   // Medium light accent
+    400: '#3b62ce',   // Lighter accent — hsl(224, 60%, 52%)
+    500: '#3158c4',   // Main accent — hsl(224, 60%, 48%)
+    600: '#2d51b3',   // Hover state — hsl(224, 60%, 44%)
+    700: '#2949a3',   // Active state — hsl(224, 60%, 40%)
+    800: '#213d8a',   // Very dark accent
+    900: '#1a3070',   // Darkest accent
   },
-  
-  // Indigo secondary - Professional accent
+
+  // Warm amber secondary — sparingly for status badges, notification dots, priority markers only
   secondary: {
-    50: '#eef2ff',
-    100: '#e0e7ff',
-    200: '#c7d2fe',
-    300: '#a5b4fc',
-    400: '#818cf8',
-    500: '#6366f1',   // Main indigo secondary
-    600: '#4f46e5',
-    700: '#4338ca',
-    800: '#3730a3',
-    900: '#312e81',
+    50: '#fef8ec',
+    100: '#fdefc6',
+    200: '#fce08a',
+    300: '#fbcf4e',
+    400: '#f0b429',
+    500: '#e79823',   // Main amber — hsl(36, 80%, 52%)
+    600: '#c57d15',
+    700: '#9c6210',
+    800: '#7a4d10',
+    900: '#5f3b0e',
   },
   
   // Semantic colors - Enhanced for legal software
@@ -101,21 +103,21 @@ export const colors = {
     900: '#f3f4f6',    // Text primary - maximum contrast
   },
   
-  // Professional legal status colors
+  // Legal status colors — using amber secondary sparingly
   status: {
-    draft: '#6b7280',      // Neutral gray
-    active: '#1e3a8a',     // Navy blue - active cases
-    pending: '#f59e0b',    // Amber - pending review
+    draft: '#606876',      // Neutral secondary text
+    active: '#3158c4',     // Accent blue - active cases
+    pending: '#e79823',    // Amber - pending review
     completed: '#22c55e',  // Clean green - completed
-    archived: '#4b5563',   // Muted gray - archived
+    archived: '#969ba6',   // Muted tertiary - archived
     urgent: '#ef4444',     // Red - urgent attention
-    review: '#6366f1',     // Indigo - under review
+    review: '#3b62ce',     // Lighter accent - under review
   },
-  
-  // Document priority colors
+
+  // Document priority colors — amber secondary for medium
   priority: {
     low: '#22c55e',        // Green - low priority
-    medium: '#f59e0b',     // Amber - medium priority
+    medium: '#e79823',     // Amber - medium priority
     high: '#f97316',       // Orange - high priority
     critical: '#ef4444',   // Red - critical priority
   },
@@ -201,42 +203,38 @@ export const borderRadius = {
   full: '9999px',
 } as const;
 
-// Shadow System - Sophisticated professional depth with dark mode support
+// Shadow System — Two-stage: rest and hover, using hsla(220, 40%, 20%) tinted shadows
 export const shadows = {
   none: 'none',
+
+  // Two-stage card shadow system (cool-tinted, not pure black)
+  xs: '0 1px 2px rgba(31, 44, 71, 0.04)',
+  sm: '0 1px 3px rgba(31, 44, 71, 0.04), 0 4px 12px rgba(31, 44, 71, 0.03)',   // Card rest
+  base: '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)', // Card hover
+  md: '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',
+  lg: '0 4px 12px rgba(31, 44, 71, 0.08), 0 16px 32px rgba(31, 44, 71, 0.06)',
+  xl: '0 8px 24px rgba(31, 44, 71, 0.1), 0 24px 48px rgba(31, 44, 71, 0.08)',
+  '2xl': '0 16px 48px rgba(31, 44, 71, 0.12), 0 32px 64px rgba(31, 44, 71, 0.1)',
+
+  // Named semantic shadows
+  interactive: '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',
+  primaryGlow: '0 0 16px rgba(49, 88, 196, 0.2)',
+  panel: '0 1px 3px rgba(31, 44, 71, 0.04), 0 4px 12px rgba(31, 44, 71, 0.03)',
+  float: '0 4px 12px rgba(31, 44, 71, 0.08), 0 16px 32px rgba(31, 44, 71, 0.06)',
   
-  // Light mode shadows - subtle and professional
-  xs: '0 1px 2px rgba(0, 0, 0, 0.05)',
-  sm: '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
-  base: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  md: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  lg: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  xl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-  '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
-  
-  // Professional interactive shadows - navy accent
-  interactive: '0 8px 32px rgba(30, 58, 138, 0.15)', // Navy glow
-  primaryGlow: '0 0 20px rgba(30, 58, 138, 0.3)',    // Strong navy glow
-  panel: '0 4px 20px rgba(0, 0, 0, 0.08)',
-  float: '0 12px 24px rgba(0, 0, 0, 0.15)',
-  
-  // Dark mode shadows - enhanced for midnight blue theme
+  // Dark mode shadows
   dark: {
-    xs: '0 1px 2px rgba(0, 0, 0, 0.4)',
-    sm: '0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3)',
-    base: '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)',
-    md: '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
-    lg: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
-    xl: '0 25px 50px -12px rgba(0, 0, 0, 0.6)',
-    '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.7)',
-    
-    // Enhanced dark mode specific shadows
-    panel: '0 8px 32px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4)',
-    interactive: '0 8px 32px rgba(30, 58, 138, 0.2)', // Stronger navy glow for dark
-    primaryGlow: '0 0 24px rgba(30, 58, 138, 0.4)',
-    float: '0 16px 32px rgba(0, 0, 0, 0.7), 0 8px 16px rgba(0, 0, 0, 0.5)',
-    
-    // Sophisticated surface elevation
+    xs: '0 1px 2px rgba(0, 0, 0, 0.3)',
+    sm: '0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
+    base: '0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4)',
+    md: '0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4)',
+    lg: '0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 32px rgba(0, 0, 0, 0.4)',
+    xl: '0 8px 24px rgba(0, 0, 0, 0.6), 0 24px 48px rgba(0, 0, 0, 0.5)',
+    '2xl': '0 16px 48px rgba(0, 0, 0, 0.6), 0 32px 64px rgba(0, 0, 0, 0.5)',
+    panel: '0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
+    interactive: '0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4)',
+    primaryGlow: '0 0 16px rgba(49, 88, 196, 0.3)',
+    float: '0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 32px rgba(0, 0, 0, 0.4)',
     surface: {
       1: '0 1px 3px rgba(0, 0, 0, 0.4)',
       2: '0 2px 6px rgba(0, 0, 0, 0.5)',
@@ -245,14 +243,14 @@ export const shadows = {
       5: '0 16px 48px rgba(0, 0, 0, 0.8)',
     },
   },
-  
+
   // Light mode surface elevation
   surface: {
-    1: '0 1px 3px rgba(0, 0, 0, 0.08)',
-    2: '0 2px 6px rgba(0, 0, 0, 0.1)',
-    3: '0 4px 12px rgba(0, 0, 0, 0.12)',
-    4: '0 8px 24px rgba(0, 0, 0, 0.15)',
-    5: '0 16px 48px rgba(0, 0, 0, 0.2)',
+    1: '0 1px 3px rgba(31, 44, 71, 0.04)',
+    2: '0 1px 3px rgba(31, 44, 71, 0.04), 0 4px 12px rgba(31, 44, 71, 0.03)',
+    3: '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',
+    4: '0 4px 12px rgba(31, 44, 71, 0.08), 0 16px 32px rgba(31, 44, 71, 0.06)',
+    5: '0 8px 24px rgba(31, 44, 71, 0.1), 0 24px 48px rgba(31, 44, 71, 0.08)',
   },
 } as const;
 
@@ -363,18 +361,18 @@ export const breakpoints = {
   xl: '1536px',
 } as const;
 
-// Professional component variants
+// Component variants — spec: 10px/16px padding, 6px radius, 36px min-height
 export const components = {
   button: {
     height: {
       sm: '2rem',      // 32px
-      md: '2.5rem',    // 40px
-      lg: '3rem',      // 48px
+      md: '2.25rem',   // 36px (spec minimum)
+      lg: '2.75rem',   // 44px
     },
     padding: {
-      sm: '0.5rem 1rem',
-      md: '0.75rem 1.5rem',
-      lg: '1rem 2rem',
+      sm: '6px 12px',
+      md: '10px 16px',   // Spec: 10px vertical / 16px horizontal
+      lg: '12px 24px',
     },
   },
   
@@ -396,31 +394,26 @@ export const components = {
   },
 } as const;
 
-// Professional legal document theming
+// Legal document theming
 export const legal = {
-  // Document colors
   document: {
     background: '#ffffff',
-    paper: '#fefefe',
+    paper: '#ffffff',
     margin: colors.neutral[100],
     text: colors.neutral[800],
-    heading: colors.neutral[900],
+    heading: colors.neutral[800],
   },
-  
-  // Status colors for legal cases
   status: {
     draft: colors.neutral[500],
     active: colors.primary[500],
-    onHold: colors.warning[500],
+    onHold: colors.secondary[500],
     completed: colors.success[500],
     archived: colors.neutral[400],
     urgent: colors.error[500],
   },
-  
-  // Priority colors
   priority: {
     low: colors.success[400],
-    medium: colors.warning[400],
+    medium: colors.secondary[400],
     high: colors.error[400],
     critical: colors.error[600],
   },

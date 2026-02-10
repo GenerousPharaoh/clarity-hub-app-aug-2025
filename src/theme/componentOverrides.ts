@@ -67,20 +67,20 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     },
   },
 
-  // App Bar - Professional header styling
+  // App Bar — white/near-white bg, subtle bottom border, anchored feel
   MuiAppBar: {
     styleOverrides: {
       root: {
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,
-        boxShadow: theme.palette.mode === 'dark' ? shadows.dark.sm : shadows.sm,
+        boxShadow: 'none',
         borderBottom: `1px solid ${theme.palette.divider}`,
-        
+
         '&.MuiAppBar-positionFixed': {
           zIndex: theme.zIndex.appBar,
         },
       },
-      
+
       colorPrimary: {
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,
@@ -88,87 +88,85 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     },
   },
 
-  // Button - Professional interaction styling
+  // Button — spec: 10px/16px padding, 6px radius, 36px min-height, 120ms ease
   MuiButton: {
     styleOverrides: {
       root: {
-        borderRadius: parseInt(borderRadius.md.replace('rem', '')) * 16,
-        textTransform: 'none',
-        fontWeight: theme.typography.fontWeightMedium,
-        fontSize: theme.typography.button.fontSize,
+        borderRadius: 6,
+        textTransform: 'none' as const,
+        fontWeight: 500,
+        fontSize: '0.844rem',
         lineHeight: 1.5,
-        padding: '8px 16px',
-        minHeight: 40,
-        transition: animations.transition.fast,
-        
-        '&:hover': {
-          transform: 'translateY(-1px)',
-        },
-        
-        '&:active': {
-          transform: 'translateY(0)',
-        },
-        
+        padding: '10px 16px',
+        minHeight: 36,
+        transition: 'background-color 120ms ease, box-shadow 120ms ease, border-color 120ms ease, color 120ms ease',
+
         '&:disabled': {
           transform: 'none',
         },
       },
-      
+
       contained: {
-        boxShadow: theme.palette.mode === 'dark' ? shadows.dark.xs : shadows.xs,
-        
+        boxShadow: theme.palette.mode === 'dark' ? shadows.dark.xs : shadows.sm,
+        color: '#ffffff',
+
         '&:hover': {
-          boxShadow: theme.palette.mode === 'dark' ? shadows.dark.sm : shadows.sm,
+          boxShadow: theme.palette.mode === 'dark' ? shadows.dark.sm : shadows.base,
         },
-        
+
         '&:active': {
           boxShadow: theme.palette.mode === 'dark' ? shadows.dark.xs : shadows.xs,
         },
       },
-      
+
       outlined: {
         borderWidth: 1,
-        
+        borderColor: theme.palette.primary.main,
+        color: theme.palette.primary.main,
+        backgroundColor: 'transparent',
+
         '&:hover': {
           borderWidth: 1,
-          backgroundColor: alpha(theme.palette.primary.main, 0.04),
+          backgroundColor: colors.primary[50],
+          borderColor: theme.palette.primary.dark,
         },
       },
-      
+
       text: {
-        padding: '6px 8px',
-        
+        padding: '6px 12px',
+
         '&:hover': {
           backgroundColor: alpha(theme.palette.primary.main, 0.04),
         },
       },
-      
+
       sizeSmall: {
-        padding: '4px 12px',
+        padding: '6px 12px',
         minHeight: 32,
-        fontSize: theme.typography.caption.fontSize,
+        fontSize: '0.75rem',
       },
-      
+
       sizeLarge: {
         padding: '12px 24px',
-        minHeight: 48,
-        fontSize: theme.typography.body1.fontSize,
+        minHeight: 44,
+        fontSize: '0.875rem',
       },
     },
   },
 
-  // Card - Professional panel styling
+  // Card — 20px padding, 8px radius, two-stage shadow with 150ms hover
   MuiCard: {
     styleOverrides: {
       root: {
         backgroundColor: theme.palette.background.paper,
-        borderRadius: parseInt(borderRadius.lg.replace('rem', '')) * 16,
-        boxShadow: theme.palette.mode === 'dark' ? shadows.dark.sm : shadows.panel,
+        borderRadius: 8,
+        boxShadow: theme.palette.mode === 'dark' ? shadows.dark.sm : shadows.sm,
         border: `1px solid ${theme.palette.divider}`,
-        transition: animations.transition.normal,
-        
+        transition: 'box-shadow 150ms ease-out, border-color 150ms ease-out',
+        padding: 0, // Let CardContent handle padding
+
         '&:hover': {
-          boxShadow: theme.palette.mode === 'dark' ? shadows.dark.md : shadows.md,
+          boxShadow: theme.palette.mode === 'dark' ? shadows.dark.base : shadows.base,
         },
       },
     },
@@ -310,19 +308,19 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
   MuiMenuItem: {
     styleOverrides: {
       root: {
-        borderRadius: parseInt(borderRadius.base.replace('rem', '')) * 16,
-        margin: '2px 0',
+        borderRadius: 6,
+        margin: '2px 4px',
         padding: '8px 12px',
-        fontSize: theme.typography.body2.fontSize,
-        transition: animations.transition.fast,
-        
+        fontSize: '0.844rem',
+        transition: 'background-color 120ms ease',
+
         '&:hover': {
           backgroundColor: alpha(theme.palette.primary.main, 0.04),
         },
-        
+
         '&.Mui-selected': {
           backgroundColor: alpha(theme.palette.primary.main, 0.08),
-          
+
           '&:hover': {
             backgroundColor: alpha(theme.palette.primary.main, 0.12),
           },
@@ -384,22 +382,22 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     },
   },
 
-  // Tabs - Professional navigation tabs
+  // Tabs — active: accent text + 2px bottom border; inactive: secondary text, no underline
   MuiTabs: {
     styleOverrides: {
       root: {
         borderBottom: `1px solid ${theme.palette.divider}`,
-        minHeight: 48,
+        minHeight: 40,
       },
-      
+
       indicator: {
-        height: 3,
-        borderRadius: '3px 3px 0 0',
+        height: 2,
+        borderRadius: 0,
         backgroundColor: theme.palette.primary.main,
       },
-      
+
       flexContainer: {
-        gap: 8,
+        gap: 4,
       },
     },
   },
@@ -407,22 +405,22 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
   MuiTab: {
     styleOverrides: {
       root: {
-        textTransform: 'none',
-        fontSize: theme.typography.body2.fontSize,
-        fontWeight: theme.typography.fontWeightMedium,
+        textTransform: 'none' as const,
+        fontSize: '0.844rem',
+        fontWeight: 500,
         color: theme.palette.text.secondary,
-        padding: '12px 16px',
-        minHeight: 48,
-        transition: animations.transition.fast,
-        
+        padding: '10px 16px',
+        minHeight: 40,
+        transition: 'color 120ms ease',
+
         '&:hover': {
           color: theme.palette.text.primary,
-          backgroundColor: alpha(theme.palette.primary.main, 0.04),
+          backgroundColor: 'transparent',
         },
-        
+
         '&.Mui-selected': {
           color: theme.palette.primary.main,
-          fontWeight: theme.typography.fontWeightSemiBold,
+          fontWeight: 600,
         },
       },
     },
@@ -506,15 +504,16 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     },
   },
 
-  // Chip - Professional tag/badge styling
+  // Chip — compact with 120ms transitions
   MuiChip: {
     styleOverrides: {
       root: {
-        borderRadius: parseInt(borderRadius.md.replace('rem', '')) * 16,
-        fontSize: theme.typography.caption.fontSize,
-        fontWeight: theme.typography.fontWeightMedium,
-        height: 28,
-        
+        borderRadius: 6,
+        fontSize: '0.75rem',
+        fontWeight: 500,
+        height: 24,
+        transition: 'background-color 120ms ease',
+
         '& .MuiChip-label': {
           padding: '0 8px',
         },
@@ -682,17 +681,20 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
   MuiListItemButton: {
     styleOverrides: {
       root: {
-        borderRadius: parseInt(borderRadius.base.replace('rem', '')) * 16,
-        margin: '2px 8px',
-        transition: animations.transition.fast,
-        
+        borderRadius: 6,
+        margin: '1px 8px',
+        padding: '8px 12px',
+        transition: 'background-color 120ms ease, color 120ms ease',
+
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.04),
+          backgroundColor: theme.palette.mode === 'dark'
+            ? alpha(theme.palette.primary.main, 0.08)
+            : '#eef0f3',  // hsl(220,14%,95%)
         },
-        
+
         '&.Mui-selected': {
           backgroundColor: alpha(theme.palette.primary.main, 0.08),
-          
+
           '&:hover': {
             backgroundColor: alpha(theme.palette.primary.main, 0.12),
           },

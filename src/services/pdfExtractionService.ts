@@ -46,8 +46,6 @@ class PDFExtractionService {
    */
   async extractAndStore(fileId: string, fileUrl: string, fileName: string): Promise<void> {
     try {
-      console.log(`📄 Extracting PDF content from ${fileName}...`);
-      
       const pageTexts = await this.extractPDFText(fileUrl);
       
       // Store each page's content
@@ -71,13 +69,10 @@ class PDFExtractionService {
         .insert(contentRecords);
 
       if (error) {
-        console.error('Error storing extracted content:', error);
         throw error;
       }
-
-      console.log(`✅ Successfully extracted ${pageTexts.length} pages from ${fileName}`);
     } catch (error) {
-      console.error(`❌ Failed to extract PDF ${fileName}:`, error);
+      console.error(`Failed to extract PDF ${fileName}:`, error);
       throw error;
     }
   }
@@ -98,16 +93,12 @@ class PDFExtractionService {
         .or('mime_type.eq.application/pdf,name.ilike.%.pdf');
 
       if (error) {
-        console.error('Error fetching PDF files:', error);
         throw error;
       }
 
       if (!files || files.length === 0) {
-        console.log('No PDF files found');
         return { success: 0, failed: 0, total: 0 };
       }
-
-      console.log(`🔄 Found ${files.length} PDF files to process`);
 
       let success = 0;
       let failed = 0;
@@ -155,7 +146,6 @@ class PDFExtractionService {
         .limit(limit);
 
       if (error) {
-        console.error('Error searching content:', error);
         return [];
       }
 
@@ -184,7 +174,6 @@ class PDFExtractionService {
         .order('page_number', { ascending: true });
 
       if (error) {
-        console.error('Error fetching file content:', error);
         return [];
       }
 
@@ -220,7 +209,6 @@ class PDFExtractionService {
         .not('exhibit_id', 'is', null);
 
       if (error) {
-        console.error('Error fetching exhibits:', error);
         throw error;
       }
 
@@ -276,7 +264,6 @@ class PDFExtractionService {
         .select('file_id, file_name, content');
 
       if (error) {
-        console.error('Error fetching content summary:', error);
         throw error;
       }
 

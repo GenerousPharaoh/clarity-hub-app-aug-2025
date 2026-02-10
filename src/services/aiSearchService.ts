@@ -62,8 +62,6 @@ class AISearchService {
       similarityThreshold = 0.7
     } = options;
 
-    console.log(`[AISearchService] Searching documents in project ${projectId} with query: "${query}"`);
-
     try {
       const { data, error } = await supabase.functions.invoke('semantic-search', {
         body: {
@@ -78,7 +76,6 @@ class AISearchService {
       });
 
       if (error) {
-        console.error('[AISearchService] Search error:', error);
         throw new Error(`Search failed: ${error.message}`);
       }
 
@@ -86,7 +83,6 @@ class AISearchService {
         throw new Error(`Search failed: ${data?.error || 'Unknown error'}`);
       }
 
-      console.log(`[AISearchService] Search completed with ${data.results.length} results`);
       return data;
 
     } catch (error) {
@@ -111,8 +107,6 @@ class AISearchService {
       limit = 10
     } = options;
 
-    console.log(`[AISearchService] Finding similar documents to file ${fileId}`);
-
     try {
       const { data, error } = await supabase.functions.invoke('semantic-search', {
         body: {
@@ -125,7 +119,6 @@ class AISearchService {
       });
 
       if (error) {
-        console.error('[AISearchService] Similar documents search error:', error);
         throw new Error(`Similar documents search failed: ${error.message}`);
       }
 
@@ -133,7 +126,6 @@ class AISearchService {
         throw new Error(`Similar documents search failed: ${data?.error || 'Unknown error'}`);
       }
 
-      console.log(`[AISearchService] Found ${data.results.length} similar documents`);
       return data;
 
     } catch (error) {
@@ -149,8 +141,6 @@ class AISearchService {
     projectId: string,
     partialQuery: string
   ): Promise<string[]> {
-    console.log(`[AISearchService] Getting search suggestions for: "${partialQuery}"`);
-
     try {
       // For now, return basic suggestions based on the partial query
       // In a full implementation, this could query previous search analytics
@@ -164,7 +154,6 @@ class AISearchService {
         .limit(10);
 
       if (error) {
-        console.warn('[AISearchService] Failed to get search suggestions:', error);
         return [];
       }
 
@@ -204,8 +193,6 @@ class AISearchService {
     averageResultsCount: number;
     searchTypes: Array<{ type: string; count: number }>;
   }> {
-    console.log(`[AISearchService] Getting search analytics for project ${projectId}`);
-
     try {
       let query = supabase
         .from('search_analytics')
@@ -287,8 +274,6 @@ class AISearchService {
       failed: number;
     };
   }> {
-    console.log(`[AISearchService] Getting project analysis summary for ${projectId}`);
-
     try {
       // Get processed content statistics
       const { data: processedData, error: processedError } = await supabase
@@ -311,10 +296,6 @@ class AISearchService {
         .from('files')
         .select('processing_status')
         .eq('project_id', projectId);
-
-      if (fileStatsError) {
-        console.warn('Failed to get file processing stats:', fileStatsError);
-      }
 
       const processedDocuments = processedData || [];
       const allFiles = fileStats || [];
@@ -388,8 +369,6 @@ class AISearchService {
    * Trigger processing for a specific file
    */
   async triggerFileProcessing(fileId: string, projectId: string): Promise<{ success: boolean; queue_id?: string }> {
-    console.log(`[AISearchService] Triggering processing for file ${fileId}`);
-
     try {
       const { data, error } = await supabase.functions.invoke('process-document', {
         body: {
@@ -415,8 +394,6 @@ class AISearchService {
    * Get processing status for a file
    */
   async getProcessingStatus(fileId: string): Promise<any> {
-    console.log(`[AISearchService] Getting processing status for file ${fileId}`);
-
     try {
       const { data, error } = await supabase.functions.invoke('process-document', {
         body: {

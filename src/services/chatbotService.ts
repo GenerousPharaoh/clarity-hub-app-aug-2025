@@ -53,8 +53,6 @@ class ChatbotService {
         return this.knowledgeCache;
       }
 
-      console.log('🔄 Loading knowledge base from Supabase...');
-
       // Load all relevant data in parallel
       const [documents, projects, files] = await Promise.all([
         this.loadDocuments(),
@@ -77,7 +75,6 @@ class ChatbotService {
       };
 
       this.cacheTimestamp = Date.now();
-      console.log('✅ Knowledge base loaded successfully', this.knowledgeCache.metadata);
 
       return this.knowledgeCache;
     } catch (error) {
@@ -238,7 +235,6 @@ class ChatbotService {
       const prompt = this.buildPrompt(query, context, mode);
 
       // Generate response
-      console.log(`🤖 Processing with ${modelConfig.name}...`);
       const result = await model.generateContent(prompt);
       const response = result.response.text();
 

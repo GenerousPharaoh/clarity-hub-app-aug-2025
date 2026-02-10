@@ -81,7 +81,6 @@ export const getPublicUrl = (bucket: string, path: string): string => {
   if (useLocalFallback) {
     // In fallback mode, we can't return a synchronous URL for async local storage
     // Components should use getFileUrl() for async URL resolution
-    console.warn('[storageService] Fallback mode active - use getFileUrl() for proper async handling');
     return '';
   }
 
@@ -107,8 +106,6 @@ export const getSignedUrl = async (bucket: string, path: string, expiresIn = 360
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
   
   if (error) {
-    console.error('Error creating signed URL:', error);
-    
     // Try fallback if Supabase fails
     useLocalFallback = true;
     return fallbackStorage.getFileUrl(bucket, path)
@@ -243,13 +240,9 @@ export const uploadFile = async (
     const formatError = (error: any) => {
       let message = error?.message || 'Unknown error occurred';
       
-      // Log the complete error for debugging
-      console.error('STORAGE ERROR DETAILS:', JSON.stringify(error, null, 2));
-      
       // Extract more detailed error message for RLS policy issues
       if (error?.message?.includes('new row violates row-level security policy')) {
         message = 'Permission denied: Your account does not have permissions to upload files';
-        console.error('RLS policy violation during file upload. Details:', error);
       }
       
       // Handle storage quota issues
@@ -261,7 +254,6 @@ export const uploadFile = async (
       if (error?.message?.includes('The bucket you\'re trying to upload to doesn\'t exist') || 
           error?.message?.includes('Bucket not found')) {
         message = `Storage bucket "${bucket}" doesn't exist. Please check your bucket configuration.`;
-        console.error(`Bucket "${bucket}" not found. Available buckets should be: ${Object.values(STORAGE_BUCKETS).join(', ')}`);
       }
       
       // Handle authorization issues
@@ -272,8 +264,7 @@ export const uploadFile = async (
           error?.status === 401 ||
           error?.status === 400) {
         message = 'Authorization failed. Please log in again or try refreshing the page.';
-        console.error('JWT/Auth error during upload:', error);
-        
+
         // Switch to fallback mode when authentication fails
         useLocalFallback = true;
       }
@@ -378,8 +369,6 @@ export const downloadFile = async (bucket: string, path: string): Promise<Blob> 
   const { data, error } = await supabase.storage.from(bucket).download(path);
   
   if (error) {
-    console.error('Error downloading file:', error);
-    
     // Try fallback on failure
     useLocalFallback = true;
     return downloadFile(bucket, path);
@@ -447,7 +436,6 @@ export const deleteFile = async (bucket: string, path: string): Promise<boolean>
   const { error } = await supabase.storage.from(bucket).remove([path]);
   
   if (error) {
-    console.error('Error deleting file:', error);
     useLocalFallback = true;
     return deleteFile(bucket, path);
   }

@@ -179,7 +179,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         return handleDirectUpload(file, index);
       }
       
-      console.log(`Starting chunked upload with ${totalChunks} chunks for ${file.name}`);
       
       // Upload each chunk with progress tracking
       let uploadedChunks = 0;
@@ -228,9 +227,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
           throw new Error(`Failed to upload chunk ${i} after multiple attempts`);
         }
       }
-      
-      // Once all chunks are uploaded, combine them or mark as completed
-      console.log('All chunks uploaded successfully:', chunkResults.length);
       
       // Determine file type from extension
       const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
@@ -349,14 +345,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
       const storagePath = `projects/${projectId}/${fileId}_${safeFileName}`;
       const bucket = 'files';
       
-      // Additional logging for debugging
-      console.log('Starting direct upload:', { 
-        file: file.name, 
-        size: file.size, 
-        bucket, 
-        path: storagePath 
-      });
-      
       // Upload with enhanced storage service (which handles fallback automatically)
       const uploadResult = await uploadFileService(bucket, storagePath, file, {
         onProgress: (progress) => {
@@ -367,8 +355,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         },
         upsert: true
       });
-      
-      console.log('Upload successful:', uploadResult.publicUrl);
       
       // Check if we're using fallback storage after upload attempt
       if (isUsingFallback() && !fallbackModeActive) {
@@ -432,8 +418,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
       // If database record creation failed or we're using fallback storage,
       // create a client-side file record
       if (!fileData) {
-        console.log('Creating client-side file record');
-        
         fileData = {
           id: fileId,
           name: file.name,
@@ -450,11 +434,6 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
           using_fallback_storage: isUsingFallback()
         };
         
-        if (isUsingFallback()) {
-          console.log('Using local fallback storage for file:', file.name);
-        } else {
-          console.warn('File uploaded to storage but database record creation failed');
-        }
       }
       
       // Update status to completed

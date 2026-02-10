@@ -172,14 +172,12 @@ class TextExtractionService {
   ): Promise<void> {
     try {
       if (!this.isSupported(contentType)) {
-        console.log(`Skipping indexing for unsupported type: ${contentType}`);
         return;
       }
 
       const extractionResult = await this.extractText(file, contentType);
       
       if (extractionResult.error) {
-        console.error(`Failed to extract text for file ${fileId}:`, extractionResult.error);
         return;
       }
 
@@ -193,8 +191,6 @@ class TextExtractionService {
           );
         }
       }
-
-      console.log(`Successfully indexed ${extractionResult.content.length} pages for file ${fileId}`);
 
     } catch (error) {
       console.error(`Error indexing file ${fileId}:`, error);

@@ -78,7 +78,6 @@ export function useProjectFiles(projectId: string | null) {
     queryKey: ['files', projectId],
     queryFn: async () => {
       if (!projectId || projectId === 'undefined') {
-        console.warn('useProjectFiles called with invalid projectId:', projectId);
         return [];
       }
 
@@ -201,13 +200,6 @@ export function useFileUpload() {
       }
       
       try {
-        console.log('Starting file upload process', { 
-          name: file.name, 
-          size: file.size, 
-          type: file.type,
-          projectId: projectId 
-        });
-        
         // Extract the file extension
         const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
         
@@ -223,9 +215,6 @@ export function useFileUpload() {
         const storagePath = `projects/${projectId}/${fileId}_${safeFileName}`;
         const bucket = 'files';
         
-        // Upload to storage using our enhanced storage service
-        console.log(`Uploading file to ${bucket}/${storagePath}`);
-        
         try {
           // Upload the file using our enhanced storage service
           const uploadResult = await uploadFile(bucket, storagePath, file, {
@@ -236,11 +225,6 @@ export function useFileUpload() {
           
           // Get the public URL
           const publicUrl = uploadResult.publicUrl || getPublicUrl(bucket, storagePath);
-          
-          console.log('File uploaded successfully', { 
-            path: uploadResult.path, 
-            publicUrl 
-          });
           
           // Call onProgress one last time to ensure 100%
           if (onProgress) {
@@ -253,8 +237,6 @@ export function useFileUpload() {
           let fileDescription = '';
           
           try {
-            console.log('Requesting AI analysis for file naming and organization');
-            
             const aiResponse = await supabase.functions.invoke('suggest-filename', {
               body: {
                 fileId: fileId,
@@ -270,14 +252,6 @@ export function useFileUpload() {
               suggestedTitle = suggestions.suggestedTitle || file.name;
               suggestedTags = suggestions.suggestedTags || [];
               fileDescription = suggestions.description || '';
-              
-              console.log('Received AI suggestions:', {
-                title: suggestedTitle,
-                tags: suggestedTags,
-                description: fileDescription
-              });
-            } else if (aiResponse.error) {
-              console.warn('Error getting file name suggestions:', aiResponse.error);
             }
           } catch (aiError) {
             console.error('Error analyzing file with AI:', aiError);
@@ -297,9 +271,6 @@ export function useFileUpload() {
             mimeType: file.type,
             processingStatus: 'pending',
           };
-          
-          // Create database record
-          console.log('Creating database record for file');
           
           // Create database record or use fallback object
           let fileData = null;
@@ -334,8 +305,6 @@ export function useFileUpload() {
             // Trigger AI processing for analysis in the background
             setTimeout(async () => {
               try {
-                console.log('Triggering AI processing for file:', fileData.id);
-                
                 // Queue file for AI processing using the new Edge Function
                 const { data: queueResult, error: queueError } = await supabase.functions.invoke('process-document', {
                   body: {
@@ -357,8 +326,6 @@ export function useFileUpload() {
                     console.error('Background file processing error:', err);
                   });
                 } else {
-                  console.log('File queued for AI processing:', queueResult);
-                  
                   // Update query cache to reflect processing status
                   queryClient.setQueryData(['files', projectId], (oldData: FileRecord[]) => 
                     oldData ? oldData.map(f => 
@@ -382,14 +349,12 @@ export function useFileUpload() {
               }
             }, 100);
             
-            console.log('File record created successfully:', fileData?.id);
           } catch (dbError) {
             console.error('Exception creating file record:', dbError);
             
             // Attempt to clean up the storage file if database insert fails
             try {
               await supabase.storage.from(bucket).remove([storagePath]);
-              console.log('Cleaned up storage file after database insert failed');
             } catch (cleanupError) {
               console.error('Failed to clean up storage file:', cleanupError);
             }
@@ -404,18 +369,12 @@ export function useFileUpload() {
           
           const detectedExhibitId = detectExhibitIdFromFilename(file.name);
           if (detectedExhibitId && fileData) {
-            console.log('Auto-detected exhibit ID from filename:', detectedExhibitId);
-            
             // Check if exhibit already exists
             const existingExhibit = exhibits.find(e => e.exhibit_id === detectedExhibitId);
             
             if (!existingExhibit) {
-              // Create new exhibit from this file
-              console.log('Creating new exhibit:', detectedExhibitId);
               createExhibitFromFile(fileData.id, detectedExhibitId, `Exhibit ${detectedExhibitId}`);
             } else {
-              // Assign file to existing exhibit
-              console.log('Assigning file to existing exhibit:', detectedExhibitId);
               const assignFileToExhibit = useAppStore.getState().assignFileToExhibit;
               assignFileToExhibit(fileData.id, detectedExhibitId, !existingExhibit.files.length);
             }

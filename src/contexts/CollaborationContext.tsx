@@ -443,7 +443,6 @@ export function CollaborationProvider({ children }: { children: React.ReactNode 
           table: 'user_presence',
           filter: `project_id=eq.${projectId}`,
         }, (payload) => {
-          console.log('Presence change:', payload);
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             dispatch({ type: 'UPDATE_USER', payload: payload.new as UserPresence });
           } else if (payload.eventType === 'DELETE') {

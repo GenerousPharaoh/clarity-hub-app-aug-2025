@@ -35,10 +35,8 @@ export const initIndexedDB = async () => {
         }
       },
       blocked() {
-        console.warn('IndexedDB upgrade blocked - another tab has the database open');
       },
       blocking() {
-        console.warn('IndexedDB is blocking a newer version from being opened');
       },
       terminated() {
         console.error('IndexedDB connection was terminated abnormally');
@@ -81,7 +79,6 @@ export const initStorageBuckets = async () => {
     const missingBuckets = REQUIRED_BUCKETS.filter(bucket => !existingBuckets.includes(bucket));
 
     if (missingBuckets.length > 0) {
-      console.warn('Missing storage buckets (create in Supabase dashboard):', missingBuckets.join(', '));
     }
   } catch (err) {
     console.error('Storage bucket initialization error:', err);

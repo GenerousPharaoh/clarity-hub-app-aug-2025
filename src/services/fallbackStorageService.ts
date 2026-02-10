@@ -115,8 +115,6 @@ class FallbackStorageService {
       const fileBlob = file instanceof File ? file : new Blob([file]);
       
       if (existingFile) {
-        console.log('Updating existing file in local storage:', existingFile.path);
-        
         // Create a version of the previous state
         await this.createFileVersion(existingFile.id, existingFile.file);
         
@@ -168,8 +166,6 @@ class FallbackStorageService {
         
         await db.put('files', fileEntry);
         
-        console.log('File stored locally:', fileEntry.path);
-        
         // Create a data URL as a fallback for the public URL
         const localUrl = URL.createObjectURL(fileBlob);
         
@@ -202,8 +198,7 @@ class FallbackStorageService {
       };
       
       await db.put('versions', versionEntry);
-      console.log(`Created version ${versionId} for file ${fileId}`);
-      
+
       return versionId;
     } catch (error) {
       console.error('Error creating file version:', error);
@@ -379,7 +374,6 @@ class FallbackStorageService {
       const db = await getIndexedDB();
       
       if (!db) {
-        console.error('Failed to get IndexedDB instance');
         return [];
       }
       
@@ -388,7 +382,6 @@ class FallbackStorageService {
         const store = tx.objectStore('unsynced-files');
         
         if (!store.indexNames.contains('by-status')) {
-          console.warn('Missing by-status index, fallback to get all records');
           return await store.getAll();
         }
         

@@ -763,7 +763,7 @@ const RightPanel = ({
               textAlign: 'center',
             }}
           >
-            <InfoIcon sx={{ fontSize: 48, color: '#cdd0d5', mb: 2 }} />
+            <InfoIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, fontSize: '1rem' }}>
               No file selected
             </Typography>

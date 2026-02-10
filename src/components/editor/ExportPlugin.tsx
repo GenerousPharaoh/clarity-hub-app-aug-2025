@@ -155,9 +155,9 @@ const ExportPlugin: React.FC = () => {
           size="small" 
           onClick={handleClick}
           sx={{
-            color: '#2563eb',
+            color: 'secondary.main',
             '&:hover': {
-              backgroundColor: 'rgba(30, 41, 59, 0.1)',
+              backgroundColor: 'action.hover',
             }
           }}
         >

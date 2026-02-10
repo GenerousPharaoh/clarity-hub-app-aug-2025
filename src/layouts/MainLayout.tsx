@@ -192,7 +192,7 @@ const MainLayout = () => {
           zIndex: theme => theme.zIndex.drawer + 1,
         }}
       >
-        <Toolbar sx={{ minHeight: 48, px: { xs: 2, sm: 3 }, gap: 1.5 }}>
+        <Toolbar variant="dense" sx={{ px: { xs: 2, sm: 3 }, gap: 1.5 }}>
           {/* Burger Menu */}
           <Tooltip title="Menu">
             <IconButton

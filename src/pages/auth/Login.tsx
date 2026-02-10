@@ -23,6 +23,12 @@ export default function Login() {
     setLoading(true);
     try {
       await signInWithGoogle();
+      // signInWithOAuth redirects the browser, so if we're still here
+      // after a delay, something went wrong
+      setTimeout(() => {
+        setLoading(false);
+        setError('Sign-in redirect did not complete. Please try again.');
+      }, 10000);
     } catch (err: any) {
       setError(err.message || 'Failed to sign in with Google');
       setLoading(false);

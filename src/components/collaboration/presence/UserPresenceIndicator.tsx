@@ -9,7 +9,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import {
   Circle as CircleIcon,
   Visibility as VisibilityIcon,
@@ -30,16 +30,17 @@ interface StatusIndicatorProps {
 }
 
 const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status, size = 'medium' }) => {
+  const theme = useTheme();
   const getStatusColor = (status: UserPresence['status']) => {
     switch (status) {
       case 'online':
-        return '#4caf50';
+        return theme.palette.success.main;
       case 'away':
-        return '#ff9800';
+        return theme.palette.warning.main;
       case 'offline':
-        return '#9e9e9e';
+        return theme.palette.text.disabled;
       default:
-        return '#9e9e9e';
+        return theme.palette.text.disabled;
     }
   };
 
@@ -71,6 +72,7 @@ interface UserAvatarProps {
 }
 
 const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'medium', showCursor = false }) => {
+  const theme = useTheme();
   const getAvatarSize = (size: string) => {
     switch (size) {
       case 'small':
@@ -133,9 +135,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'medium', showCurs
               justifyContent: 'center',
               width: size === 'small' ? 12 : 16,
               height: size === 'small' ? 12 : 16,
-              backgroundColor: 'white',
+              backgroundColor: theme.palette.background.paper,
               borderRadius: '50%',
-              border: '1px solid #e0e0e0',
+              border: `1px solid ${theme.palette.divider}`,
             }}
           >
             <StatusIndicator status={user.status} size={size} />
@@ -147,7 +149,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'medium', showCurs
           alt={getUserName(user)}
           sx={{
             ...getAvatarSize(size),
-            border: user.status === 'online' ? '2px solid #4caf50' : '2px solid transparent',
+            border: user.status === 'online' ? `2px solid ${theme.palette.success.main}` : '2px solid transparent',
             cursor: 'pointer',
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
@@ -168,6 +170,7 @@ const UserPresenceIndicator: React.FC<UserPresenceIndicatorProps> = ({
   size = 'medium',
   variant = 'compact',
 }) => {
+  const theme = useTheme();
   const { state } = useCollaboration();
   const activeUsers = state.activeUsers.filter(user => user.status === 'online');
 
@@ -180,7 +183,7 @@ const UserPresenceIndicator: React.FC<UserPresenceIndicatorProps> = ({
       max={maxUsers}
       sx={{
         '& .MuiAvatar-root': {
-          border: '2px solid white',
+          border: `2px solid ${theme.palette.background.paper}`,
           cursor: 'pointer',
         },
       }}
@@ -235,9 +238,9 @@ const UserPresenceIndicator: React.FC<UserPresenceIndicatorProps> = ({
             gap: 1,
             p: 1,
             borderRadius: 1,
-            backgroundColor: alpha('#000', 0.02),
+            backgroundColor: alpha(theme.palette.text.primary, 0.02),
             '&:hover': {
-              backgroundColor: alpha('#000', 0.04),
+              backgroundColor: alpha(theme.palette.text.primary, 0.04),
             },
           }}
         >

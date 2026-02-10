@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, AppBar, Toolbar, Typography, IconButton, Skeleton, useTheme, CircularProgress, Breadcrumbs, Link, useMediaQuery } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { Home as HomeIcon, Menu as MenuIcon, DarkMode, LightMode, ChevronRight, ArrowBack } from '@mui/icons-material';
 import { Link as RouterLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import useAppStore from '../store';
@@ -86,9 +87,9 @@ export default function ProjectLayout() {
           zIndex: theme => theme.zIndex.drawer + 1,
           borderBottom: '1px solid',
           borderColor: 'divider',
-          background: theme.palette.mode === 'dark' 
-            ? 'rgba(15, 23, 42, 0.8)'
-            : 'rgba(255, 255, 255, 0.8)',
+          background: theme.palette.mode === 'dark'
+            ? alpha(theme.palette.primary.dark, 0.8)
+            : alpha(theme.palette.background.paper, 0.8),
           backdropFilter: 'blur(8px)'
         }}
       >

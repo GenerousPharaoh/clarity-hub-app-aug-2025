@@ -27,6 +27,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
+import { useTheme, alpha } from '@mui/material/styles';
 import {
   History as HistoryIcon,
   Restore as RestoreIcon,
@@ -91,6 +92,7 @@ interface CreateVersionDialogProps {
 }
 
 const DiffViewer: React.FC<DiffViewerProps> = ({ version1, version2, open, onClose }) => {
+  const theme = useTheme();
   const [viewMode, setViewMode] = useState<'side-by-side' | 'unified'>('side-by-side');
 
   const renderDiffContent = () => {
@@ -108,7 +110,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ version1, version2, open, onClo
 
     if (viewMode === 'unified') {
       return (
-        <Paper sx={{ p: 2, backgroundColor: '#f5f5f5', fontFamily: 'monospace', fontSize: '0.875rem' }}>
+        <Paper sx={{ p: 2, backgroundColor: theme.palette.background.default, fontFamily: 'monospace', fontSize: '0.875rem' }}>
           {changes.map((change, index) => (
             <Box
               key={index}
@@ -116,13 +118,13 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ version1, version2, open, onClo
                 py: 0.5,
                 px: 1,
                 backgroundColor:
-                  change.type === 'add' ? '#e8f5e8' :
-                  change.type === 'remove' ? '#ffe8e8' :
+                  change.type === 'add' ? alpha(theme.palette.success.main, 0.08) :
+                  change.type === 'remove' ? alpha(theme.palette.error.main, 0.08) :
                   'transparent',
                 borderLeft: `3px solid ${
-                  change.type === 'add' ? '#4caf50' :
-                  change.type === 'remove' ? '#f44336' :
-                  '#2196f3'
+                  change.type === 'add' ? theme.palette.success.main :
+                  change.type === 'remove' ? theme.palette.error.main :
+                  theme.palette.info.main
                 }`,
                 mb: 0.5,
               }}
@@ -131,9 +133,9 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ version1, version2, open, onClo
                 component="span"
                 sx={{
                   color:
-                    change.type === 'add' ? '#2e7d32' :
-                    change.type === 'remove' ? '#d32f2f' :
-                    '#1976d2',
+                    change.type === 'add' ? theme.palette.success.dark :
+                    change.type === 'remove' ? theme.palette.error.dark :
+                    theme.palette.info.dark,
                   fontFamily: 'inherit',
                   fontSize: 'inherit',
                 }}
@@ -145,7 +147,7 @@ const DiffViewer: React.FC<DiffViewerProps> = ({ version1, version2, open, onClo
                 <Typography
                   component="div"
                   sx={{
-                    color: '#d32f2f',
+                    color: theme.palette.error.dark,
                     fontFamily: 'inherit',
                     fontSize: 'inherit',
                     opacity: 0.7,

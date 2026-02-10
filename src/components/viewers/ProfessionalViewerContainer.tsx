@@ -187,34 +187,37 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         backgroundColor: 'background.default',
       }}
     >
-      <Paper
-        elevation={0}
-        sx={{
-          p: 6,
-          maxWidth: 400,
-          textAlign: 'center',
-          backgroundColor: 'background.paper',
-          border: 1,
-          borderColor: 'divider',
-          borderRadius: 2,
-        }}
-      >
-        <Box sx={{ mb: 3 }}>
-          <InsertDriveFile sx={{ fontSize: 72, color: 'divider' }} />
+      <Box sx={{ maxWidth: 360, textAlign: 'center' }}>
+        <Box
+          sx={{
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            background: theme.palette.mode === 'dark'
+              ? alpha('#6366F1', 0.12)
+              : 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mx: 'auto',
+            mb: 3,
+          }}
+        >
+          <InsertDriveFile sx={{ fontSize: 40, color: '#6366F1' }} />
         </Box>
 
-        <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary' }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
           No Document Selected
         </Typography>
 
-        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
-          Select a document from the file browser to view it with professional precision controls.
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.6 }}>
+          Select a file from the browser to view it here with professional precision controls.
         </Typography>
 
         <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-          Supports PDF, images, audio, video, and document files with citation linking
+          PDF, images, audio, video, and documents supported
         </Typography>
-      </Paper>
+      </Box>
     </Box>
   );
 

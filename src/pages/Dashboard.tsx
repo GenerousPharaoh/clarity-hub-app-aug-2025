@@ -148,11 +148,26 @@ export default function Dashboard() {
           ))}
         </Grid>
       ) : (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 3,
+            }}
+          >
+            <FolderIcon sx={{ fontSize: 40, color: '#6366F1' }} />
+          </Box>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             No legal cases yet
           </Typography>
-          <Typography variant="body1" color="text.secondary" paragraph>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
             Create your first legal case to start managing documents with our three-panel citation system
           </Typography>
           <Button
@@ -162,7 +177,7 @@ export default function Dashboard() {
           >
             Create Legal Case
           </Button>
-        </Paper>
+        </Box>
       )}
       
       {/* New Legal Case Dialog */}

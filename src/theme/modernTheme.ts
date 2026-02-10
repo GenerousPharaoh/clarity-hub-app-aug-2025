@@ -48,7 +48,7 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
         dark: '#0891b2',
       },
       background: {
-        default: isLight ? '#fafafa' : '#0c0f1a',
+        default: isLight ? '#f5f3ff' : '#0c0f1a',
         paper: isLight ? '#ffffff' : '#151928',
       },
       text: {

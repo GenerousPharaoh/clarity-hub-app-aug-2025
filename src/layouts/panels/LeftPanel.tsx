@@ -616,17 +616,31 @@ const LeftPanel = ({
         flexDirection: 'column', 
         overflow: 'hidden',
         pt: 1.5,
-        backgroundColor: theme => theme.palette.mode === 'dark' ? theme.palette.background.paper : '#f9fafb'
+        backgroundColor: 'background.paper'
       }}
       data-test="left-panel"
     >
       {/* Header component passed from parent */}
       {headerComponent ? headerComponent(
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="h6" sx={{
+          fontWeight: 700,
+          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.02em',
+        }}>
           Clarity Hub
         </Typography>
       ) : (
-        <Typography variant="h6" sx={{ fontWeight: 'bold', px: 2, py: 1 }}>
+        <Typography variant="h6" sx={{
+          fontWeight: 700,
+          px: 2,
+          py: 1,
+          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          letterSpacing: '-0.02em',
+        }}>
           Clarity Hub
         </Typography>
       )}

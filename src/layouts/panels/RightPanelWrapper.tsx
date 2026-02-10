@@ -118,7 +118,7 @@ const RightPanelWrapper = () => {
       data-test="right-panel"
     >
       {/* Tab Navigation */}
-      <Paper elevation={1} sx={{ borderRadius: 0 }}>
+      <Paper elevation={0} sx={{ borderRadius: 0, borderBottom: '1px solid', borderColor: 'divider' }}>
         <Tabs 
           value={tabValue} 
           onChange={handleTabChange}

@@ -47,9 +47,8 @@ export const ErrorBoundaryWithNavigation = (props: Props) => {
   // Always use the fallback approach to avoid router context issues
   return (
     <ErrorBoundaryClass 
-      {...props} 
-      navigate={(path) => { 
-        console.log('Navigation attempted:', path);
+      {...props}
+      navigate={(path) => {
         // Use direct location change to avoid router context dependencies
         if (typeof path === 'string') {
           window.location.href = path;

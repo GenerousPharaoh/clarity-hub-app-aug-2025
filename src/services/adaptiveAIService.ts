@@ -93,8 +93,6 @@ export class AdaptiveAIService {
    * Process uploaded file with user-specific analysis and exhibit generation
    */
   async processFileForUser(fileId: string, userId: string): Promise<void> {
-    console.log(`Starting AI processing for file ${fileId} for user ${userId}`);
-    
     try {
       // Get user profile and file data
       const userProfile = await this.getUserAIProfile(userId);
@@ -153,7 +151,6 @@ export class AdaptiveAIService {
       // Update user's AI learning
       await this.updateUserAILearning(userId, file, analysis, personalizedInsights);
 
-      console.log(`AI processing completed for file ${fileId} with exhibit ${exhibitData.exhibitId}`);
     } catch (error) {
       console.error(`AI processing failed for file ${fileId}:`, error);
       await this.updateProcessingStage(fileId, 'error', 0, null, error.message);

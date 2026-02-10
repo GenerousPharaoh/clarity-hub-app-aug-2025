@@ -69,7 +69,7 @@ export const fileProcessingService = {
     // Update file metadata with analysis results
     if (response.data?.analysis) {
       await this.updateFileMetadata(fileId, {
-        imageAnalysis: response.data.analysis,
+        imageAnalysis: response.data?.analysis,
         processingStatus: 'completed'
       });
     }
@@ -95,7 +95,7 @@ export const fileProcessingService = {
     // Update file metadata with analysis results
     if (response.data?.analysis) {
       await this.updateFileMetadata(fileId, {
-        documentAnalysis: response.data.analysis,
+        documentAnalysis: response.data?.analysis,
         processingStatus: 'completed'
       });
     }

@@ -126,8 +126,8 @@ export const CloudUploadZone: React.FC = () => {
           analysis = await geminiAI.analyzeDocument(
             fileContent, file.name, file.type, `Legal case project: ${projectId}`
           );
-        } catch (err) {
-          console.warn('AI analysis skipped:', err);
+        } catch {
+          // AI analysis skipped
         }
       }
 

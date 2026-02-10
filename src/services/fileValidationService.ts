@@ -131,7 +131,7 @@ export class FileValidationService {
       if (!allowedMimeTypes.includes(file.type as any)) {
         // Allow empty MIME type for some file types, but warn
         if (file.type === '') {
-          console.warn(`File '${file.name}' has no MIME type, but extension '${extension}' is allowed`);
+          // File has no MIME type, but extension is allowed - proceed
         } else {
           errors.push(`MIME type '${file.type}' does not match expected types for '${extension}' files: ${allowedMimeTypes.join(', ')}`);
           isValid = false;

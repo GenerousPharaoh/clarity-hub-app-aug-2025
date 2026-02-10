@@ -76,7 +76,7 @@ const FileAnalyzer: React.FC<FileAnalyzerProps> = ({ file }) => {
 
       // Check if we got a valid analysis result
       if (response.data?.analysis) {
-        setAnalysis(response.data.analysis);
+        setAnalysis(response.data?.analysis ?? null);
       } else {
         throw new Error('No analysis data received');
       }

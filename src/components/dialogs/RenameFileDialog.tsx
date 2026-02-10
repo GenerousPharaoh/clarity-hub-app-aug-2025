@@ -112,7 +112,7 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
       }
       
       if (response.data?.suggestedNames) {
-        setNameSuggestions(response.data.suggestedNames);
+        setNameSuggestions(response.data?.suggestedNames ?? []);
       }
     } catch (error) {
       console.error('Error getting filename suggestions:', error);
@@ -140,7 +140,7 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
       }
       
       if (response.data?.nextExhibitId) {
-        setNextExhibitId(response.data.nextExhibitId);
+        setNextExhibitId(response.data?.nextExhibitId ?? '');
       }
     } catch (error) {
       console.error('Error getting next exhibit ID:', error);

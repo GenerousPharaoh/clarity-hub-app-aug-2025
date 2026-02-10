@@ -104,7 +104,6 @@ class CloudFileService {
   async getProjectFiles(projectId: string): Promise<CloudFile[]> {
     // Validate projectId to prevent undefined queries
     if (!projectId || projectId === 'undefined') {
-      console.warn('getProjectFiles called with invalid projectId:', projectId);
       return [];
     }
 
@@ -275,11 +274,8 @@ class CloudFileService {
   ) {
     // Validate projectId to prevent undefined queries
     if (!projectId || projectId === 'undefined') {
-      console.warn('subscribeToFileUpdates called with invalid projectId:', projectId);
       return {
-        unsubscribe: () => {
-          console.warn('Unsubscribe called on invalid subscription');
-        }
+        unsubscribe: () => {}
       };
     }
     

@@ -41,10 +41,8 @@ export const publicUrl = (key: string, bucket?: string): string => {
   // Use encodeURIComponent for each path segment to handle special characters
   const encodedPath = storagePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
   
-  // Log the URL generation for debugging
   const url = `${base}/storage/v1/object/public/${storageBucket}/${encodedPath}`;
-  console.log(`[publicUrl] Generated URL: ${url}`);
-  
+
   return url;
 };
 

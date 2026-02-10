@@ -172,11 +172,11 @@ const SuggestionPanel = ({ content }: SuggestionPanelProps) => {
         throw new Error(response.error.message);
       }
 
-      setSuggestions(response.data as AiSuggestionResponse);
+      setSuggestions((response.data ?? { suggestions: [] }) as AiSuggestionResponse);
       
       // Reset to the first category tab if we're on the suggestions tab
       if (tabValue === 0 && response.data?.suggestions?.length > 0) {
-        const categories = Array.from(new Set(response.data.suggestions.map(s => s.category.toLowerCase())));
+        const categories = Array.from(new Set((response.data?.suggestions ?? []).map(s => s.category.toLowerCase())));
         if (categories.length > 0) {
           setActiveCategory(categories[0]);
         }

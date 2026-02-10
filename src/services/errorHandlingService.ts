@@ -128,8 +128,6 @@ class ErrorHandlingService {
     window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
     
     this.isInitialized = true;
-    
-    console.log('Error handling service initialized');
   }
   
   // Clean up handlers
@@ -308,8 +306,7 @@ class ErrorHandlingService {
   private reportToErrorTracking(error: AppError) {
     // In production, you would implement actual error reporting
     if (process.env.NODE_ENV === 'production') {
-      // Simulated error tracking service call
-      console.log('[ErrorTracking] Would report to error service:', error.toJSON());
+      // Actual error tracking service integration would go here
       
       // Implementation with a real service would go here
       // For example with Sentry:

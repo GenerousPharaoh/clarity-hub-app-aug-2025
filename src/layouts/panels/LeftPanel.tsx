@@ -405,7 +405,6 @@ const LeftPanel = ({
   const filterFiles = (filesToFilter: FileRecord[]): FileRecord[] => {
     // Guard: ensure files is always an array
     if (!Array.isArray(filesToFilter)) {
-      console.warn('filterFiles received non-array input:', filesToFilter);
       return [];
     }
     

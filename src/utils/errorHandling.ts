@@ -31,9 +31,6 @@ export const handleError = (error: any, context?: string) => {
 };
 
 export const showNotification = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
-  // This will be connected to a notification system
-  console.log(`[${type.toUpperCase()}] ${message}`);
-  
   // For now, use alert for errors
   if (type === 'error') {
     alert(message);

@@ -13,11 +13,6 @@ export async function analyzeWritingContext(
   projectId?: string,
 ): Promise<any> {
   try {
-    console.log('Sending text for analysis, length:', text.length);
-    if (projectId) {
-      console.log('For project:', projectId);
-    }
-    
     const endpoint = `${BASE_URL}/analyze-writing-context`;
     
     const { data } = await axios.post(endpoint, {
@@ -32,7 +27,6 @@ export async function analyzeWritingContext(
       timeout: 30000, // 30 second timeout for LLM processing
     });
     
-    console.log('Analysis completed successfully');
     return data;
   } catch (error) {
     console.error('Error analyzing text:', error);
@@ -51,8 +45,6 @@ export async function analyzeWritingContext(
  */
 export async function analyzeFile(fileId: string): Promise<any> {
   try {
-    console.log(`Analyzing file ${fileId} with AI`);
-    
     // Call the Edge Function
     const { data, error } = await supabase.functions.invoke('analyze-file', {
       body: { fileId }
@@ -61,8 +53,6 @@ export async function analyzeFile(fileId: string): Promise<any> {
     if (error) {
       throw new Error(`Analysis failed: ${error.message}`);
     }
-    
-    console.log('File analysis completed successfully');
     
     // Update file metadata with analysis results
     if (data?.analysis) {

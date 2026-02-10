@@ -237,10 +237,6 @@ class MetricsStore {
         threshold: this.getThresholdForMetric(metric)
       };
       
-      // Log to console for development feedback
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`Slow performance detected: ${metric.name} (${metric.value.toFixed(2)} ms)`);
-      }
     }
     
     // Add to metrics store

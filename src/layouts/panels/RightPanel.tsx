@@ -356,7 +356,7 @@ const RightPanel = ({
       }
 
       if (response.data?.entities) {
-        const entities = response.data.entities;
+        const entities = response.data?.entities ?? [];
         setExtractedEntities(entities);
         
         // Update the file metadata to cache entities

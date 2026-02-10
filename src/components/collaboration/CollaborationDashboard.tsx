@@ -139,9 +139,8 @@ const CollaborationDashboard: React.FC<CollaborationDashboardProps> = ({
     setActiveTab(newValue);
   };
 
-  const handleCreateVersion = (message: string) => {
+  const handleCreateVersion = (_message: string) => {
     // Implementation would create a new version
-    console.log('Creating version:', message);
   };
 
   const handleRestoreVersion = (version: any) => {

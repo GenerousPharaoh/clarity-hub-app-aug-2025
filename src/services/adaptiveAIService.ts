@@ -596,6 +596,7 @@ export class AdaptiveAIService {
     userMessage: string;
     userProfile: UserAIProfile;
     userContext: any[];
+    legalContext?: string;
     conversationHistory: any[];
     attachments?: File[];
   }): Promise<PersonalizedResponse> {
@@ -605,28 +606,37 @@ export class AdaptiveAIService {
       .map(c => c.content.substring(0, 300))
       .join('\n');
 
+    const legalKnowledgeSection = params.legalContext
+      ? `\n    Ontario Employment Law Knowledge Base:\n    ${params.legalContext}\n`
+      : '';
+
     const prompt = `
-    You are a personalized legal AI assistant for a ${params.userProfile.legal_specialties.join(', ')} attorney.
-    
+    You are a specialized Ontario employment law AI assistant. You have deep knowledge of Canadian employment law, with particular expertise in Ontario legislation, case law, and legal principles.
+
     User Profile:
     - Specialties: ${params.userProfile.legal_specialties.join(', ')}
     - Preferred Response Length: ${params.userProfile.interaction_preferences.response_length}
     - Detail Level: ${params.userProfile.interaction_preferences.detail_level}
-    
+
     Relevant Context from User's Files:
     ${contextSummary}
-    
+    ${legalKnowledgeSection}
     Recent Conversation:
     ${params.conversationHistory.slice(-3).map(m => `${m.role}: ${m.content}`).join('\n')}
-    
+
     User Question: ${params.userMessage}
-    
-    Provide a helpful, personalized response that:
-    1. References their specific case context when relevant
-    2. Matches their expertise level and specialties
-    3. Suggests specific actions they can take
-    4. Uses their preferred communication style
-    
+
+    Provide a helpful, authoritative response that:
+    1. References specific case law citations and legislation where applicable
+    2. Cites the relevant statutory provisions (e.g., ESA s.57, OHRC s.5(1))
+    3. Identifies applicable legal principles and their elements
+    4. References their specific case context when relevant
+    5. Matches their expertise level and communication style
+    6. Suggests specific next steps or actions
+    7. Notes any recent developments that may affect the analysis
+
+    IMPORTANT: Always cite your sources. When referencing a case, include the full citation. When referencing legislation, include the section number. Do not fabricate citations.
+
     Return JSON with: content, personalizedInsights, citations, learningSignals, profileUpdates
     `;
 

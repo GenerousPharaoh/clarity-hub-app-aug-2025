@@ -44,6 +44,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { v4 as uuid } from 'uuid';
 import { supabase } from '../../lib/supabase';
 import { AdaptiveAIService, UserAIProfile, PersonalizedResponse } from '../../services/adaptiveAIService';
+import { legalKnowledge } from '../../services/legalKnowledgeService';
 import useAppStore from '../../store';
 
 interface ChatMessage {
@@ -208,14 +209,18 @@ What would you like to work on today?`,
       // Save user message
       await saveMessageToDatabase(userMessage, currentConversation.id);
 
-      // Get user's relevant context
-      const userContext = await getUserRelevantContext(inputValue);
+      // Get user's relevant context and legal knowledge in parallel
+      const [userContext, legalContext] = await Promise.all([
+        getUserRelevantContext(inputValue),
+        getLegalKnowledgeContext(inputValue),
+      ]);
 
-      // Generate AI response
+      // Generate AI response with combined context
       const aiResponse = await aiService.generatePersonalizedResponse({
         userMessage: inputValue,
         userProfile,
         userContext,
+        legalContext,
         conversationHistory: messages.slice(-10), // Last 10 messages for context
         attachments
       });
@@ -272,6 +277,15 @@ What would you like to work on today?`,
     } catch (error) {
       console.error('Failed to get user context:', error);
       return [];
+    }
+  };
+
+  const getLegalKnowledgeContext = async (query: string): Promise<string> => {
+    if (!query || query.length < 5) return '';
+    try {
+      return await legalKnowledge.buildLegalContext(query);
+    } catch {
+      return '';
     }
   };
 

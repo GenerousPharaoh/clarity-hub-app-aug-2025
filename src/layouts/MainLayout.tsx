@@ -194,7 +194,7 @@ const MainLayout = () => {
           backdropFilter: 'blur(20px)',
           background: theme.palette.mode === 'dark' 
             ? alpha(theme.palette.background.paper, 0.9)
-            : 'rgba(255, 255, 255, 0.95)',
+            : alpha(theme.palette.background.paper, 0.95),
           borderBottom: `1px solid ${theme.palette.divider}`,
           boxShadow: theme.palette.mode === 'dark'
             ? '0 1px 3px rgba(0, 0, 0, 0.3)'
@@ -243,9 +243,9 @@ const MainLayout = () => {
               minWidth: 200, 
               mr: 2,
               '& .MuiOutlinedInput-root': {
-                bgcolor: 'white',
+                bgcolor: 'background.paper',
                 '&:hover': {
-                  bgcolor: alpha('#1e3a8a', 0.02),
+                  bgcolor: alpha(theme.palette.primary.main, 0.02),
                 },
               },
             }}
@@ -255,7 +255,7 @@ const MainLayout = () => {
               onChange={(e) => handleProjectChange(e.target.value)}
               displayEmpty
               renderValue={(value) => {
-                if (!value) return <em style={{ color: '#9ca3af' }}>Select a project</em>;
+                if (!value) return <em style={{ color: theme.palette.text.disabled }}>Select a project</em>;
                 const project = projects.find(p => p.id === value);
                 return (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -471,7 +471,7 @@ const MainLayout = () => {
             width: 280,
             boxSizing: 'border-box',
             bgcolor: 'background.paper',
-            borderRight: `1px solid ${alpha('#000', 0.1)}`,
+            borderRight: `1px solid ${theme.palette.divider}`,
           },
         }}
       >
@@ -480,7 +480,7 @@ const MainLayout = () => {
           alignItems: 'center', 
           justifyContent: 'space-between',
           p: 2,
-          borderBottom: `1px solid ${alpha('#000', 0.1)}`,
+          borderBottom: `1px solid ${theme.palette.divider}`,
         }}>
           <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
             Navigation

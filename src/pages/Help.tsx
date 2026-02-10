@@ -109,7 +109,7 @@ const Help = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#1f2937', mb: 1 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
           Help & Support
         </Typography>
         <Typography variant="body1" color="text.secondary">
@@ -236,12 +236,12 @@ const Help = () => {
                         sx={{ 
                           p: 1, 
                           borderRadius: 1, 
-                          bgcolor: alpha('#1e3a8a', 0.1),
+                          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
                           display: 'flex',
                           mr: 2,
                         }}
                       >
-                        {React.cloneElement(option.icon, { sx: { color: '#1e3a8a' } })}
+                        {React.cloneElement(option.icon, { sx: { color: 'primary.main' } })}
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
@@ -260,11 +260,11 @@ const Help = () => {
                       variant="outlined" 
                       size="small"
                       sx={{
-                        borderColor: '#1e3a8a',
-                        color: '#1e3a8a',
+                        borderColor: 'primary.main',
+                        color: 'primary.main',
                         '&:hover': {
-                          borderColor: '#1e3a8a',
-                          bgcolor: alpha('#1e3a8a', 0.05),
+                          borderColor: 'primary.main',
+                          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.05),
                         }
                       }}
                     >
@@ -301,7 +301,7 @@ const Help = () => {
                     }
                   }}
                 >
-                  <ListItemIcon sx={{ color: '#1e3a8a' }}>
+                  <ListItemIcon sx={{ color: 'primary.main' }}>
                     {resource.icon}
                   </ListItemIcon>
                   <ListItemText 
@@ -323,7 +323,7 @@ const Help = () => {
           mt: 3,
           border: '1px solid',
           borderColor: 'divider',
-          bgcolor: alpha('#1e3a8a', 0.02),
+          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.02),
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>

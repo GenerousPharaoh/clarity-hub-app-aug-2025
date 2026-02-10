@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Paper, Typography, Alert, CircularProgress } from '@mui/material';
+import { Box, Paper, Typography, Alert, CircularProgress, useTheme, alpha } from '@mui/material';
 import { InsertDriveFile, PictureAsPdf, Image, AudioFile, VideoFile } from '@mui/icons-material';
 import ProfessionalPdfViewer from './ProfessionalPdfViewer';
 import EnhancedMediaViewer from './EnhancedMediaViewer';
@@ -29,6 +29,8 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
   loading = false,
   error = null,
 }) => {
+  const theme = useTheme();
+
   // Determine file type for viewer selection
   const getViewerType = (file: File): 'pdf' | 'image' | 'audio' | 'video' | 'document' | 'unsupported' => {
     const fileType = file.file_type.toLowerCase();
@@ -91,31 +93,31 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'background.default',
         p: 4,
       }}
     >
       <CircularProgress
         size={64}
         thickness={4}
-        sx={{ 
-          color: '#2563eb',
+        sx={{
+          color: 'primary.main',
           mb: 3,
         }}
       />
-      
-      <Typography variant="h6" sx={{ mb: 1, color: '#1f2937' }}>
+
+      <Typography variant="h6" sx={{ mb: 1, color: 'text.primary' }}>
         Loading Document
       </Typography>
-      
-      <Typography variant="body2" sx={{ color: '#6b7280', textAlign: 'center', maxWidth: 300 }}>
+
+      <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', maxWidth: 300 }}>
         Preparing professional viewer for {file?.name || 'document'}...
       </Typography>
-      
+
       {file && (
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           {getFileIcon(getViewerType(file))}
-          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#9ca3af' }}>
+          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.disabled' }}>
             {file.exhibit_id && `Exhibit ${file.exhibit_id} • `}
             {file.file_type.toUpperCase()}
           </Typography>
@@ -133,7 +135,7 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         alignItems: 'center',
         justifyContent: 'center',
         p: 4,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'background.default',
       }}
     >
       <Paper
@@ -142,25 +144,26 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
           p: 4,
           maxWidth: 500,
           textAlign: 'center',
-          backgroundColor: 'white',
-          border: '1px solid #fecaca',
+          backgroundColor: 'background.paper',
+          border: 1,
+          borderColor: alpha(theme.palette.error.main, 0.3),
         }}
       >
         <Alert severity="error" sx={{ mb: 3 }}>
           Document Loading Error
         </Alert>
-        
-        <Typography variant="h6" gutterBottom sx={{ color: '#dc2626' }}>
+
+        <Typography variant="h6" gutterBottom sx={{ color: 'error.main' }}>
           Unable to Load Document
         </Typography>
-        
-        <Typography variant="body2" sx={{ mb: 3, color: '#6b7280' }}>
+
+        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
           {error || 'The document could not be loaded. Please check the file format and try again.'}
         </Typography>
-        
+
         {file && (
-          <Box sx={{ p: 2, backgroundColor: '#f9fafb', borderRadius: 1, mt: 2 }}>
-            <Typography variant="caption" sx={{ color: '#6b7280' }}>
+          <Box sx={{ p: 2, backgroundColor: 'background.default', borderRadius: 1, mt: 2 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
               File: {file.name}<br />
               Type: {file.file_type}<br />
               Size: {(file.size / 1024 / 1024).toFixed(2)} MB
@@ -181,7 +184,7 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         alignItems: 'center',
         justifyContent: 'center',
         p: 4,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'background.default',
       }}
     >
       <Paper
@@ -190,24 +193,25 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
           p: 6,
           maxWidth: 400,
           textAlign: 'center',
-          backgroundColor: 'white',
-          border: '1px solid #e5e7eb',
+          backgroundColor: 'background.paper',
+          border: 1,
+          borderColor: 'divider',
           borderRadius: 2,
         }}
       >
         <Box sx={{ mb: 3 }}>
-          <InsertDriveFile sx={{ fontSize: 72, color: '#d1d5db' }} />
+          <InsertDriveFile sx={{ fontSize: 72, color: 'divider' }} />
         </Box>
-        
-        <Typography variant="h6" gutterBottom sx={{ color: '#374151' }}>
+
+        <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary' }}>
           No Document Selected
         </Typography>
-        
-        <Typography variant="body2" sx={{ color: '#6b7280', mb: 3 }}>
+
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
           Select a document from the file browser to view it with professional precision controls.
         </Typography>
-        
-        <Typography variant="caption" sx={{ color: '#9ca3af' }}>
+
+        <Typography variant="caption" sx={{ color: 'text.disabled' }}>
           Supports PDF, images, audio, video, and document files with citation linking
         </Typography>
       </Paper>
@@ -223,7 +227,7 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         alignItems: 'center',
         justifyContent: 'center',
         p: 4,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'background.default',
       }}
     >
       <Paper
@@ -232,25 +236,26 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
           p: 4,
           maxWidth: 400,
           textAlign: 'center',
-          backgroundColor: 'white',
-          border: '1px solid #fbbf24',
+          backgroundColor: 'background.paper',
+          border: 1,
+          borderColor: 'warning.main',
         }}
       >
         <Box sx={{ mb: 3 }}>
           {getFileIcon('unsupported')}
         </Box>
-        
-        <Typography variant="h6" gutterBottom sx={{ color: '#92400e' }}>
+
+        <Typography variant="h6" gutterBottom sx={{ color: 'warning.dark' }}>
           Unsupported File Type
         </Typography>
-        
-        <Typography variant="body2" sx={{ mb: 3, color: '#6b7280' }}>
+
+        <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
           This file type is not yet supported by the professional viewer.
         </Typography>
-        
+
         {file && (
-          <Box sx={{ p: 2, backgroundColor: '#fef3c7', borderRadius: 1 }}>
-            <Typography variant="caption" sx={{ color: '#92400e' }}>
+          <Box sx={{ p: 2, backgroundColor: alpha(theme.palette.warning.main, 0.12), borderRadius: 1 }}>
+            <Typography variant="caption" sx={{ color: 'warning.dark' }}>
               File: {file.name}<br />
               Type: {file.file_type}<br />
               Content Type: {file.content_type}
@@ -338,7 +343,7 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'background.paper',
         overflow: 'hidden',
       }}
     >

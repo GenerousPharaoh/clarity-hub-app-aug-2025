@@ -17,6 +17,8 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   ZoomIn,
@@ -44,10 +46,11 @@ interface ProfessionalPdfViewerProps {
   fileName?: string;
 }
 
-const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({ 
-  url, 
-  fileName = 'document.pdf' 
+const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
+  url,
+  fileName = 'document.pdf'
 }) => {
+  const theme = useTheme();
   const [pdfDocument, setPdfDocument] = useState<pdfjsLib.PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -226,8 +229,9 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
           width: 180,
           height: '100%',
           overflowY: 'auto',
-          backgroundColor: '#f8f9fa',
-          borderRight: '1px solid #e5e7eb',
+          backgroundColor: 'background.default',
+          borderRight: 1,
+          borderColor: 'divider',
           p: 1,
         }}
       >
@@ -242,11 +246,13 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
               mb: 1,
               p: 1,
               cursor: 'pointer',
-              border: currentPage === pageNum ? '2px solid #2563eb' : '1px solid #e5e7eb',
-              backgroundColor: currentPage === pageNum ? '#eff6ff' : 'white',
+              border: currentPage === pageNum ? 2 : 1,
+              borderStyle: 'solid',
+              borderColor: currentPage === pageNum ? 'primary.main' : 'divider',
+              backgroundColor: currentPage === pageNum ? alpha(theme.palette.primary.main, 0.08) : 'background.paper',
               transition: 'all 0.2s ease',
               '&:hover': {
-                backgroundColor: '#f3f4f6',
+                backgroundColor: 'action.hover',
                 elevation: 1,
               },
             }}
@@ -260,8 +266,9 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
               sx={{
                 width: '100%',
                 height: 60,
-                backgroundColor: '#f9fafb',
-                border: '1px solid #e5e7eb',
+                backgroundColor: 'background.default',
+                border: 1,
+                borderColor: 'divider',
                 borderRadius: 1,
                 display: 'flex',
                 alignItems: 'center',
@@ -281,16 +288,16 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
+      <Box sx={{
+        display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', 
-        justifyContent: 'center', 
+        alignItems: 'center',
+        justifyContent: 'center',
         height: '100%',
-        backgroundColor: '#f8f9fa' 
+        backgroundColor: 'background.default'
       }}>
-        <CircularProgress size={48} thickness={4} sx={{ color: '#2563eb' }} />
-        <Typography variant="body2" sx={{ mt: 2, color: '#666666' }}>
+        <CircularProgress size={48} thickness={4} sx={{ color: 'primary.main' }} />
+        <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
           Loading PDF document...
         </Typography>
       </Box>
@@ -314,12 +321,12 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'background.paper',
         overflow: 'hidden',
       }}
     >
       {/* Professional Toolbar */}
-      <Paper elevation={0} sx={{ borderBottom: '1px solid #e5e7eb' }}>
+      <Paper elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Toolbar variant="dense" sx={{ minHeight: 56, px: 2 }}>
           {/* Page Navigation */}
           <ButtonGroup size="small" variant="outlined" sx={{ mr: 2 }}>
@@ -365,7 +372,7 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
                 }
               }}
             />
-            <Typography variant="body2" sx={{ ml: 1, color: '#666666' }}>
+            <Typography variant="body2" sx={{ ml: 1, color: 'text.secondary' }}>
               of {totalPages}
             </Typography>
           </Box>
@@ -401,7 +408,7 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
           </ButtonGroup>
 
           {/* Zoom Percentage */}
-          <Typography variant="body2" sx={{ mr: 2, minWidth: '50px', color: '#666666' }}>
+          <Typography variant="body2" sx={{ mr: 2, minWidth: '50px', color: 'text.secondary' }}>
             {Math.round(scale * 100)}%
           </Typography>
 
@@ -481,7 +488,7 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
           sx={{
             flex: 1,
             overflow: 'auto',
-            backgroundColor: '#f8f9fa',
+            backgroundColor: 'background.default',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start',
@@ -492,7 +499,7 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
             elevation={3}
             sx={{
               display: 'inline-block',
-              backgroundColor: 'white',
+              backgroundColor: 'background.paper',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             }}
           >
@@ -509,7 +516,7 @@ const ProfessionalPdfViewer: React.FC<ProfessionalPdfViewerProps> = ({
       </Box>
 
       {/* Status Bar */}
-      <Paper elevation={0} sx={{ borderTop: '1px solid #e5e7eb', py: 0.5, px: 2 }}>
+      <Paper elevation={0} sx={{ borderTop: 1, borderColor: 'divider', py: 0.5, px: 2 }}>
         <Typography variant="caption" color="text.secondary">
           {fileName} • Page {currentPage} of {totalPages} • {Math.round(scale * 100)}% zoom
         </Typography>

@@ -11,13 +11,14 @@
  * - Citation linking to right panel viewers
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { 
-  Box, 
-  Paper, 
-  Typography, 
+import {
+  Box,
+  Paper,
+  Typography,
   Button,
   Alert,
   Snackbar,
+  alpha,
 } from '@mui/material';
 import {
   Save,
@@ -264,19 +265,19 @@ const EditorContent: React.FC<{
             display: 'flex',
             alignItems: 'center',
             gap: 1,
-            bgcolor: 'rgba(245, 158, 11, 0.1)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
+            bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
+            border: (theme) => `1px solid ${alpha(theme.palette.warning.main, 0.3)}`,
             borderRadius: '20px',
             padding: '4px 12px',
             animation: 'premiumPulse 2s infinite'
           }}>
-            <div style={{
+            <Box sx={{
               width: 6,
               height: 6,
               borderRadius: '50%',
-              background: '#f59e0b',
+              bgcolor: 'warning.main',
             }} />
-            <Typography variant="caption" color="#b45309" fontWeight={500}>
+            <Typography variant="caption" color="warning.dark" fontWeight={500}>
               Unsaved changes
             </Typography>
           </Box>
@@ -299,7 +300,7 @@ const EditorContent: React.FC<{
             background: hasUnsavedChanges 
               ? 'linear-gradient(135deg, #4299e1, #63b3ed)' 
               : 'linear-gradient(135deg, #e2e8f0, #cbd5e0)',
-            color: hasUnsavedChanges ? 'white' : '#718096',
+            color: hasUnsavedChanges ? 'white' : 'text.disabled',
             boxShadow: hasUnsavedChanges 
               ? '0 4px 12px rgba(66, 153, 225, 0.4)' 
               : '0 2px 8px rgba(0, 0, 0, 0.1)',
@@ -313,8 +314,8 @@ const EditorContent: React.FC<{
                 : '0 4px 12px rgba(0, 0, 0, 0.15)',
             },
             '&:disabled': {
-              background: '#f1f5f9',
-              color: '#cbd5e0',
+              bgcolor: 'action.disabledBackground',
+              color: 'action.disabled',
               boxShadow: 'none',
             }
           }}
@@ -624,21 +625,21 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
           font-size: 2rem;
           font-weight: 600;
           margin: 24px 0 16px 0;
-          color: #1a1a1a;
+          color: inherit;
         }
-        
+
         .lexical-heading-h2 {
           font-size: 1.5rem;
           font-weight: 600;
           margin: 20px 0 12px 0;
-          color: #1a1a1a;
+          color: inherit;
         }
-        
+
         .lexical-heading-h3 {
           font-size: 1.25rem;
           font-weight: 600;
           margin: 16px 0 8px 0;
-          color: #1a1a1a;
+          color: inherit;
         }
         
         .lexical-list-ol, .lexical-list-ul {

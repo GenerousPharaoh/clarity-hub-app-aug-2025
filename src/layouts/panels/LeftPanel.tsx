@@ -625,7 +625,7 @@ const LeftPanel = ({
       {headerComponent ? headerComponent(
         <Typography variant="h6" sx={{
           fontWeight: 700,
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           letterSpacing: '-0.02em',
@@ -637,7 +637,7 @@ const LeftPanel = ({
           fontWeight: 700,
           px: 2,
           py: 1,
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           letterSpacing: '-0.02em',
@@ -693,7 +693,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
+                    backgroundColor: 'rgba(30, 41, 59, 0.06)',
                   },
                 }}
               />
@@ -711,7 +711,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
+                    backgroundColor: 'rgba(30, 41, 59, 0.06)',
                   },
                 }}
               />
@@ -729,7 +729,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: 'rgba(99, 102, 241, 0.06)',
+                    backgroundColor: 'rgba(30, 41, 59, 0.06)',
                   },
                 }}
               />

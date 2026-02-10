@@ -13,7 +13,7 @@ export default function Auth() {
         minHeight: '100vh',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(145deg, #faf9ff 0%, #f0edff 50%, #e8e4ff 100%)',
+        background: 'linear-gradient(145deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
       }}
     >
       {/* Subtle decorative elements */}
@@ -25,7 +25,7 @@ export default function Auth() {
           width: 320,
           height: 320,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(15,23,42,0.04) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -37,7 +37,7 @@ export default function Auth() {
           width: 240,
           height: 240,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(15,23,42,0.03) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -62,8 +62,8 @@ export default function Auth() {
                 sx={{
                   width: 32,
                   height: 32,
-                  border: '3px solid #E0E7FF',
-                  borderTopColor: '#6366F1',
+                  border: '3px solid #e2e8f0',
+                  borderTopColor: '#1e293b',
                   borderRadius: '50%',
                   animation: 'spin 0.8s linear infinite',
                   '@keyframes spin': {

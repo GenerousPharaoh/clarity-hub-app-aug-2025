@@ -162,14 +162,14 @@ code {
 
 /* Enhanced focus styles for accessibility */
 *:focus-visible {
-  outline: 2px solid #6366F1;
+  outline: 2px solid #1e293b;
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 /* Improved selection styles */
 ::selection {
-  background-color: rgba(99, 102, 241, 0.25);
+  background-color: rgba(30, 41, 59, 0.25);
   color: inherit;
 }
 
@@ -185,7 +185,7 @@ button:disabled {
 
 /* Enhanced loading states */
 .loading-shimmer {
-  background: linear-gradient(90deg, rgba(99,102,241,0.06) 25%, rgba(99,102,241,0.12) 50%, rgba(99,102,241,0.06) 75%);
+  background: linear-gradient(90deg, rgba(30, 41, 59,0.06) 25%, rgba(30, 41, 59,0.12) 50%, rgba(30, 41, 59,0.06) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -201,7 +201,7 @@ button:disabled {
 
 /* Enhanced typography */
 .text-gradient {
-  background: linear-gradient(90deg, #4F46E5, #8B5CF6);
+  background: linear-gradient(90deg, #0f172a, #334155);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

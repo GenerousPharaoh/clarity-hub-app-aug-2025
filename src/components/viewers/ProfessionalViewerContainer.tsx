@@ -194,8 +194,8 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
             height: 80,
             borderRadius: '50%',
             background: theme.palette.mode === 'dark'
-              ? alpha('#6366F1', 0.12)
-              : 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
+              ? alpha('#1e293b', 0.12)
+              : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -203,7 +203,7 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
             mb: 3,
           }}
         >
-          <InsertDriveFile sx={{ fontSize: 40, color: '#6366F1' }} />
+          <InsertDriveFile sx={{ fontSize: 40, color: '#1e293b' }} />
         </Box>
 
         <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>

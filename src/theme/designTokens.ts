@@ -20,18 +20,18 @@ export const colors = {
     900: '#1a1d23',   // Primary text dark (same, near-black, never pure #000)
   },
 
-  // Vibrant indigo primary — modern SaaS feel, punchy and confident
+  // Slate primary — authoritative, sophisticated, legal-grade
   primary: {
-    50: '#EEF2FF',    // Ghost button hover bg
-    100: '#E0E7FF',   // Very light accent
-    200: '#C7D2FE',   // Light accent
-    300: '#A5B4FC',   // Medium light accent
-    400: '#818CF8',   // Lighter accent
-    500: '#6366F1',   // Main accent — vibrant indigo
-    600: '#4F46E5',   // Hover state
-    700: '#4338CA',   // Active state
-    800: '#3730A3',   // Very dark accent
-    900: '#312E81',   // Darkest accent
+    50: '#f8fafc',
+    100: '#f1f5f9',
+    200: '#e2e8f0',
+    300: '#cbd5e1',
+    400: '#94a3b8',
+    500: '#64748b',
+    600: '#475569',
+    700: '#334155',
+    800: '#1e293b',
+    900: '#0f172a',
   },
 
   // Warm amber secondary — sparingly for status badges, notification dots, priority markers only
@@ -105,12 +105,12 @@ export const colors = {
   // Legal status colors — using amber secondary sparingly
   status: {
     draft: '#606876',      // Neutral secondary text
-    active: '#6366F1',     // Accent indigo - active cases
+    active: '#1e293b',     // Accent slate - active cases
     pending: '#e79823',    // Amber - pending review
     completed: '#22c55e',  // Clean green - completed
     archived: '#969ba6',   // Muted tertiary - archived
     urgent: '#ef4444',     // Red - urgent attention
-    review: '#818CF8',     // Lighter accent - under review
+    review: '#475569',     // Lighter accent - under review
   },
 
   // Document priority colors — amber secondary for medium
@@ -123,10 +123,10 @@ export const colors = {
 
   // Gradient tokens — modern SaaS accent gradients
   gradients: {
-    primary: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
-    primaryHover: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-    subtle: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.08) 100%)',
-    selectedBg: 'linear-gradient(90deg, rgba(99,102,241,0.12) 0%, rgba(99,102,241,0.03) 100%)',
+    primary: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+    primaryHover: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    subtle: 'linear-gradient(135deg, rgba(30,41,59,0.08) 0%, rgba(52,65,85,0.08) 100%)',
+    selectedBg: 'linear-gradient(90deg, rgba(30,41,59,0.12) 0%, rgba(30,41,59,0.03) 100%)',
   },
 } as const;
 
@@ -225,8 +225,8 @@ export const shadows = {
 
   // Named semantic shadows
   interactive: '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',
-  primaryGlow: '0 4px 14px rgba(99, 102, 241, 0.3)',
-  cardHover: '0 8px 30px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(31, 44, 71, 0.08)',
+  primaryGlow: '0 4px 14px rgba(30, 41, 59, 0.3)',
+  cardHover: '0 8px 30px rgba(30, 41, 59, 0.12), 0 4px 12px rgba(31, 44, 71, 0.08)',
   elevated: '0 12px 40px rgba(31, 44, 71, 0.12), 0 4px 12px rgba(31, 44, 71, 0.06)',
   panel: '0 1px 3px rgba(31, 44, 71, 0.04), 0 4px 12px rgba(31, 44, 71, 0.03)',
   float: '0 4px 12px rgba(31, 44, 71, 0.08), 0 16px 32px rgba(31, 44, 71, 0.06)',
@@ -242,7 +242,7 @@ export const shadows = {
     '2xl': '0 16px 48px rgba(0, 0, 0, 0.6), 0 32px 64px rgba(0, 0, 0, 0.5)',
     panel: '0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
     interactive: '0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4)',
-    primaryGlow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+    primaryGlow: '0 4px 14px rgba(30, 41, 59, 0.4)',
     float: '0 4px 12px rgba(0, 0, 0, 0.5), 0 16px 32px rgba(0, 0, 0, 0.4)',
     surface: {
       1: '0 1px 3px rgba(0, 0, 0, 0.4)',

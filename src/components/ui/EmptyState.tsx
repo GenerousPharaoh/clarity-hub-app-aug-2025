@@ -72,8 +72,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           height: iconSize,
           borderRadius: '50%',
           background: isDark
-            ? 'rgba(99, 102, 241, 0.1)'
-            : 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
+            ? 'rgba(30, 41, 59, 0.1)'
+            : 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -86,7 +86,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           <IconComponent
             sx={{
               fontSize: iconSize * 0.5,
-              color: '#6366F1',
+              color: '#1e293b',
             }}
           />
         )}

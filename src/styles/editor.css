@@ -41,13 +41,13 @@
 }
 
 .tox .tox-tbtn:hover {
-  background-color: rgba(99, 102, 241, 0.06) !important;
+  background-color: rgba(30, 41, 59, 0.06) !important;
 }
 
 .tox .tox-tbtn--enabled,
 .tox .tox-tbtn--enabled:hover {
-  background-color: rgba(99, 102, 241, 0.1) !important;
-  color: #6366F1 !important;
+  background-color: rgba(30, 41, 59, 0.1) !important;
+  color: #1e293b !important;
 }
 
 /* Editor content area - full height */
@@ -111,7 +111,7 @@
 }
 
 .tox .tox-collection--list .tox-collection__item:hover {
-  background-color: rgba(99, 102, 241, 0.06) !important;
+  background-color: rgba(30, 41, 59, 0.06) !important;
 }
 
 /* Editor scrollbar */

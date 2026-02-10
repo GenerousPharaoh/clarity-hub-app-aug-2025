@@ -50,12 +50,12 @@ export default function Login() {
           width: 56,
           height: 56,
           borderRadius: '16px',
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           mb: 3,
-          boxShadow: '0 8px 24px rgba(99, 102, 241, 0.3)',
+          boxShadow: '0 8px 24px rgba(15, 23, 42, 0.15)',
         }}
       >
         <Typography
@@ -130,21 +130,21 @@ export default function Login() {
           fontWeight: 600,
           textTransform: 'none',
           letterSpacing: '0.01em',
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
           color: '#fff',
-          boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
+          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.15)',
           transition: 'all 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-            boxShadow: '0 4px 16px rgba(99, 102, 241, 0.4)',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+            boxShadow: '0 4px 16px rgba(15, 23, 42, 0.20)',
             transform: 'translateY(-1px)',
           },
           '&:active': {
             transform: 'translateY(0)',
-            boxShadow: '0 2px 6px rgba(99, 102, 241, 0.2)',
+            boxShadow: '0 2px 6px rgba(15, 23, 42, 0.12)',
           },
           '&.Mui-disabled': {
-            background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
             color: 'rgba(255,255,255,0.7)',
             opacity: 0.7,
           },

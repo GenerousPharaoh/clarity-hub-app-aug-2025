@@ -73,9 +73,9 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
       root: {
         background: theme.palette.mode === 'dark'
           ? theme.palette.background.paper
-          : 'linear-gradient(135deg, #ffffff 0%, #F5F3FF 100%)',
+          : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         color: theme.palette.text.primary,
-        boxShadow: '0 1px 3px rgba(99, 102, 241, 0.06), 0 1px 2px rgba(31, 44, 71, 0.04)',
+        boxShadow: '0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(31, 44, 71, 0.04)',
         borderBottom: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
         backdropFilter: 'blur(8px)',
 
@@ -87,7 +87,7 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
       colorPrimary: {
         background: theme.palette.mode === 'dark'
           ? theme.palette.background.paper
-          : 'linear-gradient(135deg, #ffffff 0%, #F5F3FF 100%)',
+          : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
         color: theme.palette.text.primary,
       },
     },
@@ -112,19 +112,19 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
       },
 
       contained: {
-        background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+        background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
         color: '#ffffff',
-        boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
+        boxShadow: '0 2px 8px rgba(15, 23, 42, 0.15)',
 
         '&:hover': {
-          background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          boxShadow: '0 4px 14px rgba(15, 23, 42, 0.20)',
           transform: 'translateY(-1px)',
         },
 
         '&:active': {
           transform: 'translateY(0)',
-          boxShadow: '0 2px 6px rgba(99, 102, 241, 0.2)',
+          boxShadow: '0 2px 6px rgba(15, 23, 42, 0.12)',
         },
       },
 
@@ -183,15 +183,15 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
           left: 0,
           right: 0,
           height: 3,
-          background: 'linear-gradient(90deg, #6366F1, #8B5CF6)',
+          background: 'linear-gradient(90deg, #1e293b, #334155)',
           opacity: 0,
           transition: 'opacity 200ms ease',
         },
 
         '&:hover': {
           transform: 'translateY(-2px)',
-          boxShadow: '0 8px 30px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(31, 44, 71, 0.08)',
-          borderColor: alpha('#6366F1', 0.3),
+          boxShadow: '0 8px 30px rgba(15, 23, 42, 0.10), 0 4px 12px rgba(31, 44, 71, 0.08)',
+          borderColor: alpha('#1e293b', 0.3),
           '&::before': {
             opacity: 1,
           },
@@ -362,7 +362,7 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     styleOverrides: {
       paper: {
         borderRadius: parseInt(borderRadius.xl.replace('rem', '')) * 16,
-        boxShadow: '0 24px 48px rgba(31, 44, 71, 0.16), 0 8px 24px rgba(99, 102, 241, 0.08)',
+        boxShadow: '0 24px 48px rgba(31, 44, 71, 0.16), 0 8px 24px rgba(15, 23, 42, 0.06)',
         border: `1px solid ${theme.palette.divider}`,
         backgroundImage: 'none',
       },
@@ -422,7 +422,7 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
         height: 3,
         borderRadius: '3px 3px 0 0',
         backgroundColor: theme.palette.primary.main,
-        boxShadow: '0 0 8px rgba(99,102,241,0.3)',
+        boxShadow: '0 0 8px rgba(15,23,42,0.15)',
       },
 
       flexContainer: {

@@ -265,15 +265,15 @@ export const CloudUploadZone: React.FC = () => {
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           backgroundColor: isDragActive
-            ? 'rgba(99, 102, 241, 0.08)'
+            ? 'rgba(30, 41, 59, 0.08)'
             : 'background.paper',
           background: isDragActive
-            ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%)'
+            ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.08) 0%, rgba(30, 41, 59, 0.02) 100%)'
             : 'none',
           transform: isDragActive ? 'scale(1.02)' : 'scale(1)',
           '&:hover': {
             borderColor: 'primary.main',
-            backgroundColor: 'rgba(99, 102, 241, 0.04)',
+            backgroundColor: 'rgba(30, 41, 59, 0.04)',
             transform: 'scale(1.01)'
           }
         }}

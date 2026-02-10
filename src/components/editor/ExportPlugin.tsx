@@ -157,7 +157,7 @@ const ExportPlugin: React.FC = () => {
           sx={{
             color: '#2563eb',
             '&:hover': {
-              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              backgroundColor: 'rgba(30, 41, 59, 0.1)',
             }
           }}
         >

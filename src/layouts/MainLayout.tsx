@@ -219,7 +219,7 @@ const MainLayout = () => {
             sx={{
               fontWeight: 700,
               fontSize: '1.1rem',
-              background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+              background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               letterSpacing: '-0.5px',

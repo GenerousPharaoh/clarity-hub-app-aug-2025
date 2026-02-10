@@ -74,7 +74,7 @@ const SUGGESTION_CATEGORIES: Record<string, SuggestionCategory> = {
     id: 'elaborate',
     label: 'Elaboration Suggestions',
     icon: <LightbulbIcon />,
-    color: '#6366F1',
+    color: '#1e293b',
   },
   insight: {
     id: 'insight',

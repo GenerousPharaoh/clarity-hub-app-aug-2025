@@ -73,17 +73,17 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   },
   '&.Mui-selected': {
     backgroundColor: theme.palette.mode === 'dark' 
-      ? 'rgba(99, 102, 241, 0.2)' 
-      : 'rgba(99, 102, 241, 0.1)',
+      ? 'rgba(30, 41, 59, 0.2)' 
+      : 'rgba(30, 41, 59, 0.1)',
     borderLeft: `3px solid ${theme.palette.primary.main}`,
     transform: 'translateX(4px)',
     boxShadow: theme.palette.mode === 'dark'
-      ? '0 4px 12px rgba(99, 102, 241, 0.3)'
-      : '0 4px 12px rgba(99, 102, 241, 0.2)',
+      ? '0 4px 12px rgba(30, 41, 59, 0.3)'
+      : '0 4px 12px rgba(30, 41, 59, 0.2)',
     '&:hover': {
       backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(99, 102, 241, 0.25)' 
-        : 'rgba(99, 102, 241, 0.15)',
+        ? 'rgba(30, 41, 59, 0.25)' 
+        : 'rgba(30, 41, 59, 0.15)',
       transform: 'translateX(6px)',
     },
   },

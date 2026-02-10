@@ -53,13 +53,13 @@ export const ProfessionalGlobalStyles: React.FC = () => {
           '--shadow-sm': isDark ? '0 1px 3px rgba(0, 0, 0, 0.4)' : '0 1px 3px rgba(31, 44, 71, 0.04), 0 4px 12px rgba(31, 44, 71, 0.03)',
           '--shadow-md': isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.4)' : '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',
           '--shadow-lg': isDark ? '0 20px 25px -5px rgba(0, 0, 0, 0.4)' : '0 4px 12px rgba(31, 44, 71, 0.08), 0 16px 40px rgba(31, 44, 71, 0.06)',
-          '--shadow-interactive': '0 2px 8px rgba(99, 102, 241, 0.1), 0 8px 24px rgba(31, 44, 71, 0.05)',
+          '--shadow-interactive': '0 2px 8px rgba(15, 23, 42, 0.08), 0 8px 24px rgba(31, 44, 71, 0.05)',
           '--shadow-panel': 'none',
         },
 
         // Gradient text utility
         '.gradient-text': {
-          background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+          background: 'linear-gradient(135deg, #1e293b, #334155)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
@@ -151,7 +151,7 @@ export const ProfessionalGlobalStyles: React.FC = () => {
 
         // Professional focus styles
         '*:focus-visible': {
-          outline: `2px solid #6366F1`,
+          outline: `2px solid #1e293b`,
           outlineOffset: 2,
           borderRadius: 4,
         },
@@ -173,7 +173,7 @@ export const ProfessionalGlobalStyles: React.FC = () => {
           },
           
           '&:focus-visible': {
-            outline: `2px solid #6366F1`,
+            outline: `2px solid #1e293b`,
             outlineOffset: 2,
             borderRadius: 2,
           },
@@ -250,12 +250,12 @@ export const ProfessionalGlobalStyles: React.FC = () => {
 
         // Professional selection colors — indigo tint
         '::selection': {
-          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          backgroundColor: 'rgba(30, 41, 59, 0.15)',
           color: theme.palette.text.primary,
         },
 
         '::-moz-selection': {
-          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          backgroundColor: 'rgba(30, 41, 59, 0.15)',
           color: theme.palette.text.primary,
         },
 

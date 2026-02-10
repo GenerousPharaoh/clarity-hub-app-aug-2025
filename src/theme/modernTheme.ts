@@ -1,16 +1,16 @@
 import { createTheme, alpha } from '@mui/material/styles';
 
-// Vibrant indigo primary — the key accent color
-const PRIMARY = '#6366F1';
-const PRIMARY_LIGHT = '#818CF8';
-const PRIMARY_DARK = '#4F46E5';
-const VIOLET = '#8B5CF6';
+// Premium dark slate palette — authoritative, sophisticated, legal-grade
+const PRIMARY = '#1e293b';       // Slate 800 — deep, authoritative
+const PRIMARY_LIGHT = '#334155'; // Slate 700 — hover/lighter states
+const PRIMARY_DARK = '#0f172a';  // Slate 900 — pressed/darkest
+const ACCENT = '#3b82f6';        // Blue 500 — secondary accent (links, highlights)
 
 export const createModernTheme = (mode: 'light' | 'dark') => {
   const isLight = mode === 'light';
 
   // --- Palette ---
-  const dividerColor = isLight ? alpha('#94a3b8', 0.16) : alpha('#475569', 0.20);
+  const dividerColor = isLight ? alpha('#94a3b8', 0.18) : alpha('#475569', 0.22);
 
   return createTheme({
     palette: {
@@ -22,9 +22,9 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#7c3aed',
-        light: '#8b5cf6',
-        dark: '#6d28d9',
+        main: ACCENT,
+        light: '#60a5fa',
+        dark: '#2563eb',
         contrastText: '#ffffff',
       },
       error: {
@@ -48,7 +48,7 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
         dark: '#0891b2',
       },
       background: {
-        default: isLight ? '#f5f3ff' : '#0c0f1a',
+        default: isLight ? '#f8fafc' : '#0c0f1a',
         paper: isLight ? '#ffffff' : '#151928',
       },
       text: {
@@ -59,11 +59,11 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
       divider: dividerColor,
       action: {
         active: isLight ? '#475569' : '#94a3b8',
-        hover: isLight ? alpha(PRIMARY, 0.06) : alpha(PRIMARY_LIGHT, 0.10),
-        selected: isLight ? alpha(PRIMARY, 0.10) : alpha(PRIMARY_LIGHT, 0.18),
+        hover: isLight ? alpha(PRIMARY, 0.05) : alpha(PRIMARY_LIGHT, 0.10),
+        selected: isLight ? alpha(PRIMARY, 0.08) : alpha(PRIMARY_LIGHT, 0.16),
         disabled: isLight ? '#94a3b8' : '#475569',
         disabledBackground: isLight ? alpha('#94a3b8', 0.08) : alpha('#475569', 0.08),
-        focus: isLight ? alpha(PRIMARY, 0.14) : alpha(PRIMARY_LIGHT, 0.24),
+        focus: isLight ? alpha(PRIMARY, 0.12) : alpha(PRIMARY_LIGHT, 0.22),
       },
     },
 
@@ -90,30 +90,30 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
     // --- Shadows — cool-tinted, layered ---
     shadows: [
       'none',
-      `0 1px 2px ${isLight ? 'rgba(99,102,241,0.04)' : 'rgba(0,0,0,0.20)'}`,
-      `0 1px 4px ${isLight ? 'rgba(99,102,241,0.06)' : 'rgba(0,0,0,0.25)'}`,
-      `0 2px 8px ${isLight ? 'rgba(99,102,241,0.08)' : 'rgba(0,0,0,0.30)'}`,
-      `0 4px 12px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 6px 16px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 8px 20px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 10px 24px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 12px 28px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 14px 32px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 16px 36px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 18px 40px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 20px 44px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 22px 48px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 24px 52px ${isLight ? 'rgba(99,102,241,0.10)' : 'rgba(0,0,0,0.35)'}`,
-      `0 32px 64px ${isLight ? 'rgba(99,102,241,0.14)' : 'rgba(0,0,0,0.50)'}`,
+      `0 1px 2px ${isLight ? 'rgba(15,23,42,0.04)' : 'rgba(0,0,0,0.20)'}`,
+      `0 1px 4px ${isLight ? 'rgba(15,23,42,0.06)' : 'rgba(0,0,0,0.25)'}`,
+      `0 2px 8px ${isLight ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.30)'}`,
+      `0 4px 12px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 6px 16px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 8px 20px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 10px 24px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 12px 28px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 14px 32px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 16px 36px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 18px 40px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 20px 44px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 22px 48px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 24px 52px ${isLight ? 'rgba(15,23,42,0.10)' : 'rgba(0,0,0,0.35)'}`,
+      `0 32px 64px ${isLight ? 'rgba(15,23,42,0.14)' : 'rgba(0,0,0,0.50)'}`,
     ],
 
     // --- Component overrides ---
@@ -135,24 +135,19 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
         },
       },
 
-      // ---- AppBar — subtle gradient in light, clean dark ----
+      // ---- AppBar — clean white with subtle border ----
       MuiAppBar: {
         styleOverrides: {
           root: {
-            background: isLight
-              ? 'linear-gradient(135deg, #ffffff 0%, #F5F3FF 100%)'
-              : '#151928',
+            background: isLight ? '#ffffff' : '#151928',
             color: isLight ? '#0f172a' : '#f1f5f9',
-            boxShadow: isLight
-              ? `0 1px 3px rgba(99,102,241,0.06), 0 1px 2px rgba(0,0,0,0.04)`
-              : `0 1px 3px rgba(0,0,0,0.3)`,
+            boxShadow: 'none',
             borderBottom: `1px solid ${dividerColor}`,
-            backdropFilter: 'blur(8px)',
           },
         },
       },
 
-      // ---- Buttons — gradient contained, visible hover states ----
+      // ---- Buttons — solid dark, premium feel ----
       MuiButton: {
         styleOverrides: {
           root: {
@@ -165,17 +160,17 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
             '&:hover': { boxShadow: 'none' },
           },
           contained: {
-            background: `linear-gradient(135deg, ${PRIMARY} 0%, ${VIOLET} 100%)`,
+            background: PRIMARY,
             color: '#ffffff',
-            boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.35)}`,
+            boxShadow: `0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)`,
             '&:hover': {
-              background: `linear-gradient(135deg, ${PRIMARY_DARK} 0%, #7C3AED 100%)`,
-              boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.45)}`,
+              background: PRIMARY_LIGHT,
+              boxShadow: `0 4px 12px rgba(0,0,0,0.15)`,
               transform: 'translateY(-1px)',
             },
             '&:active': {
               transform: 'translateY(0)',
-              boxShadow: `0 2px 6px ${alpha(PRIMARY, 0.2)}`,
+              background: PRIMARY_DARK,
             },
             '&.Mui-disabled': {
               background: isLight ? '#e2e8f0' : '#334155',
@@ -210,7 +205,7 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
             borderRadius: 14,
             border: `1px solid ${dividerColor}`,
             boxShadow: isLight
-              ? '0 1px 3px rgba(99,102,241,0.05), 0 1px 2px rgba(0,0,0,0.03)'
+              ? '0 1px 3px rgba(15,23,42,0.05), 0 1px 2px rgba(0,0,0,0.03)'
               : '0 1px 3px rgba(0,0,0,0.3)',
             transition: 'all 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             position: 'relative' as const,
@@ -219,7 +214,7 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
               content: '""',
               position: 'absolute',
               top: 0, left: 0, right: 0, height: 3,
-              background: `linear-gradient(90deg, ${PRIMARY}, ${VIOLET})`,
+              background: PRIMARY,
               opacity: 0,
               transition: 'opacity 200ms ease',
             },
@@ -239,9 +234,9 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
       MuiPaper: {
         styleOverrides: {
           root: { backgroundImage: 'none' },
-          elevation1: { boxShadow: isLight ? '0 1px 3px rgba(99,102,241,0.05)' : '0 1px 3px rgba(0,0,0,0.3)' },
-          elevation2: { boxShadow: isLight ? '0 2px 8px rgba(99,102,241,0.07)' : '0 2px 8px rgba(0,0,0,0.35)' },
-          elevation3: { boxShadow: isLight ? '0 4px 14px rgba(99,102,241,0.09)' : '0 4px 14px rgba(0,0,0,0.4)' },
+          elevation1: { boxShadow: isLight ? '0 1px 3px rgba(15,23,42,0.05)' : '0 1px 3px rgba(0,0,0,0.3)' },
+          elevation2: { boxShadow: isLight ? '0 2px 8px rgba(15,23,42,0.07)' : '0 2px 8px rgba(0,0,0,0.35)' },
+          elevation3: { boxShadow: isLight ? '0 4px 14px rgba(15,23,42,0.09)' : '0 4px 14px rgba(0,0,0,0.4)' },
         },
       },
 
@@ -372,7 +367,7 @@ export const createModernTheme = (mode: 'light' | 'dark') => {
             borderRadius: 12,
             border: `1px solid ${dividerColor}`,
             boxShadow: isLight
-              ? '0 4px 16px rgba(15,23,42,0.10), 0 12px 32px rgba(99,102,241,0.06)'
+              ? '0 4px 16px rgba(15,23,42,0.10), 0 12px 32px rgba(15,23,42,0.06)'
               : '0 4px 16px rgba(0,0,0,0.4)',
             marginTop: 4,
           },

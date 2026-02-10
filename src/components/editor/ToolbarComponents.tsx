@@ -37,7 +37,7 @@ export const ToolbarButton: React.FC<{
         onClick={handleClick}
         sx={{
           color: active ? '#2563eb' : 'inherit',
-          backgroundColor: active ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+          backgroundColor: active ? 'rgba(30, 41, 59, 0.1)' : 'transparent',
         }}
       >
         {icon}

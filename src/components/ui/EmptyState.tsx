@@ -65,11 +65,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         color: isDark ? designTokens.colors.dark[600] : designTokens.colors.neutral[600],
       }}
     >
-      {/* Icon — simple, no animation */}
+      {/* Icon — gradient bg circle with indigo icon */}
       <Box
         sx={{
           width: iconSize,
           height: iconSize,
+          borderRadius: '50%',
+          background: isDark
+            ? 'rgba(99, 102, 241, 0.1)'
+            : 'linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -82,7 +86,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           <IconComponent
             sx={{
               fontSize: iconSize * 0.5,
-              color: isDark ? designTokens.colors.dark[400] : '#cdd0d5',
+              color: '#6366F1',
             }}
           />
         )}

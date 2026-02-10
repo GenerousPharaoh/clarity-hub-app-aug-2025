@@ -191,11 +191,6 @@ const MainLayout = () => {
         elevation={0}
         sx={{
           zIndex: theme => theme.zIndex.drawer + 1,
-          background: theme.palette.mode === 'dark'
-            ? theme.palette.background.paper
-            : '#ffffff',
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          boxShadow: 'none',
         }}
       >
         <Toolbar sx={{ minHeight: 48, px: { xs: 2, sm: 3 }, gap: 1.5 }}>
@@ -221,10 +216,12 @@ const MainLayout = () => {
           <Typography
             variant="h6"
             noWrap
-            sx={{ 
+            sx={{
               fontWeight: 700,
               fontSize: '1.1rem',
-              color: theme.palette.primary.main,
+              background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
               letterSpacing: '-0.5px',
               mr: 3,
               display: { xs: 'none', sm: 'block' }
@@ -240,12 +237,12 @@ const MainLayout = () => {
               minWidth: 200,
               mr: 2,
               '& .MuiOutlinedInput-root': {
-                bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : '#eceef1',
+                bgcolor: theme.palette.mode === 'dark' ? 'background.paper' : alpha(theme.palette.primary.main, 0.06),
                 border: '1px solid',
                 borderColor: theme.palette.divider,
-                borderRadius: '6px',
+                borderRadius: '8px',
                 '&:hover': {
-                  bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.08) : '#e3e5e8',
+                  bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.primary.main, 0.08) : alpha(theme.palette.primary.main, 0.10),
                 },
                 '& .MuiOutlinedInput-notchedOutline': {
                   border: 'none',
@@ -307,9 +304,9 @@ const MainLayout = () => {
                 onClick={() => toggleLeftPanel()}
                 sx={{ 
                   color: theme.palette.text.primary,
-                  bgcolor: isLeftPanelOpen ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                  bgcolor: isLeftPanelOpen ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
                   '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.15),
+                    bgcolor: alpha(theme.palette.primary.main, 0.20),
                   }
                 }}
               >
@@ -322,9 +319,9 @@ const MainLayout = () => {
                 onClick={() => toggleRightPanel()}
                 sx={{ 
                   color: theme.palette.text.primary,
-                  bgcolor: isRightPanelOpen ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
+                  bgcolor: isRightPanelOpen ? alpha(theme.palette.primary.main, 0.15) : 'transparent',
                   '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.15),
+                    bgcolor: alpha(theme.palette.primary.main, 0.20),
                   }
                 }}
               >

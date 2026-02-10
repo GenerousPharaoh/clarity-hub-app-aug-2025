@@ -108,16 +108,12 @@ export default function Dashboard() {
         <Grid container spacing={3}>
           {projects.map((project) => (
             <Grid item xs={12} sm={6} md={4} key={project.id}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
                   flexDirection: 'column',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4
-                  }
+                  cursor: 'pointer',
                 }}
               >
                 <CardContent sx={{ flexGrow: 1 }}>
@@ -139,8 +135,9 @@ export default function Dashboard() {
                   )}
                 </CardContent>
                 <CardActions>
-                  <Button 
-                    size="small" 
+                  <Button
+                    size="small"
+                    color="primary"
                     onClick={() => handleOpenProject(project.id)}
                   >
                     Open Case

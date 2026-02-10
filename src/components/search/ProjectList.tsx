@@ -103,14 +103,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
       <List
         sx={{
           width: '100%',
-          bgcolor: 'background.paper',
           overflow: 'auto',
-          '& .MuiListItemButton-root.Mui-selected': {
-            bgcolor: 'action.selected',
-            borderLeft: '3px solid',
-            borderLeftColor: 'primary.main',
-            pl: 1.75, // Compensate for the border
-          },
         }}
         component="nav"
         aria-label="projects list"

@@ -146,15 +146,8 @@ const FileList: React.FC<FileListProps> = ({
       <List
         sx={{
           width: '100%',
-          bgcolor: 'background.paper',
           overflow: 'auto',
           flexGrow: 1,
-          '& .MuiListItemButton-root.Mui-selected': {
-            bgcolor: 'action.selected',
-            borderLeft: '3px solid',
-            borderLeftColor: 'primary.main',
-            pl: 1.75, // Compensate for the border
-          },
         }}
         component="nav"
         aria-label="files list"

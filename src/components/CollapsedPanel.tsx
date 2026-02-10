@@ -53,12 +53,13 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
           size="small"
           sx={{
             mb: 3,
-            bgcolor: alpha(theme.palette.primary.main, 0.1),
+            bgcolor: alpha(theme.palette.primary.main, 0.12),
             '&:hover': {
               bgcolor: alpha(theme.palette.primary.main, 0.2),
-              transform: 'scale(1.1)',
+              transform: 'scale(1.15)',
+              boxShadow: '0 4px 12px rgba(99,102,241,0.2)',
             },
-            transition: 'all 0.2s',
+            transition: 'all 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}
         >
           {side === 'left' ? <ChevronRight /> : <ChevronLeft />}

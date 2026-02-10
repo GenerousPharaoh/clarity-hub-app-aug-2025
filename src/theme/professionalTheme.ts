@@ -97,22 +97,22 @@ const createProfessionalTheme = (mode: 'light' | 'dark' = 'light'): ThemeOptions
         ? colors.neutral[200]
         : alpha(colors.dark[300], 0.5),
       
-      // Professional action colors
+      // Professional action colors — stronger alphas for visibility
       action: {
         active: isLight ? colors.neutral[700] : colors.neutral[600],
-        hover: isLight 
-          ? alpha(colors.neutral[900], 0.04)
-          : alpha(colors.neutral[700], 0.08),
+        hover: isLight
+          ? alpha(colors.neutral[900], 0.06)
+          : alpha(colors.neutral[700], 0.12),
         selected: isLight
-          ? alpha(colors.primary[500], 0.08)
-          : alpha(colors.primary[400], 0.16),
+          ? alpha(colors.primary[500], 0.12)
+          : alpha(colors.primary[400], 0.20),
         disabled: isLight ? colors.neutral[500] : colors.neutral[400],
-        disabledBackground: isLight 
+        disabledBackground: isLight
           ? alpha(colors.neutral[900], 0.02)
           : alpha(colors.neutral[600], 0.04),
         focus: isLight
-          ? alpha(colors.primary[500], 0.12)
-          : alpha(colors.primary[400], 0.24),
+          ? alpha(colors.primary[500], 0.16)
+          : alpha(colors.primary[400], 0.28),
       },
       
       // Grey palette for consistency
@@ -155,18 +155,18 @@ const createProfessionalTheme = (mode: 'light' | 'dark' = 'light'): ThemeOptions
       fontFamily: typography.fontFamily.primary,
 
       h1: {
-        fontSize: '2.25rem',    // 36px
-        fontWeight: 600,
+        fontSize: '2.5rem',     // 40px
+        fontWeight: 700,
         lineHeight: 1.25,
-        letterSpacing: '-0.01em',
+        letterSpacing: '-0.02em',
         color: isLight ? colors.neutral[800] : colors.dark[900],
       },
 
       h2: {
-        fontSize: '1.5rem',     // 24px
-        fontWeight: 600,
+        fontSize: '1.75rem',    // 28px
+        fontWeight: 700,
         lineHeight: 1.3,
-        letterSpacing: '-0.01em',
+        letterSpacing: '-0.02em',
         color: isLight ? colors.neutral[800] : colors.dark[900],
       },
 

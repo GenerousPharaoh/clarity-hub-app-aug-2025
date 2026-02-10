@@ -67,14 +67,17 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     },
   },
 
-  // App Bar — white/near-white bg, subtle bottom border, anchored feel
+  // App Bar — subtle gradient bg, backdrop blur, modern feel
   MuiAppBar: {
     styleOverrides: {
       root: {
-        backgroundColor: theme.palette.background.paper,
+        background: theme.palette.mode === 'dark'
+          ? theme.palette.background.paper
+          : 'linear-gradient(135deg, #ffffff 0%, #F5F3FF 100%)',
         color: theme.palette.text.primary,
-        boxShadow: 'none',
-        borderBottom: `1px solid ${theme.palette.divider}`,
+        boxShadow: '0 1px 3px rgba(99, 102, 241, 0.06), 0 1px 2px rgba(31, 44, 71, 0.04)',
+        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+        backdropFilter: 'blur(8px)',
 
         '&.MuiAppBar-positionFixed': {
           zIndex: theme.zIndex.appBar,
@@ -82,13 +85,15 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
       },
 
       colorPrimary: {
-        backgroundColor: theme.palette.background.paper,
+        background: theme.palette.mode === 'dark'
+          ? theme.palette.background.paper
+          : 'linear-gradient(135deg, #ffffff 0%, #F5F3FF 100%)',
         color: theme.palette.text.primary,
       },
     },
   },
 
-  // Button — spec: 10px/16px padding, 6px radius, 36px min-height, 120ms ease
+  // Button — gradient contained, smooth transitions, visible hover states
   MuiButton: {
     styleOverrides: {
       root: {
@@ -99,7 +104,7 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
         lineHeight: 1.5,
         padding: '10px 16px',
         minHeight: 36,
-        transition: 'background-color 120ms ease, box-shadow 120ms ease, border-color 120ms ease, color 120ms ease',
+        transition: 'all 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
 
         '&:disabled': {
           transform: 'none',
@@ -107,15 +112,19 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
       },
 
       contained: {
-        boxShadow: theme.palette.mode === 'dark' ? shadows.dark.xs : shadows.sm,
+        background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
         color: '#ffffff',
+        boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
 
         '&:hover': {
-          boxShadow: theme.palette.mode === 'dark' ? shadows.dark.sm : shadows.base,
+          background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+          boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+          transform: 'translateY(-1px)',
         },
 
         '&:active': {
-          boxShadow: theme.palette.mode === 'dark' ? shadows.dark.xs : shadows.xs,
+          transform: 'translateY(0)',
+          boxShadow: '0 2px 6px rgba(99, 102, 241, 0.2)',
         },
       },
 
@@ -136,7 +145,7 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
         padding: '6px 12px',
 
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.04),
+          backgroundColor: alpha(theme.palette.primary.main, 0.08),
         },
       },
 
@@ -154,19 +163,38 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     },
   },
 
-  // Card — 20px padding, 8px radius, two-stage shadow with 150ms hover
+  // Card — gradient accent line on hover, lift effect, modern feel
   MuiCard: {
     styleOverrides: {
       root: {
         backgroundColor: theme.palette.background.paper,
-        borderRadius: 8,
+        borderRadius: 12,
         boxShadow: theme.palette.mode === 'dark' ? shadows.dark.sm : shadows.sm,
         border: `1px solid ${theme.palette.divider}`,
-        transition: 'box-shadow 150ms ease-out, border-color 150ms ease-out',
-        padding: 0, // Let CardContent handle padding
+        transition: 'all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        padding: 0,
+        position: 'relative' as const,
+        overflow: 'hidden',
+
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          background: 'linear-gradient(90deg, #6366F1, #8B5CF6)',
+          opacity: 0,
+          transition: 'opacity 200ms ease',
+        },
 
         '&:hover': {
-          boxShadow: theme.palette.mode === 'dark' ? shadows.dark.base : shadows.base,
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 30px rgba(99, 102, 241, 0.12), 0 4px 12px rgba(31, 44, 71, 0.08)',
+          borderColor: alpha('#6366F1', 0.3),
+          '&::before': {
+            opacity: 1,
+          },
         },
       },
     },
@@ -234,7 +262,7 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
           borderColor: theme.palette.primary.main,
           borderWidth: 2,
-          boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.08)}`,
+          boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.12)}`,
         },
         
         '&.Mui-error .MuiOutlinedInput-notchedOutline': {
@@ -315,14 +343,14 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
         transition: 'background-color 120ms ease',
 
         '&:hover': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.04),
+          backgroundColor: alpha(theme.palette.primary.main, 0.06),
         },
 
         '&.Mui-selected': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+          backgroundColor: alpha(theme.palette.primary.main, 0.10),
 
           '&:hover': {
-            backgroundColor: alpha(theme.palette.primary.main, 0.12),
+            backgroundColor: alpha(theme.palette.primary.main, 0.14),
           },
         },
       },
@@ -334,7 +362,7 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
     styleOverrides: {
       paper: {
         borderRadius: parseInt(borderRadius.xl.replace('rem', '')) * 16,
-        boxShadow: theme.palette.mode === 'dark' ? shadows.dark.xl : shadows.interactive,
+        boxShadow: '0 24px 48px rgba(31, 44, 71, 0.16), 0 8px 24px rgba(99, 102, 241, 0.08)',
         border: `1px solid ${theme.palette.divider}`,
         backgroundImage: 'none',
       },
@@ -391,9 +419,10 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
       },
 
       indicator: {
-        height: 2,
-        borderRadius: 0,
+        height: 3,
+        borderRadius: '3px 3px 0 0',
         backgroundColor: theme.palette.primary.main,
+        boxShadow: '0 0 8px rgba(99,102,241,0.3)',
       },
 
       flexContainer: {
@@ -421,6 +450,8 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
         '&.Mui-selected': {
           color: theme.palette.primary.main,
           fontWeight: 600,
+          backgroundColor: alpha(theme.palette.primary.main, 0.06),
+          borderRadius: '8px 8px 0 0',
         },
       },
     },
@@ -520,11 +551,12 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
       },
       
       filled: {
-        backgroundColor: theme.palette.mode === 'dark' ? colors.dark[200] : colors.neutral[100],
-        color: theme.palette.text.primary,
-        
+        backgroundColor: alpha(theme.palette.primary.main, 0.10),
+        color: theme.palette.primary.main,
+        fontWeight: 500,
+
         '&:hover': {
-          backgroundColor: theme.palette.mode === 'dark' ? colors.dark[300] : colors.neutral[200],
+          backgroundColor: alpha(theme.palette.primary.main, 0.18),
         },
       },
       
@@ -687,16 +719,21 @@ export const createComponentOverrides = (theme: Theme): Components<Omit<Theme, '
         transition: 'background-color 120ms ease, color 120ms ease',
 
         '&:hover': {
-          backgroundColor: theme.palette.mode === 'dark'
-            ? alpha(theme.palette.primary.main, 0.08)
-            : '#eef0f3',  // hsl(220,14%,95%)
+          backgroundColor: alpha(theme.palette.primary.main, 0.06),
         },
 
         '&.Mui-selected': {
-          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+          background: `linear-gradient(90deg, ${alpha(theme.palette.primary.main, 0.12)} 0%, ${alpha(theme.palette.primary.main, 0.03)} 100%)`,
+          borderLeft: '3px solid',
+          borderLeftColor: theme.palette.primary.main,
+
+          '& .MuiListItemText-primary': {
+            color: theme.palette.primary.main,
+            fontWeight: 600,
+          },
 
           '&:hover': {
-            backgroundColor: alpha(theme.palette.primary.main, 0.12),
+            backgroundColor: alpha(theme.palette.primary.main, 0.15),
           },
         },
       },

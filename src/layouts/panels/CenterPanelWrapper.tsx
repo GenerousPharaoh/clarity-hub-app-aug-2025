@@ -8,10 +8,6 @@ interface CenterPanelWrapperProps {
 }
 
 const CenterPanelWrapper: React.FC<CenterPanelWrapperProps> = ({ children }) => {
-  // Check if we're in demo mode
-  const user = useAppStore(state => state.user);
-  const isDemoMode = user?.id === '00000000-0000-0000-0000-000000000000';
-
   const handleSave = async (content: string) => {
     console.log('Saving document:', content.substring(0, 100) + '...');
     // Simulate save delay

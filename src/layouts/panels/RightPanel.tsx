@@ -208,7 +208,7 @@ const RightPanel = ({
             .single();
             
           if (data?.storage_path) {
-            const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
+            const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || '';
             const directUrl = `https://${supabaseProjectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
             console.log('Trying last resort URL:', directUrl);
             
@@ -701,7 +701,7 @@ const RightPanel = ({
                   if (!selectedFileId) return;
                   
                   // Try with a direct public URL approach as a last resort
-                  const projectId = 'swtkpfpyjjkkemmvkhmz';
+                  const supabaseProjectUrl = import.meta.env.VITE_SUPABASE_URL || '';
                   
                   supabaseClient
                     .from('files')
@@ -710,7 +710,7 @@ const RightPanel = ({
                     .single()
                     .then(({ data }) => {
                       if (data?.storage_path) {
-                        const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
+                        const directUrl = `${supabaseProjectUrl}/storage/v1/object/public/files/${data.storage_path}?t=${Date.now()}`;
                         console.log('Trying alternative URL method:', directUrl);
                         
                         // Open in new tab to test access

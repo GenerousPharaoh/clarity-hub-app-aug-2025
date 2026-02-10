@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -50,9 +50,12 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
   // React Query client
   const queryClient = useQueryClient();
   
-  // Get the file from the store
-  const file = fileId && files ? files.find(f => f.id === fileId) : null;
-  
+  // Get the file from the store - memoize to prevent infinite re-renders
+  const file = useMemo(
+    () => (fileId && files ? files.find(f => f.id === fileId) : null),
+    [fileId, files]
+  );
+
   // Set up initial values when dialog opens
   useEffect(() => {
     if (open && file) {
@@ -61,32 +64,32 @@ const RenameFileDialog = ({ open, fileId, onClose }: RenameFileDialogProps) => {
       setExhibitIdExists(false);
       setError(null);
       setLoading(false);
-      
+
       // Get filename suggestions and next exhibit ID
       if (selectedProjectId) {
         getFilenameSuggestions(file.name, file.storage_path);
         getNextExhibitId();
       }
-    } else {
+    } else if (!open) {
       setLoading(true);
       setNameSuggestions([]);
       setNextExhibitId('');
     }
-  }, [open, file, selectedProjectId]);
+  }, [open, fileId, selectedProjectId]);
 
   // Check if exhibit ID already exists
   useEffect(() => {
     if (newExhibitId && newExhibitId !== file?.exhibit_id && files) {
-      const exists = files.some(f => 
-        f.id !== fileId && 
+      const exists = files.some(f =>
+        f.id !== fileId &&
         f.exhibit_id?.toLowerCase() === newExhibitId.toLowerCase()
       );
-      
+
       setExhibitIdExists(exists);
     } else {
       setExhibitIdExists(false);
     }
-  }, [newExhibitId, files, fileId, file]);
+  }, [newExhibitId, files, fileId]);
   
   // Get filename suggestions and next exhibit ID
   const getFilenameSuggestions = async (filename: string, storagePath: string) => {

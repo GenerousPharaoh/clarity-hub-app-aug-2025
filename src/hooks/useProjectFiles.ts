@@ -85,7 +85,7 @@ export function useProjectFiles(projectId: string | null) {
       const { data, error } = await supabase
         .from('files')
         .select('*')
-        .eq('project_id', targetProjectId)
+        .eq('project_id', projectId)
         .order('added_at', { ascending: false });
       
       if (error) {
@@ -201,25 +201,6 @@ export function useFileUpload() {
       }
       
       try {
-        // Only validate API connection if not in demo mode
-        if (!window.DEMO_MODE && userId !== '00000000-0000-0000-0000-000000000000') {
-          try {
-            const { data: testConnection, error: testError } = await supabase.auth.getSession();
-            
-            if (testError) {
-              console.warn('Session validation failed, switching to demo mode:', testError);
-              // Don't throw error, just continue with demo mode
-            }
-            
-            if (!testConnection?.session?.access_token) {
-              console.warn('No valid session token found, using demo mode');
-              // Don't throw error, just continue with demo mode
-            }
-          } catch (sessionError) {
-            console.warn('Session check failed, continuing with demo mode:', sessionError);
-          }
-        }
-        
         console.log('Starting file upload process', { 
           name: file.name, 
           size: file.size, 
@@ -317,39 +298,7 @@ export function useFileUpload() {
             processingStatus: 'pending',
           };
           
-          // Check if we are in demo mode (check user ID or window.DEMO_MODE)
-          const isDemoMode = userId === 'demo-user-123' || 
-                           userId === '00000000-0000-0000-0000-000000000000' || 
-                           window.DEMO_MODE;
-          
-          if (isDemoMode) {
-            console.log('Creating local file record (demo mode)');
-            // Create a client-side file record with a UUID
-            const mockFileData = {
-              id: fileId,
-              name: suggestedTitle, // Use AI-suggested title if available
-              project_id: projectId,
-              owner_id: userId,
-              uploaded_by_user_id: userId,
-              storage_path: storagePath,
-              content_type: file.type,
-              size: file.size,
-              file_type: fileType,
-              metadata: fileMetadata,
-              added_at: new Date().toISOString(),
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            };
-            
-            // Update the query cache directly in demo mode
-            queryClient.setQueryData(['files', projectId], (oldData: any) => 
-              [mockFileData, ...(oldData || [])]
-            );
-            
-            return mockFileData;
-          }
-          
-          // For non-demo mode, create database record
+          // Create database record
           console.log('Creating database record for file');
           
           // Create database record or use fallback object

@@ -56,13 +56,10 @@ const RightPanelWrapper = () => {
     ? files.find(file => file.id === selectedFileId) 
     : null;
   
-  // Check if we're in demo mode
-  const isDemoMode = user?.id === '00000000-0000-0000-0000-000000000000';
-
   // Load file URL for professional viewer
   useEffect(() => {
     const loadFileUrl = async () => {
-      if (!selectedFile || isDemoMode) {
+      if (!selectedFile) {
         setFileUrl(null);
         setLoading(false);
         return;

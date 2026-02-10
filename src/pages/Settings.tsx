@@ -103,7 +103,6 @@ const Settings: React.FC = () => {
     }
   };
 
-  const isDemoMode = user?.id === '00000000-0000-0000-0000-000000000000';
   const isUsingLocalStorage = isUsingFallback();
 
   return (
@@ -123,17 +122,9 @@ const Settings: React.FC = () => {
               {user?.user_metadata?.full_name || user?.email || 'Demo User'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {user?.email || 'demo@example.com'}
+              {user?.email || ''}
             </Typography>
           </Box>
-          {isDemoMode && (
-            <Chip 
-              label="Demo Mode" 
-              color="warning" 
-              variant="outlined" 
-              size="small"
-            />
-          )}
         </Box>
         <Button 
           variant="outlined" 

@@ -150,19 +150,7 @@ export const IntelligentUploadZone: React.FC = () => {
     userId: string,
     projectId: string
   ) => {
-    const isDemoMode = userId === '00000000-0000-0000-0000-000000000000';
-    
-    try {
-      if (isDemoMode) {
-        // Demo Mode: Use persistent local storage + real AI processing
-        await processDemoFileUpload(file, uploadId, projectId);
-      } else {
-        // Production Mode: Use Supabase
-        await processProductionFileUpload(file, uploadId, userId, projectId);
-      }
-    } catch (error) {
-      throw error;
-    }
+    await processProductionFileUpload(file, uploadId, userId, projectId);
   };
 
   const processDemoFileUpload = async (file: File, uploadId: string, projectId: string) => {
@@ -403,12 +391,6 @@ export const IntelligentUploadZone: React.FC = () => {
   // Real-time processing updates
   useEffect(() => {
     if (!user || !user.id) return;
-
-    // Skip realtime for demo mode to avoid authentication issues
-    if (user.id === '00000000-0000-0000-0000-000000000000') {
-      console.log('Skipping realtime subscription in demo mode');
-      return;
-    }
 
     const subscription = supabase
       .channel(`file_processing_${user.id}`)

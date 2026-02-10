@@ -196,29 +196,11 @@ const initIfNeeded = () => {
   }, 2000); // Increased delay to allow auth to fully initialize
 };
 
-// Always initialize IndexedDB in browser environment 
+// Always initialize IndexedDB in browser environment
 if (typeof window !== 'undefined') {
-  console.log('Initializing local storage in browser environment...');
-  
-  // Only enable fallback storage in demo mode
-  if (window.DEMO_MODE) {
-    try {
-      localStorage.setItem('USE_FALLBACK_STORAGE', 'true');
-      console.log('Fallback storage enabled for demo mode');
-      
-      // Initialize immediately
-      initIndexedDB()
-        .then(() => console.log('IndexedDB initialized for fallback storage'))
-        .catch(err => console.error('IndexedDB initialization failed:', err));
-    } catch (err) {
-      console.error('Failed to enable fallback storage:', err);
-    }
-  } else {
-    // Initialize IndexedDB for file sync in production
-    initIndexedDB()
-      .then(() => console.log('IndexedDB initialized for file sync'))
-      .catch(err => console.error('IndexedDB initialization failed:', err));
-  }
+  initIndexedDB()
+    .then(() => console.log('IndexedDB initialized for file sync'))
+    .catch(err => console.error('IndexedDB initialization failed:', err));
 }
 
 // Only run bucket initialization on the server (SSR) to avoid client-side noise

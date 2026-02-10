@@ -12,7 +12,7 @@
 export const publicUrl = (key: string, bucket?: string): string => {
   // Get Supabase project URL from environment
   // Strip any trailing slashes to avoid double slashes in the final URL
-  const base = (import.meta.env.VITE_SUPABASE_URL || 'https://swtkpfpyjjkkemmvkhmz.supabase.co')
+  const base = (import.meta.env.VITE_SUPABASE_URL || '')
     .replace(/\/+$/, '');
   
   // Parse bucket from key if not provided separately

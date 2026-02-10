@@ -143,9 +143,6 @@ const UniversalFileViewer: React.FC<{ file: FileRecord | null }> = ({ file }) =>
     );
   }
 
-  // Check if we're in demo mode
-  const user = useAppStore(state => state.user);
-  const isDemoMode = user?.id === '00000000-0000-0000-0000-000000000000';
 
   // Handle link copying for demo mode
   const handleCopyLink = () => {

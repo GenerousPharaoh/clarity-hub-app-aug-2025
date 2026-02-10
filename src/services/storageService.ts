@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase';
 import { fallbackStorage } from './fallbackStorageService';
 
 // Get Supabase URL for public URL construction
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://swtkpfpyjjkkemmvkhmz.supabase.co';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 
 // Initialize fallback mode based on prior failures
 let useLocalFallback = false;
@@ -34,13 +34,6 @@ const fileVersions: Record<string, FileVersion[]> = {};
 // Test Supabase connection on startup and set fallback mode if needed
 (async function testSupabaseConnection() {
   try {
-    // Check if we're in demo mode first
-    if (window.DEMO_MODE) {
-      console.log('Demo mode detected, enabling fallback storage');
-      useLocalFallback = true;
-      return;
-    }
-    
     // Try to access the files bucket
     const { data, error } = await supabase.storage.from('files').list('', { limit: 1 });
     
@@ -90,7 +83,7 @@ export const resetFallbackMode = async (): Promise<boolean> => {
  * This avoids the redirect issue that can cause iframe embedding problems.
  */
 export const getPublicUrl = (bucket: string, path: string): string => {
-  if (useLocalFallback || window.DEMO_MODE) {
+  if (useLocalFallback) {
     // In fallback mode, we can't return a synchronous URL for async local storage
     // Components should use getFileUrl() for async URL resolution
     console.warn('[storageService] Fallback mode active - use getFileUrl() for proper async handling');
@@ -191,7 +184,7 @@ export const uploadFile = async (
     } = options || {};
     
     // Check if we're in fallback mode or demo mode
-    if (useLocalFallback || window.DEMO_MODE) {
+    if (useLocalFallback) {
       console.log('Using local fallback for uploadFile (fallback mode or demo)');
       
       // Extract project ID and user ID from the path
@@ -199,13 +192,13 @@ export const uploadFile = async (
       const parts = path.split('/');
       const projectId = parts.length > 1 ? parts[1] : 'unknown-project';
       
-      // Get user ID from Supabase auth or use demo user ID
-      let userId = 'demo-user-123';
+      // Get user ID from Supabase auth
+      let userId = 'unknown';
       try {
         const { data } = await supabase.auth.getUser();
-        userId = data?.user?.id || 'demo-user-123';
+        userId = data?.user?.id || 'unknown';
       } catch (error) {
-        console.warn('Could not get user ID, using demo user');
+        console.warn('Could not get user ID');
       }
       
       // Simulate upload progress for better UX
@@ -550,7 +543,7 @@ export function getFileUrl(filePath: string, options?: { cacheBuster?: boolean }
     
     try {
       // Get environment variables or fallback values
-      const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || 'swtkpfpyjjkkemmvkhmz';
+      const supabaseProjectId = supabaseUrl.match(/\/\/([^.]+)/)?.[1] || '';
       
       // APPROACH 1: Use the Supabase JS client's built-in getPublicUrl method
       try {

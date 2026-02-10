@@ -224,14 +224,7 @@ const LeftPanel = ({
         return;
       }
       
-      // Handle demo user - don't try to fetch from Supabase
-      if (user?.id === '00000000-0000-0000-0000-000000000000' || window.DEMO_MODE) {
-        console.log('Demo user detected - using local projects');
-        // Demo user uses store projects, no need to fetch from Supabase
-        return;
-      }
-      
-      // Verify authentication status before proceeding for real users
+      // Verify authentication status before proceeding
       const { data: session, error: sessionError } = await supabaseClient.auth.getSession();
       
       if (sessionError) {
@@ -255,16 +248,13 @@ const LeftPanel = ({
       setProjects(data || []);
     } catch (error) {
       logError(error, 'fetchProjects');
-      // Don't show session expired message for demo users
-      if (!window.DEMO_MODE && user?.id !== '00000000-0000-0000-0000-000000000000') {
-        // If this is the common API key error, provide a more helpful message
-        if (error?.message?.includes('No API key found')) {
-          showNotification(
-            'Session expired. Please refresh your browser or log in again.',
-            'warning',
-            6000
-          );
-        }
+      // If this is the common API key error, provide a more helpful message
+      if (error?.message?.includes('No API key found')) {
+        showNotification(
+          'Session expired. Please refresh your browser or log in again.',
+          'warning',
+          6000
+        );
       }
     } finally {
       setProjectsLoading(false);

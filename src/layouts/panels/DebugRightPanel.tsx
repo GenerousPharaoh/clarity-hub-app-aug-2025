@@ -132,8 +132,8 @@ const DebugRightPanel: React.FC = () => {
     
     try {
       // Method 1: Direct URL construction
-      const projectId = 'swtkpfpyjjkkemmvkhmz';
-      const directUrl = `https://${projectId}.supabase.co/storage/v1/object/public/files/${fileDetails.storage_path}`;
+      const supabaseProjectUrl = import.meta.env.VITE_SUPABASE_URL || '';
+      const directUrl = `${supabaseProjectUrl}/storage/v1/object/public/files/${fileDetails.storage_path}`;
       
       addDebugInfo(`Constructed direct URL: ${directUrl}`);
       

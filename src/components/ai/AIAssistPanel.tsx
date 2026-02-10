@@ -33,7 +33,6 @@ import {
 import { supabase as supabaseClient } from '../../lib/supabase';
 import { File as FileType } from '../../types';
 import useAppStore from '../../store';
-import { demoAI } from '../../services/demoAIService';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -107,39 +106,8 @@ const AIAssistPanel = ({ fileId }: AIAssistPanelProps) => {
       setAnalyzing(true);
       setError(null);
       
-      // Use demo AI for demo mode
-      if (window.DEMO_MODE) {
-        // Simulate analysis with demo AI
-        const demoAnalysis = await demoAI.analyzeDocument(
-          '', // Empty content for demo
-          selectedFile.name,
-          selectedFile.content_type || '',
-          `Analyzing file ${selectedFile.id}`
-        );
-        
-        const analysisResult: AnalysisResult = {
-          summary: demoAnalysis.summary,
-          documentType: demoAnalysis.documentType,
-          keyEntities: demoAnalysis.keyEntities.map(e => ({ name: e, role: 'Entity' })),
-          keyDates: [],
-          legalIssues: ['Document review required', 'Legal compliance check needed'],
-          keyFacts: demoAnalysis.insights.map(i => i.description),
-          relevantLaw: [],
-          suggestedKeywords: demoAnalysis.keyEntities
-        };
-        
-        setAnalysis(analysisResult);
-        
-        // Update file metadata in store
-        useAppStore.getState().updateFile(selectedFile.id, {
-          metadata: {
-            ...selectedFile.metadata,
-            analysis: analysisResult,
-            analyzed_at: new Date().toISOString()
-          }
-        });
-      } else {
-        // Call the analyze-file edge function for real mode
+      // Call the analyze-file edge function
+      {
         const { data, error } = await supabaseClient.functions.invoke('analyze-file', {
           body: { fileId }
         });

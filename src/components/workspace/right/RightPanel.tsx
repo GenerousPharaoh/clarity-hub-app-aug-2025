@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import useAppStore from '@/store';
 import { cn } from '@/lib/utils';
 import { ChevronRight, Eye, Sparkles } from 'lucide-react';
@@ -8,39 +8,8 @@ import { AIChatPanel } from '@/components/ai/AIChatPanel';
 type Tab = 'viewer' | 'ai';
 
 export function RightPanel() {
-  const isOpen = useAppStore((s) => s.isRightPanelOpen);
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
   const [activeTab, setActiveTab] = useState<Tab>('viewer');
-
-  const handleExpand = useCallback(
-    (tab: Tab) => {
-      setActiveTab(tab);
-      if (!isOpen) toggleRight();
-    },
-    [isOpen, toggleRight]
-  );
-
-  // Collapsed state: thin icon strip
-  if (!isOpen) {
-    return (
-      <div className="flex h-full w-full flex-col items-center gap-1 bg-white py-2 dark:bg-surface-800">
-        <button
-          onClick={() => handleExpand('viewer')}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
-          title="Open file viewer"
-        >
-          <Eye className="h-4 w-4" />
-        </button>
-        <button
-          onClick={() => handleExpand('ai')}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-accent-500 transition-colors hover:bg-accent-50 hover:text-accent-600 dark:hover:bg-accent-900/30 dark:hover:text-accent-400"
-          title="Open AI assistant"
-        >
-          <Sparkles className="h-4 w-4" />
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full w-full flex-col bg-white dark:bg-surface-800">

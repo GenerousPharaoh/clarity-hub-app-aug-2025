@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { FolderOpen, ChevronLeft, Search, X, FileText } from 'lucide-react';
+import { ChevronLeft, FolderOpen, Search, X, FileText } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -8,7 +8,6 @@ import { FileListItem } from './FileListItem';
 import { FileUploadZone } from './FileUploadZone';
 
 export function LeftPanel() {
-  const isOpen = useAppStore((s) => s.isLeftPanelOpen);
   const toggleLeft = useAppStore((s) => s.toggleLeftPanel);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const searchQuery = useAppStore((s) => s.searchQuery);
@@ -27,30 +26,9 @@ export function LeftPanel() {
     );
   }, [files, searchQuery]);
 
-  const handleExpand = useCallback(() => {
-    if (!isOpen) toggleLeft();
-  }, [isOpen, toggleLeft]);
-
   const clearSearch = useCallback(() => {
     setSearchQuery('');
   }, [setSearchQuery]);
-
-  // ── Collapsed state ──────────────────────────────────────
-  if (!isOpen) {
-    return (
-      <div className="flex h-full w-full flex-col items-center bg-white py-2 dark:bg-surface-800">
-        <button
-          onClick={handleExpand}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
-          title="Expand file browser"
-        >
-          <FolderOpen className="h-4 w-4" />
-        </button>
-      </div>
-    );
-  }
-
-  // ── Expanded state ───────────────────────────────────────
   return (
     <div className="flex h-full w-full flex-col bg-white dark:bg-surface-800">
       {/* ── Header ────────────────────────────────────────── */}

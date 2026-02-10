@@ -11,14 +11,39 @@ export function PanelGrip({ className, id }: PanelGripProps) {
   return (
     <PanelResizeHandle
       id={id}
-      className={cn('group relative flex w-[3px] items-center justify-center', className)}
+      className={cn(
+        'group relative flex w-2 items-center justify-center',
+        'hover:w-2 active:w-2',
+        'transition-colors duration-100',
+        className
+      )}
     >
-      {/* Background track */}
-      <div className="absolute inset-0 bg-surface-200 transition-colors duration-150 group-hover:bg-primary-400 group-data-[resize-handle-active]:bg-primary-500 dark:bg-surface-700 dark:group-hover:bg-primary-500 dark:group-data-[resize-handle-active]:bg-primary-400" />
+      {/* Wider invisible hit area — extends beyond the visible line */}
+      <div className="absolute inset-y-0 -left-1 -right-1 z-10" />
 
-      {/* Grip icon - appears on hover */}
-      <div className="relative z-10 flex h-8 w-4 items-center justify-center rounded-sm bg-surface-200 opacity-0 shadow-sm transition-all duration-150 group-hover:opacity-100 group-data-[resize-handle-active]:opacity-100 dark:bg-surface-600">
-        <GripVertical className="h-3.5 w-3.5 text-surface-500 dark:text-surface-300" />
+      {/* Visible track — 1px default, 2px on hover/active */}
+      <div
+        className={cn(
+          'absolute inset-y-0 left-1/2 -translate-x-1/2',
+          'w-px bg-surface-200 dark:bg-surface-700',
+          'transition-all duration-100',
+          'group-hover:w-[2px] group-hover:bg-primary-400 dark:group-hover:bg-primary-500',
+          'group-data-[resize-handle-state=drag]:w-[2px] group-data-[resize-handle-state=drag]:bg-primary-500 dark:group-data-[resize-handle-state=drag]:bg-primary-400'
+        )}
+      />
+
+      {/* Grip dots — visible on hover/drag */}
+      <div
+        className={cn(
+          'relative z-20 flex h-6 w-3 items-center justify-center rounded-sm',
+          'bg-surface-100 dark:bg-surface-700',
+          'border border-surface-200 dark:border-surface-600',
+          'opacity-0 transition-opacity duration-100',
+          'group-hover:opacity-100',
+          'group-data-[resize-handle-state=drag]:opacity-100'
+        )}
+      >
+        <GripVertical className="h-3 w-3 text-surface-400 dark:text-surface-500" />
       </div>
     </PanelResizeHandle>
   );

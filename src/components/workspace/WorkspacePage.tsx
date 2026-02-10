@@ -1,142 +1,135 @@
 import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { Panel, PanelGroup } from 'react-resizable-panels';
+import {
+  Panel,
+  PanelGroup,
+  type ImperativePanelHandle,
+} from 'react-resizable-panels';
 import useAppStore from '@/store';
 import { LeftPanel } from './left/LeftPanel';
 import { CenterPanel } from './center/CenterPanel';
 import { RightPanel } from './right/RightPanel';
 import { PanelGrip } from './PanelGrip';
-
-const PANEL_DEFAULTS = {
-  left: 20,
-  center: 45,
-  right: 35,
-} as const;
-
-const PANEL_MINS = {
-  left: 15,
-  center: 30,
-  right: 20,
-} as const;
-
-const COLLAPSED_SIZE = 3; // % width for collapsed icon strip
+import { CollapsedStrip } from './CollapsedStrip';
+import { FolderOpen, Eye, Sparkles } from 'lucide-react';
 
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
   const isLeftOpen = useAppStore((s) => s.isLeftPanelOpen);
   const isRightOpen = useAppStore((s) => s.isRightPanelOpen);
+  const setLeftPanel = useAppStore((s) => s.setLeftPanel);
+  const setRightPanel = useAppStore((s) => s.setRightPanel);
 
-  // Refs for imperative panel control
-  const leftPanelRef = useRef<import('react-resizable-panels').ImperativePanelHandle>(null);
-  const rightPanelRef = useRef<import('react-resizable-panels').ImperativePanelHandle>(null);
+  const leftRef = useRef<ImperativePanelHandle>(null);
+  const rightRef = useRef<ImperativePanelHandle>(null);
 
-  // Set active project on mount / projectId change
+  // Set active project
   useEffect(() => {
-    if (projectId) {
-      setSelectedProject(projectId);
-    }
-    return () => {
-      setSelectedProject(null);
-    };
+    if (projectId) setSelectedProject(projectId);
+    return () => setSelectedProject(null);
   }, [projectId, setSelectedProject]);
 
-  // Sync zustand panel state with react-resizable-panels
+  // Sync Zustand → panel imperative API
   useEffect(() => {
-    const panel = leftPanelRef.current;
-    if (!panel) return;
-
-    if (isLeftOpen) {
-      if (panel.isCollapsed()) {
-        panel.expand();
-      }
-    } else {
-      if (!panel.isCollapsed()) {
-        panel.collapse();
-      }
-    }
+    const p = leftRef.current;
+    if (!p) return;
+    if (isLeftOpen && p.isCollapsed()) p.expand();
+    else if (!isLeftOpen && !p.isCollapsed()) p.collapse();
   }, [isLeftOpen]);
 
   useEffect(() => {
-    const panel = rightPanelRef.current;
-    if (!panel) return;
-
-    if (isRightOpen) {
-      if (panel.isCollapsed()) {
-        panel.expand();
-      }
-    } else {
-      if (!panel.isCollapsed()) {
-        panel.collapse();
-      }
-    }
+    const p = rightRef.current;
+    if (!p) return;
+    if (isRightOpen && p.isCollapsed()) p.expand();
+    else if (!isRightOpen && !p.isCollapsed()) p.collapse();
   }, [isRightOpen]);
 
   return (
-    <div className="h-full w-full">
+    <div className="flex h-full">
+      {/* Left collapsed strip — outside PanelGroup */}
+      <CollapsedStrip side="left" visible={!isLeftOpen}>
+        <button
+          onClick={() => setLeftPanel(true)}
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          title="Open file browser"
+        >
+          <FolderOpen className="h-4 w-4" />
+        </button>
+      </CollapsedStrip>
+
+      {/* Main panel group */}
       <PanelGroup
         direction="horizontal"
         autoSaveId="clarity-hub-workspace"
-        className="h-full"
+        className="h-full flex-1"
       >
-        {/* Left Panel - File Browser */}
         <Panel
-          ref={leftPanelRef}
-          id="left-panel"
+          ref={leftRef}
+          id="left"
           order={1}
-          defaultSize={PANEL_DEFAULTS.left}
-          minSize={PANEL_MINS.left}
+          defaultSize={20}
+          minSize={14}
           collapsible
-          collapsedSize={COLLAPSED_SIZE}
+          collapsedSize={0}
           onCollapse={() => {
-            const current = useAppStore.getState().isLeftPanelOpen;
-            if (current) useAppStore.getState().setLeftPanel(false);
+            if (useAppStore.getState().isLeftPanelOpen)
+              useAppStore.getState().setLeftPanel(false);
           }}
           onExpand={() => {
-            const current = useAppStore.getState().isLeftPanelOpen;
-            if (!current) useAppStore.getState().setLeftPanel(true);
+            if (!useAppStore.getState().isLeftPanelOpen)
+              useAppStore.getState().setLeftPanel(true);
           }}
-          className="transition-[flex] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <LeftPanel />
         </Panel>
 
-        <PanelGrip id="left-grip" />
+        <PanelGrip id="grip-left" />
 
-        {/* Center Panel - Notes & Overview */}
-        <Panel
-          id="center-panel"
-          order={2}
-          defaultSize={PANEL_DEFAULTS.center}
-          minSize={PANEL_MINS.center}
-        >
+        <Panel id="center" order={2} defaultSize={45} minSize={30}>
           <CenterPanel />
         </Panel>
 
-        <PanelGrip id="right-grip" />
+        <PanelGrip id="grip-right" />
 
-        {/* Right Panel - Viewer & AI Chat */}
         <Panel
-          ref={rightPanelRef}
-          id="right-panel"
+          ref={rightRef}
+          id="right"
           order={3}
-          defaultSize={PANEL_DEFAULTS.right}
-          minSize={PANEL_MINS.right}
+          defaultSize={35}
+          minSize={20}
           collapsible
-          collapsedSize={COLLAPSED_SIZE}
+          collapsedSize={0}
           onCollapse={() => {
-            const current = useAppStore.getState().isRightPanelOpen;
-            if (current) useAppStore.getState().setRightPanel(false);
+            if (useAppStore.getState().isRightPanelOpen)
+              useAppStore.getState().setRightPanel(false);
           }}
           onExpand={() => {
-            const current = useAppStore.getState().isRightPanelOpen;
-            if (!current) useAppStore.getState().setRightPanel(true);
+            if (!useAppStore.getState().isRightPanelOpen)
+              useAppStore.getState().setRightPanel(true);
           }}
-          className="transition-[flex] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <RightPanel />
         </Panel>
       </PanelGroup>
+
+      {/* Right collapsed strip — outside PanelGroup */}
+      <CollapsedStrip side="right" visible={!isRightOpen}>
+        <button
+          onClick={() => setRightPanel(true)}
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          title="Open file viewer"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => setRightPanel(true)}
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-accent-500 transition-colors hover:bg-accent-50 hover:text-accent-600 dark:hover:bg-accent-900/30 dark:hover:text-accent-400"
+          title="Open AI assistant"
+        >
+          <Sparkles className="h-4 w-4" />
+        </button>
+      </CollapsedStrip>
     </div>
   );
 }

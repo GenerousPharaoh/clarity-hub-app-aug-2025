@@ -203,7 +203,7 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ open, onClose
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   
-  const { addProject, setSelectedProject } = useAppStore();
+  const { addProject, setSelectedProject, user } = useAppStore();
 
   const steps = ['Basic Info', 'Details', 'Review'];
 
@@ -226,7 +226,7 @@ const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ open, onClose
       name: projectData.name,
       description: projectData.description,
       created_at: new Date().toISOString(),
-      owner_id: 'demo-user',
+      owner_id: user?.id || '',
       goal_type: projectData.type,
       tags: projectData.tags,
       collaborators: projectData.collaborators,

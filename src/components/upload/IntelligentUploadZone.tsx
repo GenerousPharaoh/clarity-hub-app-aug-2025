@@ -39,7 +39,6 @@ import { supabase } from '../../lib/supabase';
 import { AdaptiveAIService } from '../../services/adaptiveAIService';
 import ExhibitEditor from '../exhibits/ExhibitEditor';
 import useAppStore from '../../store';
-import demoStorage from '../../services/demoStorageService';
 
 interface UploadProgress {
   id: string;
@@ -153,70 +152,6 @@ export const IntelligentUploadZone: React.FC = () => {
     await processProductionFileUpload(file, uploadId, userId, projectId);
   };
 
-  const processDemoFileUpload = async (file: File, uploadId: string, projectId: string) => {
-    // Stage 1: Save to IndexedDB
-    updateUploadProgress(uploadId, 'upload', 20);
-    
-    // Generate exhibit data first
-    updateUploadProgress(uploadId, 'extract', 40);
-    const exhibitData = await generateDemoExhibitData(file);
-    
-    // Save to demo storage
-    updateUploadProgress(uploadId, 'upload', 60);
-    const demoFile = await demoStorage.saveFile(
-      file, 
-      projectId, 
-      exhibitData.exhibitId, 
-      exhibitData.exhibitTitle
-    );
-
-    // Add to app store for immediate UI update
-    const fileRecord = {
-      id: uploadId,
-      name: file.name,
-      project_id: projectId,
-      owner_id: '00000000-0000-0000-0000-000000000000',
-      file_type: file.type.split('/')[0],
-      content_type: file.type,
-      size: file.size,
-      storage_path: `demo/${uploadId}`,
-      added_at: new Date().toISOString(),
-      exhibit_id: exhibitData.exhibitId,
-      exhibit_title: exhibitData.exhibitTitle
-    };
-
-    // Add to store immediately
-    useAppStore.getState().addFile(fileRecord);
-
-    updateUploadProgress(uploadId, 'analyze', 80);
-
-    // Stage 2: Real AI Analysis (even in demo mode)
-    try {
-      const analysisResults = await performRealAIAnalysis(file, exhibitData);
-      updateUploadProgress(
-        uploadId, 
-        'completed', 
-        100, 
-        analysisResults.insights,
-        undefined,
-        exhibitData.exhibitId,
-        exhibitData.exhibitTitle
-      );
-    } catch (aiError) {
-      console.error('AI analysis failed in demo mode:', aiError);
-      // Still mark as completed with basic exhibit info
-      updateUploadProgress(
-        uploadId, 
-        'completed', 
-        100, 
-        [],
-        undefined,
-        exhibitData.exhibitId,
-        exhibitData.exhibitTitle
-      );
-    }
-  };
-
   const processProductionFileUpload = async (
     file: File,
     uploadId: string,
@@ -283,81 +218,6 @@ export const IntelligentUploadZone: React.FC = () => {
     }, 1000);
 
     updateUploadProgress(uploadId, 'extract', 100);
-  };
-
-  const generateDemoExhibitData = async (file: File) => {
-    // Smart exhibit ID generation based on file type and name
-    const fileType = file.type.split('/')[0];
-    const fileName = file.name.toLowerCase();
-    
-    let prefix = 'D'; // Default to Document
-    if (fileType === 'image') prefix = 'P'; // Photo
-    else if (fileType === 'video') prefix = 'V'; // Video
-    else if (fileType === 'audio') prefix = 'A'; // Audio
-    else if (fileName.includes('contract')) prefix = 'C'; // Contract
-    else if (fileName.includes('email')) prefix = 'E'; // Email
-    
-    // Get next sequential number for this prefix
-    const existingFiles = useAppStore.getState().files;
-    const existingWithPrefix = existingFiles
-      .filter(f => f.exhibit_id?.startsWith(prefix))
-      .map(f => parseInt(f.exhibit_id?.substring(1) || '0'))
-      .filter(n => !isNaN(n));
-    
-    const nextNumber = existingWithPrefix.length > 0 ? Math.max(...existingWithPrefix) + 1 : 1;
-    const exhibitId = `${prefix}${nextNumber}`;
-    
-    // Generate smart title
-    const baseName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-    const exhibitTitle = `${baseName} (Exhibit ${exhibitId})`;
-    
-    return { exhibitId, exhibitTitle };
-  };
-
-  const performRealAIAnalysis = async (file: File, exhibitData: any) => {
-    // Convert file to text for analysis (simplified for demo)
-    let content = '';
-    
-    if (file.type === 'text/plain') {
-      content = await file.text();
-    } else if (file.type === 'application/pdf') {
-      // For demo, use filename and basic metadata
-      content = `PDF Document: ${file.name}. Size: ${(file.size / 1024).toFixed(1)}KB. This document has been uploaded for legal analysis and case preparation.`;
-    } else {
-      content = `File: ${file.name} (${file.type}). Size: ${(file.size / 1024).toFixed(1)}KB. This file is available for legal review and analysis.`;
-    }
-
-    // Generate insights based on file content and type
-    const insights = [];
-    
-    if (file.name.toLowerCase().includes('contract')) {
-      insights.push({
-        title: 'Contract Analysis',
-        description: 'This appears to be a contract document. Key areas to review include terms, obligations, and potential liability clauses.'
-      });
-    }
-    
-    if (file.name.toLowerCase().includes('email')) {
-      insights.push({
-        title: 'Email Communication',
-        description: 'Email evidence identified. Consider authentication requirements and relevance to case timeline.'
-      });
-    }
-    
-    if (file.type.startsWith('image/')) {
-      insights.push({
-        title: 'Visual Evidence',
-        description: 'Image file detected. Ensure proper chain of custody and consider enhancement or expert analysis if needed.'
-      });
-    }
-
-    // Add general legal insight
-    insights.push({
-      title: 'Exhibit Management',
-      description: `File successfully processed as ${exhibitData.exhibitId}. Ready for legal review and case integration.`
-    });
-
-    return { insights };
   };
 
   const updateUploadProgress = (

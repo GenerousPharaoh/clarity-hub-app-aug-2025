@@ -45,7 +45,6 @@ import { v4 as uuid } from 'uuid';
 import { supabase } from '../../lib/supabase';
 import { AdaptiveAIService, UserAIProfile, PersonalizedResponse } from '../../services/adaptiveAIService';
 import useAppStore from '../../store';
-import demoStorage from '../../services/demoStorageService';
 
 interface ChatMessage {
   id: string;
@@ -101,95 +100,6 @@ export const AdaptiveLegalAIChat: React.FC = () => {
       await initializeProductionChat();
     } catch (error) {
       console.error('Failed to initialize chat:', error);
-    }
-  };
-
-  const initializeDemoChat = async () => {
-    // Create demo AI profile
-    const profile: UserAIProfile = {
-      id: 'demo-profile',
-      user_id: user.id,
-      legal_specialties: ['Corporate Law', 'Contract Disputes', 'Commercial Litigation'],
-      writing_style_analysis: {
-        tone: 'professional',
-        formality: 'high',
-        preferred_structures: ['IRAC', 'chronological'],
-        citation_style: 'bluebook'
-      },
-      case_patterns: {
-        common_case_types: ['contract_breach', 'corporate_governance'],
-        typical_outcomes: ['settlement', 'motion_granted'],
-        jurisdiction_focus: ['federal', 'delaware']
-      },
-      interaction_preferences: {
-        communication_style: 'detailed',
-        response_length: 'comprehensive', 
-        expertise_level: 'senior_partner'
-      },
-      knowledge_domains: {
-        primary_domains: ['contract_law', 'corporate_law', 'litigation'],
-        specialization_depth: 'expert'
-      },
-      ai_learning_metadata: {
-        total_interactions: 25,
-        learning_progress: { contract_analysis: 0.85, brief_writing: 0.92 }
-      },
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    
-    setUserProfile(profile);
-
-    // Load demo conversation from local storage
-    const demoConversations = await demoStorage.getConversations(selectedProjectId);
-    
-    if (demoConversations.length > 0) {
-      const conversation = demoConversations[0];
-      setCurrentConversation({
-        id: conversation.id,
-        project_id: conversation.project_id,
-        user_id: user.id,
-        title: conversation.title,
-        created_at: conversation.created_at,
-        updated_at: conversation.updated_at,
-        last_message_at: conversation.updated_at
-      });
-      
-      // Load messages from conversation
-      const formattedMessages: ChatMessage[] = conversation.messages.map((msg: any) => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-        citations: msg.citations || [],
-        insights: msg.insights || [],
-        timestamp: new Date(msg.timestamp),
-        tokens_used: msg.tokens_used || 0
-      }));
-      setMessages(formattedMessages);
-    } else {
-      // Create new demo conversation
-      const newConversation = {
-        id: uuid(),
-        project_id: selectedProjectId,
-        title: 'AI Legal Assistant - Demo',
-        messages: [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-      
-      await demoStorage.saveConversation(newConversation);
-      setCurrentConversation({
-        id: newConversation.id,
-        project_id: newConversation.project_id,
-        user_id: user.id,
-        title: newConversation.title,
-        created_at: newConversation.created_at,
-        updated_at: newConversation.updated_at,
-        last_message_at: newConversation.updated_at
-      });
-      
-      // Add welcome message for demo
-      await addDemoWelcomeMessage(profile);
     }
   };
 
@@ -274,59 +184,6 @@ What would you like to work on today?`,
     
     if (currentConversation) {
       await saveMessageToDatabase(welcomeMessage, currentConversation.id);
-    }
-  };
-
-  const addDemoWelcomeMessage = async (profile: UserAIProfile) => {
-    const welcomeMessage: ChatMessage = {
-      id: uuid(),
-      role: 'assistant',
-      content: `Welcome to Clarity Hub's AI Legal Assistant! 🎯
-
-I'm your personalized AI assistant, trained in ${profile.legal_specialties.join(', ')}. I'm here to help you with:
-
-• **Document Analysis**: Upload files and get intelligent insights
-• **Case Strategy**: Develop arguments and identify key legal issues  
-• **Research Assistance**: Find relevant precedents and authorities
-• **Brief Writing**: Help draft motions, briefs, and legal documents
-• **Evidence Review**: Organize and analyze exhibits
-
-**Demo Features Available:**
-✅ Real file upload with persistent storage
-✅ AI-powered document analysis
-✅ Exhibit management with smart numbering
-✅ Conversation history that persists across sessions
-✅ Professional legal document editing
-
-Try asking me about your case, uploading a document, or requesting help with legal research. Everything you do here will be saved and persist across browser sessions!
-
-What would you like to work on first?`,
-      personalizedInsights: [
-        {
-          title: 'Demo Mode Active',
-          description: 'Full-featured demo with persistent data storage',
-          type: 'info'
-        },
-        {
-          title: 'Legal Expertise',
-          description: `Specialized in ${profile.legal_specialties.join(', ')}`,
-          type: 'success'
-        }
-      ],
-      timestamp: new Date()
-    };
-
-    setMessages([welcomeMessage]);
-    
-    // Save to demo storage
-    const conversation = await demoStorage.getConversations(selectedProjectId);
-    if (conversation.length > 0) {
-      const updatedConversation = {
-        ...conversation[0],
-        messages: [welcomeMessage],
-        updated_at: new Date().toISOString()
-      };
-      await demoStorage.saveConversation(updatedConversation);
     }
   };
 

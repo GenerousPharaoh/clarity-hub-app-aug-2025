@@ -41,7 +41,6 @@ import useAppStore from '../../store';
 import { cloudFileService } from '../../services/cloudFileService';
 import { geminiAI } from '../../services/geminiAIService';
 import ExhibitEditor from '../exhibits/ExhibitEditor';
-import { demoAI } from '../../services/demoAIService';
 
 interface UploadFile {
   id: string;

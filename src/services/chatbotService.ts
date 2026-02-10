@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '../lib/supabase';
 
 // Initialize Gemini AI with CPO's API key (temporary - replace with your own)
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyBoHxMRLlqSzCzvVpeuw06SUqmkj4eNzm8';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 // Chat modes configuration

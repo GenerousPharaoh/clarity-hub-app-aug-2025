@@ -205,7 +205,7 @@ export default function ProjectView() {
         ) : (
           <Box sx={{ height: 'calc(100% - 40px)' }}>
             <Editor
-              apiKey="q6pu1qv40eyr40jy40uf09aic0zax3jbmtuufeonppzbxmpk"
+              apiKey={import.meta.env.VITE_TINYMCE_API_KEY || 'gpl'}
               onInit={(evt, editor) => (editorRef.current = editor)}
               initialValue={noteContent}
               onEditorChange={handleEditorChange}

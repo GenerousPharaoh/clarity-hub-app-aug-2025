@@ -42,7 +42,6 @@ import {
   Redo,
 } from '@mui/icons-material';
 import useAppStore from '../../store';
-import demoStorage from '../../services/demoStorageService';
 
 interface ProfessionalRichEditorProps {
   initialContent?: string;
@@ -81,29 +80,6 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
   const user = useAppStore(state => state.user);
   const selectedProjectId = useAppStore(state => state.selectedProjectId);
 
-  // Load saved content for demo mode
-  useEffect(() => {
-    const loadDemoContent = async () => {
-      if (user?.id === '00000000-0000-0000-0000-000000000000' && selectedProjectId && !initialContent) {
-        setIsLoadingContent(true);
-        try {
-          const documentId = `editor-${selectedProjectId}`;
-          const savedDoc = await demoStorage.getDocument(documentId);
-          if (savedDoc?.content) {
-            setContent(savedDoc.content);
-            console.log('Loaded saved document from demo storage');
-          }
-        } catch (error) {
-          console.error('Failed to load demo content:', error);
-        } finally {
-          setIsLoadingContent(false);
-        }
-      }
-    };
-
-    loadDemoContent();
-  }, [user, selectedProjectId, initialContent]);
-
   // Auto-save functionality
   useEffect(() => {
     if (autoSave && isDirty && onSave) {
@@ -119,14 +95,6 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     try {
-      // Save to demo storage if in demo mode
-      if (user?.id === '00000000-0000-0000-0000-000000000000' && selectedProjectId) {
-        const documentId = `editor-${selectedProjectId}`;
-        await demoStorage.saveDocument(documentId, selectedProjectId, content, 'Document Editor');
-        console.log('Document saved to demo storage');
-      }
-      
-      // Also call the provided onSave if available
       if (onSave) {
         await onSave(content);
       }

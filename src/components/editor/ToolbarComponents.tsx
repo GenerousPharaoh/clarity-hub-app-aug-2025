@@ -3,7 +3,7 @@
  * These components must be used within a LexicalComposer context
  */
 import React from 'react';
-import { IconButton, Tooltip } from '@mui/material';
+import { IconButton, Tooltip, alpha, useTheme } from '@mui/material';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import {
   $getSelection,
@@ -25,6 +25,7 @@ export const ToolbarButton: React.FC<{
   active?: boolean;
 }> = ({ format, icon, tooltip, active }) => {
   const [editor] = useLexicalComposerContext();
+  const theme = useTheme();
 
   const handleClick = () => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, format as any);
@@ -32,12 +33,12 @@ export const ToolbarButton: React.FC<{
 
   return (
     <Tooltip title={tooltip}>
-      <IconButton 
-        size="small" 
+      <IconButton
+        size="small"
         onClick={handleClick}
         sx={{
-          color: active ? '#2563eb' : 'inherit',
-          backgroundColor: active ? 'rgba(30, 41, 59, 0.1)' : 'transparent',
+          color: active ? theme.palette.secondary.main : 'inherit',
+          backgroundColor: active ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
         }}
       >
         {icon}

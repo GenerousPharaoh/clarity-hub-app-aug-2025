@@ -14,7 +14,8 @@ import {
   List,
   ListItem,
   useMediaQuery,
-  useTheme
+  useTheme,
+  alpha
 } from '@mui/material';
 import { 
   CloudUpload, 
@@ -754,7 +755,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
           <Box sx={{ 
             p: 2, 
             borderRadius: '50%', 
-            bgcolor: theme => theme.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.12)' : 'rgba(30, 41, 59, 0.08)',
+            bgcolor: (t) => alpha(t.palette.primary.main, t.palette.mode === 'dark' ? 0.12 : 0.08),
             transition: 'all 0.3s ease',
             mb: 1
           }}>

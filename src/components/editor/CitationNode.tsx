@@ -21,7 +21,7 @@ import {
   LexicalEditor
 } from 'lexical';
 import React from 'react';
-import { Box, Chip } from '@mui/material';
+import { Box, Chip, alpha, useTheme } from '@mui/material';
 import { LinkOutlined } from '@mui/icons-material';
 
 // Command for inserting citation
@@ -214,6 +214,7 @@ const CitationComponent: React.FC<CitationComponentProps> = ({
   editor,
   nodeKey
 }) => {
+  const theme = useTheme();
   const citationText = `[${citationReference}]`;
 
   const handleClick = () => {
@@ -241,10 +242,10 @@ const CitationComponent: React.FC<CitationComponentProps> = ({
       onKeyDown={handleKeyDown}
       icon={<LinkOutlined />}
       sx={{
-        backgroundColor: '#e3f2fd',
-        border: '1px solid #2563eb',
+        backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+        border: `1px solid ${theme.palette.secondary.main}`,
         borderRadius: '4px',
-        color: '#1565c0',
+        color: theme.palette.secondary.dark,
         fontSize: '0.85rem',
         fontWeight: 600,
         height: '22px',
@@ -252,10 +253,10 @@ const CitationComponent: React.FC<CitationComponentProps> = ({
         cursor: 'pointer',
         transition: 'all 120ms cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
-          backgroundColor: '#bbdefb',
-          borderColor: '#1976d2',
+          backgroundColor: alpha(theme.palette.secondary.main, 0.12),
+          borderColor: theme.palette.secondary.main,
           transform: 'scale(1.05)',
-          boxShadow: '0 2px 8px rgba(30, 41, 59, 0.2)',
+          boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.2)}`,
         },
         '&:active': {
           transform: 'scale(0.98)',
@@ -263,7 +264,7 @@ const CitationComponent: React.FC<CitationComponentProps> = ({
         '& .MuiChip-icon': {
           fontSize: '14px',
           marginLeft: '4px',
-          color: '#1565c0',
+          color: theme.palette.secondary.dark,
         },
         '& .MuiChip-label': {
           paddingLeft: '6px',

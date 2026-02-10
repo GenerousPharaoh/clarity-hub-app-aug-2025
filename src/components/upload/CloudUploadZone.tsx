@@ -21,7 +21,9 @@ import {
   CircularProgress,
   IconButton,
   Collapse,
-  Button
+  Button,
+  useTheme,
+  alpha
 } from '@mui/material';
 import {
   CloudUpload as UploadIcon,
@@ -55,6 +57,7 @@ interface UploadFile {
 }
 
 export const CloudUploadZone: React.FC = () => {
+  const theme = useTheme();
   const user = useAppStore(state => state.user);
   const selectedProjectId = useAppStore(state => state.selectedProjectId);
   
@@ -265,15 +268,15 @@ export const CloudUploadZone: React.FC = () => {
           cursor: 'pointer',
           transition: 'all 0.3s ease',
           backgroundColor: isDragActive
-            ? 'rgba(30, 41, 59, 0.08)'
+            ? alpha(theme.palette.primary.main, 0.08)
             : 'background.paper',
           background: isDragActive
-            ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.08) 0%, rgba(30, 41, 59, 0.02) 100%)'
+            ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`
             : 'none',
           transform: isDragActive ? 'scale(1.02)' : 'scale(1)',
           '&:hover': {
             borderColor: 'primary.main',
-            backgroundColor: 'rgba(30, 41, 59, 0.04)',
+            backgroundColor: alpha(theme.palette.primary.main, 0.04),
             transform: 'scale(1.01)'
           }
         }}

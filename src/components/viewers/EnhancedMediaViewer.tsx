@@ -180,8 +180,8 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
 
     wavesurferRef.current = WaveSurfer.create({
       container: waveformContainer as HTMLElement,
-      waveColor: '#1e293b',
-      progressColor: '#0f172a',
+      waveColor: theme.palette.primary.main,
+      progressColor: theme.palette.primary.dark,
       barWidth: 2,
       barRadius: 1,
       responsive: true,

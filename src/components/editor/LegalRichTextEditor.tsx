@@ -19,6 +19,7 @@ import {
   Alert,
   Snackbar,
   alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Save,
@@ -211,6 +212,7 @@ const EditorContent: React.FC<{
   focusMode,
   onFocusModeToggle,
 }) => {
+  const theme = useTheme();
   const [toolbarFormats, setToolbarFormats] = useState<{[key: string]: boolean}>({});
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -297,20 +299,20 @@ const EditorContent: React.FC<{
             textTransform: 'none',
             fontWeight: 600,
             fontSize: '0.875rem',
-            background: hasUnsavedChanges 
-              ? 'linear-gradient(135deg, #4299e1, #63b3ed)' 
-              : 'linear-gradient(135deg, #e2e8f0, #cbd5e0)',
+            background: hasUnsavedChanges
+              ? `linear-gradient(135deg, ${theme.palette.secondary.dark}, ${theme.palette.secondary.main})`
+              : `linear-gradient(135deg, ${theme.palette.divider}, ${theme.palette.action.disabled})`,
             color: hasUnsavedChanges ? 'white' : 'text.disabled',
-            boxShadow: hasUnsavedChanges 
-              ? '0 4px 12px rgba(30, 41, 59, 0.4)'
+            boxShadow: hasUnsavedChanges
+              ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`
               : '0 2px 8px rgba(0, 0, 0, 0.1)',
             '&:hover': {
-              background: hasUnsavedChanges 
-                ? 'linear-gradient(135deg, #3182ce, #4299e1)' 
-                : 'linear-gradient(135deg, #cbd5e0, #a0aec0)',
+              background: hasUnsavedChanges
+                ? `linear-gradient(135deg, ${theme.palette.secondary.dark}, ${theme.palette.secondary.main})`
+                : `linear-gradient(135deg, ${theme.palette.action.disabled}, ${theme.palette.text.disabled})`,
               transform: 'translateY(-2px)',
-              boxShadow: hasUnsavedChanges 
-                ? '0 6px 16px rgba(30, 41, 59, 0.5)'
+              boxShadow: hasUnsavedChanges
+                ? `0 6px 16px ${alpha(theme.palette.primary.main, 0.5)}`
                 : '0 4px 12px rgba(0, 0, 0, 0.15)',
             },
             '&:disabled': {
@@ -418,6 +420,7 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
   focusMode = false,
   onFocusModeChange
 }) => {
+  const theme = useTheme();
   const selectedProjectId = useAppStore(state => state.selectedProjectId);
   const selectedFileId = useAppStore(state => state.selectedFileId);
   const files = useAppStore(state => state.files);
@@ -664,19 +667,19 @@ const LegalRichTextEditor: React.FC<LegalRichTextEditorProps> = ({
         }
         
         .lexical-text-code {
-          background-color: #f3f4f6;
-          border: 1px solid #e5e7eb;
+          background-color: ${theme.palette.background.default};
+          border: 1px solid ${theme.palette.divider};
           border-radius: 3px;
           font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
           font-size: 0.9em;
           padding: 2px 4px;
         }
-        
+
         .lexical-quote {
-          border-left: 4px solid #2563eb;
+          border-left: 4px solid ${theme.palette.secondary.main};
           padding-left: 16px;
           margin: 16px 0;
-          color: #4b5563;
+          color: ${theme.palette.text.secondary};
           font-style: italic;
         }
         

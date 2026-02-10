@@ -15,6 +15,8 @@ import {
   MenuItem,
   ListItemAvatar,
   Avatar,
+  alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Description as DocumentIcon,
@@ -72,18 +74,14 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
       : '0 2px 8px rgba(0, 0, 0, 0.1)',
   },
   '&.Mui-selected': {
-    backgroundColor: theme.palette.mode === 'dark' 
-      ? 'rgba(30, 41, 59, 0.2)' 
-      : 'rgba(30, 41, 59, 0.1)',
+    backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.2 : 0.1),
     borderLeft: `3px solid ${theme.palette.primary.main}`,
     transform: 'translateX(4px)',
     boxShadow: theme.palette.mode === 'dark'
-      ? '0 4px 12px rgba(30, 41, 59, 0.3)'
-      : '0 4px 12px rgba(30, 41, 59, 0.2)',
+      ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`
+      : `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
     '&:hover': {
-      backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(30, 41, 59, 0.25)' 
-        : 'rgba(30, 41, 59, 0.15)',
+      backgroundColor: alpha(theme.palette.primary.main, theme.palette.mode === 'dark' ? 0.25 : 0.15),
       transform: 'translateX(6px)',
     },
   },
@@ -143,6 +141,7 @@ const EnhancedFileListItem: React.FC<EnhancedFileListItemProps> = ({
   onDownload,
   onDelete,
 }) => {
+  const theme = useTheme();
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
   const menuOpen = Boolean(menuAnchorEl);
   
@@ -320,7 +319,7 @@ const EnhancedFileListItem: React.FC<EnhancedFileListItemProps> = ({
                     width: 8,
                     height: 8,
                     borderRadius: '50%',
-                    backgroundColor: '#f59e0b',
+                    backgroundColor: theme.palette.warning.main,
                     animation: 'pulse 1.5s infinite',
                     display: 'inline-block',
                     marginLeft: '0.25rem',

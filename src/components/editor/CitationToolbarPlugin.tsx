@@ -21,7 +21,9 @@ import {
   FormHelperText,
   IconButton,
   Tooltip,
-  Divider
+  Divider,
+  alpha,
+  useTheme
 } from '@mui/material';
 import {
   LinkOutlined,
@@ -45,6 +47,7 @@ interface ExhibitOption {
 }
 
 const CitationToolbarPlugin: React.FC<CitationToolbarPluginProps> = ({ className }) => {
+  const theme = useTheme();
   const [editor] = useLexicalComposerContext();
   const [isOpen, setIsOpen] = useState(false);
   const [exhibitLetter, setExhibitLetter] = useState('');
@@ -155,9 +158,9 @@ const CitationToolbarPlugin: React.FC<CitationToolbarPluginProps> = ({ className
           onClick={handleOpen}
           className={className}
           sx={{
-            color: '#2563eb',
+            color: theme.palette.secondary.main,
             '&:hover': {
-              backgroundColor: 'rgba(30, 41, 59, 0.1)',
+              backgroundColor: alpha(theme.palette.primary.main, 0.1),
             }
           }}
         >
@@ -258,12 +261,12 @@ const CitationToolbarPlugin: React.FC<CitationToolbarPluginProps> = ({ className
               rows={2}
             />
 
-            <Box 
-              sx={{ 
-                p: 2, 
-                backgroundColor: '#f8f9fa', 
+            <Box
+              sx={{
+                p: 2,
+                backgroundColor: theme.palette.background.default,
                 borderRadius: 1,
-                border: '1px solid #e5e7eb'
+                border: `1px solid ${theme.palette.divider}`
               }}
             >
               <Typography variant="body2" fontWeight="600" sx={{ mb: 1 }}>
@@ -272,10 +275,10 @@ const CitationToolbarPlugin: React.FC<CitationToolbarPluginProps> = ({ className
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box
                   sx={{
-                    backgroundColor: '#e3f2fd',
-                    border: '1px solid #2563eb',
+                    backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+                    border: `1px solid ${theme.palette.secondary.main}`,
                     borderRadius: '4px',
-                    color: '#1565c0',
+                    color: theme.palette.secondary.dark,
                     fontSize: '0.85rem',
                     fontWeight: 600,
                     padding: '2px 8px',
@@ -304,9 +307,9 @@ const CitationToolbarPlugin: React.FC<CitationToolbarPluginProps> = ({ className
             startIcon={<Add />}
             disabled={!exhibitLetter || !pageNumber}
             sx={{
-              backgroundColor: '#2563eb',
+              backgroundColor: theme.palette.secondary.main,
               '&:hover': {
-                backgroundColor: '#1d4ed8',
+                backgroundColor: theme.palette.secondary.dark,
               }
             }}
           >

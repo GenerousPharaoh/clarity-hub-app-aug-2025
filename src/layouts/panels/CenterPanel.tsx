@@ -6,7 +6,9 @@ import {
   CircularProgress,
   Tooltip,
   Button,
+  alpha,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   ExpandMore as ExpandMoreIcon,
   AutoAwesome as AnalyzeIcon,
@@ -33,6 +35,7 @@ interface NoteData {
 }
 
 const CenterPanel = () => {
+  const theme = useTheme();
   const { user } = useAuth();
   const [content, setContent] = useState<string>('');
   const [note, setNote] = useState<NoteData | null>(null);
@@ -325,7 +328,7 @@ const CenterPanel = () => {
                 onClick={handleAnalyzeContent}
                 sx={{ 
                   bgcolor: isSuggestionPanelOpen ? 'primary.main' : 'background.paper',
-                  color: isSuggestionPanelOpen ? 'white' : 'primary.main',
+                  color: isSuggestionPanelOpen ? theme.palette.background.paper : 'primary.main',
                   boxShadow: 3,
                   width: 56,
                   height: 56,
@@ -351,14 +354,14 @@ const CenterPanel = () => {
           transform: 'translateX(-50%)',
           display: 'flex',
           alignItems: 'center',
-          bgcolor: 'rgba(0, 0, 0, 0.7)',
-          color: 'white',
+          bgcolor: alpha(theme.palette.primary.dark, 0.85),
+          color: theme.palette.background.paper,
           p: 0.5,
           px: 2,
           borderRadius: 20,
           zIndex: 1000,
         }}>
-          <CircularProgress size={14} sx={{ mr: 1, color: 'white' }} />
+          <CircularProgress size={14} sx={{ mr: 1, color: theme.palette.background.paper }} />
           <Typography variant="caption">Saving...</Typography>
         </Box>
       )}

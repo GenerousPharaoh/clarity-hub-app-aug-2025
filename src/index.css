@@ -6,9 +6,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light;
-  color: #1e293b;
-  background-color: #ffffff;
+  color-scheme: light dark;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -58,7 +56,7 @@ html, body {
 
 /* Fix for malformed outline properties */
 *:focus {
-  outline: 1px solid transparent;
+  outline: none;
 }
 
 /* 
@@ -90,20 +88,6 @@ code {
   background: rgba(0, 0, 0, 0.3);
 }
 
-/* Dark mode scrollbar */
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-}
 
 /* Enhanced animations and transitions */
 @keyframes pulse {
@@ -169,8 +153,8 @@ code {
 
 /* Improved selection styles */
 ::selection {
-  background-color: rgba(30, 41, 59, 0.25);
-  color: inherit;
+  background-color: Highlight;
+  color: HighlightText;
 }
 
 /* Better button hover states */
@@ -185,7 +169,7 @@ button:disabled {
 
 /* Enhanced loading states */
 .loading-shimmer {
-  background: linear-gradient(90deg, rgba(30, 41, 59,0.06) 25%, rgba(30, 41, 59,0.12) 50%, rgba(30, 41, 59,0.06) 75%);
+  background: linear-gradient(90deg, var(--color-neutral-100, rgba(30, 41, 59,0.06)) 25%, var(--color-neutral-200, rgba(30, 41, 59,0.12)) 50%, var(--color-neutral-100, rgba(30, 41, 59,0.06)) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }

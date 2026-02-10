@@ -50,7 +50,7 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
       <Box sx={{
         width: 20,
         height: 2,
-        background: 'linear-gradient(90deg, #1e293b, #334155)',
+        background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
         borderRadius: 1,
         mx: 'auto',
         mb: 2,
@@ -67,7 +67,7 @@ const CollapsedPanel: React.FC<CollapsedPanelProps> = ({ side, onExpand }) => {
             '&:hover': {
               bgcolor: alpha(theme.palette.primary.main, 0.2),
               transform: 'scale(1.15)',
-              boxShadow: '0 4px 12px rgba(15,23,42,0.15)',
+              boxShadow: theme.shadows[4],
             },
             transition: 'all 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}

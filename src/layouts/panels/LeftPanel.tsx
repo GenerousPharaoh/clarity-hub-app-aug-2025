@@ -31,7 +31,9 @@ import {
   Snackbar,
   Tabs,
   Tab,
+  alpha,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -72,10 +74,11 @@ interface LeftPanelProps {
   headerComponent?: (defaultHeader: React.ReactNode) => React.ReactNode;
 }
 
-const LeftPanel = ({ 
-  isCollapsed = false, 
+const LeftPanel = ({
+  isCollapsed = false,
   headerComponent,
 }: LeftPanelProps = {}) => {
+  const theme = useTheme();
   const { user, loading: authLoading } = useAuth();
   const { showNotification } = useNotification();
   const selectedProjectId = useAppStore((state) => state.selectedProjectId);
@@ -625,7 +628,7 @@ const LeftPanel = ({
       {headerComponent ? headerComponent(
         <Typography variant="h6" sx={{
           fontWeight: 700,
-          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           letterSpacing: '-0.02em',
@@ -637,7 +640,7 @@ const LeftPanel = ({
           fontWeight: 700,
           px: 2,
           py: 1,
-          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           letterSpacing: '-0.02em',
@@ -693,7 +696,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: 'rgba(30, 41, 59, 0.06)',
+                    backgroundColor: alpha(theme.palette.primary.main, 0.06),
                   },
                 }}
               />
@@ -711,7 +714,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: 'rgba(30, 41, 59, 0.06)',
+                    backgroundColor: alpha(theme.palette.primary.main, 0.06),
                   },
                 }}
               />
@@ -729,7 +732,7 @@ const LeftPanel = ({
                   transition: 'all 150ms ease',
                   '&.Mui-selected': {
                     fontWeight: 600,
-                    backgroundColor: 'rgba(30, 41, 59, 0.06)',
+                    backgroundColor: alpha(theme.palette.primary.main, 0.06),
                   },
                 }}
               />

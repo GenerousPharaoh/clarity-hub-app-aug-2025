@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Paper, Grid, Card, CardContent, CardActions, TextField, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress, Divider, Chip, Stack } from '@mui/material';
+import { Box, Typography, Button, Paper, Grid, Card, CardContent, CardActions, TextField, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, CircularProgress, Divider, Chip, Stack, alpha } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Add as AddIcon, Folder as FolderIcon } from '@mui/icons-material';
 import useAppStore from '../store';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const theme = useTheme();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isProjectDialogOpen, setProjectDialogOpen] = useState(false);
@@ -159,7 +161,7 @@ export default function Dashboard() {
               width: 80,
               height: 80,
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+              background: alpha(theme.palette.primary.main, 0.04),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -167,7 +169,7 @@ export default function Dashboard() {
               mb: 3,
             }}
           >
-            <FolderIcon sx={{ fontSize: 40, color: '#1e293b' }} />
+            <FolderIcon sx={{ fontSize: 40, color: theme.palette.text.primary }} />
           </Box>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
             No legal cases yet

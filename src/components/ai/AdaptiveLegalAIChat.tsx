@@ -410,10 +410,10 @@ What would you like to work on today?`,
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Avatar sx={{
-            background: 'linear-gradient(135deg, #1e293b, #334155)',
+            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
             width: 36,
             height: 36,
-            boxShadow: '0 2px 8px rgba(30, 41, 59, 0.25)',
+            boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.25)}`,
           }}>
             <AIIcon sx={{ fontSize: 20 }} />
           </Avatar>
@@ -517,7 +517,7 @@ What would you like to work on today?`,
                     ...(message.role === 'user'
                       ? { bgcolor: 'grey.300', width: 32, height: 32 }
                       : {
-                          background: 'linear-gradient(135deg, #1e293b, #334155)',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                           width: 32,
                           height: 32,
                         }),
@@ -532,10 +532,10 @@ What would you like to work on today?`,
                     p: 2.5,
                     ...(message.role === 'user'
                       ? {
-                          background: '#1e293b',
-                          color: '#fff',
+                          background: theme.palette.primary.main,
+                          color: theme.palette.primary.contrastText,
                           borderRadius: '16px 16px 4px 16px',
-                          boxShadow: '0 2px 8px rgba(15, 23, 42, 0.25)',
+                          boxShadow: `0 2px 8px ${alpha(theme.palette.primary.dark, 0.25)}`,
                         }
                       : {
                           border: '1px solid',
@@ -553,13 +553,13 @@ What would you like to work on today?`,
                       '& li': { marginBottom: '0.25em' },
                       '& strong': { fontWeight: 600 },
                       '& code': {
-                        backgroundColor: message.role === 'user' ? 'rgba(255,255,255,0.15)' : 'action.hover',
+                        backgroundColor: message.role === 'user' ? alpha(theme.palette.common.white, 0.15) : 'action.hover',
                         padding: '0.2em 0.4em',
                         borderRadius: '3px',
                         fontSize: '0.9em',
                       },
                       '& pre': {
-                        backgroundColor: message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'action.hover',
+                        backgroundColor: message.role === 'user' ? alpha(theme.palette.common.white, 0.1) : 'action.hover',
                         padding: '1em',
                         borderRadius: '4px',
                         overflow: 'auto',
@@ -692,14 +692,14 @@ What would you like to work on today?`,
                             fontWeight: 500,
                             ...(message.modelUsed === 'gpt'
                               ? {
-                                  background: alpha('#1e293b', 0.08),
-                                  color: '#1e293b',
-                                  border: `1px solid ${alpha('#1e293b', 0.2)}`,
+                                  background: alpha(theme.palette.primary.main, 0.08),
+                                  color: theme.palette.primary.main,
+                                  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                                 }
                               : {
-                                  background: alpha('#1e293b', 0.08),
-                                  color: '#1e293b',
-                                  border: `1px solid ${alpha('#1e293b', 0.2)}`,
+                                  background: alpha(theme.palette.primary.main, 0.08),
+                                  color: theme.palette.primary.main,
+                                  border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                                 }),
                           }}
                         />
@@ -721,7 +721,7 @@ What would you like to work on today?`,
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Avatar
                   sx={{
-                    background: 'linear-gradient(135deg, #1e293b, #334155)',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
                     width: 32,
                     height: 32,
                   }}
@@ -837,13 +837,13 @@ What would you like to work on today?`,
             disabled={isLoading || (!inputValue.trim() && attachments.length === 0)}
             size="small"
             sx={{
-              background: 'linear-gradient(135deg, #1e293b, #334155)',
-              color: '#fff',
+              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+              color: theme.palette.primary.contrastText,
               borderRadius: '12px',
               width: 36,
               height: 36,
               '&:hover': {
-                background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
               },
               '&.Mui-disabled': {
                 background: 'action.disabledBackground',

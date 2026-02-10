@@ -16,14 +16,14 @@
   height: 100% !important;
 }
 
-/* Ultra-minimal toolbar */
+/* Ultra-minimal toolbar — uses CSS vars set by GlobalStyles.tsx */
 .tox .tox-toolbar,
 .tox .tox-toolbar__overflow,
 .tox .tox-toolbar__primary {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: var(--color-neutral-100, rgba(255, 255, 255, 0.95)) !important;
   backdrop-filter: blur(10px) !important;
   border: none !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-bottom: 1px solid var(--color-neutral-200, rgba(0, 0, 0, 0.05)) !important;
   padding: 4px 8px !important;
   min-height: auto !important;
 }
@@ -35,29 +35,29 @@
 
 /* Toolbar buttons */
 .tox .tox-tbtn {
-  color: #475569 !important;
+  color: var(--color-neutral-600, #475569) !important;
   border-radius: 4px !important;
   margin: 0 2px !important;
 }
 
 .tox .tox-tbtn:hover {
-  background-color: rgba(30, 41, 59, 0.06) !important;
+  background-color: var(--color-neutral-200, rgba(30, 41, 59, 0.06)) !important;
 }
 
 .tox .tox-tbtn--enabled,
 .tox .tox-tbtn--enabled:hover {
-  background-color: rgba(30, 41, 59, 0.1) !important;
-  color: #1e293b !important;
+  background-color: var(--color-neutral-300, rgba(30, 41, 59, 0.1)) !important;
+  color: var(--color-neutral-800, #1e293b) !important;
 }
 
 /* Editor content area - full height */
 .tox .tox-edit-area {
   border: none !important;
-  height: calc(100% - 40px) !important; /* Subtract toolbar height */
+  height: calc(100% - 40px) !important;
 }
 
 .tox .tox-edit-area__iframe {
-  background: #ffffff !important;
+  background: var(--color-neutral-100, #ffffff) !important;
   height: 100% !important;
 }
 
@@ -111,7 +111,7 @@
 }
 
 .tox .tox-collection--list .tox-collection__item:hover {
-  background-color: rgba(30, 41, 59, 0.06) !important;
+  background-color: var(--color-neutral-200, rgba(30, 41, 59, 0.06)) !important;
 }
 
 /* Editor scrollbar */

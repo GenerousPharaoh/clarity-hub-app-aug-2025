@@ -56,37 +56,37 @@ const SUGGESTION_CATEGORIES: Record<string, SuggestionCategory> = {
     id: 'support',
     label: 'Supporting Evidence',
     icon: <CheckIcon />,
-    color: '#10b981',
+    color: 'success.main',
   },
   contradiction: {
     id: 'contradiction',
     label: 'Contradictory Evidence',
     icon: <ErrorIcon />,
-    color: '#ef4444',
+    color: 'error.main',
   },
   question: {
     id: 'question',
     label: 'Questions to Address',
     icon: <HelpIcon />,
-    color: '#f59e0b',
+    color: 'warning.main',
   },
   elaborate: {
     id: 'elaborate',
     label: 'Elaboration Suggestions',
     icon: <LightbulbIcon />,
-    color: '#1e293b',
+    color: 'primary.main',
   },
   insight: {
     id: 'insight',
     label: 'Key Insights',
     icon: <PsychologyIcon />,
-    color: '#7c3aed',
+    color: 'secondary.main',
   },
   precedent: {
     id: 'precedent',
     label: 'Relevant Precedents',
     icon: <HistoryEduIcon />,
-    color: '#78716c',
+    color: 'text.disabled',
   },
 };
 
@@ -320,7 +320,7 @@ const SuggestionPanel = ({ content }: SuggestionPanelProps) => {
       id: normalizedCategory,
       label: normalizedCategory.charAt(0).toUpperCase() + normalizedCategory.slice(1),
       icon: <AutoAwesomeIcon />,
-      color: '#64748b',
+      color: 'text.secondary',
     };
   };
 
@@ -410,9 +410,9 @@ const SuggestionPanel = ({ content }: SuggestionPanelProps) => {
                       id: category.toLowerCase(),
                       label: category,
                       icon: <AutoAwesomeIcon />,
-                      color: '#64748b',
+                      color: 'text.secondary',
                     };
-                    
+
                     return (
                       <Chip 
                         key={category}

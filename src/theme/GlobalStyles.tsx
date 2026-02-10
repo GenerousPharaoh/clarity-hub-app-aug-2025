@@ -49,6 +49,13 @@ export const ProfessionalGlobalStyles: React.FC = () => {
           '--easing-ease-in-out': animations.easing.easeInOut,
           '--easing-ease-out': animations.easing.easeOut,
 
+          // Surface tokens — used by CSS files that can't access JS theme
+          '--theme-bg': theme.palette.background.default,
+          '--theme-surface': theme.palette.background.paper,
+          '--theme-text': theme.palette.text.primary,
+          '--theme-text-secondary': theme.palette.text.secondary,
+          '--theme-border': theme.palette.divider,
+
           // Shadow tokens
           '--shadow-sm': isDark ? '0 1px 3px rgba(0, 0, 0, 0.4)' : '0 1px 3px rgba(31, 44, 71, 0.04), 0 4px 12px rgba(31, 44, 71, 0.03)',
           '--shadow-md': isDark ? '0 10px 15px -3px rgba(0, 0, 0, 0.4)' : '0 2px 6px rgba(31, 44, 71, 0.06), 0 8px 24px rgba(31, 44, 71, 0.05)',

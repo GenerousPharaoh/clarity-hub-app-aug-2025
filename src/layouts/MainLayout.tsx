@@ -117,7 +117,7 @@ const MainLayout = () => {
   // Handle project change
   const handleProjectChange = (projectId: string) => {
     setSelectedProject(projectId);
-    navigate(`/project/${projectId}`);
+    navigate(`/projects/${projectId}`);
     showNotification(`Switched to project: ${projects.find(p => p.id === projectId)?.name}`, 'info');
   };
 

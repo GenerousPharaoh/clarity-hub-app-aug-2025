@@ -111,52 +111,45 @@ export const CloudUploadZone: React.FC = () => {
       
       updateUpload(uploadId, { progress: 50 });
 
-      // Stage 2: AI Analysis with Gemini 2.5 Pro
-      updateUpload(uploadId, { stage: 'analyzing', progress: 60 });
-      
-      // Get file content for analysis
-      let fileContent: string | Uint8Array = '';
-      if (file.type.startsWith('text/') || file.type === 'application/json') {
-        fileContent = await file.text();
-      } else {
-        // For binary files, read as array buffer
-        const buffer = await file.arrayBuffer();
-        fileContent = new Uint8Array(buffer);
-      }
-      
-      // Analyze with Gemini 2.5 Pro
-      const analysis = await geminiAI.analyzeDocument(
-        fileContent,
-        file.name,
-        file.type,
-        `Legal case project: ${projectId}`
-      );
-      
-      updateUpload(uploadId, { progress: 80 });
-      
-      // Stage 3: Update file with AI results
-      const updatedFile = await cloudFileService.updateFile(cloudFile.id, {
-        exhibit_id: analysis.suggestedExhibitId,
-        exhibit_title: analysis.suggestedExhibitTitle,
-        content_text: analysis.extractedText.substring(0, 10000), // Store first 10k chars
-        ai_insights: analysis.insights,
-        processing_status: 'completed',
-        processed_at: new Date().toISOString()
-      });
-      
-      // Generate embeddings for semantic search (optional)
-      if (analysis.extractedText) {
+      // Stage 2: AI Analysis (if Gemini is configured)
+      let analysis: Awaited<ReturnType<typeof geminiAI.analyzeDocument>> | null = null;
+      if (geminiAI.isAvailable()) {
+        updateUpload(uploadId, { stage: 'analyzing', progress: 60 });
         try {
-          const embeddings = await geminiAI.generateEmbeddings(
-            analysis.extractedText.substring(0, 5000) // Use first 5k chars for embedding
+          let fileContent: string | Uint8Array = '';
+          if (file.type.startsWith('text/') || file.type === 'application/json') {
+            fileContent = await file.text();
+          } else {
+            const buffer = await file.arrayBuffer();
+            fileContent = new Uint8Array(buffer);
+          }
+          analysis = await geminiAI.analyzeDocument(
+            fileContent, file.name, file.type, `Legal case project: ${projectId}`
           );
-          // Store embeddings if needed
-          console.log('Generated embeddings:', embeddings.length, 'dimensions');
         } catch (err) {
-          console.warn('Embedding generation failed:', err);
+          console.warn('AI analysis skipped:', err);
         }
       }
-      
+
+      updateUpload(uploadId, { progress: 80 });
+
+      // Stage 3: Update file with AI results (if available)
+      if (analysis) {
+        await cloudFileService.updateFile(cloudFile.id, {
+          exhibit_id: analysis.suggestedExhibitId,
+          exhibit_title: analysis.suggestedExhibitTitle,
+          content_text: analysis.extractedText.substring(0, 10000),
+          ai_insights: analysis.insights,
+          processing_status: 'completed',
+          processed_at: new Date().toISOString()
+        });
+        if (analysis.extractedText) {
+          try {
+            await geminiAI.generateEmbeddings(analysis.extractedText.substring(0, 5000));
+          } catch { /* embeddings are optional */ }
+        }
+      }
+
       // Add to store for immediate UI update
       useAppStore.getState().addFile({
         id: cloudFile.id,
@@ -168,16 +161,16 @@ export const CloudUploadZone: React.FC = () => {
         size: file.size,
         storage_path: cloudFile.storage_path,
         added_at: new Date().toISOString(),
-        exhibit_id: analysis.suggestedExhibitId,
-        exhibit_title: analysis.suggestedExhibitTitle
+        exhibit_id: analysis?.suggestedExhibitId,
+        exhibit_title: analysis?.suggestedExhibitTitle
       });
-      
+
       updateUpload(uploadId, {
         stage: 'completed',
         progress: 100,
-        exhibitId: analysis.suggestedExhibitId,
-        exhibitTitle: analysis.suggestedExhibitTitle,
-        insights: analysis.insights
+        exhibitId: analysis?.suggestedExhibitId,
+        exhibitTitle: analysis?.suggestedExhibitTitle,
+        insights: analysis?.insights
       });
       
     } catch (error) {

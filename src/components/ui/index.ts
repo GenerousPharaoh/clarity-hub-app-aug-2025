@@ -17,9 +17,6 @@ export {
 // Layout Components
 export { default as ProfessionalLayout } from './ProfessionalLayout';
 
-// Showcase Components
-export { default as ComponentShowcase } from './ComponentShowcase';
-
 // Loading and Empty States
 export { 
   LoadingSkeleton, 

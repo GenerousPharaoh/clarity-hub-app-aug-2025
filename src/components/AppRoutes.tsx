@@ -71,7 +71,6 @@ export default function AppRoutes() {
           <Route path="messages" element={<Messages />} />
           <Route path="settings" element={<Settings />} />
           <Route path="help" element={<Help />} />
-          <Route path="project/:projectId" element={<ProjectView />} />
           <Route path="profile" element={<Settings />} />
         </Route>
         

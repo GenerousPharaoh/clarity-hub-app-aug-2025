@@ -8,8 +8,9 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Gemini with your API key
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+// Initialize Gemini only if API key is available
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 export interface DocumentAnalysis {
   extractedText: string;
@@ -33,11 +34,16 @@ export interface LegalInsight {
 
 class GeminiAIService {
   private model;
+  private available: boolean;
 
   constructor() {
-    // Use Gemini 2.5 Pro - Google's latest thinking model with enhanced reasoning
-    this.model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-pro", // Latest 2.5 Pro with adaptive thinking
+    this.available = !!genAI;
+    if (!genAI) {
+      this.model = null;
+      return;
+    }
+    this.model = genAI.getGenerativeModel({
+      model: "gemini-2.5-pro",
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -45,6 +51,10 @@ class GeminiAIService {
         maxOutputTokens: 8192,
       },
     });
+  }
+
+  isAvailable(): boolean {
+    return this.available;
   }
 
   /**
@@ -56,6 +66,7 @@ class GeminiAIService {
     fileType: string,
     caseContext?: string
   ): Promise<DocumentAnalysis> {
+    if (!this.model) throw new Error('Gemini AI is not configured. Set VITE_GEMINI_API_KEY to enable AI features.');
     try {
       const prompt = this.buildLegalAnalysisPrompt(fileName, fileType, caseContext);
       
@@ -93,9 +104,9 @@ class GeminiAIService {
    * Generate embeddings for semantic search
    */
   async generateEmbeddings(text: string): Promise<number[]> {
+    if (!genAI) return [];
     try {
-      // Use Google's latest embedding model for vector generation
-      const embeddingModel = genAI.getGenerativeModel({ 
+      const embeddingModel = genAI.getGenerativeModel({
         model: "text-embedding-004" // Google's latest embedding model (768 dimensions)
       });
 
@@ -116,6 +127,7 @@ class GeminiAIService {
     documentContext: string[],
     conversationHistory: Array<{ role: string; content: string }>
   ): Promise<string> {
+    if (!this.model) throw new Error('Gemini AI is not configured. Set VITE_GEMINI_API_KEY to enable AI features.');
     try {
       const chat = this.model.startChat({
         history: conversationHistory.map(msg => ({

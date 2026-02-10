@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Tabs, Tab, Badge } from '@mui/material';
+import { Box, Paper, Tabs, Tab } from '@mui/material';
 import { Description as FileIcon, Psychology as AIIcon } from '@mui/icons-material';
 import useAppStore from '../../store';
 import ProfessionalViewerContainer from '../../components/viewers/ProfessionalViewerContainer';
 import AdaptiveLegalAIChat from '../../components/ai/AdaptiveLegalAIChat';
-import { supabase } from '../../lib/supabase';
 import { publicUrl } from '../../utils/publicUrl';
 
 interface TabPanelProps {
@@ -38,7 +37,6 @@ const RightPanelWrapper = () => {
   // Get selected file directly from store
   const selectedFileId = useAppStore((state) => state.selectedFileId);
   const files = useAppStore((state) => state.files);
-  const user = useAppStore((state) => state.user);
   
   // Tab state
   const [tabValue, setTabValue] = useState(0);
@@ -68,22 +66,15 @@ const RightPanelWrapper = () => {
         
         // Generate public URL for the file
         const directUrl = publicUrl(`files/${selectedFile.storage_path}`);
-        console.log(`[RightPanelWrapper] Generated public URL: ${directUrl}`);
-        
-        // For PDF and document files, fetch as blob and create object URL for better handling
+
+        // For PDF and document files, fetch as blob for better handling
         if (['pdf', 'document'].includes(selectedFile.file_type)) {
-          console.log(`[RightPanelWrapper] Using blob approach for ${selectedFile.file_type}`);
           try {
             const response = await fetch(directUrl);
-            if (!response.ok) {
-              throw new Error(`Failed to fetch file: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Failed to fetch file: ${response.status}`);
             const blob = await response.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            console.log(`[RightPanelWrapper] Created blob URL from ${blob.size} bytes`);
-            setFileUrl(blobUrl);
-          } catch (blobError) {
-            console.error(`[RightPanelWrapper] Blob fetch failed, using direct URL:`, blobError);
+            setFileUrl(URL.createObjectURL(blob));
+          } catch {
             setFileUrl(directUrl);
           }
         } else {
@@ -121,8 +112,8 @@ const RightPanelWrapper = () => {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        backgroundColor: '#ffffff',
-        color: '#1a1a1a',
+        backgroundColor: 'background.paper',
+        color: 'text.primary',
       }}
       data-test="right-panel"
     >

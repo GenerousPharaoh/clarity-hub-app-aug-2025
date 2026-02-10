@@ -66,7 +66,6 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
 }) => {
   const editorRef = useRef<any>(null);
   const [content, setContent] = useState(initialContent);
-  const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -77,8 +76,6 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
   const [isDirty, setIsDirty] = useState(false);
   
   const themeMode = useAppStore((state) => state.themeMode);
-  const user = useAppStore(state => state.user);
-  const selectedProjectId = useAppStore(state => state.selectedProjectId);
 
   // Auto-save functionality
   useEffect(() => {
@@ -107,7 +104,7 @@ const ProfessionalRichEditor: React.FC<ProfessionalRichEditorProps> = ({
     } finally {
       setIsSaving(false);
     }
-  }, [content, onSave, user, selectedProjectId]);
+  }, [content, onSave]);
 
   // Handle content change
   const handleEditorChange = (newContent: string) => {

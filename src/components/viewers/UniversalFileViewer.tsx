@@ -4,8 +4,6 @@ import { supabase } from '../../lib/supabase';
 import { publicUrl } from '../../utils/publicUrl';
 import ViewerContainer, { FileType } from './core/ViewerContainer';
 import { FileRecord } from '../../hooks/useProjectFiles';
-import MockFileViewer from './MockFileViewer';
-import useAppStore from '../../store';
 
 const UniversalFileViewer: React.FC<{ file: FileRecord | null }> = ({ file }) => {
   const [loading, setLoading] = useState(true);
@@ -42,11 +40,9 @@ const UniversalFileViewer: React.FC<{ file: FileRecord | null }> = ({ file }) =>
       try {
         // Get public URL for file
         const directUrl = publicUrl(`files/${file.storage_path}`);
-        console.log(`[UniversalFileViewer] Generated public URL: ${directUrl}`);
-        
+
         // For PDF and document files, fetch as blob and create object URL
         if (['pdf', 'document'].includes(file.file_type)) {
-          console.log(`[UniversalFileViewer] Using blob approach for ${file.file_type}`);
           try {
             const response = await fetch(directUrl);
             if (!response.ok) {
@@ -54,7 +50,6 @@ const UniversalFileViewer: React.FC<{ file: FileRecord | null }> = ({ file }) =>
             }
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
-            console.log(`[UniversalFileViewer] Created blob URL from ${blob.size} bytes`);
             setFileUrl(blobUrl);
           } catch (blobError) {
             console.error(`[UniversalFileViewer] Blob fetch failed, using direct URL:`, blobError);
@@ -143,27 +138,6 @@ const UniversalFileViewer: React.FC<{ file: FileRecord | null }> = ({ file }) =>
     );
   }
 
-
-  // Handle link copying for demo mode
-  const handleCopyLink = () => {
-    if (!file) return;
-    
-    // Create a dummy link activation and set it in the store
-    const linkActivation = {
-      fileId: file.id,
-      page: file.file_type === 'pdf' ? 1 : undefined,
-      timestamp: ['audio', 'video'].includes(file.file_type) ? '00:00' : undefined,
-    };
-    
-    // Add link activation to store if needed
-    useAppStore.setState(state => ({
-      ...state,
-      linkActivation
-    }));
-    
-    // Show notification if needed
-    console.log('Demo link copied for file:', file.name);
-  };
 
   return (
     <Box sx={{ height: '100%', width: '100%', overflow: 'hidden' }}>

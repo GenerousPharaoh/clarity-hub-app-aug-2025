@@ -87,7 +87,7 @@ export const CloudUploadZone: React.FC = () => {
         await processCloudUpload(file, uploadId, userId, projectId!);
       } catch (error) {
         console.error('Upload failed:', error);
-        updateUpload(uploadId, { stage: 'error', error: error.message });
+        updateUpload(uploadId, { stage: 'error', error: error instanceof Error ? error.message : String(error) });
       }
     }
   }, [user, selectedProjectId]);

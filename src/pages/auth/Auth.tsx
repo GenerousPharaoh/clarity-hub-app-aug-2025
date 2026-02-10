@@ -129,12 +129,11 @@ export default function Auth() {
           <Box
             component="p"
             sx={{
-              color: 'rgba(148,163,184,0.8) !important',
+              color: 'text.secondary',
               fontSize: '1.0625rem',
               fontWeight: 400,
               lineHeight: 1.6,
               maxWidth: 340,
-              mt: 3,
               m: 0,
               mt: 3,
               fontFamily: 'inherit',

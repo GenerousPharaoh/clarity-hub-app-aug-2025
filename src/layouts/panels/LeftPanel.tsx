@@ -624,31 +624,6 @@ const LeftPanel = ({
       }}
       data-test="left-panel"
     >
-      {/* Header component passed from parent */}
-      {headerComponent ? headerComponent(
-        <Typography variant="h6" sx={{
-          fontWeight: 700,
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          letterSpacing: '-0.02em',
-        }}>
-          Clarity Hub
-        </Typography>
-      ) : (
-        <Typography variant="h6" sx={{
-          fontWeight: 700,
-          px: 2,
-          py: 1,
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          letterSpacing: '-0.02em',
-        }}>
-          Clarity Hub
-        </Typography>
-      )}
-
       {/* Collapsible content */}
       <Box
         sx={{

@@ -93,36 +93,17 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'background.default',
         p: 4,
       }}
     >
       <CircularProgress
-        size={64}
-        thickness={4}
-        sx={{
-          color: 'primary.main',
-          mb: 3,
-        }}
+        size={32}
+        thickness={3}
+        sx={{ color: 'primary.main', mb: 2 }}
       />
-
-      <Typography variant="h6" sx={{ mb: 1, color: 'text.primary' }}>
-        Loading Document
+      <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8125rem' }}>
+        Loading {file?.name || 'document'}...
       </Typography>
-
-      <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center', maxWidth: 300 }}>
-        Preparing professional viewer for {file?.name || 'document'}...
-      </Typography>
-
-      {file && (
-        <Box sx={{ mt: 3, textAlign: 'center' }}>
-          {getFileIcon(getViewerType(file))}
-          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.disabled' }}>
-            {file.exhibit_id && `Exhibit ${file.exhibit_id} • `}
-            {file.file_type.toUpperCase()}
-          </Typography>
-        </Box>
-      )}
     </Box>
   );
 
@@ -184,38 +165,31 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
         alignItems: 'center',
         justifyContent: 'center',
         p: 4,
-        backgroundColor: 'background.default',
       }}
     >
-      <Box sx={{ maxWidth: 360, textAlign: 'center' }}>
+      <Box sx={{ maxWidth: 300, textAlign: 'center' }}>
         <Box
           sx={{
-            width: 80,
-            height: 80,
-            borderRadius: '50%',
-            background: theme.palette.mode === 'dark'
-              ? alpha(theme.palette.primary.main, 0.12)
-              : `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.06)} 0%, ${alpha(theme.palette.primary.main, 0.12)} 100%)`,
+            width: 56,
+            height: 56,
+            borderRadius: '16px',
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.06)} 0%, ${alpha(theme.palette.primary.main, 0.14)} 100%)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             mx: 'auto',
-            mb: 3,
+            mb: 2.5,
           }}
         >
-          <InsertDriveFile sx={{ fontSize: 40, color: theme.palette.text.primary }} />
+          <InsertDriveFile sx={{ fontSize: 24, color: 'primary.main' }} />
         </Box>
 
-        <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', mb: 1 }}>
-          No Document Selected
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5, letterSpacing: '-0.01em' }}>
+          No document selected
         </Typography>
 
-        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.6 }}>
-          Select a file from the browser to view it here with professional precision controls.
-        </Typography>
-
-        <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-          PDF, images, audio, video, and documents supported
+        <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6, fontSize: '0.8125rem' }}>
+          Choose a file from the sidebar to preview it here.
         </Typography>
       </Box>
     </Box>

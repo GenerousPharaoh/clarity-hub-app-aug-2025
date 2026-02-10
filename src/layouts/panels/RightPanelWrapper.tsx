@@ -132,21 +132,23 @@ const RightPanelWrapper = () => {
           value={tabValue}
           onChange={handleTabChange}
           variant="fullWidth"
-          sx={{ minHeight: 48 }}
+          sx={{ minHeight: 44 }}
         >
           <Tab
-            icon={<FileIcon />}
+            icon={<FileIcon sx={{ fontSize: 18 }} />}
+            iconPosition="start"
             label="Viewer"
             id="right-panel-tab-0"
             aria-controls="right-panel-tabpanel-0"
-            sx={{ minHeight: 48, fontSize: '0.8125rem', fontWeight: 500 }}
+            sx={{ minHeight: 44, fontSize: '0.8125rem', fontWeight: 500, textTransform: 'none', gap: 0.75 }}
           />
           <Tab
-            icon={<AIIcon />}
+            icon={<AIIcon sx={{ fontSize: 18 }} />}
+            iconPosition="start"
             label="AI Assistant"
             id="right-panel-tab-1"
             aria-controls="right-panel-tabpanel-1"
-            sx={{ minHeight: 48, fontSize: '0.8125rem', fontWeight: 500 }}
+            sx={{ minHeight: 44, fontSize: '0.8125rem', fontWeight: 500, textTransform: 'none', gap: 0.75 }}
           />
         </Tabs>
       </Paper>

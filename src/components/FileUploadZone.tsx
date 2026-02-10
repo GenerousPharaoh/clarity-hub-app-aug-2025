@@ -754,7 +754,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
           <Box sx={{ 
             p: 2, 
             borderRadius: '50%', 
-            bgcolor: theme => theme.palette.mode === 'dark' ? 'rgba(25, 118, 210, 0.12)' : 'rgba(25, 118, 210, 0.08)',
+            bgcolor: theme => theme.palette.mode === 'dark' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(99, 102, 241, 0.08)',
             transition: 'all 0.3s ease',
             mb: 1
           }}>

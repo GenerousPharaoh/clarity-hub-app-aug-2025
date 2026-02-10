@@ -35,19 +35,19 @@
 
 /* Toolbar buttons */
 .tox .tox-tbtn {
-  color: #444 !important;
+  color: #475569 !important;
   border-radius: 4px !important;
   margin: 0 2px !important;
 }
 
 .tox .tox-tbtn:hover {
-  background-color: #f0f0f0 !important;
+  background-color: rgba(99, 102, 241, 0.06) !important;
 }
 
 .tox .tox-tbtn--enabled,
 .tox .tox-tbtn--enabled:hover {
-  background-color: #e8f4fd !important;
-  color: #0066cc !important;
+  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: #6366F1 !important;
 }
 
 /* Editor content area - full height */
@@ -111,7 +111,7 @@
 }
 
 .tox .tox-collection--list .tox-collection__item:hover {
-  background-color: #f0f0f0 !important;
+  background-color: rgba(99, 102, 241, 0.06) !important;
 }
 
 /* Editor scrollbar */
@@ -120,14 +120,14 @@
 }
 
 .tox-edit-area__iframe::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .tox-edit-area__iframe::-webkit-scrollbar-thumb {
-  background: #888;
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 4px;
 }
 
 .tox-edit-area__iframe::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: rgba(0, 0, 0, 0.25);
 }

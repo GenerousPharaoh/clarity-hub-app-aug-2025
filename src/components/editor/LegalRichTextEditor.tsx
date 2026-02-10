@@ -302,7 +302,7 @@ const EditorContent: React.FC<{
               : 'linear-gradient(135deg, #e2e8f0, #cbd5e0)',
             color: hasUnsavedChanges ? 'white' : 'text.disabled',
             boxShadow: hasUnsavedChanges 
-              ? '0 4px 12px rgba(66, 153, 225, 0.4)' 
+              ? '0 4px 12px rgba(99, 102, 241, 0.4)'
               : '0 2px 8px rgba(0, 0, 0, 0.1)',
             '&:hover': {
               background: hasUnsavedChanges 
@@ -310,7 +310,7 @@ const EditorContent: React.FC<{
                 : 'linear-gradient(135deg, #cbd5e0, #a0aec0)',
               transform: 'translateY(-2px)',
               boxShadow: hasUnsavedChanges 
-                ? '0 6px 16px rgba(66, 153, 225, 0.5)' 
+                ? '0 6px 16px rgba(99, 102, 241, 0.5)'
                 : '0 4px 12px rgba(0, 0, 0, 0.15)',
             },
             '&:disabled': {

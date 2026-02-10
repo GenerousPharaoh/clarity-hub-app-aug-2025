@@ -73,17 +73,17 @@ const StyledListItemButton = styled(ListItemButton)(({ theme }) => ({
   },
   '&.Mui-selected': {
     backgroundColor: theme.palette.mode === 'dark' 
-      ? 'rgba(67, 129, 250, 0.2)' 
-      : 'rgba(67, 129, 250, 0.1)',
+      ? 'rgba(99, 102, 241, 0.2)' 
+      : 'rgba(99, 102, 241, 0.1)',
     borderLeft: `3px solid ${theme.palette.primary.main}`,
     transform: 'translateX(4px)',
     boxShadow: theme.palette.mode === 'dark'
-      ? '0 4px 12px rgba(67, 129, 250, 0.3)'
-      : '0 4px 12px rgba(67, 129, 250, 0.2)',
+      ? '0 4px 12px rgba(99, 102, 241, 0.3)'
+      : '0 4px 12px rgba(99, 102, 241, 0.2)',
     '&:hover': {
       backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(67, 129, 250, 0.25)' 
-        : 'rgba(67, 129, 250, 0.15)',
+        ? 'rgba(99, 102, 241, 0.25)' 
+        : 'rgba(99, 102, 241, 0.15)',
       transform: 'translateX(6px)',
     },
   },
@@ -320,7 +320,7 @@ const EnhancedFileListItem: React.FC<EnhancedFileListItemProps> = ({
                     width: 8,
                     height: 8,
                     borderRadius: '50%',
-                    backgroundColor: '#ff9800',
+                    backgroundColor: '#f59e0b',
                     animation: 'pulse 1.5s infinite',
                     display: 'inline-block',
                     marginLeft: '0.25rem',

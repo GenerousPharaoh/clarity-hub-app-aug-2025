@@ -70,17 +70,17 @@ const ProfessionalViewerContainer: React.FC<ProfessionalViewerContainerProps> = 
   const getFileIcon = (viewerType: string) => {
     switch (viewerType) {
       case 'pdf':
-        return <PictureAsPdf sx={{ fontSize: 48, color: '#dc2626' }} />;
+        return <PictureAsPdf sx={{ fontSize: 48, color: 'error.dark' }} />;
       case 'image':
-        return <Image sx={{ fontSize: 48, color: '#059669' }} />;
+        return <Image sx={{ fontSize: 48, color: 'success.dark' }} />;
       case 'audio':
-        return <AudioFile sx={{ fontSize: 48, color: '#7c3aed' }} />;
+        return <AudioFile sx={{ fontSize: 48, color: 'secondary.main' }} />;
       case 'video':
-        return <VideoFile sx={{ fontSize: 48, color: '#ea580c' }} />;
+        return <VideoFile sx={{ fontSize: 48, color: 'warning.dark' }} />;
       case 'document':
-        return <InsertDriveFile sx={{ fontSize: 48, color: '#2563eb' }} />;
+        return <InsertDriveFile sx={{ fontSize: 48, color: 'primary.main' }} />;
       default:
-        return <InsertDriveFile sx={{ fontSize: 48, color: '#6b7280' }} />;
+        return <InsertDriveFile sx={{ fontSize: 48, color: 'text.secondary' }} />;
     }
   };
 

@@ -157,7 +157,7 @@ const CitationToolbarPlugin: React.FC<CitationToolbarPluginProps> = ({ className
           sx={{
             color: '#2563eb',
             '&:hover': {
-              backgroundColor: 'rgba(37, 99, 235, 0.1)',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
             }
           }}
         >

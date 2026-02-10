@@ -242,7 +242,7 @@ const EnhancedImageViewer = forwardRef<any, EnhancedImageViewerProps>(
             flexGrow: 1,
             overflow: 'hidden',
             position: 'relative',
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#303030' : '#f5f5f5',
+            bgcolor: 'background.default',
           }}
         >
           {loading && (

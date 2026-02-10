@@ -255,7 +255,7 @@ const CitationComponent: React.FC<CitationComponentProps> = ({
           backgroundColor: '#bbdefb',
           borderColor: '#1976d2',
           transform: 'scale(1.05)',
-          boxShadow: '0 2px 8px rgba(37, 99, 235, 0.2)',
+          boxShadow: '0 2px 8px rgba(99, 102, 241, 0.2)',
         },
         '&:active': {
           transform: 'scale(0.98)',

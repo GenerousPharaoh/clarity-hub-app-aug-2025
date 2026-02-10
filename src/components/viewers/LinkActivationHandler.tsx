@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Typography, Paper, Button, Alert } from '@mui/material';
+import { Box, Typography, Paper, Button, Alert, alpha, useTheme } from '@mui/material';
 import { OpenInNew, NavigateBefore } from '@mui/icons-material';
 import useAppStore from '../../store';
 import { LinkActivation, File } from '../../types';
@@ -19,6 +19,7 @@ interface LinkActivationHandlerProps {
  * 5. Provides breadcrumb navigation for linked content
  */
 const LinkActivationHandler: React.FC<LinkActivationHandlerProps> = ({ children }) => {
+  const theme = useTheme();
   const linkActivation = useAppStore((state) => state.linkActivation);
   const setLinkActivation = useAppStore((state) => state.setLinkActivation);
   const selectedFileId = useAppStore((state) => state.selectedFileId);
@@ -124,19 +125,20 @@ const LinkActivationHandler: React.FC<LinkActivationHandlerProps> = ({ children 
     const exhibitInfo = parseExhibitReference(linkActivation);
     
     return (
-      <Paper 
-        elevation={1} 
-        sx={{ 
-          p: 2, 
-          mb: 2, 
-          backgroundColor: '#eff6ff',
-          border: '1px solid #2563eb',
+      <Paper
+        elevation={1}
+        sx={{
+          p: 2,
+          mb: 2,
+          backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.06),
+          border: '1px solid',
+          borderColor: 'primary.main',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <NavigateBefore sx={{ mr: 1, color: '#2563eb' }} />
-            <Typography variant="body2" sx={{ color: '#1d4ed8' }}>
+            <NavigateBefore sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="body2" sx={{ color: 'primary.dark' }}>
               Citation Link: 
               {exhibitInfo && (
                 <>
@@ -158,7 +160,7 @@ const LinkActivationHandler: React.FC<LinkActivationHandlerProps> = ({ children 
           <Button
             size="small"
             onClick={() => setLinkActivation(null)}
-            sx={{ color: '#1d4ed8' }}
+            sx={{ color: 'primary.dark' }}
           >
             Clear
           </Button>
@@ -194,27 +196,28 @@ const LinkActivationHandler: React.FC<LinkActivationHandlerProps> = ({ children 
     const currentFile = files.find(f => f.id === selectedFileId);
 
     return (
-      <Paper 
-        elevation={2} 
-        sx={{ 
-          p: 3, 
+      <Paper
+        elevation={2}
+        sx={{
+          p: 3,
           mb: 2,
           textAlign: 'center',
-          backgroundColor: '#fef3c7',
-          border: '1px solid #f59e0b',
+          backgroundColor: (theme) => alpha(theme.palette.warning.main, 0.1),
+          border: '1px solid',
+          borderColor: 'warning.main',
         }}
       >
-        <Typography variant="h6" gutterBottom sx={{ color: '#92400e' }}>
+        <Typography variant="h6" gutterBottom sx={{ color: 'warning.dark' }}>
           Switch to Referenced File?
         </Typography>
-        
-        <Typography variant="body2" sx={{ mb: 2, color: '#78350f' }}>
+
+        <Typography variant="body2" sx={{ mb: 2, color: 'warning.dark' }}>
           Citation references <strong>{targetFile.exhibit_id || targetFile.name}</strong>
           {linkActivation.targetPage && ` (Page ${linkActivation.targetPage})`}
           {linkActivation.timestamp && ` (${linkActivation.timestamp})`}
         </Typography>
         
-        <Typography variant="caption" sx={{ display: 'block', mb: 3, color: '#78350f' }}>
+        <Typography variant="caption" sx={{ display: 'block', mb: 3, color: 'warning.dark' }}>
           Currently viewing: {currentFile?.exhibit_id || currentFile?.name || 'No file selected'}
         </Typography>
 
@@ -225,9 +228,9 @@ const LinkActivationHandler: React.FC<LinkActivationHandlerProps> = ({ children 
             onClick={() => {
               setSelectedFile(linkActivation.fileId);
             }}
-            sx={{ 
-              backgroundColor: '#f59e0b',
-              '&:hover': { backgroundColor: '#d97706' }
+            sx={{
+              backgroundColor: 'warning.main',
+              '&:hover': { backgroundColor: 'warning.dark' }
             }}
           >
             Switch to File
@@ -236,12 +239,12 @@ const LinkActivationHandler: React.FC<LinkActivationHandlerProps> = ({ children 
           <Button
             variant="outlined"
             onClick={() => setLinkActivation(null)}
-            sx={{ 
-              color: '#92400e',
-              borderColor: '#92400e',
+            sx={{
+              color: 'warning.dark',
+              borderColor: 'warning.dark',
               '&:hover': {
-                backgroundColor: 'rgba(146, 64, 14, 0.1)',
-                borderColor: '#92400e'
+                backgroundColor: (theme) => alpha(theme.palette.warning.dark, 0.1),
+                borderColor: 'warning.dark'
               }
             }}
           >

@@ -212,7 +212,7 @@ const AudioVideoViewer = forwardRef<any, AudioVideoViewerProps>(
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#1E1E1E' : '#f5f5f5',
+            bgcolor: 'background.default',
             p: 2,
             position: 'relative',
             overflow: 'hidden',

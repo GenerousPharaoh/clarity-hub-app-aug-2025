@@ -305,7 +305,7 @@ const EnhancedPdfViewer = forwardRef<any, EnhancedPdfViewerProps>(
             flexGrow: 1, 
             overflow: 'auto', 
             position: 'relative',
-            bgcolor: (theme) => theme.palette.mode === 'dark' ? '#303030' : '#f5f5f5',
+            bgcolor: 'background.default',
           }}
         >
           {loading && (

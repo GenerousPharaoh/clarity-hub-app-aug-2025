@@ -15,6 +15,7 @@ import {
   ListItemText,
   CircularProgress,
   Alert,
+  useTheme,
 } from '@mui/material';
 import {
   ZoomIn,
@@ -64,6 +65,8 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
   fileType,
   fileName = 'media-file',
 }) => {
+  const theme = useTheme();
+
   // Common state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -177,8 +180,8 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
 
     wavesurferRef.current = WaveSurfer.create({
       container: waveformContainer as HTMLElement,
-      waveColor: '#2563eb',
-      progressColor: '#1d4ed8',
+      waveColor: '#6366F1',
+      progressColor: '#4F46E5',
       barWidth: 2,
       barRadius: 1,
       responsive: true,
@@ -279,7 +282,7 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
       height: type === 'rectangle' ? 60 : undefined,
       radius: type === 'circle' ? 30 : undefined,
       text: type === 'text' ? 'Annotation' : undefined,
-      color: '#ff4444',
+      color: theme.palette.error.main,
       timestamp: Date.now(),
     };
     setAnnotations([...annotations, newAnnotation]);
@@ -310,16 +313,16 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
 
   if (loading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
+      <Box sx={{
+        display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', 
-        justifyContent: 'center', 
+        alignItems: 'center',
+        justifyContent: 'center',
         height: '100%',
-        backgroundColor: '#f8f9fa' 
+        backgroundColor: 'background.default'
       }}>
-        <CircularProgress size={48} thickness={4} sx={{ color: '#2563eb' }} />
-        <Typography variant="body2" sx={{ mt: 2, color: '#666666' }}>
+        <CircularProgress size={48} thickness={4} sx={{ color: 'primary.main' }} />
+        <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
           Loading {fileType} file...
         </Typography>
       </Box>
@@ -338,7 +341,7 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
 
   // Render toolbar based on file type
   const renderToolbar = () => (
-    <Paper elevation={0} sx={{ borderBottom: '1px solid #e5e7eb' }}>
+    <Paper elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
       <Toolbar variant="dense" sx={{ minHeight: 56, px: 2 }}>
         {fileType === 'image' && (
           <>
@@ -566,7 +569,7 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: fileType === 'image' ? '#f8f9fa' : '#ffffff',
+        backgroundColor: fileType === 'image' ? 'background.default' : 'background.paper',
         overflow: 'hidden',
       }}
     >
@@ -577,7 +580,7 @@ const EnhancedMediaViewer: React.FC<EnhancedMediaViewerProps> = ({
       </Box>
 
       {/* Status Bar */}
-      <Paper elevation={0} sx={{ borderTop: '1px solid #e5e7eb', py: 0.5, px: 2 }}>
+      <Paper elevation={0} sx={{ borderTop: 1, borderColor: 'divider', py: 0.5, px: 2 }}>
         <Typography variant="caption" color="text.secondary">
           {fileName} • {fileType.charAt(0).toUpperCase() + fileType.slice(1)} 
           {(fileType === 'audio' || fileType === 'video') && ` • ${formatTime(duration)}`}

@@ -42,7 +42,7 @@ class OpenAIService {
 
   /**
    * Use GPT-5.2 with extended thinking for complex legal analysis.
-   * This is the heavy hitter — use for questions that require
+   * This is the heavy hitter -- use for questions that require
    * careful legal reasoning, multi-factor analysis, or strategy.
    */
   async deepLegalReasoning(params: {
@@ -51,7 +51,8 @@ class OpenAIService {
     caseContext?: string;
     conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
   }): Promise<DeepReasoningResponse> {
-    if (!openai) throw new Error('OpenAI not configured. Set VITE_OPENAI_API_KEY.');
+    if (!openai)
+      throw new Error('OpenAI not configured. Set VITE_OPENAI_API_KEY.');
 
     const systemPrompt = `You are a senior Ontario employment law analyst. You have deep expertise in Canadian employment law with particular focus on Ontario legislation, case law, and legal principles.
 
@@ -74,14 +75,14 @@ When analyzing legal issues:
       { role: 'system', content: systemPrompt },
     ];
 
-    // Add conversation history
+    // Add conversation history (last 6 messages for context window)
     if (params.conversationHistory?.length) {
       for (const msg of params.conversationHistory.slice(-6)) {
         messages.push({ role: msg.role, content: msg.content });
       }
     }
 
-    // Build the user message with context
+    // Build the user message with legal + case context
     let userContent = '';
 
     if (params.legalContext) {
@@ -117,7 +118,7 @@ When analyzing legal issues:
 
   /**
    * Generate 1536-dim embeddings using text-embedding-3-small.
-   * $0.02 per 1M tokens — very cheap for RAG.
+   * $0.02 per 1M tokens -- very cheap for RAG.
    */
   async generateEmbedding(text: string): Promise<number[]> {
     if (!openai) return [];
@@ -131,13 +132,12 @@ When analyzing legal issues:
   }
 
   /**
-   * Batch embed multiple texts efficiently.
+   * Batch embed multiple texts efficiently in a single API call.
    */
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
     if (!openai || texts.length === 0) return [];
 
-    // OpenAI supports batch embedding in a single call
-    const truncated = texts.map(t => t.substring(0, 8000));
+    const truncated = texts.map((t) => t.substring(0, 8000));
 
     const response = await openai.embeddings.create({
       model: 'text-embedding-3-small',
@@ -146,7 +146,7 @@ When analyzing legal issues:
 
     return response.data
       .sort((a, b) => a.index - b.index)
-      .map(d => d.embedding);
+      .map((d) => d.embedding);
   }
 
   // ─── Helpers ──────────────────────────────────────────────
@@ -154,8 +154,7 @@ When analyzing legal issues:
   private extractCitations(text: string): string[] {
     const citations: string[] = [];
 
-    // Match common legal citation patterns
-    // e.g., "2020 SCC 26", "2020 ONCA 391", "[1992] 1 SCR 986", "R.S.O. 1990, c. H.19"
+    // Match common Canadian legal citation patterns
     const patterns = [
       /\d{4}\s+(?:SCC|ONCA|ONSC|BCCA|ABCA|CanLII)\s+\d+/g,
       /\[\d{4}\]\s+\d+\s+(?:SCR|OR|OJ)\s+(?:No\s+)?\d+/g,

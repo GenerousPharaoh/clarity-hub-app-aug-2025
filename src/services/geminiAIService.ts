@@ -12,9 +12,20 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
+// ============================================================
+// Types
+// ============================================================
+
 export interface DocumentAnalysis {
   extractedText: string;
-  documentType: 'contract' | 'email' | 'brief' | 'motion' | 'evidence' | 'correspondence' | 'other';
+  documentType:
+    | 'contract'
+    | 'email'
+    | 'brief'
+    | 'motion'
+    | 'evidence'
+    | 'correspondence'
+    | 'other';
   keyEntities: string[];
   legalIssues: string[];
   suggestedExhibitId: string;
@@ -32,6 +43,10 @@ export interface LegalInsight {
   pageReferences?: number[];
 }
 
+// ============================================================
+// Service
+// ============================================================
+
 class GeminiAIService {
   private model;
   private available: boolean;
@@ -43,7 +58,7 @@ class GeminiAIService {
       return;
     }
     this.model = genAI.getGenerativeModel({
-      model: "gemini-3.0-pro",
+      model: 'gemini-3.0-pro',
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -58,7 +73,7 @@ class GeminiAIService {
   }
 
   /**
-   * Analyze a legal document with Gemini 2.5 Pro
+   * Analyze a legal document with Gemini 3.0 Pro
    */
   async analyzeDocument(
     fileContent: string | Uint8Array,
@@ -66,25 +81,34 @@ class GeminiAIService {
     fileType: string,
     caseContext?: string
   ): Promise<DocumentAnalysis> {
-    if (!this.model) throw new Error('Gemini AI is not configured. Set VITE_GEMINI_API_KEY to enable AI features.');
+    if (!this.model)
+      throw new Error(
+        'Gemini AI is not configured. Set VITE_GEMINI_API_KEY to enable AI features.'
+      );
+
     try {
       const prompt = this.buildLegalAnalysisPrompt(fileName, fileType, caseContext);
-      
-      // Gemini 2.0 Flash can handle multiple input types
-      const parts = [
-        { text: prompt }
-      ];
+
+      // Gemini 3.0 Pro can handle multiple input types natively
+      const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> =
+        [{ text: prompt }];
 
       // Add file content based on type
       if (typeof fileContent === 'string') {
         parts.push({ text: `\n\nDocument Content:\n${fileContent}` });
       } else {
         // For binary content (PDFs, images), Gemini can process directly
-        parts.push({ 
+        // Convert Uint8Array to base64 using browser-compatible method
+        let binary = '';
+        for (let i = 0; i < fileContent.length; i++) {
+          binary += String.fromCharCode(fileContent[i]);
+        }
+        const base64 = btoa(binary);
+        parts.push({
           inlineData: {
             mimeType: fileType,
-            data: Buffer.from(fileContent).toString('base64')
-          }
+            data: base64,
+          },
         });
       }
 
@@ -92,7 +116,6 @@ class GeminiAIService {
       const response = await result.response;
       const text = response.text();
 
-      // Parse the structured response
       return this.parseAnalysisResponse(text, fileName);
     } catch (error) {
       console.error('Gemini analysis failed:', error);
@@ -101,20 +124,19 @@ class GeminiAIService {
   }
 
   /**
-   * Generate embeddings for semantic search
+   * Generate embeddings for semantic search (768-dim, text-embedding-004)
    */
   async generateEmbeddings(text: string): Promise<number[]> {
     if (!genAI) return [];
     try {
       const embeddingModel = genAI.getGenerativeModel({
-        model: "text-embedding-004" // Google's latest embedding model (768 dimensions)
+        model: 'text-embedding-004',
       });
 
       const result = await embeddingModel.embedContent(text);
       return result.embedding.values;
     } catch (error) {
       console.error('Embedding generation failed:', error);
-      // Return empty array as fallback
       return [];
     }
   }
@@ -127,12 +149,16 @@ class GeminiAIService {
     documentContext: string[],
     conversationHistory: Array<{ role: string; content: string }>
   ): Promise<string> {
-    if (!this.model) throw new Error('Gemini AI is not configured. Set VITE_GEMINI_API_KEY to enable AI features.');
+    if (!this.model)
+      throw new Error(
+        'Gemini AI is not configured. Set VITE_GEMINI_API_KEY to enable AI features.'
+      );
+
     try {
       const chat = this.model.startChat({
-        history: conversationHistory.map(msg => ({
+        history: conversationHistory.map((msg) => ({
           role: msg.role === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.content }]
+          parts: [{ text: msg.content }],
         })),
         generationConfig: {
           maxOutputTokens: 4096,
@@ -140,7 +166,6 @@ class GeminiAIService {
         },
       });
 
-      // Build context-aware prompt
       const contextPrompt = `
 You are a legal AI assistant analyzing case documents. Here's the relevant context:
 
@@ -165,9 +190,38 @@ Provide a detailed, legally-informed response focusing on:
   }
 
   /**
-   * Build a comprehensive legal analysis prompt
+   * Process a file for exhibit generation
    */
-  private buildLegalAnalysisPrompt(fileName: string, fileType: string, caseContext?: string): string {
+  async generateExhibitData(
+    file: File,
+    projectContext?: string
+  ): Promise<{
+    exhibitId: string;
+    exhibitTitle: string;
+    insights: LegalInsight[];
+  }> {
+    const content = await file.text();
+    const analysis = await this.analyzeDocument(
+      content,
+      file.name,
+      file.type,
+      projectContext
+    );
+
+    return {
+      exhibitId: analysis.suggestedExhibitId,
+      exhibitTitle: analysis.suggestedExhibitTitle,
+      insights: analysis.insights,
+    };
+  }
+
+  // ─── Private helpers ────────────────────────────────────────
+
+  private buildLegalAnalysisPrompt(
+    fileName: string,
+    fileType: string,
+    caseContext?: string
+  ): string {
     return `You are an expert legal analyst. Analyze this document and provide structured insights.
 
 File Name: ${fileName}
@@ -198,12 +252,11 @@ Analyze this document and provide:
 Format your response as structured JSON for easy parsing.`;
   }
 
-  /**
-   * Parse Gemini's response into structured data
-   */
-  private parseAnalysisResponse(responseText: string, fileName: string): DocumentAnalysis {
+  private parseAnalysisResponse(
+    responseText: string,
+    fileName: string
+  ): DocumentAnalysis {
     try {
-      // Try to parse as JSON first (if Gemini returns structured format)
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
@@ -216,14 +269,14 @@ Format your response as structured JSON for easy parsing.`;
           suggestedExhibitTitle: parsed.suggestedExhibitTitle || fileName,
           insights: parsed.insights || [],
           confidenceScore: parsed.confidenceScore || 0.85,
-          summary: parsed.summary || ''
+          summary: parsed.summary || '',
         };
       }
-    } catch (e) {
+    } catch {
       // Fall back to text parsing if JSON fails
     }
 
-    // Fallback: Extract information from text response
+    // Fallback: extract information from text response
     return {
       extractedText: responseText,
       documentType: this.extractDocumentType(responseText),
@@ -233,7 +286,7 @@ Format your response as structured JSON for easy parsing.`;
       suggestedExhibitTitle: this.extractExhibitTitle(responseText, fileName),
       insights: this.extractInsights(responseText),
       confidenceScore: 0.75,
-      summary: this.extractSummary(responseText)
+      summary: this.extractSummary(responseText),
     };
   }
 
@@ -249,8 +302,8 @@ Format your response as structured JSON for easy parsing.`;
   }
 
   private extractEntities(text: string): string[] {
-    // Simple entity extraction - can be enhanced
-    const entityPattern = /(?:Mr\.|Ms\.|Mrs\.|Dr\.|Judge|Attorney)\s+[A-Z][a-z]+\s+[A-Z][a-z]+/g;
+    const entityPattern =
+      /(?:Mr\.|Ms\.|Mrs\.|Dr\.|Judge|Attorney)\s+[A-Z][a-z]+\s+[A-Z][a-z]+/g;
     const matches = text.match(entityPattern) || [];
     return [...new Set(matches)];
   }
@@ -258,25 +311,31 @@ Format your response as structured JSON for easy parsing.`;
   private extractLegalIssues(text: string): string[] {
     const issues: string[] = [];
     const keywords = [
-      'breach', 'violation', 'damages', 'liability', 'negligence',
-      'fraud', 'misrepresentation', 'dispute', 'claim', 'cause of action'
+      'breach',
+      'violation',
+      'damages',
+      'liability',
+      'negligence',
+      'fraud',
+      'misrepresentation',
+      'dispute',
+      'claim',
+      'cause of action',
     ];
-    
-    keywords.forEach(keyword => {
+
+    for (const keyword of keywords) {
       if (text.toLowerCase().includes(keyword)) {
         issues.push(keyword);
       }
-    });
-    
+    }
+
     return issues;
   }
 
   private extractExhibitId(text: string, fileName: string): string {
-    // Look for exhibit ID in response
     const exhibitMatch = text.match(/[DPVACE]\d+/);
     if (exhibitMatch) return exhibitMatch[0];
-    
-    // Generate based on file type
+
     const ext = fileName.split('.').pop()?.toLowerCase();
     if (['jpg', 'png', 'jpeg'].includes(ext || '')) return 'P1';
     if (['pdf', 'doc', 'docx'].includes(ext || '')) return 'D1';
@@ -285,69 +344,42 @@ Format your response as structured JSON for easy parsing.`;
   }
 
   private extractExhibitTitle(text: string, fileName: string): string {
-    // Look for title suggestion in response
     const titleMatch = text.match(/title[:\s]+["']([^"']+)["']/i);
     if (titleMatch) return titleMatch[1];
-    
-    // Generate from filename
     return fileName.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
   }
 
   private extractInsights(text: string): LegalInsight[] {
     const insights: LegalInsight[] = [];
-    
-    // Look for risk indicators
+
     if (text.toLowerCase().includes('risk') || text.toLowerCase().includes('liability')) {
       insights.push({
         type: 'risk',
         title: 'Potential Legal Risk',
         description: 'This document contains potential legal risks that require attention.',
-        importance: 'high'
+        importance: 'high',
       });
     }
-    
-    // Look for deadlines
-    const datePattern = /\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/g;
+
+    const datePattern = /\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/g;
     if (datePattern.test(text)) {
       insights.push({
         type: 'deadline',
         title: 'Important Date Found',
         description: 'This document contains date references that may be deadlines.',
-        importance: 'medium'
+        importance: 'medium',
       });
     }
-    
+
     return insights;
   }
 
   private extractSummary(text: string): string {
-    // Take first 200 characters as summary
     const sentences = text.split(/[.!?]+/);
     return sentences.slice(0, 2).join('. ').substring(0, 200);
   }
-
-  /**
-   * Process a file for exhibit generation
-   */
-  async generateExhibitData(
-    file: File,
-    projectContext?: string
-  ): Promise<{ exhibitId: string; exhibitTitle: string; insights: LegalInsight[] }> {
-    const content = await file.text();
-    const analysis = await this.analyzeDocument(
-      content,
-      file.name,
-      file.type,
-      projectContext
-    );
-
-    return {
-      exhibitId: analysis.suggestedExhibitId,
-      exhibitTitle: analysis.suggestedExhibitTitle,
-      insights: analysis.insights
-    };
-  }
 }
 
+// Singleton export
 export const geminiAI = new GeminiAIService();
 export default geminiAI;

@@ -1,128 +1,88 @@
-import * as React from 'react';
-import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
-import { useAppStore } from '../store';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
+import type { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+import useAppStore from '@/store';
+import type { AppUser } from '@/types';
 
-interface AuthContextType {
-  session: Session | null;
+interface AuthContextValue {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<{ error: Error | null }>;
+  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextValue | null>(null);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+function toAppUser(user: User | undefined | null): AppUser | null {
+  if (!user) return null;
+  return {
+    id: user.id,
+    email: user.email ?? '',
+    full_name: user.user_metadata?.full_name ?? user.email ?? '',
+    avatar_url: user.user_metadata?.avatar_url ?? null,
+  };
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const setStoreUser = useAppStore((state) => state.setUser);
-
-  const syncUserToStore = useCallback(
-    (u: User | null) => {
-      setUser(u);
-      if (u) {
-        setStoreUser({
-          id: u.id,
-          email: u.email || '',
-          avatar_url: u.user_metadata?.avatar_url,
-          full_name: u.user_metadata?.full_name || '',
-        });
-      } else {
-        setStoreUser(null);
-      }
-    },
-    [setStoreUser]
-  );
-
-  const signInWithGoogle = useCallback(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) throw error;
-  }, []);
-
-  const signOut = useCallback(() => {
-    return supabase.auth.signOut();
-  }, []);
+  const setUser = useAppStore((s) => s.setUser);
 
   useEffect(() => {
-    let mounted = true;
-
-    supabase.auth
-      .getSession()
-      .then(({ data, error }) => {
-        if (!mounted) return;
-        if (error) {
-          console.error('getSession error:', error.message);
-          syncUserToStore(null);
-          setSession(null);
-          setLoading(false);
-          return;
-        }
-        const s = data.session;
-        setSession(s);
-        syncUserToStore(s?.user ?? null);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error getting session:', err);
-        syncUserToStore(null);
-        setSession(null);
-        if (mounted) setLoading(false);
-      });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!mounted) return;
-
-      switch (event) {
-        case 'SIGNED_IN':
-        case 'TOKEN_REFRESHED':
-          setSession(session);
-          syncUserToStore(session?.user ?? null);
-          break;
-        case 'SIGNED_OUT':
-          setSession(null);
-          syncUserToStore(null);
-          break;
-        case 'USER_UPDATED':
-          setSession(session);
-          syncUserToStore(session?.user ?? null);
-          break;
-        default:
-          setSession(session);
-          syncUserToStore(session?.user ?? null);
-      }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(toAppUser(session?.user));
       setLoading(false);
     });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [syncUserToStore]);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(toAppUser(session?.user));
+      setLoading(false);
+    });
 
-  const value = useMemo(
-    () => ({ session, user, loading, signInWithGoogle, signOut }),
-    [session, user, loading, signInWithGoogle, signOut]
+    return () => subscription.unsubscribe();
+  }, [setUser]);
+
+  const signInWithGoogle = async () => {
+    const redirectTo = `${window.location.origin}/auth/callback`;
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    });
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user: session?.user ?? null,
+        session,
+        loading,
+        signInWithGoogle,
+        signOut,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
   );
+}
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export default AuthContext;
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
+}

@@ -1,126 +1,125 @@
-import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import EnhancedPdfViewer from './EnhancedPdfViewer';
-import EnhancedImageViewer from './EnhancedImageViewer';
-import AudioVideoViewer from './AudioVideoViewer';
-import { LinkActivation } from '../../types';
+import { useState, useEffect } from 'react';
+import useAppStore from '@/store';
+import { getFileUrl } from '@/services/storageService';
+import { getFileType } from '@/lib/utils';
+import { FileSearch } from 'lucide-react';
+import { PDFViewer } from './PDFViewer';
+import { ImageViewer } from './ImageViewer';
+import { AudioViewer } from './AudioViewer';
+import { VideoViewer } from './VideoViewer';
+import { TextViewer } from './TextViewer';
+import { EmptyViewer } from './EmptyViewer';
 
-export type SupportedFileType = 'pdf' | 'image' | 'audio' | 'video' | 'text' | 'other';
+export function FileViewer() {
+  const selectedFileId = useAppStore((s) => s.selectedFileId);
+  const files = useAppStore((s) => s.files);
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-interface FileViewerProps {
-  url: string;
-  fileType: string;
-  contentType: string;
-  fileName: string;
-  onLinkUpdate?: (updates: Partial<LinkActivation>) => void;
-  zoom?: number;
-  rotation?: number;
-  onZoomChange?: (zoom: number) => void;
-  onRotationChange?: (rotation: number) => void;
-  viewerRef?: React.RefObject<any>;
-}
+  const selectedFile = selectedFileId
+    ? files.find((f) => f.id === selectedFileId) ?? null
+    : null;
 
-export default function FileViewer({
-  url,
-  fileType,
-  contentType,
-  fileName,
-  onLinkUpdate,
-  zoom = 1,
-  rotation = 0,
-  onZoomChange,
-  onRotationChange,
-  viewerRef
-}: FileViewerProps) {
-  // Determine the viewer type based on content type
-  const getViewerType = (): SupportedFileType => {
-    if (contentType.includes('pdf')) return 'pdf';
-    if (contentType.includes('image')) return 'image';
-    if (contentType.includes('audio')) return 'audio';
-    if (contentType.includes('video')) return 'video';
-    if (contentType.includes('text')) return 'text';
-    return 'other';
-  };
+  useEffect(() => {
+    if (!selectedFile?.file_path) {
+      setFileUrl(null);
+      setError(null);
+      return;
+    }
 
-  const viewerType = getViewerType();
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
 
-  // Render the appropriate viewer based on file type
-  switch (viewerType) {
+    getFileUrl(selectedFile.file_path)
+      .then(({ url, error: urlError }) => {
+        if (cancelled) return;
+        if (urlError || !url) {
+          setError(urlError || 'Could not resolve file URL');
+          setFileUrl(null);
+        } else {
+          setFileUrl(url);
+        }
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : 'Failed to resolve file URL');
+        setFileUrl(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedFile?.file_path]);
+
+  // No file selected
+  if (!selectedFile) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
+          <FileSearch className="h-6 w-6 text-surface-400 dark:text-surface-500" />
+        </div>
+        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+          File Viewer
+        </h3>
+        <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+          Select a file from the left panel to preview it here. Supports PDFs,
+          images, documents, audio, and video.
+        </p>
+      </div>
+    );
+  }
+
+  // Loading URL
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-surface-200 border-t-primary-500" />
+      </div>
+    );
+  }
+
+  // Error
+  if (error || !fileUrl) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
+          <FileSearch className="h-6 w-6 text-red-400" />
+        </div>
+        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+          File Unavailable
+        </h3>
+        <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+          {error || 'Could not load this file. It may have been moved or deleted.'}
+        </p>
+      </div>
+    );
+  }
+
+  // Determine file type and render the appropriate viewer
+  const fileType = getFileType(selectedFile.name);
+
+  switch (fileType) {
     case 'pdf':
-      return (
-        <EnhancedPdfViewer
-          url={url}
-          fileName={fileName}
-          zoom={zoom}
-          rotation={rotation}
-          onZoomChange={onZoomChange}
-          onRotationChange={onRotationChange}
-          onLinkUpdate={onLinkUpdate}
-          ref={viewerRef}
-        />
-      );
+      return <PDFViewer url={fileUrl} fileName={selectedFile.name} />;
     case 'image':
-      return (
-        <EnhancedImageViewer
-          url={url}
-          fileName={fileName}
-          zoom={zoom}
-          rotation={rotation}
-          onZoomChange={onZoomChange}
-          onRotationChange={onRotationChange}
-          onLinkUpdate={onLinkUpdate}
-          ref={viewerRef}
-        />
-      );
+      return <ImageViewer url={fileUrl} fileName={selectedFile.name} />;
     case 'audio':
+      return <AudioViewer url={fileUrl} fileName={selectedFile.name} />;
     case 'video':
-      return (
-        <AudioVideoViewer
-          url={url}
-          fileName={fileName}
-          isVideo={viewerType === 'video'}
-          onLinkUpdate={onLinkUpdate}
-          ref={viewerRef}
-        />
-      );
+      return <VideoViewer url={fileUrl} fileName={selectedFile.name} />;
     case 'text':
-      return (
-        <Box sx={{ p: 2, height: '100%', overflow: 'auto' }}>
-          <iframe 
-            src={url} 
-            title={fileName}
-            style={{ width: '100%', height: '100%', border: 'none' }}
-          />
-        </Box>
-      );
+      return <TextViewer url={fileUrl} fileName={selectedFile.name} />;
     default:
       return (
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            height: '100%',
-            p: 3
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Preview not available
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            This file type cannot be previewed directly
-          </Typography>
-          <Button 
-            variant="contained" 
-            href={url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            download={fileName}
-          >
-            Download File
-          </Button>
-        </Box>
+        <EmptyViewer
+          fileName={selectedFile.name}
+          filePath={selectedFile.file_path}
+        />
       );
   }
-} 
+}

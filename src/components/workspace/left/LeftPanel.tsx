@@ -1,0 +1,172 @@
+import { useMemo, useCallback } from 'react';
+import { FolderOpen, ChevronLeft, Search, X, FileText } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import useAppStore from '@/store';
+import { useFiles } from '@/hooks/useFiles';
+import { FileListItem } from './FileListItem';
+import { FileUploadZone } from './FileUploadZone';
+
+export function LeftPanel() {
+  const isOpen = useAppStore((s) => s.isLeftPanelOpen);
+  const toggleLeft = useAppStore((s) => s.toggleLeftPanel);
+  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const searchQuery = useAppStore((s) => s.searchQuery);
+  const setSearchQuery = useAppStore((s) => s.setSearchQuery);
+
+  const { data: files = [], isLoading } = useFiles(selectedProjectId);
+
+  // Client-side filtering
+  const filteredFiles = useMemo(() => {
+    if (!searchQuery.trim()) return files;
+    const q = searchQuery.toLowerCase();
+    return files.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        (f.file_type && f.file_type.toLowerCase().includes(q))
+    );
+  }, [files, searchQuery]);
+
+  const handleExpand = useCallback(() => {
+    if (!isOpen) toggleLeft();
+  }, [isOpen, toggleLeft]);
+
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
+  }, [setSearchQuery]);
+
+  // ── Collapsed state ──────────────────────────────────────
+  if (!isOpen) {
+    return (
+      <div className="flex h-full w-full flex-col items-center bg-white py-2 dark:bg-surface-800">
+        <button
+          onClick={handleExpand}
+          className="flex h-8 w-8 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          title="Expand file browser"
+        >
+          <FolderOpen className="h-4 w-4" />
+        </button>
+      </div>
+    );
+  }
+
+  // ── Expanded state ───────────────────────────────────────
+  return (
+    <div className="flex h-full w-full flex-col bg-white dark:bg-surface-800">
+      {/* ── Header ────────────────────────────────────────── */}
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-700">
+        <div className="flex items-center gap-2">
+          <FolderOpen className="h-3.5 w-3.5 text-surface-400" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+            Files
+          </span>
+        </div>
+        <button
+          onClick={toggleLeft}
+          className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          title="Collapse panel"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      {/* ── Search bar ────────────────────────────────────── */}
+      <div className="shrink-0 px-3 py-2">
+        <div className="flex h-8 items-center gap-2 rounded-md border border-surface-200 bg-surface-50 px-2.5 transition-colors focus-within:border-primary-400 focus-within:ring-1 focus-within:ring-primary-400/30 dark:border-surface-600 dark:bg-surface-900 dark:focus-within:border-primary-500">
+          <Search className="h-3.5 w-3.5 shrink-0 text-surface-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search files..."
+            className="h-full w-full bg-transparent text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:text-surface-200 dark:placeholder:text-surface-500"
+          />
+          <AnimatePresence>
+            {searchQuery && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.1 }}
+                type="button"
+                onClick={clearSearch}
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-surface-200 text-surface-500 transition-colors hover:bg-surface-300 dark:bg-surface-600 dark:text-surface-400 dark:hover:bg-surface-500"
+                title="Clear search"
+              >
+                <X className="h-2.5 w-2.5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ── Upload zone ───────────────────────────────────── */}
+      {selectedProjectId && (
+        <FileUploadZone projectId={selectedProjectId} />
+      )}
+
+      {/* ── File list ─────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto">
+        {isLoading ? (
+          // Skeleton loading
+          <div className="space-y-1 px-3 py-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center gap-2.5 py-2">
+                <div className="h-8 w-8 shrink-0 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-700" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+                  <div className="h-2.5 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredFiles.length === 0 ? (
+          // Empty state
+          <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
+              <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+            </div>
+            <p className="mt-3 text-center text-xs font-medium text-surface-500 dark:text-surface-400">
+              {searchQuery
+                ? 'No files match your search'
+                : 'Upload files to get started'}
+            </p>
+            {!searchQuery && (
+              <p className="mt-1 text-center text-[11px] leading-snug text-surface-400 dark:text-surface-500">
+                PDFs, images, documents, audio, and video files are supported
+              </p>
+            )}
+          </div>
+        ) : (
+          // File list
+          <div className="py-1">
+            <AnimatePresence initial={false}>
+              {filteredFiles.map((file) => (
+                <motion.div
+                  key={file.id}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <FileListItem file={file} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
+
+      {/* ── Footer file count ─────────────────────────────── */}
+      {files.length > 0 && (
+        <div className="flex shrink-0 items-center justify-between border-t border-surface-200 px-3 py-1.5 dark:border-surface-700">
+          <span className="text-[11px] text-surface-400 dark:text-surface-500">
+            {searchQuery
+              ? `${filteredFiles.length} of ${files.length} files`
+              : `${files.length} file${files.length !== 1 ? 's' : ''}`}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}

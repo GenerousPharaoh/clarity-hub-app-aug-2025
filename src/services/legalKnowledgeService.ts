@@ -4,7 +4,13 @@
  * Provides access to legislation, case law, legal principles, and
  * RAG-powered semantic search for the AI legal assistant.
  */
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
+
+// The legal knowledge tables exist in the database but aren't in the
+// auto-generated types (they were created outside the type generation).
+// We use an untyped helper to query them.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
 
 // ============================================================
 // Types
@@ -92,7 +98,7 @@ class LegalKnowledgeService {
   // ─── Topics ────────────────────────────────────────────────
 
   async getTopics(): Promise<LegalTopic[]> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_topics')
       .select('*')
       .order('display_order');
@@ -102,7 +108,7 @@ class LegalKnowledgeService {
   }
 
   async getTopicBySlug(slug: string): Promise<LegalTopic | null> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_topics')
       .select('*')
       .eq('slug', slug)
@@ -113,13 +119,13 @@ class LegalKnowledgeService {
   }
 
   private buildTopicTree(topics: LegalTopic[]): LegalTopic[] {
-    const topLevel = topics.filter(t => !t.parent_id);
-    const children = topics.filter(t => t.parent_id);
+    const topLevel = topics.filter((t) => !t.parent_id);
+    const children = topics.filter((t) => t.parent_id);
 
-    return topLevel.map(parent => ({
+    return topLevel.map((parent) => ({
       ...parent,
       children: children
-        .filter(c => c.parent_id === parent.id)
+        .filter((c) => c.parent_id === parent.id)
         .sort((a, b) => a.display_order - b.display_order),
     }));
   }
@@ -131,7 +137,7 @@ class LegalKnowledgeService {
     type?: string;
     inForce?: boolean;
   }): Promise<LegalLegislation[]> {
-    let query = supabase
+    let query = db
       .from('legal_legislation')
       .select('*')
       .order('title');
@@ -152,7 +158,7 @@ class LegalKnowledgeService {
   }
 
   async getLegislationById(id: string): Promise<LegalLegislation | null> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_legislation')
       .select('*')
       .eq('id', id)
@@ -166,7 +172,7 @@ class LegalKnowledgeService {
     legislationId: string,
     keyword?: string
   ): Promise<LegalLegislationSection[]> {
-    let query = supabase
+    let query = db
       .from('legal_legislation_sections')
       .select('*')
       .eq('legislation_id', legislationId)
@@ -181,8 +187,10 @@ class LegalKnowledgeService {
     return data ?? [];
   }
 
-  async searchLegislationSections(keyword: string): Promise<LegalLegislationSection[]> {
-    const { data, error } = await supabase
+  async searchLegislationSections(
+    keyword: string
+  ): Promise<LegalLegislationSection[]> {
+    const { data, error } = await db
       .from('legal_legislation_sections')
       .select('*, legislation:legal_legislation(*)')
       .contains('keywords', [keyword]);
@@ -199,7 +207,7 @@ class LegalKnowledgeService {
     jurisdiction?: string;
     limit?: number;
   }): Promise<LegalCase[]> {
-    let query = supabase
+    let query = db
       .from('legal_cases')
       .select('*')
       .order('decision_date', { ascending: false });
@@ -223,7 +231,7 @@ class LegalKnowledgeService {
   }
 
   async getCaseById(id: string): Promise<LegalCase | null> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_cases')
       .select('*')
       .eq('id', id)
@@ -234,7 +242,7 @@ class LegalKnowledgeService {
   }
 
   async getCaseByCitation(citation: string): Promise<LegalCase | null> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_cases')
       .select('*')
       .eq('citation', citation)
@@ -245,10 +253,12 @@ class LegalKnowledgeService {
   }
 
   async searchCases(searchTerm: string): Promise<LegalCase[]> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_cases')
       .select('*')
-      .or(`case_name.ilike.%${searchTerm}%,summary.ilike.%${searchTerm}%,ratio.ilike.%${searchTerm}%`)
+      .or(
+        `case_name.ilike.%${searchTerm}%,summary.ilike.%${searchTerm}%,ratio.ilike.%${searchTerm}%`
+      )
       .order('is_landmark', { ascending: false })
       .limit(20);
 
@@ -262,7 +272,7 @@ class LegalKnowledgeService {
     category?: string;
     status?: string;
   }): Promise<LegalPrinciple[]> {
-    let query = supabase
+    let query = db
       .from('legal_principles')
       .select('*')
       .order('name');
@@ -280,7 +290,7 @@ class LegalKnowledgeService {
   }
 
   async getPrincipleByName(name: string): Promise<LegalPrinciple | null> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_principles')
       .select('*')
       .eq('name', name)
@@ -291,10 +301,12 @@ class LegalKnowledgeService {
   }
 
   async searchPrinciples(searchTerm: string): Promise<LegalPrinciple[]> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_principles')
       .select('*')
-      .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)
+      .or(
+        `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`
+      )
       .limit(10);
 
     if (error) throw error;
@@ -312,7 +324,7 @@ class LegalKnowledgeService {
       topicIds?: string[];
     }
   ): Promise<LegalSearchResult[]> {
-    const { data, error } = await supabase.rpc('match_legal_knowledge', {
+    const { data, error } = await db.rpc('match_legal_knowledge', {
       query_embedding: queryEmbedding,
       match_threshold: options?.threshold ?? 0.7,
       match_count: options?.limit ?? 10,
@@ -326,20 +338,24 @@ class LegalKnowledgeService {
 
   // ─── Full-Text Search ─────────────────────────────────────
 
-  async fullTextSearch(query: string, limit: number = 10): Promise<LegalSearchResult[]> {
+  async fullTextSearch(
+    query: string,
+    limit: number = 10
+  ): Promise<LegalSearchResult[]> {
     const tsQuery = query
       .split(/\s+/)
-      .filter(w => w.length > 2)
+      .filter((w) => w.length > 2)
       .join(' & ');
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('legal_knowledge_chunks')
       .select('id, source_type, source_id, content, metadata, topics')
       .textSearch('fts', tsQuery)
       .limit(limit);
 
     if (error) throw error;
-    return (data ?? []).map(d => ({ ...d, similarity: 1 }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data ?? []).map((d: any) => ({ ...d, similarity: 1 }));
   }
 
   // ─── Context Building for AI ──────────────────────────────
@@ -359,11 +375,13 @@ class LegalKnowledgeService {
       sections.push('## Relevant Case Law\n');
       for (const c of cases.slice(0, 5)) {
         sections.push(`### ${c.case_name} (${c.citation})`);
-        sections.push(`**Court:** ${c.court} | **Level:** ${c.court_level} | **Date:** ${c.decision_date}`);
+        sections.push(
+          `**Court:** ${c.court} | **Level:** ${c.court_level} | **Date:** ${c.decision_date}`
+        );
         if (c.ratio) sections.push(`**Ratio:** ${c.ratio}`);
         if (c.key_holdings?.length) {
           sections.push('**Key Holdings:**');
-          c.key_holdings.forEach(h => sections.push(`- ${h}`));
+          c.key_holdings.forEach((h) => sections.push(`- ${h}`));
         }
         sections.push('');
       }
@@ -378,7 +396,7 @@ class LegalKnowledgeService {
         sections.push(p.description);
         if (p.elements?.length) {
           sections.push('**Elements:**');
-          p.elements.forEach(e => sections.push(`- ${e}`));
+          p.elements.forEach((e) => sections.push(`- ${e}`));
         }
         sections.push(`**Status:** ${p.current_status}`);
         sections.push('');
@@ -391,7 +409,7 @@ class LegalKnowledgeService {
       if (legSections.length > 0) {
         sections.push('## Relevant Legislation\n');
         for (const s of legSections.slice(0, 3)) {
-          const leg = (s as any).legislation as LegalLegislation | undefined;
+          const leg = s.legislation;
           const legTitle = leg?.short_title ?? leg?.title ?? 'Unknown';
           sections.push(`### ${legTitle} s.${s.section_number}`);
           if (s.title) sections.push(`**${s.title}**`);
@@ -415,18 +433,19 @@ class LegalKnowledgeService {
     legislationCount: number;
   }> {
     const topic = await this.getTopicBySlug(topicSlug);
-    if (!topic) return { topic: null, caseCount: 0, principleCount: 0, legislationCount: 0 };
+    if (!topic)
+      return { topic: null, caseCount: 0, principleCount: 0, legislationCount: 0 };
 
     const [cases, principles, legislation] = await Promise.all([
-      supabase
+      db
         .from('legal_cases')
         .select('id', { count: 'exact', head: true })
         .contains('topics', [topic.id]),
-      supabase
+      db
         .from('legal_principles')
         .select('id', { count: 'exact', head: true })
         .contains('related_topics', [topic.id]),
-      supabase
+      db
         .from('legal_legislation')
         .select('id', { count: 'exact', head: true }),
     ]);
@@ -459,7 +478,7 @@ class LegalKnowledgeService {
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .split(/\s+/)
-      .filter(w => w.length > 2 && !stopWords.has(w));
+      .filter((w) => w.length > 2 && !stopWords.has(w));
   }
 }
 

@@ -12,6 +12,10 @@ import { geminiAI } from './geminiAIService';
 import { openaiService } from './openaiService';
 import { legalKnowledge } from './legalKnowledgeService';
 
+// ============================================================
+// Types
+// ============================================================
+
 export type QueryComplexity = 'simple' | 'moderate' | 'deep';
 export type ModelChoice = 'gemini' | 'gpt';
 
@@ -33,6 +37,10 @@ const DEEP_REASONING_SIGNALS = [
   'argue', 'defence', 'defense', 'counter-argument',
 ];
 
+// ============================================================
+// Service
+// ============================================================
+
 class AIRouter {
   /**
    * Classify query complexity to pick the right model.
@@ -41,13 +49,13 @@ class AIRouter {
     const lower = query.toLowerCase();
     const wordCount = query.split(/\s+/).length;
 
-    // Short simple questions → simple
-    if (wordCount < 8 && !DEEP_REASONING_SIGNALS.some(s => lower.includes(s))) {
+    // Short simple questions -> simple
+    if (wordCount < 8 && !DEEP_REASONING_SIGNALS.some((s) => lower.includes(s))) {
       return 'simple';
     }
 
     // Check for deep reasoning signals
-    const signalCount = DEEP_REASONING_SIGNALS.filter(s => lower.includes(s)).length;
+    const signalCount = DEEP_REASONING_SIGNALS.filter((s) => lower.includes(s)).length;
 
     if (signalCount >= 2) return 'deep';
     if (signalCount === 1 && wordCount > 15) return 'deep';
@@ -73,7 +81,9 @@ class AIRouter {
     if (openaiService.isAvailable()) return 'gpt';
 
     // Neither available
-    throw new Error('No AI model configured. Set VITE_GEMINI_API_KEY or VITE_OPENAI_API_KEY.');
+    throw new Error(
+      'No AI model configured. Set VITE_GEMINI_API_KEY or VITE_OPENAI_API_KEY.'
+    );
   }
 
   /**
@@ -92,7 +102,7 @@ class AIRouter {
     const complexity = this.classifyQuery(params.query);
     const model = this.selectModel(complexity);
 
-    // Build legal knowledge context
+    // Build legal knowledge context from the RAG pipeline
     const legalContext = await legalKnowledge.buildLegalContext(params.query);
 
     if (model === 'gpt') {
@@ -112,17 +122,17 @@ class AIRouter {
     }
 
     // Gemini path
-    const contextParts = [];
+    const contextParts: string[] = [];
     if (legalContext) contextParts.push(legalContext);
     if (params.caseContext) contextParts.push(params.caseContext);
 
     const response = await geminiAI.chatWithContext(
       params.query,
       contextParts,
-      (params.conversationHistory ?? []).map(m => ({
+      (params.conversationHistory ?? []).map((m) => ({
         role: m.role,
         content: m.content,
-      })),
+      }))
     );
 
     return {

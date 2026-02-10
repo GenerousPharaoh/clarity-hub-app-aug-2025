@@ -99,3 +99,6 @@ test-results/
 
 **/.claude/settings.local.json
 .vercel
+
+# Old source backup
+src-old/

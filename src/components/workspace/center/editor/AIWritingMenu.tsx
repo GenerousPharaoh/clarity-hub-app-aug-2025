@@ -212,7 +212,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
                 'flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-left text-[11px] font-medium transition-colors',
                 selectedText.trim()
                   ? 'text-surface-600 hover:bg-surface-100 hover:text-surface-800 dark:text-surface-300 dark:hover:bg-surface-700 dark:hover:text-surface-100'
-                  : 'cursor-not-allowed text-surface-300 dark:text-surface-600'
+                  : 'cursor-not-allowed text-surface-300 dark:text-surface-500'
               )}
             >
               {action.icon}

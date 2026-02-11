@@ -80,7 +80,7 @@ export function AIChatPanel() {
   if (!selectedProjectId) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-6">
-        <Sparkles className="h-6 w-6 text-surface-300 dark:text-surface-600" />
+        <Sparkles className="h-6 w-6 text-surface-300 dark:text-surface-500" />
         <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
           Select a project to start chatting with AI.
         </p>

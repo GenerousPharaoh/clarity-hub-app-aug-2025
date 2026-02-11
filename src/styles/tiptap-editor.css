@@ -28,7 +28,7 @@
 }
 
 .dark .tiptap p.is-editor-empty:first-child::before {
-  color: var(--color-surface-600);
+  color: var(--color-surface-500);
 }
 
 /* ── Paragraphs ───────────────────────────────────────── */
@@ -201,7 +201,7 @@
 }
 
 .dark .tiptap .tiptap-task-item label input[type="checkbox"] {
-  border-color: var(--color-surface-600);
+  border-color: var(--color-surface-500);
 }
 
 .dark .tiptap .tiptap-task-item label input[type="checkbox"]:hover {

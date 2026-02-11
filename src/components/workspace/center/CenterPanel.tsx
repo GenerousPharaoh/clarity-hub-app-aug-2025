@@ -207,7 +207,7 @@ function NotesTab() {
         <div className="flex-1 overflow-y-auto">
           {(!notes || notes.length === 0) && (
             <div className="px-4 py-8 text-center">
-              <FileText className="mx-auto h-5 w-5 text-surface-300 dark:text-surface-600" />
+              <FileText className="mx-auto h-5 w-5 text-surface-300 dark:text-surface-500" />
               <p className="mt-2 text-[11px] text-surface-400 dark:text-surface-500">
                 No notes yet
               </p>

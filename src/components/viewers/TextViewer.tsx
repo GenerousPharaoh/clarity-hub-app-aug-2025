@@ -90,7 +90,7 @@ export function TextViewer({ url, fileName }: TextViewerProps) {
             {lines.map((_, i) => (
               <div
                 key={i}
-                className="font-mono text-[11px] leading-5 text-surface-300 dark:text-surface-600"
+                className="font-mono text-[11px] leading-5 text-surface-300 dark:text-surface-500"
               >
                 {i + 1}
               </div>

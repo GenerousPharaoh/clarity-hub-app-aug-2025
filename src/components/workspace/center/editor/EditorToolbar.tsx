@@ -103,7 +103,7 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
         active={editor.isActive('highlight')}
         title="Highlight (Cmd+Shift+H)"
       >
-        <span className="flex h-4 w-4 items-center justify-center rounded text-[11px] font-bold" style={{ background: 'rgba(250, 204, 21, 0.4)' }}>H</span>
+        <span className="flex h-4 w-4 items-center justify-center rounded bg-yellow-300/40 text-[11px] font-bold dark:bg-yellow-400/30">H</span>
       </ToolbarButton>
 
       <Divider />

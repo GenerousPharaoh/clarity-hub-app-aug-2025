@@ -5,29 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Basic Commands
-- `npm install` - Install dependencies (also runs copy-tinymce.js)
-- `npm run dev` - Start development server (runs on port 3000 by default)
+- `npm run dev` - Start Vite development server
 - `npm run build` - Build for production (runs typecheck first)
 - `npm run lint` - Run ESLint
-
-### Viewer Testing Commands
-- `npm run dev` - Start the dev server, then:
-  - Visit http://localhost:3000/test-viewers to test file viewers
-  - Visit http://localhost:3000/comprehensive-file-test.html for isolated viewer tests
-
-### Test Commands
-- `npm run test` - Run Playwright tests
-- `npm run test:ui` - Run Playwright tests with UI
-- `npm run test:debug` - Run Playwright tests in debug mode
-- `npm run test:report` - Show Playwright test reports
-- `npm run test:puppeteer` - Run Puppeteer validation tests
-
-### Supabase/Storage Commands
-- `npm run fix:storage` - Fix Supabase storage permissions
-- `npm run fix:projects` - Fix project display issues
-- `npm run test:uploads` - Test file uploads
-- `npm run fix:all` - Apply all fixes (storage, projects, uploads)
-- `npm run copy-tinymce` - Copy TinyMCE resources (runs automatically before dev/build)
+- `npm run preview` - Preview production build locally
+- `npm run typecheck` - Run TypeScript type checking
 
 ## Application Architecture
 

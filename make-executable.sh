@@ -1,1 +1,0 @@
-chmod +x ~/Desktop/clarity-hub-app/run-dev-fresh.sh

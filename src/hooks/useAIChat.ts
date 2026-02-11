@@ -94,6 +94,43 @@ async function fetchFileContent(
   }
 }
 
+/** Convert an AI error into an actionable user-facing message. */
+function formatAIError(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return 'An unexpected error occurred. Please try again.';
+  }
+
+  const msg = error.message.toLowerCase();
+
+  // API key issues
+  if (msg.includes('api key') || msg.includes('api_key') || msg.includes('unauthorized') || msg.includes('401')) {
+    return 'API key error — the AI service rejected the request. Please check that your API keys are configured correctly in Settings.';
+  }
+
+  // Rate limiting
+  if (msg.includes('rate limit') || msg.includes('429') || msg.includes('quota')) {
+    return 'Rate limit reached — the AI service is temporarily throttled. Please wait a moment and try again.';
+  }
+
+  // Network errors
+  if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('econnrefused')) {
+    return 'Network error — could not reach the AI service. Please check your internet connection and try again.';
+  }
+
+  // Model-specific errors
+  if (msg.includes('model') && (msg.includes('not found') || msg.includes('does not exist'))) {
+    return 'Model unavailable — the requested AI model could not be found. This may be a temporary issue.';
+  }
+
+  // Content safety
+  if (msg.includes('safety') || msg.includes('blocked') || msg.includes('content filter')) {
+    return 'The AI service flagged this request. Please try rephrasing your question.';
+  }
+
+  // Generic with original message
+  return `AI error: ${error.message}`;
+}
+
 interface UseAIChatOptions {
   projectId: string | null;
 }
@@ -238,10 +275,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
       } catch (error) {
         if (abortRef.current) return;
 
-        const errorContent =
-          error instanceof Error
-            ? `I encountered an error: ${error.message}. Please check that your AI API keys are configured and try again.`
-            : 'An unexpected error occurred. Please try again.';
+        const errorContent = formatAIError(error);
 
         // Try to insert error message into DB; if that also fails, just update cache
         try {

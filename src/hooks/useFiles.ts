@@ -118,6 +118,7 @@ export function useUploadFile() {
 export function useDeleteFile() {
   const queryClient = useQueryClient();
   const removeFile = useAppStore((s) => s.removeFile);
+  const addFile = useAppStore((s) => s.addFile);
 
   return useMutation({
     mutationFn: async (file: FileRecord) => {
@@ -137,9 +138,33 @@ export function useDeleteFile() {
       if (error) throw error;
       return file;
     },
-    onSuccess: (file) => {
+    // Optimistic: remove from UI immediately
+    onMutate: async (file) => {
+      await queryClient.cancelQueries({ queryKey: filesQueryKey(file.project_id) });
+
+      const previousFiles = queryClient.getQueryData<FileRecord[]>(
+        filesQueryKey(file.project_id)
+      );
+
+      queryClient.setQueryData<FileRecord[]>(
+        filesQueryKey(file.project_id),
+        (old) => (old ?? []).filter((f) => f.id !== file.id)
+      );
       removeFile(file.id);
-      // Use the deleted file's project_id — not the currently selected project
+
+      return { previousFiles, file };
+    },
+    onError: (_err, _file, context) => {
+      // Rollback on failure
+      if (context?.previousFiles) {
+        queryClient.setQueryData(
+          filesQueryKey(context.file.project_id),
+          context.previousFiles
+        );
+        addFile(context.file);
+      }
+    },
+    onSettled: (_data, _error, file) => {
       queryClient.invalidateQueries({
         queryKey: filesQueryKey(file.project_id),
       });

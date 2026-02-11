@@ -219,6 +219,12 @@ button, [role="button"], a {
   background: linear-gradient(135deg, rgb(79 70 229 / 0.1), rgb(124 58 237 / 0.1));
 }
 
+/* ── Indeterminate Progress Bar ───────────────────────── */
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}
+
 /* ── Ambient Background (for dark mode depth) ─────────── */
 .dark .ambient-glow::before {
   content: '';

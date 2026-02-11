@@ -13,10 +13,7 @@ interface FileUploadZoneProps {
 
 export function FileUploadZone({ projectId }: FileUploadZoneProps) {
   const uploadFile = useUploadFile();
-  const [uploadProgress, setUploadProgress] = useState<{
-    fileName: string;
-    progress: number;
-  } | null>(null);
+  const [uploadingFile, setUploadingFile] = useState<string | null>(null);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[], rejections: FileRejection[]) => {
@@ -31,29 +28,17 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
       // Upload accepted files sequentially
       for (const file of acceptedFiles) {
         try {
-          setUploadProgress({ fileName: file.name, progress: 10 });
-
-          // Simulate progress stages since Supabase doesn't provide progress callbacks
-          const progressInterval = setInterval(() => {
-            setUploadProgress((prev) => {
-              if (!prev || prev.progress >= 85) return prev;
-              return { ...prev, progress: prev.progress + Math.random() * 15 };
-            });
-          }, 200);
+          setUploadingFile(file.name);
 
           await uploadFile.mutateAsync({ file, projectId });
-
-          clearInterval(progressInterval);
-          setUploadProgress({ fileName: file.name, progress: 100 });
 
           toast.success(`Uploaded ${file.name}`, {
             icon: <CheckCircle2 className="h-4 w-4 text-success" />,
           });
 
-          // Clear progress after brief success display
-          setTimeout(() => setUploadProgress(null), 800);
+          setUploadingFile(null);
         } catch (err) {
-          setUploadProgress(null);
+          setUploadingFile(null);
           const message =
             err instanceof Error ? err.message : 'Upload failed';
           toast.error(`Failed to upload ${file.name}`, {
@@ -104,28 +89,25 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         )}
 
         {/* Upload progress */}
-        {!isDragActive && uploadProgress && (
+        {!isDragActive && uploadingFile && (
           <div className="flex items-center gap-2.5 py-2.5 px-1">
             <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary-500" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-medium text-surface-700 dark:text-surface-200">
-                {uploadProgress.fileName}
+                {uploadingFile}
               </p>
               <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-surface-100 dark:bg-surface-700">
-                <div
-                  className="h-full rounded-full bg-primary-500 transition-[width] duration-300 ease-out"
-                  style={{ width: `${Math.min(uploadProgress.progress, 100)}%` }}
-                />
+                <div className="h-full w-1/3 animate-[indeterminate_1.5s_ease-in-out_infinite] rounded-full bg-primary-500" />
               </div>
             </div>
-            <span className="shrink-0 text-[11px] tabular-nums text-surface-400">
-              {Math.round(uploadProgress.progress)}%
+            <span className="shrink-0 text-[11px] text-surface-400">
+              Uploading...
             </span>
           </div>
         )}
 
         {/* Upload button (persistent, always visible when not dragging and not uploading) */}
-        {!isDragActive && !uploadProgress && (
+        {!isDragActive && !uploadingFile && (
           <button
             type="button"
             onClick={open}

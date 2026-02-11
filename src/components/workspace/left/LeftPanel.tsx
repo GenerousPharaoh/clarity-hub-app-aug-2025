@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { ChevronLeft, FolderOpen, Search, X, FileText } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -15,19 +15,30 @@ export function LeftPanel() {
 
   const { data: files = [], isLoading } = useFiles(selectedProjectId);
 
-  // Client-side filtering
+  // Debounced search: input updates immediately, filtering deferred by 150ms
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedQuery(searchQuery), 150);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchQuery]);
+
+  // Client-side filtering uses debounced query
   const filteredFiles = useMemo(() => {
-    if (!searchQuery.trim()) return files;
-    const q = searchQuery.toLowerCase();
+    if (!debouncedQuery.trim()) return files;
+    const q = debouncedQuery.toLowerCase();
     return files.filter(
       (f) =>
         f.name.toLowerCase().includes(q) ||
         (f.file_type && f.file_type.toLowerCase().includes(q))
     );
-  }, [files, searchQuery]);
+  }, [files, debouncedQuery]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
+    setDebouncedQuery('');
   }, [setSearchQuery]);
   return (
     <div className="flex h-full w-full flex-col bg-surface-50 dark:bg-surface-900">

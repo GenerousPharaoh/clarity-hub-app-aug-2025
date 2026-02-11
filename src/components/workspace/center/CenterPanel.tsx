@@ -8,7 +8,6 @@ import { useNotes, useCreateNote, useDeleteNote, useUpdateNote } from '@/hooks/u
 import { ProjectOverview } from './ProjectOverview';
 import { TipTapEditor } from './editor/TipTapEditor';
 import { ExhibitsTab } from './ExhibitsTab';
-import { FadeIn } from '@/components/shared/FadeIn';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import {
   LayoutList,
@@ -314,37 +313,15 @@ function NotesTab() {
       {/* ── Editor area ────────────────────────────────────── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {activeNote ? (
-          <FadeIn key={activeNote.id} direction="up" duration={0.2}>
-            <div className="flex flex-1 flex-col overflow-hidden">
-              {/* Title input */}
-              <div className="shrink-0 px-6 pt-5 pb-1">
-                <input
-                  ref={titleInputRef}
-                  type="text"
-                  defaultValue={activeNote.title || ''}
-                  key={activeNote.id} // reset defaultValue when switching notes
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="Untitled"
-                  className={cn(
-                    'w-full bg-transparent font-heading text-xl font-semibold',
-                    'text-surface-900 dark:text-surface-50',
-                    'placeholder:text-surface-300 dark:placeholder:text-surface-600',
-                    'border-none outline-none focus:outline-none focus:ring-0'
-                  )}
-                />
-              </div>
-
-              {/* TipTap editor */}
-              <div className="flex-1 overflow-hidden">
-                <TipTapEditor
-                  key={activeNote.id}
-                  noteId={activeNote.id}
-                  projectId={activeNote.project_id}
-                  initialContent={activeNote.content || ''}
-                />
-              </div>
-            </div>
-          </FadeIn>
+          <TipTapEditor
+            key={activeNote.id}
+            noteId={activeNote.id}
+            projectId={activeNote.project_id}
+            initialContent={activeNote.content || ''}
+            title={activeNote.title || ''}
+            onTitleChange={handleTitleChange}
+            titleInputRef={titleInputRef}
+          />
         ) : (
           <div className="flex flex-1 flex-col items-center justify-center px-8">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">

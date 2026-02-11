@@ -69,42 +69,39 @@ export async function getSignedUrl(
 }
 
 /**
- * Resolve a file URL using a signed URL (required for private buckets).
- * Falls back to public URL construction only if signing fails.
+ * Download a file from the private bucket and return a local blob URL.
+ * Uses the Supabase client's authenticated download (avoids CORS issues).
+ * Callers must revoke the blob URL with URL.revokeObjectURL() when done.
  */
 export async function getFileUrl(
-  filePath: string,
-  options?: { expiresIn?: number }
+  filePath: string
 ): Promise<{ url: string; error?: string }> {
   if (!filePath) return { url: '', error: 'No file path provided' };
 
-  const expiresIn = options?.expiresIn ?? 3600; // 1 hour default
-
   try {
-    // Private bucket — must use signed URL for authenticated access
     const { data, error } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .createSignedUrl(filePath, expiresIn);
+      .download(filePath);
 
     if (error) {
-      console.error('[storageService] Signed URL error:', error);
-      // Fall back to public URL (works if bucket is made public later)
-      return { url: getPublicUrl(filePath) };
+      console.error('[storageService] Download error:', error);
+      return { url: '', error: error.message };
     }
 
-    if (data?.signedUrl) {
-      return { url: data.signedUrl };
+    if (!data) {
+      return { url: '', error: 'File download returned empty data' };
     }
+
+    // Create a local blob URL — no CORS issues
+    const blobUrl = URL.createObjectURL(data);
+    return { url: blobUrl };
   } catch (err) {
     console.error('[storageService] getFileUrl error:', err);
+    return {
+      url: '',
+      error: err instanceof Error ? err.message : 'Failed to download file',
+    };
   }
-
-  // Last resort: public URL construction
-  if (supabaseUrl) {
-    return { url: getPublicUrl(filePath) };
-  }
-
-  return { url: '', error: 'Could not resolve file URL' };
 }
 
 // ============================================================

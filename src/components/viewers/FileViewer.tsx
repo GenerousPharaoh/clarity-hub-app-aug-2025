@@ -35,7 +35,11 @@ export function FileViewer() {
 
     getFileUrl(selectedFile.file_path)
       .then(({ url, error: urlError }) => {
-        if (cancelled) return;
+        if (cancelled) {
+          // Revoke blob URL if the effect was cancelled before we could use it
+          if (url) URL.revokeObjectURL(url);
+          return;
+        }
         if (urlError || !url) {
           setError(urlError || 'Could not resolve file URL');
           setFileUrl(null);
@@ -54,6 +58,11 @@ export function FileViewer() {
 
     return () => {
       cancelled = true;
+      // Revoke previous blob URL to free memory
+      setFileUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
     };
   }, [selectedFile?.file_path, retryCount]);
 

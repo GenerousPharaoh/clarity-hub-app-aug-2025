@@ -29,11 +29,6 @@ export default defineConfig({
               id.includes('node_modules/react-router')) {
             return 'react-vendor';
           }
-          // PDF viewer
-          if (id.includes('node_modules/react-pdf') ||
-              id.includes('node_modules/pdfjs-dist')) {
-            return 'pdf-vendor';
-          }
           // TipTap editor
           if (id.includes('node_modules/@tiptap/') ||
               id.includes('node_modules/prosemirror') ||
@@ -67,10 +62,6 @@ export default defineConfig({
 
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
-  },
-
-  worker: {
-    format: 'es',
   },
 
   publicDir: 'public',

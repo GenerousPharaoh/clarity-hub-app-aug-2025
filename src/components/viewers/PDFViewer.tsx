@@ -94,6 +94,39 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
     }
   }, [fitWidth]);
 
+  // Keyboard shortcuts (only active when viewer is focused)
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      // Don't intercept if user is typing in an input
+      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return;
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          setPageNumber((prev) => Math.max(1, prev - 1));
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setPageNumber((prev) => Math.min(numPages, prev + 1));
+          break;
+        case '=':
+        case '+':
+          e.preventDefault();
+          zoomIn();
+          break;
+        case '-':
+          e.preventDefault();
+          zoomOut();
+          break;
+        case '0':
+          e.preventDefault();
+          toggleFitWidth();
+          break;
+      }
+    },
+    [numPages, zoomIn, zoomOut, toggleFitWidth]
+  );
+
   if (loadError) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-8 text-center">
@@ -123,7 +156,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col outline-none" tabIndex={-1} onKeyDown={handleKeyDown}>
       {/* Toolbar */}
       <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-2 dark:border-surface-700">
         {/* Page navigation */}

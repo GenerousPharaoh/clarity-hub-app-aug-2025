@@ -127,6 +127,34 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
     setHasError(true);
   }, []);
 
+  // Keyboard shortcuts (only active when viewer is focused)
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return;
+
+      switch (e.key) {
+        case '=':
+        case '+':
+          e.preventDefault();
+          zoomIn();
+          break;
+        case '-':
+          e.preventDefault();
+          zoomOut();
+          break;
+        case '0':
+          e.preventDefault();
+          fitToView();
+          break;
+        case 'r':
+          e.preventDefault();
+          rotate();
+          break;
+      }
+    },
+    [zoomIn, zoomOut, fitToView, rotate]
+  );
+
   if (hasError) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-8 text-center">
@@ -147,7 +175,7 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
   }
 
   return (
-    <div className="relative flex h-full flex-col">
+    <div className="relative flex h-full flex-col outline-none" tabIndex={-1} onKeyDown={handleKeyDown}>
       {/* Toolbar */}
       <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-700">
         <span className="truncate text-xs text-surface-500 dark:text-surface-400" title={fileName}>

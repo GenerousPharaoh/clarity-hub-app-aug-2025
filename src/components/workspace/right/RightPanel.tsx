@@ -12,9 +12,9 @@ export function RightPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('viewer');
 
   return (
-    <div className="flex h-full w-full flex-col bg-white dark:bg-surface-800">
+    <div className="flex h-full w-full flex-col bg-white dark:bg-surface-900">
       {/* Header with tabs and collapse */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 dark:border-surface-700">
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 dark:border-surface-800">
         <div className="flex h-full items-center gap-0 px-1">
           <TabButton
             active={activeTab === 'viewer'}
@@ -32,7 +32,12 @@ export function RightPanel() {
         </div>
         <button
           onClick={toggleRight}
-          className="mr-2 flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          className={cn(
+            'mr-2 flex h-6 w-6 items-center justify-center rounded-md',
+            'text-surface-400 transition-all',
+            'hover:bg-surface-100 hover:text-surface-600',
+            'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+          )}
           title="Collapse panel"
         >
           <ChevronRight className="h-3.5 w-3.5" />

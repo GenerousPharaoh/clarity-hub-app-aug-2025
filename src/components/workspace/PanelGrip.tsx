@@ -25,7 +25,7 @@ export function PanelGrip({ className, id }: PanelGripProps) {
       <div
         className={cn(
           'absolute inset-y-0 left-1/2 -translate-x-1/2',
-          'w-px bg-surface-200 dark:bg-surface-700',
+          'w-px bg-surface-200 dark:bg-surface-800',
           'transition-all duration-100',
           'group-hover:w-[2px] group-hover:bg-primary-400 dark:group-hover:bg-primary-500',
           'group-data-[resize-handle-state=drag]:w-[2px] group-data-[resize-handle-state=drag]:bg-primary-500 dark:group-data-[resize-handle-state=drag]:bg-primary-400'
@@ -36,8 +36,8 @@ export function PanelGrip({ className, id }: PanelGripProps) {
       <div
         className={cn(
           'relative z-20 flex h-6 w-3 items-center justify-center rounded-sm',
-          'bg-surface-100 dark:bg-surface-700',
-          'border border-surface-200 dark:border-surface-600',
+          'bg-surface-100 dark:bg-surface-800',
+          'border border-surface-200 dark:border-surface-700',
           'opacity-0 transition-opacity duration-100',
           'group-hover:opacity-100',
           'group-data-[resize-handle-state=drag]:opacity-100'

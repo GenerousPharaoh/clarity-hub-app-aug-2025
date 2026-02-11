@@ -51,7 +51,7 @@ export function WorkspacePage() {
       <CollapsedStrip side="left" visible={!isLeftOpen}>
         <button
           onClick={() => setLeftPanel(true)}
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800 dark:hover:text-surface-300"
           title="Open file browser"
         >
           <FolderOpen className="h-4 w-4" />
@@ -117,7 +117,7 @@ export function WorkspacePage() {
       <CollapsedStrip side="right" visible={!isRightOpen}>
         <button
           onClick={() => setRightPanel(true)}
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800 dark:hover:text-surface-300"
           title="Open file viewer"
         >
           <Eye className="h-4 w-4" />

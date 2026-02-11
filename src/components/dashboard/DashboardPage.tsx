@@ -25,21 +25,21 @@ function getFirstName(user: { user_metadata?: Record<string, unknown>; email?: s
 /* ── Skeleton card for loading state ─────────────────── */
 function SkeletonCard() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
-      <div className="h-1 w-full animate-pulse bg-surface-200 dark:bg-surface-700" />
+    <div className="flex flex-col overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
+      <div className="h-1 w-full animate-pulse bg-surface-200 dark:bg-surface-800" />
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-3 flex items-start gap-3">
-          <div className="h-9 w-9 animate-pulse rounded-md bg-surface-100 dark:bg-surface-700" />
+          <div className="h-9 w-9 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
           <div className="flex-1 space-y-2">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+            <div className="h-4 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
           </div>
         </div>
         <div className="mb-4 space-y-2">
-          <div className="h-3 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
-          <div className="h-3 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+          <div className="h-3 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-3 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
         </div>
-        <div className="mt-auto border-t border-surface-100 pt-3 dark:border-surface-700">
-          <div className="h-3 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+        <div className="mt-auto border-t border-surface-100 pt-3 dark:border-surface-800">
+          <div className="h-3 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
         </div>
       </div>
     </div>
@@ -83,8 +83,14 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="min-h-full bg-surface-50 dark:bg-surface-900">
-      <div className="mx-auto max-w-6xl px-6 py-8 sm:px-8 lg:px-10">
+    <div className="relative min-h-full bg-surface-50 dark:bg-surface-950">
+      {/* Ambient background glow for dark mode */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-[400px] left-1/4 h-[800px] w-[800px] rounded-full bg-primary-500/[0.03] blur-[120px] dark:bg-primary-500/[0.06]" />
+        <div className="absolute -bottom-[300px] right-1/4 h-[600px] w-[600px] rounded-full bg-accent-500/[0.02] blur-[100px] dark:bg-accent-500/[0.04]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-6xl px-6 py-8 sm:px-8 lg:px-10">
         {/* Header section */}
         <FadeIn>
           <div className="mb-8">
@@ -106,12 +112,13 @@ export function DashboardPage() {
             <button
               onClick={() => setDialogOpen(true)}
               className={cn(
-                'inline-flex items-center gap-2 rounded-lg px-4 py-2.5',
+                'inline-flex items-center gap-2 rounded-xl px-4 py-2.5',
                 'bg-primary-600 text-sm font-medium text-white',
-                'shadow-sm transition-all',
-                'hover:bg-primary-700 hover:shadow active:bg-primary-800',
+                'shadow-sm transition-all duration-200',
+                'hover:bg-primary-500 hover:shadow-md hover:shadow-primary-500/25',
+                'active:scale-[0.98] active:bg-primary-700',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
-                'dark:focus-visible:ring-offset-surface-900'
+                'dark:focus-visible:ring-offset-surface-950'
               )}
             >
               <Plus className="h-4 w-4" />
@@ -123,7 +130,7 @@ export function DashboardPage() {
         {/* Error state */}
         {error && (
           <FadeIn>
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-400">
               Failed to load projects. Please try refreshing the page.
             </div>
           </FadeIn>
@@ -141,7 +148,7 @@ export function DashboardPage() {
         {/* Empty state */}
         {!isLoading && !error && !hasProjects && (
           <FadeIn delay={0.1}>
-            <div className="rounded-xl border border-dashed border-surface-300 bg-white py-4 dark:border-surface-600 dark:bg-surface-800/50">
+            <div className="rounded-xl border border-dashed border-surface-300 bg-white py-4 dark:border-surface-700 dark:bg-surface-900/50">
               <EmptyState
                 icon={<Scale className="h-6 w-6" />}
                 title="No projects yet"
@@ -150,10 +157,11 @@ export function DashboardPage() {
                   <button
                     onClick={() => setDialogOpen(true)}
                     className={cn(
-                      'inline-flex items-center gap-2 rounded-lg px-4 py-2.5',
+                      'inline-flex items-center gap-2 rounded-xl px-4 py-2.5',
                       'bg-primary-600 text-sm font-medium text-white',
-                      'shadow-sm transition-all',
-                      'hover:bg-primary-700 hover:shadow active:bg-primary-800'
+                      'shadow-sm transition-all duration-200',
+                      'hover:bg-primary-500 hover:shadow-md hover:shadow-primary-500/25',
+                      'active:scale-[0.98]'
                     )}
                   >
                     <Plus className="h-4 w-4" />

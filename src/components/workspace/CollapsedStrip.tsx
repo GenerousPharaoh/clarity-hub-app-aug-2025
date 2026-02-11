@@ -18,10 +18,10 @@ export function CollapsedStrip({ children, side, visible }: CollapsedStripProps)
     <div
       className={cn(
         'flex w-10 shrink-0 flex-col items-center gap-1 py-2',
-        'bg-white dark:bg-surface-800',
+        'bg-white dark:bg-surface-900',
         side === 'left'
-          ? 'border-r border-surface-200 dark:border-surface-700'
-          : 'border-l border-surface-200 dark:border-surface-700'
+          ? 'border-r border-surface-200 dark:border-surface-800'
+          : 'border-l border-surface-200 dark:border-surface-800'
       )}
     >
       {children}

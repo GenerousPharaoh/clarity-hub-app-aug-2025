@@ -78,7 +78,7 @@ export function ExhibitsTab() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-surface-100 px-4 py-3 dark:border-surface-700">
+      <div className="flex shrink-0 items-center justify-between border-b border-surface-100 px-4 py-3 dark:border-surface-800">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
           Exhibit Markers ({exhibits?.length ?? 0})
         </h2>
@@ -200,7 +200,7 @@ function ExhibitCard({
   }, [editDesc, onUpdate]);
 
   return (
-    <div className="rounded-lg border border-surface-200 bg-white p-4 transition-shadow hover:shadow-sm dark:border-surface-600 dark:bg-surface-800">
+    <div className="rounded-lg border border-surface-200 bg-white p-4 transition-shadow hover:shadow-sm dark:border-surface-700 dark:bg-surface-800">
       <div className="flex items-start justify-between gap-2">
         {/* Exhibit badge */}
         <div className="flex items-center gap-2">
@@ -339,7 +339,7 @@ function FilePicker({
       {/* Backdrop */}
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
-      <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-surface-200 bg-white p-2 shadow-lg dark:border-surface-600 dark:bg-surface-800">
+      <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-surface-200 bg-white p-2 shadow-lg dark:border-surface-700 dark:bg-surface-800">
         <input
           type="text"
           value={search}

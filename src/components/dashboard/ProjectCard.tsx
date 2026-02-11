@@ -46,16 +46,16 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
     }
   };
 
-  // Accent color stripe based on card index for visual variety
-  const accentColors = [
-    'bg-primary-500',
-    'bg-accent-500',
-    'bg-emerald-500',
-    'bg-amber-500',
-    'bg-rose-500',
-    'bg-cyan-500',
+  // Accent color stripe — gradient pairs for visual variety
+  const accentGradients = [
+    'from-primary-500 to-primary-600',
+    'from-accent-500 to-accent-600',
+    'from-emerald-500 to-emerald-600',
+    'from-amber-500 to-amber-600',
+    'from-rose-500 to-rose-600',
+    'from-cyan-500 to-cyan-600',
   ];
-  const accent = accentColors[index % accentColors.length];
+  const accent = accentGradients[index % accentGradients.length];
 
   return (
     <motion.div
@@ -71,22 +71,22 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
         onClick={handleCardClick}
         className={cn(
           'group relative flex cursor-pointer flex-col overflow-hidden',
-          'rounded-lg border border-surface-200 bg-white',
+          'rounded-xl border border-surface-200 bg-white',
           'shadow-sm transition-all duration-200',
-          'hover:shadow-md hover:border-surface-300 hover:-translate-y-0.5',
-          'dark:border-surface-700 dark:bg-surface-800',
-          'dark:hover:border-surface-600 dark:hover:shadow-surface-900/40'
+          'hover:shadow-lg hover:shadow-surface-900/5 hover:border-surface-300 hover:-translate-y-0.5',
+          'dark:border-surface-800 dark:bg-surface-900',
+          'dark:hover:border-surface-700 dark:hover:shadow-[0_8px_30px_-8px_rgb(0_0_0/0.5)]'
         )}
       >
-        {/* Accent stripe */}
-        <div className={cn('h-1 w-full', accent)} />
+        {/* Accent stripe — gradient */}
+        <div className={cn('h-1 w-full bg-gradient-to-r', accent)} />
 
         {/* Card body */}
         <div className="flex flex-1 flex-col p-5">
           {/* Header: icon + title + menu */}
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 min-w-0">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-100 text-surface-500 dark:bg-surface-700 dark:text-surface-400">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400">
                 <FolderOpen className="h-4.5 w-4.5" />
               </div>
               <div className="min-w-0">
@@ -105,12 +105,12 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                   setConfirmDelete(false);
                 }}
                 className={cn(
-                  'flex h-7 w-7 items-center justify-center rounded-md',
-                  'text-surface-400 transition-colors',
+                  'flex h-7 w-7 items-center justify-center rounded-lg',
+                  'text-surface-400 transition-all',
                   'hover:bg-surface-100 hover:text-surface-600',
-                  'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+                  'dark:hover:bg-surface-800 dark:hover:text-surface-300',
                   'opacity-0 group-hover:opacity-100 focus:opacity-100',
-                  menuOpen && 'opacity-100 bg-surface-100 dark:bg-surface-700'
+                  menuOpen && 'opacity-100 bg-surface-100 dark:bg-surface-800'
                 )}
                 aria-label="Project options"
               >
@@ -121,7 +121,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                 <div
                   className={cn(
                     'absolute right-0 top-full z-50 mt-1 w-44',
-                    'rounded-md border border-surface-200 bg-white py-1 shadow-lg',
+                    'rounded-xl border border-surface-200 bg-white py-1 shadow-lg',
                     'dark:border-surface-700 dark:bg-surface-800'
                   )}
                 >
@@ -154,7 +154,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           )}
 
           {/* Footer */}
-          <div className="mt-auto flex items-center gap-4 border-t border-surface-100 pt-3 dark:border-surface-700">
+          <div className="mt-auto flex items-center gap-4 border-t border-surface-100 pt-3 dark:border-surface-800">
             <div className="flex items-center gap-1.5 text-xs text-surface-400 dark:text-surface-500">
               <Calendar className="h-3.5 w-3.5" />
               <span>{formatDate(project.created_at)}</span>

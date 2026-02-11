@@ -30,9 +30,9 @@ export function LeftPanel() {
     setSearchQuery('');
   }, [setSearchQuery]);
   return (
-    <div className="flex h-full w-full flex-col bg-white dark:bg-surface-800">
+    <div className="flex h-full w-full flex-col bg-white dark:bg-surface-900">
       {/* ── Header ────────────────────────────────────────── */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-700">
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-800">
         <div className="flex items-center gap-2">
           <FolderOpen className="h-3.5 w-3.5 text-surface-400" />
           <span className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
@@ -41,7 +41,12 @@ export function LeftPanel() {
         </div>
         <button
           onClick={toggleLeft}
-          className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          className={cn(
+            'flex h-6 w-6 items-center justify-center rounded-md',
+            'text-surface-400 transition-all',
+            'hover:bg-surface-100 hover:text-surface-600',
+            'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+          )}
           title="Collapse panel"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
@@ -50,7 +55,16 @@ export function LeftPanel() {
 
       {/* ── Search bar ────────────────────────────────────── */}
       <div className="shrink-0 px-3 py-2">
-        <div className="flex h-8 items-center gap-2 rounded-md border border-surface-200 bg-surface-50 px-2.5 transition-colors focus-within:border-primary-400 focus-within:ring-1 focus-within:ring-primary-400/30 dark:border-surface-600 dark:bg-surface-900 dark:focus-within:border-primary-500">
+        <div
+          className={cn(
+            'flex h-8 items-center gap-2 rounded-lg border px-2.5',
+            'border-surface-200 bg-surface-50',
+            'transition-all',
+            'focus-within:border-primary-400 focus-within:ring-1 focus-within:ring-primary-400/20',
+            'dark:border-surface-700 dark:bg-surface-800/50',
+            'dark:focus-within:border-primary-500 dark:focus-within:ring-primary-500/20'
+          )}
+        >
           <Search className="h-3.5 w-3.5 shrink-0 text-surface-400" />
           <input
             type="text"
@@ -68,7 +82,7 @@ export function LeftPanel() {
                 transition={{ duration: 0.1 }}
                 type="button"
                 onClick={clearSearch}
-                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-surface-200 text-surface-500 transition-colors hover:bg-surface-300 dark:bg-surface-600 dark:text-surface-400 dark:hover:bg-surface-500"
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-surface-200 text-surface-500 transition-colors hover:bg-surface-300 dark:bg-surface-700 dark:text-surface-400 dark:hover:bg-surface-600"
                 title="Clear search"
               >
                 <X className="h-2.5 w-2.5" />
@@ -90,10 +104,10 @@ export function LeftPanel() {
           <div className="space-y-1 px-3 py-2">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="flex items-center gap-2.5 py-2">
-                <div className="h-8 w-8 shrink-0 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-700" />
+                <div className="h-8 w-8 shrink-0 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
                 <div className="flex-1 space-y-1.5">
-                  <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
-                  <div className="h-2.5 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                  <div className="h-2.5 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
                 </div>
               </div>
             ))}
@@ -101,7 +115,7 @@ export function LeftPanel() {
         ) : filteredFiles.length === 0 ? (
           // Empty state
           <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-800">
               <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
             </div>
             <p className="mt-3 text-center text-xs font-medium text-surface-500 dark:text-surface-400">
@@ -137,7 +151,7 @@ export function LeftPanel() {
 
       {/* ── Footer file count ─────────────────────────────── */}
       {files.length > 0 && (
-        <div className="flex shrink-0 items-center justify-between border-t border-surface-200 px-3 py-1.5 dark:border-surface-700">
+        <div className="flex shrink-0 items-center justify-between border-t border-surface-200 px-3 py-1.5 dark:border-surface-800">
           <span className="text-[11px] text-surface-400 dark:text-surface-500">
             {searchQuery
               ? `${filteredFiles.length} of ${files.length} files`

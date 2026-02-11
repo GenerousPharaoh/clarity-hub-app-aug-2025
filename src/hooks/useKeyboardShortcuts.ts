@@ -69,6 +69,6 @@ export const SHORTCUTS = [
   { keys: ['Cmd', '\\'], description: 'Toggle file browser' },
   { keys: ['Cmd', 'Shift', '\\'], description: 'Toggle viewer panel' },
   { keys: ['Cmd', 'J'], description: 'Toggle AI chat' },
-  { keys: ['Cmd', 'K'], description: 'Insert link (in editor)' },
+  { keys: ['Cmd', 'K'], description: 'Command palette' },
   { keys: ['Cmd', '/'], description: 'Show keyboard shortcuts' },
 ] as const;

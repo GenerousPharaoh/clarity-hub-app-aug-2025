@@ -7,6 +7,8 @@ export interface UISlice {
   toggleFocusMode: () => void;
   showKeyboardShortcuts: boolean;
   setShowKeyboardShortcuts: (show: boolean) => void;
+  showCommandPalette: boolean;
+  setShowCommandPalette: (show: boolean) => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -16,4 +18,6 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   toggleFocusMode: () => set((state) => ({ focusMode: !state.focusMode })),
   showKeyboardShortcuts: false,
   setShowKeyboardShortcuts: (show) => set({ showKeyboardShortcuts: show }),
+  showCommandPalette: false,
+  setShowCommandPalette: (show) => set({ showCommandPalette: show }),
 });

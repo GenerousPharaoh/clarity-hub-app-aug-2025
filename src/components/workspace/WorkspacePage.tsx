@@ -30,6 +30,8 @@ export function WorkspacePage() {
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
   const setLeftPanel = useAppStore((s) => s.setLeftPanel);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
+  const rightTab = useAppStore((s) => s.rightTab);
+  const setRightTab = useAppStore((s) => s.setRightTab);
 
   const projects = useAppStore((s) => s.projects);
   const projectName = projects.find((p) => p.id === projectId)?.name;
@@ -75,10 +77,13 @@ export function WorkspacePage() {
     }
     if (!isRightOpen) {
       setRightPanel(true);
+      setRightTab('ai');
+    } else if (rightTab !== 'ai') {
+      setRightTab('ai');
     } else {
       toggleRight();
     }
-  }, [isMobile, isRightOpen, setRightPanel, toggleRight]);
+  }, [isMobile, isRightOpen, rightTab, setRightPanel, setRightTab, toggleRight]);
 
   const shortcutHandlers = useMemo(
     () => ({

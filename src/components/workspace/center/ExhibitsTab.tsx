@@ -30,6 +30,8 @@ export function ExhibitsTab() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const files = useAppStore((s) => s.files);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
+  const setRightPanel = useAppStore((s) => s.setRightPanel);
+  const setRightTab = useAppStore((s) => s.setRightTab);
   const { user } = useAuth();
 
   const { data: exhibits, isLoading, isError, refetch } = useExhibits(selectedProjectId);
@@ -169,7 +171,11 @@ export function ExhibitsTab() {
                     ...updates,
                   })
                 }
-                onFileClick={(fileId) => setSelectedFile(fileId)}
+                onFileClick={(fileId) => {
+                  setSelectedFile(fileId);
+                  setRightPanel(true);
+                  setRightTab('viewer');
+                }}
               />
             ))}
           </div>

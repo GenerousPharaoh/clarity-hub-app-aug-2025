@@ -67,9 +67,15 @@ export function FileListItem({ file }: FileListItemProps) {
     };
   }, [showMenu]);
 
+  const setRightPanel = useAppStore((s) => s.setRightPanel);
+  const setRightTab = useAppStore((s) => s.setRightTab);
+
   const handleClick = useCallback(() => {
     setSelectedFile(file.id);
-  }, [file.id, setSelectedFile]);
+    // Ensure right panel is open and on viewer tab
+    setRightPanel(true);
+    setRightTab('viewer');
+  }, [file.id, setSelectedFile, setRightPanel, setRightTab]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {

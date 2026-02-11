@@ -69,35 +69,39 @@ export async function getSignedUrl(
 }
 
 /**
- * Resolve a file URL using multiple strategies (most reliable to least).
- * Returns the first URL that resolves successfully.
+ * Resolve a file URL using a signed URL (required for private buckets).
+ * Falls back to public URL construction only if signing fails.
  */
 export async function getFileUrl(
   filePath: string,
-  options?: { cacheBuster?: boolean }
+  options?: { expiresIn?: number }
 ): Promise<{ url: string; error?: string }> {
   if (!filePath) return { url: '', error: 'No file path provided' };
 
-  const timestamp =
-    options?.cacheBuster !== false ? `?t=${Date.now()}` : '';
+  const expiresIn = options?.expiresIn ?? 3600; // 1 hour default
 
   try {
-    // 1. Supabase client getPublicUrl (fastest, no network call)
-    const { data } = supabase.storage
+    // Private bucket — must use signed URL for authenticated access
+    const { data, error } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .getPublicUrl(filePath);
-    if (data?.publicUrl) {
-      return { url: data.publicUrl + timestamp };
+      .createSignedUrl(filePath, expiresIn);
+
+    if (error) {
+      console.error('[storageService] Signed URL error:', error);
+      // Fall back to public URL (works if bucket is made public later)
+      return { url: getPublicUrl(filePath) };
     }
-  } catch {
-    // fall through
+
+    if (data?.signedUrl) {
+      return { url: data.signedUrl };
+    }
+  } catch (err) {
+    console.error('[storageService] getFileUrl error:', err);
   }
 
-  // 2. Direct URL construction
+  // Last resort: public URL construction
   if (supabaseUrl) {
-    return {
-      url: `${supabaseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${filePath}${timestamp}`,
-    };
+    return { url: getPublicUrl(filePath) };
   }
 
   return { url: '', error: 'Could not resolve file URL' };

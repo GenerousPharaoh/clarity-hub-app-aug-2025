@@ -28,13 +28,17 @@ function savePanelState(state: PersistedPanelState) {
   } catch { /* ignore */ }
 }
 
+export type RightTab = 'viewer' | 'ai';
+
 export interface PanelSlice {
   isLeftPanelOpen: boolean;
   isRightPanelOpen: boolean;
+  rightTab: RightTab;
   toggleLeftPanel: () => void;
   toggleRightPanel: () => void;
   setLeftPanel: (open: boolean) => void;
   setRightPanel: (open: boolean) => void;
+  setRightTab: (tab: RightTab) => void;
 }
 
 const initial = loadPanelState();
@@ -42,6 +46,7 @@ const initial = loadPanelState();
 export const createPanelSlice: StateCreator<PanelSlice> = (set) => ({
   isLeftPanelOpen: initial.isLeftPanelOpen,
   isRightPanelOpen: initial.isRightPanelOpen,
+  rightTab: 'viewer' as RightTab,
   toggleLeftPanel: () =>
     set((s) => {
       const next = !s.isLeftPanelOpen;
@@ -64,4 +69,5 @@ export const createPanelSlice: StateCreator<PanelSlice> = (set) => ({
       savePanelState({ isLeftPanelOpen: s.isLeftPanelOpen, isRightPanelOpen: open });
       return { isRightPanelOpen: open };
     }),
+  setRightTab: (tab) => set({ rightTab: tab }),
 });

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useAppStore from '@/store';
 import { getFileUrl } from '@/services/storageService';
 import { getFileType, cn } from '@/lib/utils';
-import { FileSearch } from 'lucide-react';
+import { FileSearch, RefreshCw } from 'lucide-react';
 import { PDFViewer } from './PDFViewer';
 import { ImageViewer } from './ImageViewer';
 import { AudioViewer } from './AudioViewer';
@@ -16,6 +16,7 @@ export function FileViewer() {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const selectedFile = selectedFileId
     ? files.find((f) => f.id === selectedFileId) ?? null
@@ -54,7 +55,11 @@ export function FileViewer() {
     return () => {
       cancelled = true;
     };
-  }, [selectedFile?.file_path]);
+  }, [selectedFile?.file_path, retryCount]);
+
+  const handleRetry = useCallback(() => {
+    setRetryCount((c) => c + 1);
+  }, []);
 
   // No file selected
   if (!selectedFile) {
@@ -115,6 +120,18 @@ export function FileViewer() {
         <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
           {error || 'Could not load this file. It may have been moved or deleted.'}
         </p>
+        <button
+          onClick={handleRetry}
+          className={cn(
+            'mt-3 flex items-center gap-1.5 rounded-lg px-3 py-1.5',
+            'text-xs font-medium text-primary-600',
+            'transition-colors hover:bg-primary-50',
+            'dark:text-primary-400 dark:hover:bg-primary-900/20'
+          )}
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Retry
+        </button>
       </div>
     );
   }

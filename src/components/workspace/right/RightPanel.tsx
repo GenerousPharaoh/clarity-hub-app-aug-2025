@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import useAppStore from '@/store';
 import { cn } from '@/lib/utils';
@@ -6,11 +5,10 @@ import { ChevronRight, Eye, Sparkles } from 'lucide-react';
 import { FileViewer } from '@/components/viewers/FileViewer';
 import { AIChatPanel } from '@/components/ai/AIChatPanel';
 
-type Tab = 'viewer' | 'ai';
-
 export function RightPanel() {
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
-  const [activeTab, setActiveTab] = useState<Tab>('viewer');
+  const activeTab = useAppStore((s) => s.rightTab);
+  const setActiveTab = useAppStore((s) => s.setRightTab);
 
   return (
     <div className="flex h-full w-full flex-col bg-surface-50 dark:bg-surface-900">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Panel,
@@ -14,7 +14,11 @@ import { CollapsedStrip } from './CollapsedStrip';
 import { KeyboardShortcutsHelp } from '@/components/shared/KeyboardShortcutsHelp';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { FolderOpen, Eye, Sparkles } from 'lucide-react';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import { cn } from '@/lib/utils';
+import { FolderOpen, Eye, Sparkles, LayoutList } from 'lucide-react';
+
+type MobileTab = 'files' | 'content' | 'viewer';
 
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -33,6 +37,9 @@ export function WorkspacePage() {
   const showShortcuts = useAppStore((s) => s.showKeyboardShortcuts);
   const setShowShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
 
+  const isMobile = useIsMobile();
+  const [mobileTab, setMobileTab] = useState<MobileTab>('content');
+
   const leftRef = useRef<ImperativePanelHandle>(null);
   const rightRef = useRef<ImperativePanelHandle>(null);
 
@@ -42,43 +49,90 @@ export function WorkspacePage() {
     return () => setSelectedProject(null);
   }, [projectId, setSelectedProject]);
 
-  // Sync Zustand → panel imperative API
+  // Sync Zustand → panel imperative API (desktop only)
   useEffect(() => {
+    if (isMobile) return;
     const p = leftRef.current;
     if (!p) return;
     if (isLeftOpen && p.isCollapsed()) p.expand();
     else if (!isLeftOpen && !p.isCollapsed()) p.collapse();
-  }, [isLeftOpen]);
+  }, [isLeftOpen, isMobile]);
 
   useEffect(() => {
+    if (isMobile) return;
     const p = rightRef.current;
     if (!p) return;
     if (isRightOpen && p.isCollapsed()) p.expand();
     else if (!isRightOpen && !p.isCollapsed()) p.collapse();
-  }, [isRightOpen]);
+  }, [isRightOpen, isMobile]);
 
   // Keyboard shortcut handlers
   const handleToggleAIChat = useCallback(() => {
-    // Open right panel if closed, or toggle it
+    if (isMobile) {
+      setMobileTab('viewer');
+      return;
+    }
     if (!isRightOpen) {
       setRightPanel(true);
     } else {
       toggleRight();
     }
-  }, [isRightOpen, setRightPanel, toggleRight]);
+  }, [isMobile, isRightOpen, setRightPanel, toggleRight]);
 
   const shortcutHandlers = useMemo(
     () => ({
-      onToggleLeftPanel: toggleLeft,
-      onToggleRightPanel: toggleRight,
+      onToggleLeftPanel: isMobile ? () => setMobileTab('files') : toggleLeft,
+      onToggleRightPanel: isMobile ? () => setMobileTab('viewer') : toggleRight,
       onToggleAIChat: handleToggleAIChat,
       onShowHelp: () => setShowShortcuts(true),
     }),
-    [toggleLeft, toggleRight, handleToggleAIChat]
+    [isMobile, toggleLeft, toggleRight, handleToggleAIChat]
   );
 
   useKeyboardShortcuts(shortcutHandlers);
 
+  // ── Mobile Layout ──────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div className="flex h-full flex-col">
+        {/* Active panel */}
+        <div className="flex-1 overflow-hidden">
+          {mobileTab === 'files' && <LeftPanel />}
+          {mobileTab === 'content' && <CenterPanel />}
+          {mobileTab === 'viewer' && <RightPanel />}
+        </div>
+
+        {/* Bottom tab bar */}
+        <nav className="flex shrink-0 border-t border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
+          <MobileTabButton
+            active={mobileTab === 'files'}
+            icon={<FolderOpen className="h-4 w-4" />}
+            label="Files"
+            onClick={() => setMobileTab('files')}
+          />
+          <MobileTabButton
+            active={mobileTab === 'content'}
+            icon={<LayoutList className="h-4 w-4" />}
+            label="Content"
+            onClick={() => setMobileTab('content')}
+          />
+          <MobileTabButton
+            active={mobileTab === 'viewer'}
+            icon={<Sparkles className="h-4 w-4" />}
+            label="Viewer & AI"
+            onClick={() => setMobileTab('viewer')}
+          />
+        </nav>
+
+        <KeyboardShortcutsHelp
+          open={showShortcuts}
+          onClose={() => setShowShortcuts(false)}
+        />
+      </div>
+    );
+  }
+
+  // ── Desktop Layout ─────────────────────────────────────
   return (
     <div className="flex h-full">
       {/* Left collapsed strip — outside PanelGroup */}
@@ -171,5 +225,37 @@ export function WorkspacePage() {
         onClose={() => setShowShortcuts(false)}
       />
     </div>
+  );
+}
+
+/* ── Mobile Tab Button ───────────────────────────────── */
+
+function MobileTabButton({
+  active,
+  icon,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors',
+        active
+          ? 'text-primary-600 dark:text-primary-400'
+          : 'text-surface-400 dark:text-surface-500'
+      )}
+    >
+      {icon}
+      <span className="text-[10px] font-medium">{label}</span>
+      {active && (
+        <div className="absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary-600 dark:bg-primary-400" />
+      )}
+    </button>
   );
 }

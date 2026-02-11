@@ -18,13 +18,17 @@ export function CreateProjectDialog({
 }: CreateProjectDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [nameTouched, setNameTouched] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
+
+  const nameError = nameTouched && name.trim().length === 0;
 
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setName('');
       setDescription('');
+      setNameTouched(false);
       // Focus after animation
       setTimeout(() => nameInputRef.current?.focus(), 150);
     }
@@ -42,6 +46,7 @@ export function CreateProjectDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setNameTouched(true);
     const trimmed = name.trim();
     if (!trimmed || isLoading) return;
     onSubmit({ name: trimmed, description: description.trim() || undefined });
@@ -118,22 +123,32 @@ export function CreateProjectDialog({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  onBlur={() => setNameTouched(true)}
                   placeholder="e.g. Employment Dispute 2026"
                   disabled={isLoading}
+                  aria-invalid={nameError}
                   className={cn(
-                    'w-full rounded-lg border border-surface-200 px-3 py-2.5',
+                    'w-full rounded-lg border px-3 py-2.5',
                     'text-sm text-surface-900 placeholder:text-surface-400',
                     'transition-colors',
-                    'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
                     'disabled:cursor-not-allowed disabled:opacity-60',
-                    'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-100',
-                    'dark:placeholder:text-surface-500 dark:focus:border-primary-400',
-                    'dark:focus:ring-primary-400/20'
+                    'dark:bg-surface-900 dark:text-surface-100',
+                    'dark:placeholder:text-surface-500',
+                    nameError
+                      ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20 focus:outline-none dark:border-red-600 dark:focus:border-red-500 dark:focus:ring-red-500/20'
+                      : 'border-surface-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-surface-700 dark:focus:border-primary-400 dark:focus:ring-primary-400/20'
                   )}
                   maxLength={120}
                   autoComplete="off"
                 />
-                <div className="mt-1 flex justify-end">
+                <div className="mt-1 flex items-center justify-between">
+                  {nameError ? (
+                    <span className="text-[10px] text-red-500 dark:text-red-400">
+                      Project name is required
+                    </span>
+                  ) : (
+                    <span />
+                  )}
                   <span
                     className={cn(
                       'text-[10px] tabular-nums',

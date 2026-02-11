@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { formatRelativeDate } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -57,14 +58,25 @@ export function CenterPanel() {
       </div>
 
       {/* Content area */}
-      <div className="flex flex-1 overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
-        {activeTab === 'overview' ? (
-          <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as Tab)} />
-        ) : activeTab === 'notes' ? (
-          <NotesTab />
-        ) : (
-          <ExhibitsTab />
-        )}
+      <div className="relative flex flex-1 overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            className="flex h-full w-full"
+          >
+            {activeTab === 'overview' ? (
+              <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as Tab)} />
+            ) : activeTab === 'notes' ? (
+              <NotesTab />
+            ) : (
+              <ExhibitsTab />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -101,7 +113,11 @@ function TabButton({
       {icon}
       {label}
       {active && (
-        <div className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-primary-600 dark:bg-primary-400" />
+        <motion.div
+          layoutId="center-tab-indicator"
+          className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-primary-600 dark:bg-primary-400"
+          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+        />
       )}
     </button>
   );

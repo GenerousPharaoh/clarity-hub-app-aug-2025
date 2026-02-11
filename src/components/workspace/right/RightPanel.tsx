@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import useAppStore from '@/store';
 import { cn } from '@/lib/utils';
 import { ChevronRight, Eye, Sparkles } from 'lucide-react';
@@ -48,8 +49,19 @@ export function RightPanel() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
-        {activeTab === 'viewer' ? <FileViewer /> : <AIChatPanel />}
+      <div className="relative flex flex-1 flex-col overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1 }}
+            className="flex h-full flex-col"
+          >
+            {activeTab === 'viewer' ? <FileViewer /> : <AIChatPanel />}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -94,11 +106,13 @@ function TabButton({
       {icon}
       {label}
       {active && (
-        <div
+        <motion.div
+          layoutId="right-tab-indicator"
           className={cn(
             'absolute bottom-0 left-3 right-3 h-[2px] rounded-full',
             indicatorColor
           )}
+          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}
     </button>

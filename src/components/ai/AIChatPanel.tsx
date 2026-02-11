@@ -221,7 +221,11 @@ export function AIChatPanel() {
             )}
             title="Send message"
           >
-            <Send className="h-3.5 w-3.5" />
+            {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Send className="h-3.5 w-3.5" />
+            )}
           </button>
         </div>
 
@@ -231,8 +235,15 @@ export function AIChatPanel() {
             <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>
             <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Shift+Enter</kbd> new line
           </span>
-          <span className="text-[10px] text-surface-400 dark:text-surface-500">
-            Not legal advice
+          <span className={cn(
+            'text-[10px]',
+            input.length > 3600
+              ? 'text-red-500 dark:text-red-400'
+              : input.length > 3200
+                ? 'text-amber-500 dark:text-amber-400'
+                : 'text-surface-400 dark:text-surface-500'
+          )}>
+            {input.length > 0 ? `${input.length.toLocaleString()} / 4,000` : 'Not legal advice'}
           </span>
         </div>
       </div>

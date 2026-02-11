@@ -1,11 +1,29 @@
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
-import { Scale } from 'lucide-react';
+import { Scale, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [signingIn, setSigningIn] = useState(false);
+
+  const handleSignIn = async () => {
+    try {
+      setAuthError(null);
+      setSigningIn(true);
+      await signInWithGoogle();
+    } catch (err) {
+      setAuthError(
+        err instanceof Error
+          ? err.message
+          : 'Sign-in failed. Please try again or check your browser popup settings.'
+      );
+      setSigningIn(false);
+    }
+  };
 
   if (loading) return <LoadingScreen />;
   if (user) return <Navigate to="/" replace />;
@@ -72,8 +90,16 @@ export function LoginPage() {
             Sign in to access your workspace
           </p>
 
+          {authError && (
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 dark:border-red-800/50 dark:bg-red-950/30">
+              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500" />
+              <p className="text-xs text-red-700 dark:text-red-400">{authError}</p>
+            </div>
+          )}
+
           <button
-            onClick={signInWithGoogle}
+            onClick={handleSignIn}
+            disabled={signingIn}
             className={cn(
               'flex w-full items-center justify-center gap-3 rounded-xl',
               'border border-surface-200 bg-white px-4 py-3.5',
@@ -81,6 +107,7 @@ export function LoginPage() {
               'shadow-sm transition-all duration-200',
               'hover:bg-surface-50 hover:shadow-md hover:border-surface-300',
               'active:scale-[0.98]',
+              'disabled:opacity-60 disabled:cursor-not-allowed',
               'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200',
               'dark:hover:bg-surface-700 dark:hover:border-surface-600 dark:hover:shadow-lg dark:hover:shadow-surface-950/30'
             )}

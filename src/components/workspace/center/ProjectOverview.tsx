@@ -16,13 +16,16 @@ import {
   File,
   Tag,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import useAppStore from '@/store';
 import { useNotes } from '@/hooks/useNotes';
 import { useUpdateProject } from '@/hooks/useProjects';
+import { useUploadFile } from '@/hooks/useFiles';
 import { useExhibits } from '@/hooks/useExhibits';
 import { formatDate, formatRelativeDate, getFileTypeFromExtension, getFileExtension } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { FadeIn } from '@/components/shared/FadeIn';
+import { ACCEPTED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/constants';
 
 interface ProjectOverviewProps {
   onSwitchTab?: (tab: string) => void;
@@ -410,16 +413,55 @@ function RecentActivity({
 /* ── Quick Actions ────────────────────────────────────────── */
 
 function QuickActions({ onSwitchTab }: { onSwitchTab?: (tab: string) => void }) {
+  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const uploadFile = useUploadFile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files || !selectedProjectId) return;
+
+      for (const file of Array.from(files)) {
+        if (file.size > MAX_FILE_SIZE) {
+          toast.error(`File too large: ${file.name}`);
+          continue;
+        }
+        try {
+          await uploadFile.mutateAsync({ file, projectId: selectedProjectId });
+          toast.success(`Uploaded ${file.name}`);
+        } catch (err) {
+          toast.error(`Failed: ${file.name}`);
+        }
+      }
+      // Reset input so the same file can be re-selected
+      e.target.value = '';
+    },
+    [selectedProjectId, uploadFile]
+  );
+
+  // Build accept string from ACCEPTED_FILE_TYPES
+  const acceptStr = Object.keys(ACCEPTED_FILE_TYPES).join(',');
+
   return (
     <div className="rounded-lg border border-surface-100 p-4 dark:border-surface-700">
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
         Quick Actions
       </h3>
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={acceptStr}
+        onChange={handleFileChange}
+        className="hidden"
+      />
       <div className="flex flex-wrap gap-2">
         <QuickAction
           icon={<Upload className="h-3.5 w-3.5" />}
           label="Upload File"
-          hint="Drag & drop to left panel"
+          hint="Select files to upload"
+          onClick={() => fileInputRef.current?.click()}
         />
         <QuickAction
           icon={<NotebookPen className="h-3.5 w-3.5" />}

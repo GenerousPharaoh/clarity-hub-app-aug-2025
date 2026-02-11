@@ -1,5 +1,33 @@
 import type { StateCreator } from 'zustand';
 
+// localStorage key
+const PANEL_STORAGE_KEY = 'clarity-hub-panels';
+
+interface PersistedPanelState {
+  isLeftPanelOpen: boolean;
+  isRightPanelOpen: boolean;
+}
+
+function loadPanelState(): PersistedPanelState {
+  try {
+    const raw = localStorage.getItem(PANEL_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        isLeftPanelOpen: parsed.isLeftPanelOpen ?? true,
+        isRightPanelOpen: parsed.isRightPanelOpen ?? true,
+      };
+    }
+  } catch { /* ignore */ }
+  return { isLeftPanelOpen: true, isRightPanelOpen: true };
+}
+
+function savePanelState(state: PersistedPanelState) {
+  try {
+    localStorage.setItem(PANEL_STORAGE_KEY, JSON.stringify(state));
+  } catch { /* ignore */ }
+}
+
 export interface PanelSlice {
   isLeftPanelOpen: boolean;
   isRightPanelOpen: boolean;
@@ -9,11 +37,31 @@ export interface PanelSlice {
   setRightPanel: (open: boolean) => void;
 }
 
+const initial = loadPanelState();
+
 export const createPanelSlice: StateCreator<PanelSlice> = (set) => ({
-  isLeftPanelOpen: true,
-  isRightPanelOpen: true,
-  toggleLeftPanel: () => set((s) => ({ isLeftPanelOpen: !s.isLeftPanelOpen })),
-  toggleRightPanel: () => set((s) => ({ isRightPanelOpen: !s.isRightPanelOpen })),
-  setLeftPanel: (open) => set({ isLeftPanelOpen: open }),
-  setRightPanel: (open) => set({ isRightPanelOpen: open }),
+  isLeftPanelOpen: initial.isLeftPanelOpen,
+  isRightPanelOpen: initial.isRightPanelOpen,
+  toggleLeftPanel: () =>
+    set((s) => {
+      const next = !s.isLeftPanelOpen;
+      savePanelState({ isLeftPanelOpen: next, isRightPanelOpen: s.isRightPanelOpen });
+      return { isLeftPanelOpen: next };
+    }),
+  toggleRightPanel: () =>
+    set((s) => {
+      const next = !s.isRightPanelOpen;
+      savePanelState({ isLeftPanelOpen: s.isLeftPanelOpen, isRightPanelOpen: next });
+      return { isRightPanelOpen: next };
+    }),
+  setLeftPanel: (open) =>
+    set((s) => {
+      savePanelState({ isLeftPanelOpen: open, isRightPanelOpen: s.isRightPanelOpen });
+      return { isLeftPanelOpen: open };
+    }),
+  setRightPanel: (open) =>
+    set((s) => {
+      savePanelState({ isLeftPanelOpen: s.isLeftPanelOpen, isRightPanelOpen: open });
+      return { isRightPanelOpen: open };
+    }),
 });

@@ -1,11 +1,11 @@
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo, useCallback, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { cn } from '@/lib/utils';
-import { User, Sparkles, AlertTriangle, RotateCcw } from 'lucide-react';
+import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check } from 'lucide-react';
 import type { ChatMessage as ChatMessageType } from '@/types';
 
 interface ChatMessageProps {
@@ -41,7 +41,13 @@ function useIsDark(): boolean {
 function isErrorMessage(content: string): boolean {
   return (
     content.startsWith('I encountered an error:') ||
-    content.startsWith('An unexpected error occurred')
+    content.startsWith('An unexpected error occurred') ||
+    content.startsWith('API key error') ||
+    content.startsWith('Rate limit reached') ||
+    content.startsWith('Network error') ||
+    content.startsWith('Model unavailable') ||
+    content.startsWith('AI error:') ||
+    content.startsWith('The AI service flagged')
   );
 }
 
@@ -52,6 +58,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   const isUser = message.role === 'user';
   const isDark = useIsDark();
   const isError = !isUser && isErrorMessage(message.content);
+  const [copied, setCopied] = useState(false);
 
   const timestamp = useMemo(
     () => formatTimestamp(message.timestamp),
@@ -61,6 +68,14 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   const handleRetry = useCallback(() => {
     if (onRetry) onRetry(message.id);
   }, [onRetry, message.id]);
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard API may be unavailable */ }
+  }, [message.content]);
 
   if (isUser) {
     return (
@@ -111,6 +126,11 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                   'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
                   modelConfig.className
                 )}
+                title={
+                  message.model === 'gpt'
+                    ? 'GPT-5.2 — used for deep legal reasoning and complex analysis'
+                    : 'Gemini — used for general questions and file analysis'
+                }
               >
                 {modelConfig.label}
               </span>
@@ -120,12 +140,32 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           {/* Message content */}
           <div
             className={cn(
-              'rounded-2xl rounded-tl-md px-3.5 py-2.5 shadow-sm',
+              'group/msg relative rounded-2xl rounded-tl-md px-3.5 py-2.5 shadow-sm',
               isError
                 ? 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-900/20 dark:ring-red-800/50'
                 : 'bg-white ring-1 ring-surface-200/80 dark:bg-surface-800 dark:ring-surface-700/50'
             )}
           >
+            {/* Copy button — visible on hover */}
+            {!isError && (
+              <button
+                onClick={handleCopy}
+                className={cn(
+                  'absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md transition-all',
+                  'opacity-0 group-hover/msg:opacity-100',
+                  copied
+                    ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-surface-100 text-surface-400 hover:bg-surface-200 hover:text-surface-600 dark:bg-surface-700 dark:text-surface-500 dark:hover:bg-surface-600 dark:hover:text-surface-300'
+                )}
+                title="Copy to clipboard"
+              >
+                {copied ? (
+                  <Check className="h-3 w-3" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+              </button>
+            )}
             <div
               className={cn(
                 'prose-chat text-[13px] leading-relaxed break-words',

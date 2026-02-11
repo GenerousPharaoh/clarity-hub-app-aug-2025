@@ -27,7 +27,7 @@ export function EmptyViewer({ fileName, filePath }: EmptyViewerProps) {
       } else {
         toast.error('Download link unavailable');
       }
-    } catch (err) {
+    } catch {
       toast.error('Download failed. Please try again.');
     } finally {
       setDownloading(false);

@@ -76,7 +76,6 @@ export function FileViewer() {
 
   // Loading URL — skeleton preview
   if (isLoading) {
-    const fileType = selectedFile ? getFileType(selectedFile.name) : null;
     return (
       <div className="flex h-full flex-col">
         {/* Skeleton toolbar */}

@@ -6,17 +6,20 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 export function useAutoSave(noteId: string, projectId: string) {
   const updateNote = useUpdateNote();
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingContent = useRef<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const triggerSave = useCallback(
     (content: string) => {
       setSaveStatus('saving');
+      pendingContent.current = content;
 
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
 
       debounceTimer.current = setTimeout(() => {
+        pendingContent.current = null;
         updateNote.mutate(
           { id: noteId, projectId, content },
           {
@@ -29,12 +32,19 @@ export function useAutoSave(noteId: string, projectId: string) {
     [noteId, projectId, updateNote]
   );
 
-  // Cleanup function to be called on unmount
+  // Cleanup: flush any pending content immediately on unmount
   const cleanup = useCallback(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
-  }, []);
+    // Save unsaved content immediately instead of discarding it
+    if (pendingContent.current !== null) {
+      updateNote.mutate(
+        { id: noteId, projectId, content: pendingContent.current },
+      );
+      pendingContent.current = null;
+    }
+  }, [noteId, projectId, updateNote]);
 
   return { saveStatus, triggerSave, cleanup };
 }

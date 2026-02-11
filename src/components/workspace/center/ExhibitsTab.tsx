@@ -160,7 +160,6 @@ export function ExhibitsTab() {
               <ExhibitCard
                 key={exhibit.id}
                 exhibit={exhibit}
-                projectId={selectedProjectId}
                 files={projectFiles}
                 onDelete={() => handleDeleteRequest(exhibit)}
                 onUpdate={(updates) =>
@@ -232,14 +231,12 @@ function EmptyState({
 
 function ExhibitCard({
   exhibit,
-  projectId,
   files,
   onDelete,
   onUpdate,
   onFileClick,
 }: {
   exhibit: ExhibitMarker;
-  projectId: string;
   files: FileRecord[];
   onDelete: () => void;
   onUpdate: (updates: { description?: string; fileId?: string | null }) => void;

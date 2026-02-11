@@ -87,7 +87,7 @@ export function WorkspacePage() {
       onToggleAIChat: handleToggleAIChat,
       onShowHelp: () => setShowShortcuts(true),
     }),
-    [isMobile, toggleLeft, toggleRight, handleToggleAIChat]
+    [isMobile, toggleLeft, toggleRight, handleToggleAIChat, setShowShortcuts]
   );
 
   useKeyboardShortcuts(shortcutHandlers);

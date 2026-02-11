@@ -50,7 +50,6 @@ export function useUploadFile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const addFile = useAppStore((s) => s.addFile);
-  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
 
   return useMutation({
     mutationFn: async ({

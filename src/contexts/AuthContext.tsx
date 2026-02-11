@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import useAppStore from '@/store';
 import type { AppUser } from '@/types';
@@ -34,36 +35,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const setUser = useAppStore((s) => s.setUser);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(toAppUser(session?.user));
-      setLoading(false);
-    });
-
+    // Use onAuthStateChange as single source of truth (fires INITIAL_SESSION first)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(toAppUser(session?.user));
       setLoading(false);
+
+      // Handle session expiry / token refresh failure
+      if (event === 'TOKEN_REFRESHED' && !session) {
+        // Refresh failed — clear everything
+        queryClient.clear();
+        setUser(null);
+      }
+      if (event === 'SIGNED_OUT') {
+        queryClient.clear();
+        setUser(null);
+        useAppStore.getState().setProjects([]);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [setUser]);
+  }, [setUser, queryClient]);
 
   const signInWithGoogle = async () => {
     const redirectTo = `${window.location.origin}/auth/callback`;
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
     });
+    if (error) throw error;
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    queryClient.clear();
+    useAppStore.getState().setProjects([]);
     setUser(null);
+    await supabase.auth.signOut();
   };
 
   return (

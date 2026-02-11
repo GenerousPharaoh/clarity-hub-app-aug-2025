@@ -86,7 +86,6 @@ export function useUpdateNote() {
   return useMutation({
     mutationFn: async ({
       id,
-      projectId,
       title,
       content,
     }: {

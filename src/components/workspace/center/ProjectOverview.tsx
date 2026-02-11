@@ -6,7 +6,6 @@ import {
   Clock,
   Calendar,
   Upload,
-  Sparkles,
   Pencil,
   Check,
   X,
@@ -452,7 +451,7 @@ function QuickActions({ onSwitchTab }: { onSwitchTab?: (tab: string) => void }) 
         try {
           await uploadFile.mutateAsync({ file, projectId: selectedProjectId });
           toast.success(`Uploaded ${file.name}`);
-        } catch (err) {
+        } catch {
           toast.error(`Failed: ${file.name}`);
         }
       }

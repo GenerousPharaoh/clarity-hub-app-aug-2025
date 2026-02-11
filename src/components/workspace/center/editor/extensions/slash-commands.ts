@@ -22,8 +22,6 @@ export const SlashCommands = Extension.create({
   name: 'slashCommands',
 
   addProseMirrorPlugins() {
-    const editor = this.editor;
-
     return [
       new Plugin({
         key: slashCommandPluginKey,

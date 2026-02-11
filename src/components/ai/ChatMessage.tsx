@@ -289,16 +289,21 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                       {children}
                     </blockquote>
                   ),
-                  a: ({ href, children }) => (
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary-600 underline decoration-primary-300 hover:text-primary-700 dark:text-primary-400 dark:decoration-primary-700"
-                    >
-                      {children}
-                    </a>
-                  ),
+                  a: ({ href, children }) => {
+                    // Sanitize: only allow http(s) and mailto links
+                    const isSafe = href && (href.startsWith('https://') || href.startsWith('http://') || href.startsWith('mailto:'));
+                    if (!isSafe) return <span className="underline">{children}</span>;
+                    return (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 underline decoration-primary-300 hover:text-primary-700 dark:text-primary-400 dark:decoration-primary-700"
+                      >
+                        {children}
+                      </a>
+                    );
+                  },
                   table: ({ children }) => (
                     <div className="my-2 overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700">
                       <table className="min-w-full text-[12px]">{children}</table>

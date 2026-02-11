@@ -85,7 +85,6 @@ export function useUpdateExhibit() {
   return useMutation({
     mutationFn: async ({
       id,
-      projectId,
       description,
       fileId,
       exhibitId,

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { cn } from '@/lib/utils';
-import { slashCommandPluginKey, type SlashCommandState } from './extensions/slash-commands';
+import { type SlashCommandState } from './extensions/slash-commands';
 import {
   Heading1,
   Heading2,

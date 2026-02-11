@@ -149,6 +149,9 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
   // Track loading state for the AI response cycle
   const isLoadingRef = useRef(false);
 
+  // Monotonically increasing counter for unique loading IDs
+  const loadingIdCounter = useRef(0);
+
   const sendMessage = useCallback(
     async (
       content: string,
@@ -174,39 +177,41 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
         enrichedContext = `${fileContextStr}\n\n--- FILE CONTENT ---\n${fileContent}\n--- END FILE CONTENT ---`;
       }
 
-      // 1. Insert user message into DB
-      const userRow = await insertMessage.mutateAsync({
-        project_id: projectId,
-        role: 'user',
-        content: content.trim(),
-        file_context: fileContextStr ?? null,
-      });
-
-      // Optimistically add to cache
-      const userMsg = rowToMessage(userRow);
-      queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) => [
-        ...(old ?? []),
-        userMsg,
-      ]);
-
-      // Add a temporary loading indicator
-      const loadingId = `loading_${Date.now()}`;
-      queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) => [
-        ...(old ?? []),
-        {
-          id: loadingId,
-          role: 'assistant' as const,
-          content: '__loading__',
-          timestamp: new Date(),
-        },
-      ]);
+      // Unique loading indicator ID
+      const loadingId = `loading_${++loadingIdCounter.current}`;
 
       try {
-        // Build conversation history from existing messages
-        const conversationHistory = messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        }));
+        // 1. Insert user message into DB
+        const userRow = await insertMessage.mutateAsync({
+          project_id: projectId,
+          role: 'user',
+          content: content.trim(),
+          file_context: fileContextStr ?? null,
+        });
+
+        // Optimistically add to cache
+        const userMsg = rowToMessage(userRow);
+        queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) => [
+          ...(old ?? []),
+          userMsg,
+        ]);
+
+        // Add a temporary loading indicator
+        queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) => [
+          ...(old ?? []),
+          {
+            id: loadingId,
+            role: 'assistant' as const,
+            content: '__loading__',
+            timestamp: new Date(),
+          },
+        ]);
+
+        // Build conversation history from cache (avoids stale closure)
+        const currentMessages = queryClient.getQueryData<ChatMessage[]>(chatKey(projectId)) ?? [];
+        const conversationHistory = currentMessages
+          .filter((m) => m.content !== '__loading__')
+          .map((m) => ({ role: m.role, content: m.content }));
 
         const result = await aiRouter.routeQuery({
           query: content.trim(),
@@ -238,26 +243,37 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
             ? `I encountered an error: ${error.message}. Please check that your AI API keys are configured and try again.`
             : 'An unexpected error occurred. Please try again.';
 
-        // Insert error message into DB
-        const errorRow = await insertMessage.mutateAsync({
-          project_id: projectId,
-          role: 'assistant',
-          content: errorContent,
-          model: 'gemini',
-          file_context: null,
-        });
+        // Try to insert error message into DB; if that also fails, just update cache
+        try {
+          const errorRow = await insertMessage.mutateAsync({
+            project_id: projectId,
+            role: 'assistant',
+            content: errorContent,
+            model: 'gemini',
+            file_context: null,
+          });
 
-        const errorMsg = rowToMessage(errorRow);
-        queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
-          (old ?? []).filter((m) => m.id !== loadingId).concat(errorMsg)
-        );
+          const errorMsg = rowToMessage(errorRow);
+          queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
+            (old ?? []).filter((m) => m.id !== loadingId).concat(errorMsg)
+          );
+        } catch {
+          // DB insert also failed — just remove the loading indicator and show error in cache only
+          queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
+            (old ?? []).filter((m) => m.id !== loadingId).concat({
+              id: `error_${loadingIdCounter.current}`,
+              role: 'assistant' as const,
+              content: errorContent,
+              timestamp: new Date(),
+            })
+          );
+        }
       } finally {
         isLoadingRef.current = false;
-        // Force re-render by invalidating
         queryClient.invalidateQueries({ queryKey: chatKey(projectId) });
       }
     },
-    [projectId, user, messages, insertMessage, queryClient]
+    [projectId, user, insertMessage, queryClient]
   );
 
   const clearChat = useCallback(async () => {

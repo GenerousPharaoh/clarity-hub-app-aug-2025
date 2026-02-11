@@ -80,7 +80,7 @@ export function useUploadFile() {
         mp3: 'audio', wav: 'audio', m4a: 'audio', ogg: 'audio', flac: 'audio',
         mp4: 'video', mov: 'video', webm: 'video', avi: 'video',
         doc: 'document', docx: 'document', rtf: 'document',
-        txt: 'text', csv: 'spreadsheet',
+        txt: 'text', csv: 'text',
         xls: 'spreadsheet', xlsx: 'spreadsheet',
       };
       const fileType = typeMap[ext] || 'other';
@@ -103,8 +103,9 @@ export function useUploadFile() {
     },
     onSuccess: (fileRecord) => {
       addFile(fileRecord);
+      // Use the uploaded file's project_id — not the currently selected project
       queryClient.invalidateQueries({
-        queryKey: filesQueryKey(selectedProjectId),
+        queryKey: filesQueryKey(fileRecord.project_id),
       });
     },
   });
@@ -117,7 +118,6 @@ export function useUploadFile() {
 export function useDeleteFile() {
   const queryClient = useQueryClient();
   const removeFile = useAppStore((s) => s.removeFile);
-  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
 
   return useMutation({
     mutationFn: async (file: FileRecord) => {
@@ -135,12 +135,13 @@ export function useDeleteFile() {
         .eq('id', file.id);
 
       if (error) throw error;
-      return file.id;
+      return file;
     },
-    onSuccess: (fileId) => {
-      removeFile(fileId);
+    onSuccess: (file) => {
+      removeFile(file.id);
+      // Use the deleted file's project_id — not the currently selected project
       queryClient.invalidateQueries({
-        queryKey: filesQueryKey(selectedProjectId),
+        queryKey: filesQueryKey(file.project_id),
       });
     },
   });

@@ -212,10 +212,28 @@ export function useDeleteExhibit() {
 /**
  * Generate the next exhibit ID (e.g., "Exhibit A", "Exhibit B", etc.)
  */
+/**
+ * Increment an exhibit letter sequence: A→B, Z→AA, AZ→BA, ZZ→AAA
+ */
+function incrementLetters(letters: string): string {
+  const chars = letters.split('');
+  let i = chars.length - 1;
+  while (i >= 0) {
+    if (chars[i] < 'Z') {
+      chars[i] = String.fromCharCode(chars[i].charCodeAt(0) + 1);
+      return chars.join('');
+    }
+    chars[i] = 'A';
+    i--;
+  }
+  // All were Z — add another letter (Z→AA, ZZ→AAA)
+  return 'A' + chars.join('');
+}
+
 export function getNextExhibitId(existingExhibits: ExhibitMarker[]): string {
   if (existingExhibits.length === 0) return 'Exhibit A';
 
-  // Extract letters from existing exhibit IDs
+  // Extract letter sequences from existing exhibit IDs
   const letters = existingExhibits
     .map((e) => {
       const match = e.exhibit_id.match(/Exhibit\s+([A-Z]+)/i);
@@ -225,14 +243,9 @@ export function getNextExhibitId(existingExhibits: ExhibitMarker[]): string {
 
   if (letters.length === 0) return 'Exhibit A';
 
-  // Find the highest letter and go to next
-  const sorted = letters.sort();
+  // Sort by length first, then alphabetically — so A < Z < AA < AZ < BA
+  const sorted = letters.sort((a, b) => a.length - b.length || a.localeCompare(b));
   const last = sorted[sorted.length - 1];
 
-  if (last.length === 1 && last < 'Z') {
-    return `Exhibit ${String.fromCharCode(last.charCodeAt(0) + 1)}`;
-  }
-
-  // If we've gone past Z, use AA, AB, etc.
-  return `Exhibit ${String.fromCharCode(65 + existingExhibits.length)}`;
+  return `Exhibit ${incrementLetters(last)}`;
 }

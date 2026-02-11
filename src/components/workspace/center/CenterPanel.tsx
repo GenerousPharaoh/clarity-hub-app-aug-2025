@@ -110,6 +110,13 @@ function NotesTab() {
   const titleInputRef = useRef<HTMLInputElement>(null);
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Clean up debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
+    };
+  }, []);
+
   // Auto-select the first note when notes load (or when active note is deleted)
   useEffect(() => {
     if (!notes || notes.length === 0) {

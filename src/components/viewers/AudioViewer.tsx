@@ -21,6 +21,7 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -31,12 +32,14 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
     const onEnded = () => setIsPlaying(false);
+    const onError = () => setHasError(true);
 
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('durationchange', onDurationChange);
     audio.addEventListener('play', onPlay);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('error', onError);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
@@ -44,6 +47,7 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('error', onError);
     };
   }, []);
 
@@ -91,6 +95,22 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
   }, []);
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  if (hasError) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center px-6">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/20">
+          <Music className="h-8 w-8 text-red-400" />
+        </div>
+        <p className="text-sm font-medium text-surface-700 dark:text-surface-200">
+          Unable to play audio
+        </p>
+        <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
+          The file may be corrupted or in an unsupported format.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col items-center justify-center px-6">

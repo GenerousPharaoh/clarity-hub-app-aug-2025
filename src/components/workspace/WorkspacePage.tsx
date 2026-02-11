@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Panel,
@@ -11,6 +11,8 @@ import { CenterPanel } from './center/CenterPanel';
 import { RightPanel } from './right/RightPanel';
 import { PanelGrip } from './PanelGrip';
 import { CollapsedStrip } from './CollapsedStrip';
+import { KeyboardShortcutsHelp } from '@/components/shared/KeyboardShortcutsHelp';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { FolderOpen, Eye, Sparkles } from 'lucide-react';
 
 export function WorkspacePage() {
@@ -18,11 +20,14 @@ export function WorkspacePage() {
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
   const isLeftOpen = useAppStore((s) => s.isLeftPanelOpen);
   const isRightOpen = useAppStore((s) => s.isRightPanelOpen);
+  const toggleLeft = useAppStore((s) => s.toggleLeftPanel);
+  const toggleRight = useAppStore((s) => s.toggleRightPanel);
   const setLeftPanel = useAppStore((s) => s.setLeftPanel);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
 
   const leftRef = useRef<ImperativePanelHandle>(null);
   const rightRef = useRef<ImperativePanelHandle>(null);
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   // Set active project
   useEffect(() => {
@@ -44,6 +49,28 @@ export function WorkspacePage() {
     if (isRightOpen && p.isCollapsed()) p.expand();
     else if (!isRightOpen && !p.isCollapsed()) p.collapse();
   }, [isRightOpen]);
+
+  // Keyboard shortcut handlers
+  const handleToggleAIChat = useCallback(() => {
+    // Open right panel if closed, or toggle it
+    if (!isRightOpen) {
+      setRightPanel(true);
+    } else {
+      toggleRight();
+    }
+  }, [isRightOpen, setRightPanel, toggleRight]);
+
+  const shortcutHandlers = useMemo(
+    () => ({
+      onToggleLeftPanel: toggleLeft,
+      onToggleRightPanel: toggleRight,
+      onToggleAIChat: handleToggleAIChat,
+      onShowHelp: () => setShowShortcuts(true),
+    }),
+    [toggleLeft, toggleRight, handleToggleAIChat]
+  );
+
+  useKeyboardShortcuts(shortcutHandlers);
 
   return (
     <div className="flex h-full">
@@ -130,6 +157,12 @@ export function WorkspacePage() {
           <Sparkles className="h-4 w-4" />
         </button>
       </CollapsedStrip>
+
+      {/* Keyboard shortcuts help dialog */}
+      <KeyboardShortcutsHelp
+        open={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
+      />
     </div>
   );
 }

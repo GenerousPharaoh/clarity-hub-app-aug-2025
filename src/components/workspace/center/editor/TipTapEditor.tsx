@@ -126,7 +126,7 @@ export function TipTapEditor({ noteId, projectId, initialContent }: TipTapEditor
       />
       <div className="relative flex-1 overflow-y-auto bg-white dark:bg-surface-900">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
-        <SlashCommandMenu editor={editor} />
+        <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} />
         <EditorContent editor={editor} className="h-full" />
       </div>
       <EditorStatusBar editor={editor} saveStatus={saveStatus} />

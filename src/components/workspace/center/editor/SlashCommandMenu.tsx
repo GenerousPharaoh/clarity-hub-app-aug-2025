@@ -18,6 +18,7 @@ import {
 
 interface SlashCommandMenuProps {
   editor: Editor;
+  onInsertImage?: () => void;
 }
 
 interface CommandItem {
@@ -27,7 +28,7 @@ interface CommandItem {
   action: () => void;
 }
 
-export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
+export function SlashCommandMenu({ editor, onInsertImage }: SlashCommandMenuProps) {
   const [active, setActive] = useState(false);
   const [query, setQuery] = useState('');
   const [slashRange, setSlashRange] = useState<{ from: number; to: number }>({ from: 0, to: 0 });
@@ -100,8 +101,9 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
       description: 'Insert image from URL',
       icon: <ImageIcon className="h-4 w-4" />,
       action: () => {
-        const url = window.prompt('Enter image URL:');
-        if (url) editor.chain().focus().setImage({ src: url }).run();
+        if (onInsertImage) {
+          onInsertImage();
+        }
       },
     },
   ];

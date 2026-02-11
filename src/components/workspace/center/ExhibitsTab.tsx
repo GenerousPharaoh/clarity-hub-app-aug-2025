@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -33,6 +34,7 @@ export function ExhibitsTab() {
   const createExhibit = useCreateExhibit();
   const updateExhibit = useUpdateExhibit();
   const deleteExhibit = useDeleteExhibit();
+  const [exhibitToDelete, setExhibitToDelete] = useState<ExhibitMarker | null>(null);
 
   const projectFiles = files.filter(
     (f) => f.project_id === selectedProjectId && !f.is_deleted
@@ -47,17 +49,19 @@ export function ExhibitsTab() {
     });
   }, [selectedProjectId, user, exhibits, createExhibit]);
 
-  const handleDelete = useCallback(
-    (exhibit: ExhibitMarker) => {
-      if (!selectedProjectId) return;
-      const confirmed = window.confirm(
-        `Delete "${exhibit.exhibit_id}"? This cannot be undone.`
-      );
-      if (!confirmed) return;
-      deleteExhibit.mutate({ id: exhibit.id, projectId: selectedProjectId });
-    },
-    [selectedProjectId, deleteExhibit]
-  );
+  const handleDeleteRequest = useCallback((exhibit: ExhibitMarker) => {
+    setExhibitToDelete(exhibit);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (!exhibitToDelete || !selectedProjectId) return;
+    deleteExhibit.mutate({ id: exhibitToDelete.id, projectId: selectedProjectId });
+    setExhibitToDelete(null);
+  }, [exhibitToDelete, selectedProjectId, deleteExhibit]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setExhibitToDelete(null);
+  }, []);
 
   if (!selectedProjectId) {
     return (
@@ -113,7 +117,7 @@ export function ExhibitsTab() {
                 exhibit={exhibit}
                 projectId={selectedProjectId}
                 files={projectFiles}
-                onDelete={() => handleDelete(exhibit)}
+                onDelete={() => handleDeleteRequest(exhibit)}
                 onUpdate={(updates) =>
                   updateExhibit.mutate({
                     id: exhibit.id,
@@ -127,6 +131,17 @@ export function ExhibitsTab() {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={exhibitToDelete !== null}
+        title="Delete Exhibit"
+        message={`Are you sure you want to delete "${exhibitToDelete?.exhibit_id}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }
@@ -230,7 +245,13 @@ function ExhibitCard({
               autoFocus
               rows={2}
               placeholder="Describe this exhibit..."
-              className="w-full resize-none rounded border border-surface-200 bg-transparent px-2 py-1.5 text-xs text-surface-600 outline-none focus:border-primary-400 dark:border-surface-700 dark:text-surface-300"
+              className={cn(
+                'w-full resize-none rounded-lg border px-2 py-1.5 text-xs transition-colors',
+                'border-surface-200 bg-white text-surface-600',
+                'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
+                'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
+                'dark:focus:border-primary-400 dark:focus:ring-primary-400/20'
+              )}
             />
             <div className="mt-1 flex gap-1">
               <button
@@ -346,7 +367,13 @@ function FilePicker({
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search files..."
           autoFocus
-          className="mb-2 w-full rounded border border-surface-200 bg-transparent px-2 py-1 text-xs text-surface-700 outline-none focus:border-primary-400 dark:border-surface-700 dark:text-surface-200"
+          className={cn(
+            'mb-2 w-full rounded-lg border px-2 py-1.5 text-xs transition-colors',
+            'border-surface-200 bg-white text-surface-700',
+            'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
+            'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200',
+            'dark:focus:border-primary-400 dark:focus:ring-primary-400/20'
+          )}
         />
 
         <div className="max-h-40 overflow-y-auto">

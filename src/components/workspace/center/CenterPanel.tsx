@@ -8,6 +8,7 @@ import { ProjectOverview } from './ProjectOverview';
 import { TipTapEditor } from './editor/TipTapEditor';
 import { ExhibitsTab } from './ExhibitsTab';
 import { FadeIn } from '@/components/shared/FadeIn';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import {
   LayoutList,
   NotebookPen,
@@ -107,6 +108,7 @@ function NotesTab() {
   const updateNote = useUpdateNote();
 
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -142,17 +144,19 @@ function NotesTab() {
     setTimeout(() => titleInputRef.current?.focus(), 150);
   }, [selectedProjectId, user, createNote]);
 
-  const handleDelete = useCallback(
-    (note: Note) => {
-      if (!selectedProjectId) return;
-      const confirmed = window.confirm(
-        `Delete "${note.title || 'Untitled'}"? This cannot be undone.`
-      );
-      if (!confirmed) return;
-      deleteNote.mutate({ id: note.id, projectId: selectedProjectId });
-    },
-    [selectedProjectId, deleteNote]
-  );
+  const handleDeleteRequest = useCallback((note: Note) => {
+    setNoteToDelete(note);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (!noteToDelete || !selectedProjectId) return;
+    deleteNote.mutate({ id: noteToDelete.id, projectId: selectedProjectId });
+    setNoteToDelete(null);
+  }, [noteToDelete, selectedProjectId, deleteNote]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setNoteToDelete(null);
+  }, []);
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -227,7 +231,7 @@ function NotesTab() {
               note={note}
               isActive={note.id === activeNoteId}
               onClick={() => setActiveNoteId(note.id)}
-              onDelete={() => handleDelete(note)}
+              onDelete={() => handleDeleteRequest(note)}
             />
           ))}
         </div>
@@ -298,6 +302,17 @@ function NotesTab() {
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={noteToDelete !== null}
+        title="Delete Note"
+        message={`Are you sure you want to delete "${noteToDelete?.title || 'Untitled'}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }

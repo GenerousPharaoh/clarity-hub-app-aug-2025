@@ -223,10 +223,14 @@ export function AIChatPanel() {
           </button>
         </div>
 
-        <p className="mt-2 text-center text-[10px] text-surface-400 dark:text-surface-500">
-          AI responses are for informational purposes only and do not constitute
-          legal advice.
-        </p>
+        <div className="mt-2 flex items-center justify-between px-1">
+          <span className="text-[10px] text-surface-400 dark:text-surface-500">
+            <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
+          </span>
+          <span className="text-[10px] text-surface-400 dark:text-surface-500">
+            Not legal advice
+          </span>
+        </div>
       </div>
     </div>
   );

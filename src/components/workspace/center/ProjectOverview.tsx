@@ -15,6 +15,7 @@ import {
   FileVideo,
   File,
   Tag,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import useAppStore from '@/store';
@@ -192,21 +193,30 @@ function EditableProjectHeader({
                 setIsEditingName(false);
               }
             }}
+            disabled={updateProject.isPending}
             autoFocus
-            className="flex-1 border-b-2 border-primary-400 bg-transparent font-heading text-xl font-semibold text-surface-900 outline-none dark:text-surface-50"
+            className="flex-1 border-b-2 border-primary-400 bg-transparent font-heading text-xl font-semibold text-surface-900 outline-none disabled:opacity-50 dark:text-surface-50"
           />
           <button
             onClick={saveName}
-            className="flex h-6 w-6 items-center justify-center rounded text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+            disabled={updateProject.isPending}
+            aria-label="Save name"
+            className="flex h-6 w-6 items-center justify-center rounded text-green-600 hover:bg-green-50 disabled:opacity-50 dark:hover:bg-green-900/20"
           >
-            <Check className="h-3.5 w-3.5" />
+            {updateProject.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Check className="h-3.5 w-3.5" />
+            )}
           </button>
           <button
             onClick={() => {
               setEditName(project.name);
               setIsEditingName(false);
             }}
-            className="flex h-6 w-6 items-center justify-center rounded text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700"
+            disabled={updateProject.isPending}
+            aria-label="Cancel editing"
+            className="flex h-6 w-6 items-center justify-center rounded text-surface-400 hover:bg-surface-100 disabled:opacity-50 dark:hover:bg-surface-700"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -221,6 +231,7 @@ function EditableProjectHeader({
               setIsEditingName(true);
               setTimeout(() => nameInputRef.current?.focus(), 50);
             }}
+            aria-label="Edit project name"
             className="flex h-6 w-6 items-center justify-center rounded text-surface-300 opacity-0 transition-opacity hover:bg-surface-100 hover:text-surface-500 group-hover:opacity-100 dark:hover:bg-surface-700"
           >
             <Pencil className="h-3 w-3" />
@@ -237,20 +248,24 @@ function EditableProjectHeader({
             onChange={(e) => setEditDesc(e.target.value)}
             autoFocus
             rows={2}
+            disabled={updateProject.isPending}
             placeholder="Add a project description..."
             className={cn(
               'w-full resize-none rounded-lg border px-2 py-1.5 text-sm transition-colors',
               'border-surface-200 bg-white text-surface-600',
               'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
+              'disabled:opacity-50',
               'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
               'dark:focus:border-primary-400 dark:focus:ring-primary-400/20'
             )}
           />
-          <div className="mt-1 flex gap-1">
+          <div className="mt-1 flex items-center gap-1">
             <button
               onClick={saveDesc}
-              className="rounded px-2 py-0.5 text-[10px] font-medium text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+              disabled={updateProject.isPending}
+              className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium text-primary-600 hover:bg-primary-50 disabled:opacity-50 dark:hover:bg-primary-900/20"
             >
+              {updateProject.isPending && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
               Save
             </button>
             <button
@@ -258,7 +273,8 @@ function EditableProjectHeader({
                 setEditDesc(project.description ?? '');
                 setIsEditingDesc(false);
               }}
-              className="rounded px-2 py-0.5 text-[10px] font-medium text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700"
+              disabled={updateProject.isPending}
+              className="rounded px-2 py-0.5 text-[10px] font-medium text-surface-400 hover:bg-surface-100 disabled:opacity-50 dark:hover:bg-surface-700"
             >
               Cancel
             </button>

@@ -133,6 +133,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
             disabled={pageNumber <= 1}
             className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 disabled:opacity-30 disabled:hover:bg-transparent dark:hover:bg-surface-700 dark:hover:text-surface-300"
             title="Previous page"
+            aria-label="Previous page"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
@@ -144,6 +145,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
             disabled={pageNumber >= numPages}
             className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 disabled:opacity-30 disabled:hover:bg-transparent dark:hover:bg-surface-700 dark:hover:text-surface-300"
             title="Next page"
+            aria-label="Next page"
           >
             <ChevronRight className="h-3.5 w-3.5" />
           </button>
@@ -161,6 +163,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
             disabled={zoomIndex <= 0}
             className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 disabled:opacity-30 dark:hover:bg-surface-700 dark:hover:text-surface-300"
             title="Zoom out"
+            aria-label="Zoom out"
           >
             <ZoomOut className="h-3.5 w-3.5" />
           </button>
@@ -172,6 +175,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
             disabled={zoomIndex >= ZOOM_STEPS.length - 1}
             className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 disabled:opacity-30 dark:hover:bg-surface-700 dark:hover:text-surface-300"
             title="Zoom in"
+            aria-label="Zoom in"
           >
             <ZoomIn className="h-3.5 w-3.5" />
           </button>
@@ -184,6 +188,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
                 : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300'
             )}
             title="Fit to width"
+            aria-label="Fit to width"
           >
             <Maximize2 className="h-3.5 w-3.5" />
           </button>

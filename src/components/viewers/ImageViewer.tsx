@@ -247,6 +247,7 @@ function ToolbarButton({
     <button
       onClick={onClick}
       title={title}
+      aria-label={title}
       className={cn(
         'flex h-6 w-6 items-center justify-center rounded transition-colors',
         active

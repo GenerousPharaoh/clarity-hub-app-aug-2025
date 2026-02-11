@@ -23,12 +23,13 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const confirmRef = useRef<HTMLButtonElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Focus the cancel button when dialog opens (safer default)
+  // Focus the cancel button when dialog opens (safer default for destructive actions)
   useEffect(() => {
     if (open) {
-      requestAnimationFrame(() => confirmRef.current?.focus());
+      requestAnimationFrame(() => cancelRef.current?.focus());
     }
   }, [open]);
 
@@ -37,6 +38,22 @@ export function ConfirmDialog({
       if (e.key === 'Escape') {
         e.preventDefault();
         onCancel();
+      }
+      // Focus trap — keep Tab cycling within dialog
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     },
     [onCancel]
@@ -56,6 +73,7 @@ export function ConfirmDialog({
 
       {/* Dialog */}
       <div
+        ref={dialogRef}
         role="alertdialog"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-message"
@@ -85,6 +103,7 @@ export function ConfirmDialog({
               </h3>
               <button
                 onClick={onCancel}
+                aria-label="Close dialog"
                 className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
               >
                 <X className="h-3.5 w-3.5" />
@@ -101,13 +120,13 @@ export function ConfirmDialog({
             {/* Actions */}
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
+                ref={cancelRef}
                 onClick={onCancel}
                 className="rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
               >
                 {cancelLabel}
               </button>
               <button
-                ref={confirmRef}
                 onClick={onConfirm}
                 className={cn(
                   'rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-colors',

@@ -94,9 +94,9 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
 
                     if (match) {
                       return (
-                        <div className="my-2 overflow-hidden rounded-lg border border-surface-200 dark:border-surface-700">
+                        <div className="my-2 overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700">
                           <div className="flex h-7 items-center bg-surface-100 px-3 dark:bg-surface-800">
-                            <span className="font-mono text-[10px] text-surface-500">
+                            <span className="font-mono text-[10px] text-surface-500 dark:text-surface-400">
                               {match[1]}
                             </span>
                           </div>

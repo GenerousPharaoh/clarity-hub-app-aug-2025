@@ -18,7 +18,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
   const [confirmDelete, setConfirmDelete] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu on outside click
+  // Close menu on outside click or Escape
   useEffect(() => {
     if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
@@ -27,8 +27,18 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
         setConfirmDelete(false);
       }
     }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+        setConfirmDelete(false);
+      }
+    }
     document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [menuOpen]);
 
   const handleCardClick = () => {
@@ -113,6 +123,8 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                   menuOpen && 'opacity-100 bg-surface-100 dark:bg-surface-800'
                 )}
                 aria-label="Project options"
+                aria-expanded={menuOpen}
+                aria-haspopup="true"
               >
                 <MoreVertical className="h-4 w-4" />
               </button>

@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from 'react';
 import { useUpdateNote } from '@/hooks/useNotes';
 
-export type SaveStatus = 'idle' | 'saving' | 'saved';
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export function useAutoSave(noteId: string, projectId: string) {
   const updateNote = useUpdateNote();
@@ -21,7 +21,7 @@ export function useAutoSave(noteId: string, projectId: string) {
           { id: noteId, projectId, content },
           {
             onSuccess: () => setSaveStatus('saved'),
-            onError: () => setSaveStatus('idle'),
+            onError: () => setSaveStatus('error'),
           }
         );
       }, 1000);

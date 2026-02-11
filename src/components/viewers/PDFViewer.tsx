@@ -150,7 +150,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
         </div>
 
         {/* File name (center) */}
-        <span className="hidden truncate px-2 text-xs text-surface-500 dark:text-surface-400 sm:block">
+        <span className="hidden truncate px-2 text-xs text-surface-500 dark:text-surface-400 sm:block" title={fileName}>
           {fileName}
         </span>
 
@@ -164,7 +164,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
           >
             <ZoomOut className="h-3.5 w-3.5" />
           </button>
-          <span className="min-w-[2.5rem] text-center text-[11px] text-surface-500">
+          <span className="min-w-[3rem] text-center text-[11px] text-surface-500 dark:text-surface-400">
             {fitWidth ? 'Fit' : `${Math.round(scale * 100)}%`}
           </span>
           <button

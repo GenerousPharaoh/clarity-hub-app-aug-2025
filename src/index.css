@@ -139,6 +139,16 @@ body.dark {
 }
 
 /* ── Scrollbar ─────────────────────────────────────────── */
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-300) transparent;
+}
+.dark * {
+  scrollbar-color: var(--color-surface-700) transparent;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -185,6 +195,10 @@ button, [role="button"], a {
 :focus-visible {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
+}
+
+.dark :focus-visible {
+  outline-color: var(--color-primary-400);
 }
 
 /* ── Panel Resize Handle ───────────────────────────────── */

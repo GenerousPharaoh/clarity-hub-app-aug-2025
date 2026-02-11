@@ -24,9 +24,10 @@ export function EditorStatusBar({ editor, saveStatus }: EditorStatusBarProps) {
           {readingTime} min read
         </span>
       </div>
-      <span className="text-[10px] font-medium text-surface-400 dark:text-surface-500">
+      <span className={`text-[10px] font-medium ${saveStatus === 'error' ? 'text-red-500 dark:text-red-400' : 'text-surface-400 dark:text-surface-500'}`}>
         {saveStatus === 'saving' && 'Saving...'}
         {saveStatus === 'saved' && 'Saved'}
+        {saveStatus === 'error' && 'Save failed'}
       </span>
     </div>
   );

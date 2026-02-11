@@ -174,9 +174,11 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
               max="100"
               value={isMuted ? 0 : volume * 100}
               onChange={handleVolume}
+              aria-label="Volume"
               className={cn(
                 'h-1 w-16 cursor-pointer appearance-none rounded-full bg-surface-200 dark:bg-surface-700',
-                '[&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary-500'
+                '[&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary-500',
+                '[&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary-500'
               )}
             />
           </div>

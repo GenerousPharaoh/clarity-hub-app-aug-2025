@@ -43,7 +43,7 @@ export function PanelGrip({ className, id }: PanelGripProps) {
           'group-data-[resize-handle-state=drag]:opacity-100'
         )}
       >
-        <GripVertical className="h-3 w-3 text-surface-400 dark:text-surface-500" />
+        <GripVertical className="h-3 w-3 text-surface-400 dark:text-surface-400" />
       </div>
     </PanelResizeHandle>
   );

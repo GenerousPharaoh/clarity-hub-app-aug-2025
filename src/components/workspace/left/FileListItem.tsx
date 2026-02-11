@@ -44,7 +44,7 @@ export function FileListItem({ file }: FileListItemProps) {
   const IconComponent = typeIconMap[fileType] || File;
   const colorClass = FILE_TYPE_COLORS[fileType] || FILE_TYPE_COLORS.other;
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside or pressing Escape
   useEffect(() => {
     if (!showMenu) return;
     function handleClickOutside(e: MouseEvent) {
@@ -53,8 +53,18 @@ export function FileListItem({ file }: FileListItemProps) {
         setShowConfirm(false);
       }
     }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setShowMenu(false);
+        setShowConfirm(false);
+      }
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [showMenu]);
 
   const handleClick = useCallback(() => {

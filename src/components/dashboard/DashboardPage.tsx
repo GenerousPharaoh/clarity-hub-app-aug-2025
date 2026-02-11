@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Briefcase, Scale } from 'lucide-react';
+import { Plus, Briefcase, Scale, RefreshCw } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { FadeIn } from '@/components/shared/FadeIn';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -49,6 +50,7 @@ function SkeletonCard() {
 /* ── Main Dashboard Page ─────────────────────────────── */
 export function DashboardPage() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: projects, isLoading, error } = useProjects();
   const { data: fileCounts } = useProjectFileCounts();
   const createProject = useCreateProject();
@@ -130,8 +132,17 @@ export function DashboardPage() {
         {/* Error state */}
         {error && (
           <FadeIn>
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800/50 dark:bg-red-950/30 dark:text-red-400">
-              Failed to load projects. Please try refreshing the page.
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800/50 dark:bg-red-950/30">
+              <p className="text-sm text-red-700 dark:text-red-400">
+                Failed to load projects.
+              </p>
+              <button
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400 dark:hover:bg-red-950"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Retry
+              </button>
             </div>
           </FadeIn>
         )}

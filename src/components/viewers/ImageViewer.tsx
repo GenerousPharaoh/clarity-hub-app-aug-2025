@@ -32,6 +32,15 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
   const isFit = zoom === FIT_ZOOM;
   const displayZoom = isFit ? 'Fit' : `${Math.round(zoom * 100)}%`;
 
+  // Reset all view state when switching to a different image
+  useEffect(() => {
+    setZoom(FIT_ZOOM);
+    setRotation(0);
+    setPanOffset({ x: 0, y: 0 });
+    setIsLoading(true);
+    setHasError(false);
+  }, [url]);
+
   // Reset pan when switching to fit mode
   useEffect(() => {
     if (isFit) setPanOffset({ x: 0, y: 0 });
@@ -141,7 +150,7 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
     <div className="relative flex h-full flex-col">
       {/* Toolbar */}
       <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-700">
-        <span className="truncate text-xs text-surface-500 dark:text-surface-400">
+        <span className="truncate text-xs text-surface-500 dark:text-surface-400" title={fileName}>
           {fileName}
         </span>
 

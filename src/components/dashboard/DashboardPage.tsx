@@ -13,6 +13,7 @@ import {
   useDeleteProject,
 } from '@/hooks/useProjects';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { cn } from '@/lib/utils';
 
 function getFirstName(user: { user_metadata?: Record<string, unknown>; email?: string } | null): string {
@@ -56,6 +57,8 @@ export function DashboardPage() {
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  useDocumentTitle('Dashboard');
 
   const firstName = getFirstName(user);
   const hasProjects = projects && projects.length > 0;

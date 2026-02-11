@@ -87,6 +87,7 @@ export default function App() {
 
       <Toaster
         position="bottom-right"
+        theme={resolved}
         toastOptions={{
           className: 'font-body',
           style: {

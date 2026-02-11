@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import useAppStore from '@/store';
 import type { ThemeMode } from '@/store/slices/authSlice';
 import { FadeIn } from '@/components/shared/FadeIn';
@@ -67,6 +68,7 @@ function getInitials(name: string): string {
 // Component
 // ---------------------------------------------------------------------------
 export function SettingsPage() {
+  useDocumentTitle('Settings');
   const { user, signOut } = useAuth();
   const { themeMode, setTheme } = useAppStore();
   const storeUser = useAppStore((s) => s.user);

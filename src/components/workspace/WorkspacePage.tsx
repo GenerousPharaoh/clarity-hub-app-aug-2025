@@ -13,6 +13,7 @@ import { PanelGrip } from './PanelGrip';
 import { CollapsedStrip } from './CollapsedStrip';
 import { KeyboardShortcutsHelp } from '@/components/shared/KeyboardShortcutsHelp';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { FolderOpen, Eye, Sparkles } from 'lucide-react';
 
 export function WorkspacePage() {
@@ -24,6 +25,10 @@ export function WorkspacePage() {
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
   const setLeftPanel = useAppStore((s) => s.setLeftPanel);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
+
+  const projects = useAppStore((s) => s.projects);
+  const projectName = projects.find((p) => p.id === projectId)?.name;
+  useDocumentTitle(projectName ?? 'Project');
 
   const showShortcuts = useAppStore((s) => s.showKeyboardShortcuts);
   const setShowShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);

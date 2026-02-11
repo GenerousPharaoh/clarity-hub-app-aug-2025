@@ -1,14 +1,16 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { cn } from '@/lib/utils';
-import { User, Sparkles } from 'lucide-react';
+import { User, Sparkles, AlertTriangle, RotateCcw } from 'lucide-react';
 import type { ChatMessage as ChatMessageType } from '@/types';
 
 interface ChatMessageProps {
   message: ChatMessageType;
+  onRetry?: (messageId: string) => void;
 }
 
 const MODEL_CONFIG = {
@@ -28,22 +30,44 @@ function formatTimestamp(date: Date): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+/** Detect if the current theme is dark by checking the <html> class */
+function useIsDark(): boolean {
+  // Check at render time — this is fine for a memoized component
+  // since theme changes cause a re-render via parent context
+  return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+}
+
+/** Detect if a message is an error response from the AI */
+function isErrorMessage(content: string): boolean {
+  return (
+    content.startsWith('I encountered an error:') ||
+    content.startsWith('An unexpected error occurred')
+  );
+}
+
 export const ChatMessageComponent = memo(function ChatMessageComponent({
   message,
+  onRetry,
 }: ChatMessageProps) {
   const isUser = message.role === 'user';
+  const isDark = useIsDark();
+  const isError = !isUser && isErrorMessage(message.content);
 
   const timestamp = useMemo(
     () => formatTimestamp(message.timestamp),
     [message.timestamp]
   );
 
+  const handleRetry = useCallback(() => {
+    if (onRetry) onRetry(message.id);
+  }, [onRetry, message.id]);
+
   if (isUser) {
     return (
       <div className="flex justify-end px-4 py-2">
         <div className="flex max-w-[85%] items-end gap-2">
           <div>
-            <div className="rounded-2xl rounded-br-md bg-primary-600 px-3.5 py-2.5 text-[13px] leading-relaxed text-white">
+            <div className="rounded-2xl rounded-br-md bg-primary-600 px-3.5 py-2.5 text-[13px] leading-relaxed text-white break-words">
               {message.content}
             </div>
             <div className="mt-1 text-right text-[10px] text-surface-400">
@@ -64,12 +88,23 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   return (
     <div className="flex justify-start px-4 py-2">
       <div className="flex max-w-[90%] items-start gap-2">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-100 dark:bg-accent-900/40">
-          <Sparkles className="h-3.5 w-3.5 text-accent-600 dark:text-accent-400" />
+        <div
+          className={cn(
+            'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
+            isError
+              ? 'bg-red-100 dark:bg-red-900/40'
+              : 'bg-accent-100 dark:bg-accent-900/40'
+          )}
+        >
+          {isError ? (
+            <AlertTriangle className="h-3.5 w-3.5 text-red-500 dark:text-red-400" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5 text-accent-600 dark:text-accent-400" />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           {/* Model badge */}
-          {modelConfig && (
+          {modelConfig && !isError && (
             <div className="mb-1.5">
               <span
                 className={cn(
@@ -83,8 +118,22 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           )}
 
           {/* Message content */}
-          <div className="rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 shadow-sm ring-1 ring-surface-200/80 dark:bg-surface-800 dark:ring-surface-700/50">
-            <div className="prose-chat text-[13px] leading-relaxed text-surface-700 dark:text-surface-200">
+          <div
+            className={cn(
+              'rounded-2xl rounded-tl-md px-3.5 py-2.5 shadow-sm',
+              isError
+                ? 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-900/20 dark:ring-red-800/50'
+                : 'bg-white ring-1 ring-surface-200/80 dark:bg-surface-800 dark:ring-surface-700/50'
+            )}
+          >
+            <div
+              className={cn(
+                'prose-chat text-[13px] leading-relaxed break-words',
+                isError
+                  ? 'text-red-700 dark:text-red-300'
+                  : 'text-surface-700 dark:text-surface-200'
+              )}
+            >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -101,14 +150,14 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                             </span>
                           </div>
                           <SyntaxHighlighter
-                            style={oneLight}
+                            style={isDark ? oneDark : oneLight}
                             language={match[1]}
                             PreTag="div"
                             customStyle={{
                               margin: 0,
                               padding: '12px',
                               fontSize: '11px',
-                              lineHeight: '1.5',
+                              lineHeight: '1.6',
                               background: 'transparent',
                             }}
                           >
@@ -194,6 +243,17 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               </ReactMarkdown>
             </div>
           </div>
+
+          {/* Retry button for error messages */}
+          {isError && onRetry && (
+            <button
+              onClick={handleRetry}
+              className="mt-1.5 flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Retry
+            </button>
+          )}
 
           {/* Timestamp */}
           <div className="mt-1 text-[10px] text-surface-400">{timestamp}</div>

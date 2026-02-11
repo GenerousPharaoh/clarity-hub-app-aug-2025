@@ -155,6 +155,7 @@ export function SettingsPage() {
                   <button
                     key={opt.value}
                     onClick={() => setTheme(opt.value)}
+                    aria-pressed={active}
                     className={`group relative flex flex-col items-center gap-2 rounded-lg border-2 px-3 py-4 text-center transition-all
                       ${
                         active

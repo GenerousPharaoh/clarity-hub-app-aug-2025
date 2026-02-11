@@ -75,6 +75,28 @@ export function AIChatPanel() {
     []
   );
 
+  // Retry a failed AI message by re-sending the previous user message
+  const handleRetry = useCallback(
+    (errorMessageId: string) => {
+      // Find the error message index, then look for the user message before it
+      const idx = messages.findIndex((m) => m.id === errorMessageId);
+      if (idx <= 0) return;
+
+      // Walk backwards to find the nearest user message
+      for (let i = idx - 1; i >= 0; i--) {
+        if (messages[i].role === 'user') {
+          const userMsg = messages[i];
+          const fileContext = userMsg.fileContext
+            ? { name: userMsg.fileContext, path: '', type: null }
+            : undefined;
+          sendMessage(userMsg.content, fileContext);
+          break;
+        }
+      }
+    },
+    [messages, sendMessage]
+  );
+
   const isEmpty = messages.length === 0;
 
   if (!selectedProjectId) {
@@ -130,7 +152,7 @@ export function AIChatPanel() {
 
             {/* Messages */}
             {messages.map((msg) => (
-              <ChatMessageComponent key={msg.id} message={msg} />
+              <ChatMessageComponent key={msg.id} message={msg} onRetry={handleRetry} />
             ))}
 
             {/* Loading indicator */}

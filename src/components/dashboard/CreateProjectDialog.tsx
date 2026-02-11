@@ -69,6 +69,8 @@ export function CreateProjectDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            role="dialog"
+            aria-labelledby="create-project-title"
             className={cn(
               'relative z-10 w-full max-w-md',
               'rounded-xl border border-surface-200 bg-white shadow-2xl',
@@ -81,7 +83,7 @@ export function CreateProjectDialog({
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
                   <FolderPlus className="h-4 w-4" />
                 </div>
-                <h2 className="font-heading text-lg font-semibold text-surface-900 dark:text-surface-100">
+                <h2 id="create-project-title" className="font-heading text-lg font-semibold text-surface-900 dark:text-surface-100">
                   New Project
                 </h2>
               </div>
@@ -119,7 +121,7 @@ export function CreateProjectDialog({
                   placeholder="e.g. Employment Dispute 2026"
                   disabled={isLoading}
                   className={cn(
-                    'w-full rounded-lg border border-surface-300 px-3.5 py-2.5',
+                    'w-full rounded-lg border border-surface-200 px-3 py-2.5',
                     'text-sm text-surface-900 placeholder:text-surface-400',
                     'transition-colors',
                     'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
@@ -152,7 +154,7 @@ export function CreateProjectDialog({
                   disabled={isLoading}
                   rows={3}
                   className={cn(
-                    'w-full resize-none rounded-lg border border-surface-300 px-3.5 py-2.5',
+                    'w-full resize-none rounded-lg border border-surface-200 px-3 py-2.5',
                     'text-sm text-surface-900 placeholder:text-surface-400',
                     'transition-colors',
                     'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',

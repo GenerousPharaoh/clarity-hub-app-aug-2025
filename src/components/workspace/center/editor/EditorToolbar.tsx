@@ -28,18 +28,12 @@ import {
 interface EditorToolbarProps {
   editor: Editor;
   onInsertLink: () => void;
+  onInsertImage: () => void;
 }
 
-export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
+export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToolbarProps) {
   const insertTable = () => {
     editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-  };
-
-  const insertImage = () => {
-    const url = window.prompt('Enter image URL:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
   };
 
   return (
@@ -193,7 +187,7 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
       >
         <Minus className="h-4 w-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={insertImage} title="Insert Image">
+      <ToolbarButton onClick={onInsertImage} title="Insert Image">
         <ImageIcon className="h-4 w-4" />
       </ToolbarButton>
 

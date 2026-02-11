@@ -60,9 +60,9 @@ export function LeftPanel() {
             'flex h-8 items-center gap-2 rounded-lg border px-2.5',
             'border-surface-200 bg-surface-50',
             'transition-all',
-            'focus-within:border-primary-400 focus-within:ring-1 focus-within:ring-primary-400/20',
+            'focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/20',
             'dark:border-surface-700 dark:bg-surface-800/50',
-            'dark:focus-within:border-primary-500 dark:focus-within:ring-primary-500/20'
+            'dark:focus-within:border-primary-400 dark:focus-within:ring-primary-400/20'
           )}
         >
           <Search className="h-3.5 w-3.5 shrink-0 text-surface-400" />

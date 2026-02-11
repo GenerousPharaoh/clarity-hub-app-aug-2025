@@ -1,6 +1,7 @@
 import { FileQuestion, Download } from 'lucide-react';
 import { getFileUrl } from '@/services/storageService';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface EmptyViewerProps {
   fileName: string;
@@ -23,9 +24,11 @@ export function EmptyViewer({ fileName, filePath }: EmptyViewerProps) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+      } else {
+        toast.error('Download link unavailable');
       }
     } catch (err) {
-      console.error('Download failed:', err);
+      toast.error('Download failed. Please try again.');
     } finally {
       setDownloading(false);
     }

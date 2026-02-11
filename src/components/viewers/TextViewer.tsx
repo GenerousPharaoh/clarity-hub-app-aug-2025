@@ -68,42 +68,55 @@ export function TextViewer({ url, fileName }: TextViewerProps) {
   }
 
   const lines = (content ?? '').split('\n');
+  const isEmpty = !content || content.trim().length === 0;
 
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
       <div className="flex h-9 shrink-0 items-center gap-2 border-b border-surface-200 px-3 dark:border-surface-700">
         <FileText className="h-3.5 w-3.5 text-surface-400" />
-        <span className="truncate text-xs text-surface-500 dark:text-surface-400">
+        <span className="truncate text-xs text-surface-500 dark:text-surface-400" title={fileName}>
           {fileName}
         </span>
         <span className="ml-auto text-[10px] text-surface-400">
-          {lines.length} lines
+          {isEmpty ? '0 bytes' : `${lines.length} lines`}
         </span>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
-        <div className="flex min-w-0">
-          {/* Line numbers */}
-          <div className="sticky left-0 shrink-0 select-none border-r border-surface-200 bg-surface-50 px-3 py-3 text-right dark:border-surface-700 dark:bg-surface-800/50">
-            {lines.map((_, i) => (
-              <div
-                key={i}
-                className="font-mono text-[11px] leading-5 text-surface-300 dark:text-surface-500"
-              >
-                {i + 1}
-              </div>
-            ))}
+        {isEmpty ? (
+          <div className="flex h-full flex-col items-center justify-center px-8 text-center">
+            <FileText className="h-8 w-8 text-surface-300 dark:text-surface-600" />
+            <p className="mt-3 text-xs font-medium text-surface-500 dark:text-surface-400">
+              Empty file
+            </p>
+            <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500">
+              This file contains no content.
+            </p>
           </div>
+        ) : (
+          <div className="flex min-w-0">
+            {/* Line numbers */}
+            <div className="sticky left-0 shrink-0 select-none border-r border-surface-200 bg-surface-50 px-3 py-3 text-right dark:border-surface-700 dark:bg-surface-800/50">
+              {lines.map((_, i) => (
+                <div
+                  key={i}
+                  className="font-mono text-[11px] leading-5 text-surface-300 dark:text-surface-500"
+                >
+                  {i + 1}
+                </div>
+              ))}
+            </div>
 
-          {/* Code content */}
-          <pre className="flex-1 overflow-x-auto p-3">
-            <code className="font-mono text-[11px] leading-5 text-surface-700 dark:text-surface-300">
-              {content}
-            </code>
-          </pre>
-        </div>
+            {/* Code content */}
+            <pre className="flex-1 overflow-x-auto p-3">
+              <code className="font-mono text-[11px] leading-5 text-surface-700 dark:text-surface-300">
+                {content}
+              </code>
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );

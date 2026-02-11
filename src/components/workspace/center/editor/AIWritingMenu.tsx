@@ -138,7 +138,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
   }, []);
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-50 mx-auto w-80 rounded-xl border border-surface-200 bg-white p-3 shadow-2xl dark:border-surface-700 dark:bg-surface-800">
+    <div className="absolute bottom-4 left-1/2 z-50 w-80 -translate-x-1/2 rounded-xl border border-surface-200 bg-white p-3 shadow-2xl dark:border-surface-700 dark:bg-surface-800">
       {/* Header */}
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-1.5">

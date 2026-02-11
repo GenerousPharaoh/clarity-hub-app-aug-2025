@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Sparkles, Trash2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useAIChat } from '@/hooks/useAIChat';
 import { ChatMessageComponent } from './ChatMessage';
 import { SuggestedPrompts } from './SuggestedPrompts';
@@ -18,6 +19,7 @@ export function AIChatPanel() {
     useAIChat({ projectId: selectedProjectId });
 
   const [input, setInput] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -142,7 +144,7 @@ export function AIChatPanel() {
             {/* Clear chat button */}
             <div className="flex justify-end px-4 pb-1">
               <button
-                onClick={clearChat}
+                onClick={() => setShowClearConfirm(true)}
                 className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
               >
                 <Trash2 className="h-3 w-3" />
@@ -226,12 +228,28 @@ export function AIChatPanel() {
         <div className="mt-2 flex items-center justify-between px-1">
           <span className="text-[10px] text-surface-400 dark:text-surface-500">
             <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
+            <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>
+            <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Shift+Enter</kbd> new line
           </span>
           <span className="text-[10px] text-surface-400 dark:text-surface-500">
             Not legal advice
           </span>
         </div>
       </div>
+
+      {/* Clear chat confirmation */}
+      <ConfirmDialog
+        open={showClearConfirm}
+        title="Clear Conversation"
+        message="This will permanently delete all messages in this conversation. This action cannot be undone."
+        confirmLabel="Clear All"
+        variant="danger"
+        onConfirm={() => {
+          clearChat();
+          setShowClearConfirm(false);
+        }}
+        onCancel={() => setShowClearConfirm(false)}
+      />
     </div>
   );
 }

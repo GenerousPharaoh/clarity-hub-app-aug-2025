@@ -78,12 +78,16 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
       }}
     >
       <div
+        role="link"
+        tabIndex={0}
         onClick={handleCardClick}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(); } }}
         className={cn(
           'group relative flex cursor-pointer flex-col overflow-hidden',
           'rounded-xl border border-surface-200 bg-white',
           'shadow-sm transition-all duration-200',
           'hover:shadow-lg hover:shadow-primary-500/5 hover:border-surface-300 hover:-translate-y-0.5',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-950',
           'dark:border-surface-800 dark:bg-surface-900',
           'dark:hover:border-surface-700 dark:hover:shadow-lg dark:hover:shadow-primary-500/[0.08]'
         )}

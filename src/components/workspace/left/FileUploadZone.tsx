@@ -101,7 +101,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
               </div>
             </div>
             <span className="shrink-0 text-[11px] text-surface-400">
-              Uploading...
+              Processing...
             </span>
           </div>
         )}

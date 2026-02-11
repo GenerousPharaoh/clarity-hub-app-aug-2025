@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useAppStore from '@/store';
 import { getFileUrl } from '@/services/storageService';
-import { getFileType } from '@/lib/utils';
+import { getFileType, cn } from '@/lib/utils';
 import { FileSearch } from 'lucide-react';
 import { PDFViewer } from './PDFViewer';
 import { ImageViewer } from './ImageViewer';
@@ -74,11 +74,31 @@ export function FileViewer() {
     );
   }
 
-  // Loading URL
+  // Loading URL — skeleton preview
   if (isLoading) {
+    const fileType = selectedFile ? getFileType(selectedFile.name) : null;
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-surface-200 border-t-primary-500" />
+      <div className="flex h-full flex-col">
+        {/* Skeleton toolbar */}
+        <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-800">
+          <div className="h-3 w-40 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="flex gap-1.5">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-6 w-6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+            ))}
+          </div>
+        </div>
+        {/* Skeleton content area */}
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8">
+          <div className={cn(
+            'flex h-16 w-16 animate-pulse items-center justify-center rounded-xl',
+            'bg-surface-100 dark:bg-surface-800'
+          )}>
+            <FileSearch className="h-7 w-7 text-surface-300 dark:text-surface-600" />
+          </div>
+          <div className="h-3 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-2.5 w-20 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+        </div>
       </div>
     );
   }

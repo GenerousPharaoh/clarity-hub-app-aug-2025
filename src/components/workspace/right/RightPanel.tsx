@@ -41,6 +41,7 @@ export function RightPanel() {
             'dark:hover:bg-surface-800 dark:hover:text-surface-300'
           )}
           title="Collapse panel"
+          aria-label="Collapse viewer panel"
         >
           <ChevronRight className="h-3.5 w-3.5" />
         </button>

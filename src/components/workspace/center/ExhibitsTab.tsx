@@ -73,8 +73,25 @@ export function ExhibitsTab() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-surface-400" />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between border-b border-surface-100 px-4 py-3 dark:border-surface-800">
+          <div className="h-3 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-6 w-24 animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
+        </div>
+        <div className="space-y-3 p-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-16 animate-pulse rounded-md bg-primary-100 dark:bg-primary-900/30" />
+              </div>
+              <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+              <div className="mt-1.5 h-3 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+              <div className="mt-3 flex items-center gap-2">
+                <div className="h-6 w-32 animate-pulse rounded-md bg-surface-50 dark:bg-surface-700" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

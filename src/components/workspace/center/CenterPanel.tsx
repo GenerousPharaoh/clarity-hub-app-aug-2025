@@ -191,8 +191,30 @@ function NotesTab() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-5 w-5 animate-spin text-surface-400" />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Skeleton sidebar */}
+        <div className="flex w-52 shrink-0 flex-col border-r border-surface-200 bg-surface-50/80 dark:border-surface-800 dark:bg-surface-850/80">
+          <div className="p-2">
+            <div className="h-7 w-full animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
+          </div>
+          <div className="space-y-1 px-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-md px-3 py-2.5">
+                <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                <div className="mt-1.5 h-2.5 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Skeleton editor */}
+        <div className="flex flex-1 flex-col px-6 pt-5">
+          <div className="h-6 w-48 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="mt-4 space-y-2.5">
+            <div className="h-3 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+            <div className="h-3 w-5/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+            <div className="h-3 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -248,7 +270,7 @@ function NotesTab() {
       {/* ── Editor area ────────────────────────────────────── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {activeNote ? (
-          <FadeIn key={activeNote.id} direction="none" duration={0.15}>
+          <FadeIn key={activeNote.id} direction="up" duration={0.2}>
             <div className="flex flex-1 flex-col overflow-hidden">
               {/* Title input */}
               <div className="shrink-0 px-6 pt-5 pb-1">

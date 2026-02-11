@@ -59,6 +59,7 @@ export function LeftPanel() {
             'dark:hover:bg-surface-800 dark:hover:text-surface-300'
           )}
           title="Collapse panel"
+          aria-label="Collapse file browser"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
         </button>

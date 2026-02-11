@@ -24,7 +24,11 @@ import { formatDate, formatRelativeDate, getFileTypeFromExtension, getFileExtens
 import { cn } from '@/lib/utils';
 import { FadeIn } from '@/components/shared/FadeIn';
 
-export function ProjectOverview() {
+interface ProjectOverviewProps {
+  onSwitchTab?: (tab: string) => void;
+}
+
+export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const projects = useAppStore((s) => s.projects);
   const files = useAppStore((s) => s.files);
@@ -119,7 +123,7 @@ export function ProjectOverview() {
         </div>
 
         {/* Quick Actions */}
-        <QuickActions />
+        <QuickActions onSwitchTab={onSwitchTab} />
       </div>
     </FadeIn>
   );
@@ -405,7 +409,7 @@ function RecentActivity({
 
 /* ── Quick Actions ────────────────────────────────────────── */
 
-function QuickActions() {
+function QuickActions({ onSwitchTab }: { onSwitchTab?: (tab: string) => void }) {
   return (
     <div className="rounded-lg border border-surface-100 p-4 dark:border-surface-700">
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
@@ -415,17 +419,19 @@ function QuickActions() {
         <QuickAction
           icon={<Upload className="h-3.5 w-3.5" />}
           label="Upload File"
-          hint="Drag & drop files to the left panel"
+          hint="Drag & drop to left panel"
         />
         <QuickAction
           icon={<NotebookPen className="h-3.5 w-3.5" />}
           label="New Note"
           hint="Switch to Notes tab"
+          onClick={onSwitchTab ? () => onSwitchTab('notes') : undefined}
         />
         <QuickAction
-          icon={<Sparkles className="h-3.5 w-3.5" />}
-          label="Ask AI"
-          hint="Open AI Chat panel"
+          icon={<Tag className="h-3.5 w-3.5" />}
+          label="Exhibits"
+          hint="Manage exhibit markers"
+          onClick={onSwitchTab ? () => onSwitchTab('exhibits') : undefined}
         />
       </div>
     </div>
@@ -436,14 +442,28 @@ function QuickAction({
   icon,
   label,
   hint,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   hint: string;
+  onClick?: () => void;
 }) {
+  const Component = onClick ? 'button' : 'div';
   return (
-    <div className="group flex items-center gap-2 rounded-lg bg-surface-50 px-3 py-2 dark:bg-surface-700/50">
-      <span className="text-primary-500 dark:text-primary-400">{icon}</span>
+    <Component
+      onClick={onClick}
+      className={cn(
+        'group flex items-center gap-2 rounded-lg bg-surface-50 px-3 py-2 dark:bg-surface-700/50',
+        onClick && 'cursor-pointer transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20'
+      )}
+    >
+      <span className={cn(
+        'text-primary-500 dark:text-primary-400',
+        onClick && 'group-hover:text-primary-600 dark:group-hover:text-primary-300'
+      )}>
+        {icon}
+      </span>
       <div>
         <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
           {label}
@@ -452,7 +472,7 @@ function QuickAction({
           {hint}
         </p>
       </div>
-    </div>
+    </Component>
   );
 }
 

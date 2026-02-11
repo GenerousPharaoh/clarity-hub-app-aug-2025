@@ -15,12 +15,13 @@ export function RightPanel() {
     <div className="flex h-full w-full flex-col bg-surface-50 dark:bg-surface-900">
       {/* Header with tabs and collapse */}
       <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 bg-surface-50/80 dark:border-surface-800 dark:bg-surface-850/50">
-        <div className="flex h-full items-center gap-0 px-1">
+        <div className="flex h-full items-center gap-0 px-1" role="tablist" aria-label="Right panel tabs">
           <TabButton
             active={activeTab === 'viewer'}
             onClick={() => setActiveTab('viewer')}
             icon={<Eye className="h-3.5 w-3.5" />}
             label="Viewer"
+            controls="panel-viewer"
           />
           <TabButton
             active={activeTab === 'ai'}
@@ -28,6 +29,7 @@ export function RightPanel() {
             icon={<Sparkles className="h-3.5 w-3.5" />}
             label="AI Chat"
             accent
+            controls="panel-ai"
           />
         </div>
         <button
@@ -45,7 +47,7 @@ export function RightPanel() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
         {activeTab === 'viewer' ? <FileViewer /> : <AIChatPanel />}
       </div>
     </div>
@@ -58,12 +60,14 @@ function TabButton({
   icon,
   label,
   accent = false,
+  controls,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
   accent?: boolean;
+  controls?: string;
 }) {
   const activeColor = accent
     ? 'text-accent-600 dark:text-accent-400'
@@ -75,6 +79,9 @@ function TabButton({
 
   return (
     <button
+      role="tab"
+      aria-selected={active}
+      aria-controls={controls}
       onClick={onClick}
       className={cn(
         'relative flex h-full items-center gap-1.5 px-3 text-xs font-medium transition-colors',

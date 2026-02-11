@@ -29,32 +29,35 @@ export function CenterPanel() {
     <div className="flex h-full w-full flex-col bg-white dark:bg-surface-900">
       {/* Tab bar — fixed 40px header */}
       <div className="flex h-10 shrink-0 items-center border-b border-surface-200 bg-surface-50/50 dark:border-surface-800 dark:bg-surface-850/50">
-        <div className="flex h-full items-center gap-0 px-1">
+        <div className="flex h-full items-center gap-0 px-1" role="tablist" aria-label="Content tabs">
           <TabButton
             active={activeTab === 'overview'}
             onClick={() => setActiveTab('overview')}
             icon={<LayoutList className="h-3.5 w-3.5" />}
             label="Overview"
+            controls="panel-overview"
           />
           <TabButton
             active={activeTab === 'notes'}
             onClick={() => setActiveTab('notes')}
             icon={<NotebookPen className="h-3.5 w-3.5" />}
             label="Notes"
+            controls="panel-notes"
           />
           <TabButton
             active={activeTab === 'exhibits'}
             onClick={() => setActiveTab('exhibits')}
             icon={<Tag className="h-3.5 w-3.5" />}
             label="Exhibits"
+            controls="panel-exhibits"
           />
         </div>
       </div>
 
       {/* Content area */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
         {activeTab === 'overview' ? (
-          <ProjectOverview />
+          <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as Tab)} />
         ) : activeTab === 'notes' ? (
           <NotesTab />
         ) : (
@@ -72,14 +75,19 @@ function TabButton({
   onClick,
   icon,
   label,
+  controls,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
+  controls?: string;
 }) {
   return (
     <button
+      role="tab"
+      aria-selected={active}
+      aria-controls={controls}
       onClick={onClick}
       className={cn(
         'relative flex h-full items-center gap-1.5 px-3 text-xs font-medium transition-colors',

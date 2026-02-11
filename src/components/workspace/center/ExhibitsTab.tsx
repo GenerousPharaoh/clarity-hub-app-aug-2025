@@ -360,11 +360,21 @@ function FilePicker({
       {/* Backdrop */}
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
-      <div className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-surface-200 bg-white p-2 shadow-lg dark:border-surface-700 dark:bg-surface-800">
+      <div
+        className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-surface-200 bg-white p-2 shadow-lg dark:border-surface-700 dark:bg-surface-800"
+        role="listbox"
+        aria-label="Select a file"
+      >
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              onClose();
+            }
+          }}
           placeholder="Search files..."
           autoFocus
           className={cn(

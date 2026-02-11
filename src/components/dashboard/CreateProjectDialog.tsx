@@ -133,6 +133,18 @@ export function CreateProjectDialog({
                   maxLength={120}
                   autoComplete="off"
                 />
+                <div className="mt-1 flex justify-end">
+                  <span
+                    className={cn(
+                      'text-[10px] tabular-nums',
+                      name.length > 100
+                        ? 'text-amber-500 dark:text-amber-400'
+                        : 'text-surface-400 dark:text-surface-500'
+                    )}
+                  >
+                    {name.length}/120
+                  </span>
+                </div>
               </div>
 
               {/* Description field */}
@@ -165,6 +177,20 @@ export function CreateProjectDialog({
                   )}
                   maxLength={500}
                 />
+                {description.length > 0 && (
+                  <div className="mt-1 flex justify-end">
+                    <span
+                      className={cn(
+                        'text-[10px] tabular-nums',
+                        description.length > 450
+                          ? 'text-amber-500 dark:text-amber-400'
+                          : 'text-surface-400 dark:text-surface-500'
+                      )}
+                    >
+                      {description.length}/500
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}

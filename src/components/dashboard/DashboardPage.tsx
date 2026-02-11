@@ -158,7 +158,7 @@ export function DashboardPage() {
         {/* Loading skeletons */}
         {isLoading && (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
           </div>

@@ -33,6 +33,7 @@ export function useProjects() {
       return projects;
     },
     enabled: !!user,
+    staleTime: 60_000, // keep cached 1 min to avoid re-fetch flicker
   });
 }
 

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ── Dark Mode (class-based, driven by .dark on <html>) ── */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── Design Tokens ─────────────────────────────────────── */
 @theme {
   /* Primary - Deep Indigo */

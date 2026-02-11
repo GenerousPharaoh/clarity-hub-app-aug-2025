@@ -2,9 +2,13 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { CommandPalette } from '@/components/shared/CommandPalette';
+import { useProjects } from '@/hooks/useProjects';
 import useAppStore from '@/store';
 
 export function AppShell() {
+  // Fetch projects at shell level so they're available on every page (incl. workspace on refresh)
+  useProjects();
+
   const showCommandPalette = useAppStore((s) => s.showCommandPalette);
   const setShowCommandPalette = useAppStore((s) => s.setShowCommandPalette);
 

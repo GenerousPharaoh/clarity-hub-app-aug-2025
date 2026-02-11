@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Trash2, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useAIChat } from '@/hooks/useAIChat';
@@ -184,11 +184,23 @@ export function AIChatPanel() {
       <div className="shrink-0 border-t border-surface-200 p-3 dark:border-surface-700">
         {/* File context indicator */}
         {selectedFile && (
-          <div className="mb-2 flex items-center gap-1.5 rounded-md bg-primary-50 px-2.5 py-1.5 dark:bg-primary-900/20">
-            <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-400" />
-            <span className="truncate text-[10px] text-primary-600 dark:text-primary-400">
-              Analyzing: {selectedFile.name}
-            </span>
+          <div className="mb-2 flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 dark:border-primary-800/50 dark:bg-primary-900/20">
+            <FileContextIcon type={selectedFile.file_type} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium text-primary-700 dark:text-primary-300">
+                {selectedFile.name}
+              </p>
+              <p className="text-[10px] text-primary-500/70 dark:text-primary-400/60">
+                AI responses will reference this file
+              </p>
+            </div>
+            <button
+              onClick={() => useAppStore.getState().setSelectedFile(null)}
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-primary-400 transition-colors hover:bg-primary-100 hover:text-primary-600 dark:hover:bg-primary-800/50 dark:hover:text-primary-300"
+              title="Clear file context"
+            >
+              <X className="h-3 w-3" />
+            </button>
           </div>
         )}
 
@@ -263,4 +275,22 @@ export function AIChatPanel() {
       />
     </div>
   );
+}
+
+/* ── File context icon by type ───────────────────────── */
+
+function FileContextIcon({ type }: { type: string | null }) {
+  const iconClass = 'h-4 w-4';
+  switch (type) {
+    case 'pdf':
+      return <FileText className={cn(iconClass, 'text-red-500')} />;
+    case 'image':
+      return <FileImage className={cn(iconClass, 'text-blue-500')} />;
+    case 'audio':
+      return <FileAudio className={cn(iconClass, 'text-purple-500')} />;
+    case 'video':
+      return <FileVideo className={cn(iconClass, 'text-pink-500')} />;
+    default:
+      return <File className={cn(iconClass, 'text-primary-500')} />;
+  }
 }

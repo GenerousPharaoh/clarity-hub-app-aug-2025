@@ -5,6 +5,7 @@ import {
   PanelGroup,
   type ImperativePanelHandle,
 } from 'react-resizable-panels';
+import { AnimatePresence, motion } from 'framer-motion';
 import useAppStore from '@/store';
 import { LeftPanel } from './left/LeftPanel';
 import { CenterPanel } from './center/CenterPanel';
@@ -95,11 +96,22 @@ export function WorkspacePage() {
   if (isMobile) {
     return (
       <div className="flex h-full flex-col">
-        {/* Active panel */}
-        <div className="flex-1 overflow-hidden">
-          {mobileTab === 'files' && <LeftPanel />}
-          {mobileTab === 'content' && <CenterPanel />}
-          {mobileTab === 'viewer' && <RightPanel />}
+        {/* Active panel with crossfade */}
+        <div className="relative flex-1 overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={mobileTab}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.12 }}
+              className="absolute inset-0"
+            >
+              {mobileTab === 'files' && <LeftPanel />}
+              {mobileTab === 'content' && <CenterPanel />}
+              {mobileTab === 'viewer' && <RightPanel />}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Bottom tab bar */}
@@ -245,17 +257,17 @@ function MobileTabButton({
     <button
       onClick={onClick}
       className={cn(
-        'flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors',
+        'relative flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors',
         active
           ? 'text-primary-600 dark:text-primary-400'
           : 'text-surface-400 dark:text-surface-500'
       )}
     >
+      {active && (
+        <div className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary-600 dark:bg-primary-400" />
+      )}
       {icon}
       <span className="text-[10px] font-medium">{label}</span>
-      {active && (
-        <div className="absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary-600 dark:bg-primary-400" />
-      )}
     </button>
   );
 }

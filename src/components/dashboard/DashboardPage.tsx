@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Briefcase, Scale, RefreshCw } from 'lucide-react';
+import { Plus, Briefcase, Scale, RefreshCw, Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { FadeIn } from '@/components/shared/FadeIn';
@@ -52,7 +52,7 @@ function SkeletonCard() {
 export function DashboardPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { data: projects, isLoading, error } = useProjects();
+  const { data: projects, isLoading, isFetching, error } = useProjects();
   const { data: fileCounts } = useProjectFileCounts();
   const createProject = useCreateProject();
   const deleteProject = useDeleteProject();
@@ -111,9 +111,14 @@ export function DashboardPage() {
         {/* Section header with action button */}
         <FadeIn delay={0.05}>
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="font-heading text-lg font-semibold text-surface-800 dark:text-surface-200">
-              Your Projects
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-heading text-lg font-semibold text-surface-800 dark:text-surface-200">
+                Your Projects
+              </h2>
+              {isFetching && !isLoading && (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-surface-400 dark:text-surface-500" />
+              )}
+            </div>
             <button
               onClick={() => setDialogOpen(true)}
               className={cn(

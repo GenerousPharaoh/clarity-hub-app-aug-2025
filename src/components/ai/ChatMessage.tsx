@@ -51,6 +51,67 @@ function isErrorMessage(content: string): boolean {
   );
 }
 
+/** Code block with copy button */
+function CodeBlock({
+  language,
+  code,
+  isDark,
+}: {
+  language: string;
+  code: string;
+  isDark: boolean;
+}) {
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  const handleCodeCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch { /* clipboard API may be unavailable */ }
+  }, [code]);
+
+  return (
+    <div className="group/code my-2 overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700">
+      <div className="flex h-7 items-center justify-between bg-surface-100 px-3 dark:bg-surface-800">
+        <span className="font-mono text-[10px] text-surface-500 dark:text-surface-400">
+          {language}
+        </span>
+        <button
+          onClick={handleCodeCopy}
+          className={cn(
+            'flex h-5 items-center gap-1 rounded px-1.5 text-[10px] font-medium transition-all',
+            'opacity-0 group-hover/code:opacity-100',
+            codeCopied
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300'
+          )}
+        >
+          {codeCopied ? (
+            <><Check className="h-3 w-3" /> Copied</>
+          ) : (
+            <><Copy className="h-3 w-3" /> Copy</>
+          )}
+        </button>
+      </div>
+      <SyntaxHighlighter
+        style={isDark ? oneDark : oneLight}
+        language={language}
+        PreTag="div"
+        customStyle={{
+          margin: 0,
+          padding: '12px',
+          fontSize: '11px',
+          lineHeight: '1.6',
+          background: 'transparent',
+        }}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  );
+}
+
 export const ChatMessageComponent = memo(function ChatMessageComponent({
   message,
   onRetry,
@@ -183,27 +244,11 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
 
                     if (match) {
                       return (
-                        <div className="my-2 overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700">
-                          <div className="flex h-7 items-center bg-surface-100 px-3 dark:bg-surface-800">
-                            <span className="font-mono text-[10px] text-surface-500 dark:text-surface-400">
-                              {match[1]}
-                            </span>
-                          </div>
-                          <SyntaxHighlighter
-                            style={isDark ? oneDark : oneLight}
-                            language={match[1]}
-                            PreTag="div"
-                            customStyle={{
-                              margin: 0,
-                              padding: '12px',
-                              fontSize: '11px',
-                              lineHeight: '1.6',
-                              background: 'transparent',
-                            }}
-                          >
-                            {codeString}
-                          </SyntaxHighlighter>
-                        </div>
+                        <CodeBlock
+                          language={match[1]}
+                          code={codeString}
+                          isDark={isDark}
+                        />
                       );
                     }
 

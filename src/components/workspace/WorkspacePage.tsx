@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Panel,
@@ -25,9 +25,11 @@ export function WorkspacePage() {
   const setLeftPanel = useAppStore((s) => s.setLeftPanel);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
 
+  const showShortcuts = useAppStore((s) => s.showKeyboardShortcuts);
+  const setShowShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
+
   const leftRef = useRef<ImperativePanelHandle>(null);
   const rightRef = useRef<ImperativePanelHandle>(null);
-  const [showShortcuts, setShowShortcuts] = useState(false);
 
   // Set active project
   useEffect(() => {

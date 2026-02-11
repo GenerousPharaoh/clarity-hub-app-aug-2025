@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   LayoutDashboard,
+  Keyboard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -65,6 +66,15 @@ export function Header() {
 
       {/* Right */}
       <div className="flex items-center gap-0.5">
+        {isWorkspace && (
+          <HeaderButton
+            onClick={() => useAppStore.getState().setShowKeyboardShortcuts(true)}
+            title="Keyboard shortcuts"
+          >
+            <Keyboard className="h-4 w-4" />
+          </HeaderButton>
+        )}
+
         <HeaderButton
           onClick={toggleTheme}
           title={

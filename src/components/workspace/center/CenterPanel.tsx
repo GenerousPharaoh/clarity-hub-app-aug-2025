@@ -27,7 +27,7 @@ export function CenterPanel() {
   return (
     <div className="flex h-full w-full flex-col bg-white dark:bg-surface-900">
       {/* Tab bar — fixed 40px header */}
-      <div className="flex h-10 shrink-0 items-center border-b border-surface-200 dark:border-surface-800">
+      <div className="flex h-10 shrink-0 items-center border-b border-surface-200 bg-surface-50/50 dark:border-surface-800 dark:bg-surface-850/50">
         <div className="flex h-full items-center gap-0 px-1">
           <TabButton
             active={activeTab === 'overview'}
@@ -181,7 +181,7 @@ function NotesTab() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* ── Note list sidebar ──────────────────────────────── */}
-      <div className="flex w-52 shrink-0 flex-col border-r border-surface-100 dark:border-surface-800">
+      <div className="flex w-52 shrink-0 flex-col border-r border-surface-200 bg-surface-50/80 dark:border-surface-800 dark:bg-surface-850/80">
         {/* New note button */}
         <div className="shrink-0 p-2">
           <button

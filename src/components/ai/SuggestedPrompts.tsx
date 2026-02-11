@@ -51,7 +51,7 @@ export function SuggestedPrompts({ onSelectPrompt }: SuggestedPromptsProps) {
         <button
           key={prompt.label}
           onClick={() => onSelectPrompt(prompt.text)}
-          className="group flex items-start gap-2.5 rounded-lg border border-surface-200 p-3 text-left transition-all hover:border-accent-300 hover:bg-accent-50/50 dark:border-surface-700 dark:hover:border-accent-700 dark:hover:bg-accent-900/10"
+          className="group flex items-start gap-2.5 rounded-lg border border-surface-200 bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-50/50 hover:shadow-md dark:border-surface-700 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:shadow-lg dark:hover:shadow-surface-950/30"
         >
           <div className="mt-0.5 shrink-0 text-surface-400 transition-colors group-hover:text-accent-500 dark:text-surface-500 dark:group-hover:text-accent-400">
             {prompt.icon}

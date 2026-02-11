@@ -131,7 +131,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
             onClick={open}
             className={cn(
               'flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2',
-              'border border-dashed border-surface-300 dark:border-surface-600',
+              'border border-dashed border-surface-300 dark:border-surface-700',
               'text-xs font-medium text-surface-500 dark:text-surface-400',
               'transition-all duration-150',
               'hover:border-primary-400 hover:bg-primary-50/50 hover:text-primary-600',

@@ -26,7 +26,7 @@ export function BubbleToolbar({ editor, onInsertLink }: BubbleToolbarProps) {
       <BubbleMenu
         editor={editor}
         updateDelay={150}
-        className="flex items-center gap-0.5 rounded-lg border border-surface-200 bg-white p-1 shadow-lg dark:border-surface-600 dark:bg-surface-800"
+        className="flex items-center gap-0.5 rounded-lg border border-surface-200 bg-white p-1 shadow-lg dark:border-surface-700 dark:bg-surface-800"
       >
         <BubbleButton
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -78,7 +78,7 @@ export function BubbleToolbar({ editor, onInsertLink }: BubbleToolbarProps) {
           <Link className="h-3.5 w-3.5" />
         </BubbleButton>
 
-        <div className="mx-0.5 h-5 w-px bg-surface-200 dark:bg-surface-600" />
+        <div className="mx-0.5 h-5 w-px bg-surface-200 dark:bg-surface-700" />
 
         <BubbleButton
           onClick={() => setShowAI(!showAI)}

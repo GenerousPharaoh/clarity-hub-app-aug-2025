@@ -73,9 +73,9 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           'group relative flex cursor-pointer flex-col overflow-hidden',
           'rounded-xl border border-surface-200 bg-white',
           'shadow-sm transition-all duration-200',
-          'hover:shadow-lg hover:shadow-surface-900/5 hover:border-surface-300 hover:-translate-y-0.5',
+          'hover:shadow-lg hover:shadow-primary-500/5 hover:border-surface-300 hover:-translate-y-0.5',
           'dark:border-surface-800 dark:bg-surface-900',
-          'dark:hover:border-surface-700 dark:hover:shadow-[0_8px_30px_-8px_rgb(0_0_0/0.5)]'
+          'dark:hover:border-surface-700 dark:hover:shadow-lg dark:hover:shadow-primary-500/[0.08]'
         )}
       >
         {/* Accent stripe — gradient */}

@@ -225,7 +225,7 @@ function EditableProjectHeader({
             autoFocus
             rows={2}
             placeholder="Add a project description..."
-            className="w-full resize-none rounded-md border border-surface-200 bg-transparent px-2 py-1.5 text-sm text-surface-600 outline-none focus:border-primary-400 dark:border-surface-600 dark:text-surface-300"
+            className="w-full resize-none rounded-md border border-surface-200 bg-transparent px-2 py-1.5 text-sm text-surface-600 outline-none focus:border-primary-400 dark:border-surface-700 dark:text-surface-300"
           />
           <div className="mt-1 flex gap-1">
             <button

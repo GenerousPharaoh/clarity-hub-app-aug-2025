@@ -124,7 +124,7 @@ export function CreateProjectDialog({
                     'transition-colors',
                     'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
                     'disabled:cursor-not-allowed disabled:opacity-60',
-                    'dark:border-surface-600 dark:bg-surface-900 dark:text-surface-100',
+                    'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-100',
                     'dark:placeholder:text-surface-500 dark:focus:border-primary-400',
                     'dark:focus:ring-primary-400/20'
                   )}
@@ -157,7 +157,7 @@ export function CreateProjectDialog({
                     'transition-colors',
                     'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
                     'disabled:cursor-not-allowed disabled:opacity-60',
-                    'dark:border-surface-600 dark:bg-surface-900 dark:text-surface-100',
+                    'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-100',
                     'dark:placeholder:text-surface-500 dark:focus:border-primary-400',
                     'dark:focus:ring-primary-400/20'
                   )}

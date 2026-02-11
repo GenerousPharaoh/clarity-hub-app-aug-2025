@@ -71,9 +71,9 @@ export function TipTapEditor({ noteId, projectId, initialContent }: TipTapEditor
   if (!editor) return null;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-surface-900">
       <EditorToolbar editor={editor} onInsertLink={handleInsertLink} />
-      <div className="relative flex-1 overflow-y-auto">
+      <div className="relative flex-1 overflow-y-auto bg-white dark:bg-surface-900">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
         <SlashCommandMenu editor={editor} />
         <EditorContent editor={editor} className="h-full" />

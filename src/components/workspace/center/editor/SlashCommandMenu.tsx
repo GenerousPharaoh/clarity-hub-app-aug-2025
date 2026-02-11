@@ -186,7 +186,7 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
   return (
     <div
       ref={menuRef}
-      className="absolute z-50 max-h-64 w-64 overflow-y-auto rounded-lg border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-600 dark:bg-surface-800"
+      className="absolute z-50 max-h-64 w-64 overflow-y-auto rounded-lg border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-700 dark:bg-surface-800"
       style={{ top, left }}
     >
       {filtered.map((cmd, index) => (
@@ -207,7 +207,7 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-md border',
               index === selectedIndex
                 ? 'border-primary-200 bg-primary-100 text-primary-700 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300'
-                : 'border-surface-200 bg-surface-50 text-surface-500 dark:border-surface-600 dark:bg-surface-700 dark:text-surface-400'
+                : 'border-surface-200 bg-surface-50 text-surface-500 dark:border-surface-700 dark:bg-surface-700 dark:text-surface-400'
             )}
           >
             {cmd.icon}

@@ -12,7 +12,7 @@ export function EditorStatusBar({ editor, saveStatus }: EditorStatusBarProps) {
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   return (
-    <div className="flex h-6 shrink-0 items-center justify-between border-t border-surface-100 px-4 dark:border-surface-700">
+    <div className="flex h-7 shrink-0 items-center justify-between border-t border-surface-200 bg-surface-50/50 px-4 dark:border-surface-800 dark:bg-surface-850/50">
       <div className="flex items-center gap-3">
         <span className="text-[10px] text-surface-400 dark:text-surface-500">
           {wordCount} {wordCount === 1 ? 'word' : 'words'}

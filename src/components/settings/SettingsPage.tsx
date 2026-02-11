@@ -108,7 +108,7 @@ export function SettingsPage() {
               <img
                 src={avatarUrl}
                 alt={displayName}
-                className="h-16 w-16 shrink-0 rounded-full ring-2 ring-surface-200 dark:ring-surface-600"
+                className="h-16 w-16 shrink-0 rounded-full ring-2 ring-surface-200 dark:ring-surface-700"
                 referrerPolicy="no-referrer"
               />
             ) : (
@@ -220,7 +220,7 @@ export function SettingsPage() {
               </div>
               <button
                 onClick={handleSignOut}
-                className="inline-flex items-center gap-2 rounded-lg border border-surface-300 px-4 py-2 text-sm font-medium text-surface-700 transition-colors hover:bg-surface-100 dark:border-surface-600 dark:text-surface-300 dark:hover:bg-surface-700"
+                className="inline-flex items-center gap-2 rounded-lg border border-surface-300 px-4 py-2 text-sm font-medium text-surface-700 transition-colors hover:bg-surface-100 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800"
               >
                 <LogOut className="h-4 w-4" />
                 Sign out

@@ -158,7 +158,7 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
             <ZoomIn className="h-3.5 w-3.5" />
           </ToolbarButton>
 
-          <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-600" />
+          <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
 
           <ToolbarButton onClick={fitToView} title="Fit to view" active={isFit}>
             <Maximize className="h-3.5 w-3.5" />
@@ -168,7 +168,7 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
             <RotateCw className="h-3.5 w-3.5" />
           </ToolbarButton>
 
-          <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-600" />
+          <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
 
           <ToolbarButton onClick={handleDownload} title="Download">
             <Download className="h-3.5 w-3.5" />

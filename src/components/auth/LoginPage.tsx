@@ -53,7 +53,7 @@ export function LoginPage() {
       </div>
 
       {/* Right: Login form */}
-      <div className="flex flex-1 items-center justify-center bg-white p-8 dark:bg-surface-950">
+      <div className="flex flex-1 items-center justify-center bg-white p-8 dark:bg-surface-900">
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="mb-8 lg:hidden flex items-center gap-3">
@@ -81,8 +81,8 @@ export function LoginPage() {
               'shadow-sm transition-all duration-200',
               'hover:bg-surface-50 hover:shadow-md hover:border-surface-300',
               'active:scale-[0.98]',
-              'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200',
-              'dark:hover:bg-surface-800 dark:hover:border-surface-600'
+              'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200',
+              'dark:hover:bg-surface-700 dark:hover:border-surface-600 dark:hover:shadow-lg dark:hover:shadow-surface-950/30'
             )}
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">

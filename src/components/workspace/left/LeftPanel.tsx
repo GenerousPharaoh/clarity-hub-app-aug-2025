@@ -30,9 +30,9 @@ export function LeftPanel() {
     setSearchQuery('');
   }, [setSearchQuery]);
   return (
-    <div className="flex h-full w-full flex-col bg-white dark:bg-surface-900">
+    <div className="flex h-full w-full flex-col bg-surface-50 dark:bg-surface-900">
       {/* ── Header ────────────────────────────────────────── */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-800">
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 bg-surface-50/80 px-3 dark:border-surface-800 dark:bg-surface-850/50">
         <div className="flex items-center gap-2">
           <FolderOpen className="h-3.5 w-3.5 text-surface-400" />
           <span className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">

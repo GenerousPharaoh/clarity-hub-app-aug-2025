@@ -115,8 +115,8 @@ export function DashboardPage() {
                 'inline-flex items-center gap-2 rounded-xl px-4 py-2.5',
                 'bg-primary-600 text-sm font-medium text-white',
                 'shadow-sm transition-all duration-200',
-                'hover:bg-primary-500 hover:shadow-md hover:shadow-primary-500/25',
-                'active:scale-[0.98] active:bg-primary-700',
+                'hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/25',
+                'active:scale-[0.97] active:bg-primary-700',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2',
                 'dark:focus-visible:ring-offset-surface-950'
               )}

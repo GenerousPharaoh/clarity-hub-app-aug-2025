@@ -12,9 +12,9 @@ export function RightPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('viewer');
 
   return (
-    <div className="flex h-full w-full flex-col bg-white dark:bg-surface-900">
+    <div className="flex h-full w-full flex-col bg-surface-50 dark:bg-surface-900">
       {/* Header with tabs and collapse */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 dark:border-surface-800">
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 bg-surface-50/80 dark:border-surface-800 dark:bg-surface-850/50">
         <div className="flex h-full items-center gap-0 px-1">
           <TabButton
             active={activeTab === 'viewer'}

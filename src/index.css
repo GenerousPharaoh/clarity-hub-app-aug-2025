@@ -2,7 +2,7 @@
 
 /* ── Design Tokens ─────────────────────────────────────── */
 @theme {
-  /* Primary - Sophisticated Indigo */
+  /* Primary - Deep Indigo */
   --color-primary-50: #eef2ff;
   --color-primary-100: #e0e7ff;
   --color-primary-200: #c7d2fe;
@@ -36,6 +36,7 @@
   --color-surface-600: #52525b;
   --color-surface-700: #3f3f46;
   --color-surface-800: #27272a;
+  --color-surface-850: #1f1f23;
   --color-surface-900: #18181b;
   --color-surface-950: #09090b;
 
@@ -51,10 +52,10 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
 
-  /* Shadows */
-  --shadow-elevated: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-float: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-overlay: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* Shadows - Light mode */
+  --shadow-elevated: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow-float: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-overlay: 0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.06);
   --shadow-glow-primary: 0 0 20px rgb(79 70 229 / 0.15);
   --shadow-glow-accent: 0 0 20px rgb(124 58 237 / 0.15);
 
@@ -104,22 +105,27 @@ code, pre, kbd {
 .dark body,
 body.dark {
   background-color: var(--color-surface-950);
-  color: var(--color-surface-100);
+  color: var(--color-surface-200);
 }
 
+/*
+ * Dark default border — matches the light * { border-color } above.
+ * Component-level dark:border-* classes always win over this
+ * because Tailwind utilities are higher specificity.
+ */
 .dark * {
   border-color: var(--color-surface-800);
 }
 
 /* ── Glass Effects ────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
 }
 
 .dark .glass {
-  background: rgba(24, 24, 27, 0.8);
+  background: rgba(24, 24, 27, 0.82);
 }
 
 .glass-subtle {

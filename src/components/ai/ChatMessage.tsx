@@ -83,7 +83,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           )}
 
           {/* Message content */}
-          <div className="rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 shadow-sm ring-1 ring-surface-200/60 dark:bg-surface-700 dark:ring-surface-600/60">
+          <div className="rounded-2xl rounded-tl-md bg-white px-3.5 py-2.5 shadow-sm ring-1 ring-surface-200/80 dark:bg-surface-800 dark:ring-surface-700/50">
             <div className="prose-chat text-[13px] leading-relaxed text-surface-700 dark:text-surface-200">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
@@ -94,7 +94,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
 
                     if (match) {
                       return (
-                        <div className="my-2 overflow-hidden rounded-lg border border-surface-200 dark:border-surface-600">
+                        <div className="my-2 overflow-hidden rounded-lg border border-surface-200 dark:border-surface-700">
                           <div className="flex h-7 items-center bg-surface-100 px-3 dark:bg-surface-800">
                             <span className="font-mono text-[10px] text-surface-500">
                               {match[1]}
@@ -166,12 +166,12 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                     </a>
                   ),
                   table: ({ children }) => (
-                    <div className="my-2 overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-600">
+                    <div className="my-2 overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700">
                       <table className="min-w-full text-[12px]">{children}</table>
                     </div>
                   ),
                   th: ({ children }) => (
-                    <th className="border-b border-surface-200 bg-surface-50 px-3 py-1.5 text-left font-semibold dark:border-surface-600 dark:bg-surface-800">
+                    <th className="border-b border-surface-200 bg-surface-50 px-3 py-1.5 text-left font-semibold dark:border-surface-700 dark:bg-surface-800">
                       {children}
                     </th>
                   ),
@@ -186,7 +186,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                     </strong>
                   ),
                   hr: () => (
-                    <hr className="my-3 border-surface-200 dark:border-surface-600" />
+                    <hr className="my-3 border-surface-200 dark:border-surface-700" />
                   ),
                 }}
               >

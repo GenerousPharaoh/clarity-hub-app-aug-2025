@@ -43,21 +43,21 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
   };
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-0.5 border-b border-surface-200 px-2 py-1 dark:border-surface-700">
+    <div className="flex shrink-0 flex-wrap items-center gap-0.5 border-b border-surface-200 bg-surface-50/50 px-3 py-1.5 dark:border-surface-800 dark:bg-surface-850/50">
       {/* Undo / Redo */}
       <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
         title="Undo (Cmd+Z)"
       >
-        <Undo2 className="h-3.5 w-3.5" />
+        <Undo2 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
         title="Redo (Cmd+Shift+Z)"
       >
-        <Redo2 className="h-3.5 w-3.5" />
+        <Redo2 className="h-4 w-4" />
       </ToolbarButton>
 
       <Divider />
@@ -68,42 +68,42 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
         active={editor.isActive('bold')}
         title="Bold (Cmd+B)"
       >
-        <Bold className="h-3.5 w-3.5" />
+        <Bold className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         active={editor.isActive('italic')}
         title="Italic (Cmd+I)"
       >
-        <Italic className="h-3.5 w-3.5" />
+        <Italic className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         active={editor.isActive('underline')}
         title="Underline (Cmd+U)"
       >
-        <Underline className="h-3.5 w-3.5" />
+        <Underline className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         active={editor.isActive('strike')}
         title="Strikethrough"
       >
-        <Strikethrough className="h-3.5 w-3.5" />
+        <Strikethrough className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCode().run()}
         active={editor.isActive('code')}
         title="Inline Code"
       >
-        <Code className="h-3.5 w-3.5" />
+        <Code className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHighlight().run()}
         active={editor.isActive('highlight')}
         title="Highlight (Cmd+Shift+H)"
       >
-        <span className="flex h-3.5 w-3.5 items-center justify-center rounded text-[10px] font-bold" style={{ background: 'rgba(250, 204, 21, 0.4)' }}>H</span>
+        <span className="flex h-4 w-4 items-center justify-center rounded text-[11px] font-bold" style={{ background: 'rgba(250, 204, 21, 0.4)' }}>H</span>
       </ToolbarButton>
 
       <Divider />
@@ -114,21 +114,21 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
         active={editor.isActive('heading', { level: 1 })}
         title="Heading 1"
       >
-        <Heading1 className="h-3.5 w-3.5" />
+        <Heading1 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         active={editor.isActive('heading', { level: 2 })}
         title="Heading 2"
       >
-        <Heading2 className="h-3.5 w-3.5" />
+        <Heading2 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         active={editor.isActive('heading', { level: 3 })}
         title="Heading 3"
       >
-        <Heading3 className="h-3.5 w-3.5" />
+        <Heading3 className="h-4 w-4" />
       </ToolbarButton>
 
       <Divider />
@@ -139,21 +139,21 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
         active={editor.isActive('bulletList')}
         title="Bullet List"
       >
-        <List className="h-3.5 w-3.5" />
+        <List className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         active={editor.isActive('orderedList')}
         title="Ordered List"
       >
-        <ListOrdered className="h-3.5 w-3.5" />
+        <ListOrdered className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleTaskList().run()}
         active={editor.isActive('taskList')}
         title="Task List"
       >
-        <ListChecks className="h-3.5 w-3.5" />
+        <ListChecks className="h-4 w-4" />
       </ToolbarButton>
 
       <Divider />
@@ -164,37 +164,37 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
         active={editor.isActive('blockquote')}
         title="Blockquote"
       >
-        <Quote className="h-3.5 w-3.5" />
+        <Quote className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         active={editor.isActive('codeBlock')}
         title="Code Block"
       >
-        <CodeSquare className="h-3.5 w-3.5" />
+        <CodeSquare className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={onInsertLink}
         active={editor.isActive('link')}
         title="Insert Link (Cmd+K)"
       >
-        <Link className="h-3.5 w-3.5" />
+        <Link className="h-4 w-4" />
       </ToolbarButton>
 
       <Divider />
 
       {/* Insert */}
       <ToolbarButton onClick={insertTable} title="Insert Table">
-        <Table className="h-3.5 w-3.5" />
+        <Table className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
         title="Horizontal Rule"
       >
-        <Minus className="h-3.5 w-3.5" />
+        <Minus className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton onClick={insertImage} title="Insert Image">
-        <ImageIcon className="h-3.5 w-3.5" />
+        <ImageIcon className="h-4 w-4" />
       </ToolbarButton>
 
       <Divider />
@@ -205,21 +205,21 @@ export function EditorToolbar({ editor, onInsertLink }: EditorToolbarProps) {
         active={editor.isActive({ textAlign: 'left' })}
         title="Align Left"
       >
-        <AlignLeft className="h-3.5 w-3.5" />
+        <AlignLeft className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('center').run()}
         active={editor.isActive({ textAlign: 'center' })}
         title="Align Center"
       >
-        <AlignCenter className="h-3.5 w-3.5" />
+        <AlignCenter className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('right').run()}
         active={editor.isActive({ textAlign: 'right' })}
         title="Align Right"
       >
-        <AlignRight className="h-3.5 w-3.5" />
+        <AlignRight className="h-4 w-4" />
       </ToolbarButton>
     </div>
   );
@@ -245,10 +245,10 @@ function ToolbarButton({
       disabled={disabled}
       title={title}
       className={cn(
-        'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+        'flex h-8 w-8 items-center justify-center rounded-md transition-colors',
         active
-          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-          : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-200',
+          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
+          : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200',
         disabled && 'opacity-30 cursor-not-allowed'
       )}
     >
@@ -259,6 +259,6 @@ function ToolbarButton({
 
 function Divider() {
   return (
-    <div className="mx-0.5 h-5 w-px bg-surface-200 dark:bg-surface-700" />
+    <div className="mx-1 h-5 w-px bg-surface-200 dark:bg-surface-700" />
   );
 }

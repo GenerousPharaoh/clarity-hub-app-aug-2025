@@ -161,7 +161,7 @@ export function FileListItem({ file }: FileListItemProps) {
           className={cn(
             'flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors',
             showMenu
-              ? 'bg-surface-200 text-surface-600 dark:bg-surface-600 dark:text-surface-300'
+              ? 'bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300'
               : 'text-surface-400 opacity-0 group-hover:opacity-100 hover:bg-surface-200 dark:hover:bg-surface-600',
             'focus-visible:opacity-100 focus-visible:outline-none'
           )}
@@ -178,7 +178,7 @@ export function FileListItem({ file }: FileListItemProps) {
           className={cn(
             'absolute right-2 top-full z-50 min-w-[140px] overflow-hidden rounded-lg',
             'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
-            'dark:border-surface-600 dark:bg-surface-800 dark:shadow-surface-950/30',
+            'dark:border-surface-700 dark:bg-surface-800 dark:shadow-surface-950/30',
             'animate-in fade-in-0 zoom-in-95 duration-100'
           )}
         >

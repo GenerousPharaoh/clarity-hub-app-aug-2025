@@ -230,7 +230,7 @@ function ExhibitCard({
               autoFocus
               rows={2}
               placeholder="Describe this exhibit..."
-              className="w-full resize-none rounded border border-surface-200 bg-transparent px-2 py-1.5 text-xs text-surface-600 outline-none focus:border-primary-400 dark:border-surface-600 dark:text-surface-300"
+              className="w-full resize-none rounded border border-surface-200 bg-transparent px-2 py-1.5 text-xs text-surface-600 outline-none focus:border-primary-400 dark:border-surface-700 dark:text-surface-300"
             />
             <div className="mt-1 flex gap-1">
               <button
@@ -346,7 +346,7 @@ function FilePicker({
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search files..."
           autoFocus
-          className="mb-2 w-full rounded border border-surface-200 bg-transparent px-2 py-1 text-xs text-surface-700 outline-none focus:border-primary-400 dark:border-surface-600 dark:text-surface-200"
+          className="mb-2 w-full rounded border border-surface-200 bg-transparent px-2 py-1 text-xs text-surface-700 outline-none focus:border-primary-400 dark:border-surface-700 dark:text-surface-200"
         />
 
         <div className="max-h-40 overflow-y-auto">

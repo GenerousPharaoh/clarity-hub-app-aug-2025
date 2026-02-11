@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Trash2 } from 'lucide-react';
+import { Send, Sparkles, Trash2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAIChat } from '@/hooks/useAIChat';
 import { ChatMessageComponent } from './ChatMessage';
@@ -7,16 +7,19 @@ import { SuggestedPrompts } from './SuggestedPrompts';
 import useAppStore from '@/store';
 
 export function AIChatPanel() {
-  const { messages, isLoading, sendMessage, clearChat } = useAIChat();
-  const [input, setInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
+  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const files = useAppStore((s) => s.files);
   const selectedFile = selectedFileId
     ? files.find((f) => f.id === selectedFileId) ?? null
     : null;
+
+  const { messages, isLoading, isFetchingMessages, sendMessage, clearChat } =
+    useAIChat({ projectId: selectedProjectId });
+
+  const [input, setInput] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -44,7 +47,11 @@ export function AIChatPanel() {
 
     // Build file context if a file is selected
     const fileContext = selectedFile
-      ? `Currently viewing file: "${selectedFile.name}" (type: ${selectedFile.file_type || 'unknown'})`
+      ? {
+          name: selectedFile.name,
+          path: selectedFile.file_path,
+          type: selectedFile.file_type,
+        }
       : undefined;
 
     await sendMessage(content, fileContext);
@@ -63,7 +70,6 @@ export function AIChatPanel() {
   const handlePromptSelect = useCallback(
     (prompt: string) => {
       setInput(prompt);
-      // Focus textarea after selecting a prompt
       textareaRef.current?.focus();
     },
     []
@@ -71,11 +77,26 @@ export function AIChatPanel() {
 
   const isEmpty = messages.length === 0;
 
+  if (!selectedProjectId) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center px-6">
+        <Sparkles className="h-6 w-6 text-surface-300 dark:text-surface-600" />
+        <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
+          Select a project to start chatting with AI.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto">
-        {isEmpty ? (
+        {isFetchingMessages && isEmpty ? (
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-surface-400" />
+          </div>
+        ) : isEmpty ? (
           <div className="flex h-full flex-col">
             {/* Welcome section */}
             <div className="flex flex-1 flex-col items-center justify-center px-6 pb-4">
@@ -142,7 +163,7 @@ export function AIChatPanel() {
           <div className="mb-2 flex items-center gap-1.5 rounded-md bg-primary-50 px-2.5 py-1.5 dark:bg-primary-900/20">
             <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-400" />
             <span className="truncate text-[10px] text-primary-600 dark:text-primary-400">
-              Context: {selectedFile.name}
+              Analyzing: {selectedFile.name}
             </span>
           </div>
         )}

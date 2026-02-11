@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './index.css';
-import './styles/editor.css';
+import './styles/tiptap-editor.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {

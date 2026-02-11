@@ -5,11 +5,13 @@ import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotes, useCreateNote, useDeleteNote, useUpdateNote } from '@/hooks/useNotes';
 import { ProjectOverview } from './ProjectOverview';
-import { NotesEditor } from './NotesEditor';
+import { TipTapEditor } from './editor/TipTapEditor';
+import { ExhibitsTab } from './ExhibitsTab';
 import { FadeIn } from '@/components/shared/FadeIn';
 import {
   LayoutList,
   NotebookPen,
+  Tag,
   Plus,
   FileText,
   Trash2,
@@ -17,7 +19,7 @@ import {
 } from 'lucide-react';
 import type { Note } from '@/types';
 
-type Tab = 'overview' | 'notes';
+type Tab = 'overview' | 'notes' | 'exhibits';
 
 export function CenterPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -39,12 +41,24 @@ export function CenterPanel() {
             icon={<NotebookPen className="h-3.5 w-3.5" />}
             label="Notes"
           />
+          <TabButton
+            active={activeTab === 'exhibits'}
+            onClick={() => setActiveTab('exhibits')}
+            icon={<Tag className="h-3.5 w-3.5" />}
+            label="Exhibits"
+          />
         </div>
       </div>
 
       {/* Content area */}
       <div className="flex flex-1 overflow-hidden">
-        {activeTab === 'overview' ? <ProjectOverview /> : <NotesTab />}
+        {activeTab === 'overview' ? (
+          <ProjectOverview />
+        ) : activeTab === 'notes' ? (
+          <NotesTab />
+        ) : (
+          <ExhibitsTab />
+        )}
       </div>
     </div>
   );
@@ -235,9 +249,10 @@ function NotesTab() {
                 />
               </div>
 
-              {/* TinyMCE editor */}
+              {/* TipTap editor */}
               <div className="flex-1 overflow-hidden">
-                <NotesEditor
+                <TipTapEditor
+                  key={activeNote.id}
                   noteId={activeNote.id}
                   projectId={activeNote.project_id}
                   initialContent={activeNote.content || ''}

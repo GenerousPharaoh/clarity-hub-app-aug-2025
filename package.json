@@ -8,10 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "copy-tinymce": "node copy-tinymce.js",
-    "postinstall": "node copy-tinymce.js",
-    "prebuild": "node copy-tinymce.js",
-    "predev": "node copy-tinymce.js"
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -28,7 +25,22 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@supabase/supabase-js": "^2.56.0",
     "@tanstack/react-query": "^5.75.1",
-    "@tinymce/tinymce-react": "^6.1.0",
+    "@tiptap/extension-character-count": "^3.19.0",
+    "@tiptap/extension-highlight": "^3.19.0",
+    "@tiptap/extension-image": "^3.19.0",
+    "@tiptap/extension-link": "^3.19.0",
+    "@tiptap/extension-placeholder": "^3.19.0",
+    "@tiptap/extension-table": "^3.19.0",
+    "@tiptap/extension-table-cell": "^3.19.0",
+    "@tiptap/extension-table-header": "^3.19.0",
+    "@tiptap/extension-table-row": "^3.19.0",
+    "@tiptap/extension-task-item": "^3.19.0",
+    "@tiptap/extension-task-list": "^3.19.0",
+    "@tiptap/extension-text-align": "^3.19.0",
+    "@tiptap/extension-typography": "^3.19.0",
+    "@tiptap/extension-underline": "^3.19.0",
+    "@tiptap/react": "^3.19.0",
+    "@tiptap/starter-kit": "^3.19.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -47,7 +59,6 @@
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.0.2",
-    "tinymce": "^7.8.0",
     "zustand": "^5.0.4"
   },
   "devDependencies": {

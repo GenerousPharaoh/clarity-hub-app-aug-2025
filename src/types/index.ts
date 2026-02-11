@@ -7,6 +7,7 @@ export type Note = Tables<'notes'>;
 export type Profile = Tables<'profiles'>;
 export type ExhibitMarker = Tables<'exhibit_markers'>;
 export type DocumentChunk = Tables<'document_chunks'>;
+export type ChatMessageRow = Tables<'chat_messages'>;
 
 // App-level user type (derived from Supabase Auth + profile)
 export interface AppUser {
@@ -16,13 +17,14 @@ export interface AppUser {
   avatar_url: string | null;
 }
 
-// AI Chat types
+// AI Chat types (UI representation)
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   model?: 'gemini' | 'gpt';
   timestamp: Date;
+  fileContext?: string;
 }
 
 // Panel state

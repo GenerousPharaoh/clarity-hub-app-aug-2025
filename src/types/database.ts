@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          id: string
+          project_id: string
+          role: string
+          content: string
+          model: string | null
+          file_context: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          role: string
+          content: string
+          model?: string | null
+          file_context?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          role?: string
+          content?: string
+          model?: string | null
+          file_context?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_chunks: {
         Row: {
           content: string

@@ -105,6 +105,87 @@ export function useCreateProject() {
 }
 
 /**
+ * Updates a project's name and/or description.
+ * Uses optimistic updates for instant UI response.
+ */
+export function useUpdateProject() {
+  const queryClient = useQueryClient();
+  const setProjects = useAppStore((s) => s.setProjects);
+  const projects = useAppStore((s) => s.projects);
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      name,
+      description,
+    }: {
+      id: string;
+      name?: string;
+      description?: string;
+    }) => {
+      const updates: Record<string, unknown> = {
+        updated_at: new Date().toISOString(),
+      };
+      if (name !== undefined) updates.name = name.trim();
+      if (description !== undefined) updates.description = description.trim() || null;
+
+      const { data, error } = await supabase
+        .from('projects')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+
+    onMutate: async ({ id, name, description }) => {
+      await queryClient.cancelQueries({ queryKey: PROJECTS_KEY });
+      const previous = queryClient.getQueryData<Project[]>(PROJECTS_KEY);
+
+      queryClient.setQueryData<Project[]>(PROJECTS_KEY, (old) => {
+        if (!old) return old;
+        return old.map((p) => {
+          if (p.id !== id) return p;
+          return {
+            ...p,
+            ...(name !== undefined ? { name: name.trim() } : {}),
+            ...(description !== undefined ? { description: description.trim() || null } : {}),
+            updated_at: new Date().toISOString(),
+          };
+        });
+      });
+
+      // Also update Zustand store
+      const updated = projects.map((p) => {
+        if (p.id !== id) return p;
+        return {
+          ...p,
+          ...(name !== undefined ? { name: name.trim() } : {}),
+          ...(description !== undefined ? { description: description.trim() || null } : {}),
+          updated_at: new Date().toISOString(),
+        };
+      });
+      setProjects(updated);
+
+      return { previous };
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(PROJECTS_KEY, context.previous);
+        setProjects(context.previous);
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: PROJECTS_KEY });
+    },
+  });
+}
+
+/**
  * Deletes a project by id.
  * Invalidates the projects query cache and removes from Zustand store.
  */

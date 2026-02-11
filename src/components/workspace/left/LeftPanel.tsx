@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { ChevronLeft, FolderOpen, Search, X, FileText } from 'lucide-react';
+import { ChevronLeft, FolderOpen, Search, X, FileText, AlertCircle, RefreshCw } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -13,7 +13,7 @@ export function LeftPanel() {
   const searchQuery = useAppStore((s) => s.searchQuery);
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
 
-  const { data: files = [], isLoading } = useFiles(selectedProjectId);
+  const { data: files = [], isLoading, isError, refetch } = useFiles(selectedProjectId);
 
   // Debounced search: input updates immediately, filtering deferred by 150ms
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
@@ -123,6 +123,20 @@ export function LeftPanel() {
                 </div>
               </div>
             ))}
+          </div>
+        ) : isError ? (
+          <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+            <AlertCircle className="h-5 w-5 text-red-400" />
+            <p className="mt-2 text-center text-xs font-medium text-surface-500 dark:text-surface-400">
+              Failed to load files
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-2 flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-900/20"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Retry
+            </button>
           </div>
         ) : filteredFiles.length === 0 ? (
           // Empty state

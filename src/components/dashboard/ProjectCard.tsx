@@ -151,7 +151,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                     )}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {confirmDelete ? 'Click again to confirm' : 'Delete project'}
+                    {confirmDelete ? 'Confirm — deletes all data' : 'Delete project'}
                   </button>
                 </div>
               )}

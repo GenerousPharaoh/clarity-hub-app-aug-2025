@@ -249,6 +249,9 @@ export function SettingsPage() {
                     <Trash2 className="h-4 w-4" />
                     Delete all data
                   </button>
+                  <p className="mt-2 text-[11px] text-surface-400 dark:text-surface-500">
+                    This feature is not yet available.
+                  </p>
                 </div>
               </div>
             </div>

@@ -10,6 +10,8 @@ import {
   Pencil,
   Check,
   X,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -30,7 +32,7 @@ export function ExhibitsTab() {
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const { user } = useAuth();
 
-  const { data: exhibits, isLoading } = useExhibits(selectedProjectId);
+  const { data: exhibits, isLoading, isError, refetch } = useExhibits(selectedProjectId);
   const createExhibit = useCreateExhibit();
   const updateExhibit = useUpdateExhibit();
   const deleteExhibit = useDeleteExhibit();
@@ -92,6 +94,32 @@ export function ExhibitsTab() {
             </div>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-8">
+        <AlertCircle className="h-6 w-6 text-red-400" />
+        <p className="mt-3 text-sm font-medium text-surface-600 dark:text-surface-300">
+          Failed to load exhibits
+        </p>
+        <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
+          Check your connection and try again.
+        </p>
+        <button
+          onClick={() => refetch()}
+          className={cn(
+            'mt-3 flex items-center gap-1.5 rounded-lg px-3 py-1.5',
+            'text-xs font-medium text-primary-600',
+            'transition-colors hover:bg-primary-50',
+            'dark:text-primary-400 dark:hover:bg-primary-900/20'
+          )}
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Retry
+        </button>
       </div>
     );
   }

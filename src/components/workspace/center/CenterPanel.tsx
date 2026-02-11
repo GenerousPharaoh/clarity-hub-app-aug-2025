@@ -17,6 +17,8 @@ import {
   FileText,
   Trash2,
   Loader2,
+  AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import type { Note } from '@/types';
 
@@ -110,7 +112,7 @@ function TabButton({
 function NotesTab() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const { user } = useAuth();
-  const { data: notes, isLoading } = useNotes(selectedProjectId);
+  const { data: notes, isLoading, isError, refetch } = useNotes(selectedProjectId);
   const createNote = useCreateNote();
   const deleteNote = useDeleteNote();
   const updateNote = useUpdateNote();
@@ -215,6 +217,32 @@ function NotesTab() {
             <div className="h-3 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-8">
+        <AlertCircle className="h-6 w-6 text-red-400" />
+        <p className="mt-3 text-sm font-medium text-surface-600 dark:text-surface-300">
+          Failed to load notes
+        </p>
+        <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
+          Check your connection and try again.
+        </p>
+        <button
+          onClick={() => refetch()}
+          className={cn(
+            'mt-3 flex items-center gap-1.5 rounded-lg px-3 py-1.5',
+            'text-xs font-medium text-primary-600',
+            'transition-colors hover:bg-primary-50',
+            'dark:text-primary-400 dark:hover:bg-primary-900/20'
+          )}
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Retry
+        </button>
       </div>
     );
   }

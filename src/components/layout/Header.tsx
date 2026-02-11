@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import useAppStore from '@/store';
 import {
@@ -10,6 +10,7 @@ import {
   LogOut,
   LayoutDashboard,
   Keyboard,
+  ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,8 @@ export function Header() {
   const { themeMode, toggleTheme } = useAppStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const params = useParams<{ projectId: string }>();
+  const projects = useAppStore((s) => s.projects);
 
   const handleSignOut = async () => {
     await signOut();
@@ -25,6 +28,9 @@ export function Header() {
   };
 
   const isWorkspace = location.pathname.startsWith('/project/');
+  const projectName = isWorkspace
+    ? projects.find((p) => p.id === params.projectId)?.name
+    : null;
 
   return (
     <header
@@ -49,18 +55,28 @@ export function Header() {
         </Link>
 
         {isWorkspace && (
-          <Link
-            to="/"
-            className={cn(
-              'flex items-center gap-1.5 rounded-md px-2 py-1',
-              'text-xs font-medium text-surface-500',
-              'transition-all hover:bg-surface-100 hover:text-surface-700',
-              'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+          <nav className="flex items-center gap-1 text-xs" aria-label="Breadcrumb">
+            <Link
+              to="/"
+              className={cn(
+                'flex items-center gap-1 rounded-md px-1.5 py-1',
+                'font-medium text-surface-400',
+                'transition-all hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+              )}
+            >
+              <LayoutDashboard className="h-3 w-3" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </Link>
+            {projectName && (
+              <>
+                <ChevronRight className="h-3 w-3 text-surface-300 dark:text-surface-600" />
+                <span className="max-w-[180px] truncate font-medium text-surface-700 dark:text-surface-200">
+                  {projectName}
+                </span>
+              </>
             )}
-          >
-            <LayoutDashboard className="h-3.5 w-3.5" />
-            Dashboard
-          </Link>
+          </nav>
         )}
       </div>
 

@@ -155,7 +155,10 @@ function EditableProjectHeader({
   const saveName = useCallback(() => {
     const trimmed = editName.trim();
     if (trimmed && trimmed !== project.name) {
-      updateProject.mutate({ id: project.id, name: trimmed });
+      updateProject.mutate(
+        { id: project.id, name: trimmed },
+        { onSuccess: () => toast.success('Project name updated') }
+      );
     } else {
       setEditName(project.name);
     }
@@ -165,7 +168,10 @@ function EditableProjectHeader({
   const saveDesc = useCallback(() => {
     const trimmed = editDesc.trim();
     if (trimmed !== (project.description ?? '')) {
-      updateProject.mutate({ id: project.id, description: trimmed });
+      updateProject.mutate(
+        { id: project.id, description: trimmed },
+        { onSuccess: () => toast.success('Description updated') }
+      );
     }
     setIsEditingDesc(false);
   }, [editDesc, project, updateProject]);

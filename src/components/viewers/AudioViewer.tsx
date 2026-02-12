@@ -1,11 +1,13 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Music } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Music, Download, SkipBack, SkipForward } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AudioViewerProps {
   url: string;
   fileName: string;
 }
+
+const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 function formatTime(seconds: number): string {
   if (!isFinite(seconds) || isNaN(seconds)) return '0:00';
@@ -16,11 +18,13 @@ function formatTime(seconds: number): string {
 
 export function AudioViewer({ url, fileName }: AudioViewerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -54,11 +58,8 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
+    if (isPlaying) audio.pause();
+    else audio.play();
   }, [isPlaying]);
 
   const toggleMute = useCallback(() => {
@@ -67,6 +68,12 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
     audio.muted = !audio.muted;
     setIsMuted(!isMuted);
   }, [isMuted]);
+
+  const seek = useCallback((delta: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + delta));
+  }, []);
 
   const handleSeek = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,6 +101,72 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
     }
   }, []);
 
+  const cyclePlaybackRate = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const currentIdx = PLAYBACK_RATES.indexOf(playbackRate);
+    const nextIdx = (currentIdx + 1) % PLAYBACK_RATES.length;
+    const newRate = PLAYBACK_RATES[nextIdx];
+    audio.playbackRate = newRate;
+    setPlaybackRate(newRate);
+  }, [playbackRate]);
+
+  const handleDownload = useCallback(() => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+  }, [url, fileName]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle if this viewer is focused/active
+      if (!container.contains(document.activeElement) && document.activeElement !== container) return;
+
+      switch (e.key) {
+        case ' ':
+        case 'k':
+          e.preventDefault();
+          togglePlay();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          seek(-5);
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          seek(5);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          if (audioRef.current) {
+            const newVol = Math.min(1, audioRef.current.volume + 0.1);
+            audioRef.current.volume = newVol;
+            setVolume(newVol);
+          }
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          if (audioRef.current) {
+            const newVol = Math.max(0, audioRef.current.volume - 0.1);
+            audioRef.current.volume = newVol;
+            setVolume(newVol);
+          }
+          break;
+        case 'm':
+          toggleMute();
+          break;
+      }
+    };
+
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
+  }, [togglePlay, toggleMute, seek]);
+
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   if (hasError) {
@@ -113,7 +186,11 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center px-6">
+    <div
+      ref={containerRef}
+      tabIndex={0}
+      className="flex h-full flex-col items-center justify-center px-6 outline-none"
+    >
       <audio ref={audioRef} src={url} preload="metadata" />
 
       {/* Album art placeholder */}
@@ -129,14 +206,14 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
       {/* Player controls */}
       <div className="w-full max-w-sm">
         {/* Progress bar */}
-        <div className="mb-2 flex items-center gap-2">
+        <div className="mb-3 flex items-center gap-2">
           <span className="w-10 text-right font-mono text-[10px] text-surface-400">
             {formatTime(currentTime)}
           </span>
           <div className="relative flex-1">
-            <div className="h-1 w-full rounded-full bg-surface-200 dark:bg-surface-700">
+            <div className="h-1.5 w-full rounded-full bg-surface-200 dark:bg-surface-700">
               <div
-                className="h-1 rounded-full bg-primary-500 transition-all duration-100"
+                className="h-1.5 rounded-full bg-primary-500 transition-all duration-100"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -146,7 +223,8 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
               max="100"
               value={progress}
               onChange={handleSeek}
-              className="absolute inset-0 h-1 w-full cursor-pointer opacity-0"
+              className="absolute inset-0 h-1.5 w-full cursor-pointer opacity-0"
+              aria-label="Seek"
             />
           </div>
           <span className="w-10 font-mono text-[10px] text-surface-400">
@@ -155,12 +233,13 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
         </div>
 
         {/* Controls row */}
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-between">
           {/* Volume */}
           <div className="flex items-center gap-1.5">
             <button
               onClick={toggleMute}
               className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title={isMuted ? 'Unmute (M)' : 'Mute (M)'}
             >
               {isMuted || volume === 0 ? (
                 <VolumeX className="h-3.5 w-3.5" />
@@ -176,28 +255,70 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
               onChange={handleVolume}
               aria-label="Volume"
               className={cn(
-                'h-1 w-16 cursor-pointer appearance-none rounded-full bg-surface-200 dark:bg-surface-700',
+                'h-1 w-14 cursor-pointer appearance-none rounded-full bg-surface-200 dark:bg-surface-700',
                 '[&::-webkit-slider-thumb]:h-2.5 [&::-webkit-slider-thumb]:w-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary-500',
                 '[&::-moz-range-thumb]:h-2.5 [&::-moz-range-thumb]:w-2.5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary-500'
               )}
             />
           </div>
 
-          {/* Play/Pause */}
-          <button
-            onClick={togglePlay}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-600 text-white transition-colors hover:bg-primary-700"
-          >
-            {isPlaying ? (
-              <Pause className="h-4 w-4" />
-            ) : (
-              <Play className="h-4 w-4 ml-0.5" />
-            )}
-          </button>
+          {/* Center: Skip back / Play / Skip forward */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => seek(-10)}
+              className="flex h-8 w-8 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title="Back 10s"
+            >
+              <SkipBack className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={togglePlay}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-600 text-white transition-colors hover:bg-primary-700"
+              title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
+            >
+              {isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4 ml-0.5" />
+              )}
+            </button>
+            <button
+              onClick={() => seek(10)}
+              className="flex h-8 w-8 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title="Forward 10s"
+            >
+              <SkipForward className="h-3.5 w-3.5" />
+            </button>
+          </div>
 
-          {/* Spacer for symmetry */}
-          <div className="w-[88px]" />
+          {/* Playback rate + Download */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={cyclePlaybackRate}
+              className={cn(
+                'flex h-7 items-center justify-center rounded-md px-1.5 text-[10px] font-bold tabular-nums transition-colors',
+                playbackRate !== 1
+                  ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
+                  : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300'
+              )}
+              title="Playback speed"
+            >
+              {playbackRate}x
+            </button>
+            <button
+              onClick={handleDownload}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title="Download"
+            >
+              <Download className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
+
+        {/* Keyboard hints */}
+        <p className="mt-4 text-center text-[10px] text-surface-300 dark:text-surface-600">
+          Space: play/pause &middot; Arrows: seek/volume &middot; M: mute
+        </p>
       </div>
     </div>
   );

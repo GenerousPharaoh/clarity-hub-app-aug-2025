@@ -96,7 +96,7 @@ When analyzing legal issues:
     messages.push({ role: 'user', content: userContent });
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.2',
+      model: 'gpt-4o',
       messages,
       temperature: 0.2, // Low temp for legal accuracy
       max_completion_tokens: 16384,

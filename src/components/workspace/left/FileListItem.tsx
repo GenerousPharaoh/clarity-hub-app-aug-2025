@@ -183,7 +183,7 @@ export function FileListItem({ file }: FileListItemProps) {
             'flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors',
             showMenu
               ? 'bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300'
-              : 'text-surface-400 opacity-0 group-hover:opacity-100 hover:bg-surface-200 dark:hover:bg-surface-600',
+              : 'text-surface-400 max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-200 dark:hover:bg-surface-600',
             'focus-visible:opacity-100 focus-visible:outline-none'
           )}
           title="File actions"
@@ -210,7 +210,7 @@ export function FileListItem({ file }: FileListItemProps) {
             className={cn(
               'flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors',
               showConfirm
-                ? 'bg-error/10 text-error dark:bg-error/20'
+                ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
                 : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700'
             )}
           >

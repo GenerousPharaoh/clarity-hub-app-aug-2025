@@ -33,7 +33,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
           await uploadFile.mutateAsync({ file, projectId });
 
           toast.success(`Uploaded ${file.name}`, {
-            icon: <CheckCircle2 className="h-4 w-4 text-success" />,
+            icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
           });
 
           setUploadingFile(null);
@@ -43,7 +43,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
             err instanceof Error ? err.message : 'Upload failed';
           toast.error(`Failed to upload ${file.name}`, {
             description: message,
-            icon: <AlertCircle className="h-4 w-4 text-error" />,
+            icon: <AlertCircle className="h-4 w-4 text-red-500" />,
           });
         }
       }

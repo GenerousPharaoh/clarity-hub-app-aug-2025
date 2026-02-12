@@ -2,6 +2,7 @@ import { useEffect, useCallback, useState, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { getExtensions } from './extensions';
 import { useAutoSave } from './hooks/useAutoSave';
+import { EditorToolbar } from './EditorToolbar';
 import { BubbleToolbar } from './BubbleToolbar';
 import { SlashCommandMenu } from './SlashCommandMenu';
 import { PromptDialog } from './PromptDialog';
@@ -127,7 +128,10 @@ export function TipTapEditor({
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-white dark:bg-surface-900">
-      {/* Single scrollable document canvas */}
+      {/* Fixed toolbar at top — Google Docs style */}
+      <EditorToolbar editor={editor} onInsertLink={handleInsertLink} onInsertImage={handleInsertImage} />
+
+      {/* Scrollable document canvas */}
       <div className="flex-1 overflow-y-auto">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
         <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} />
@@ -148,7 +152,7 @@ export function TipTapEditor({
                   editor.commands.focus('start');
                 }
               }}
-              placeholder="Untitled"
+              placeholder="Untitled Document"
               className={cn(
                 'w-full bg-transparent font-heading text-2xl font-bold leading-tight tracking-tight md:text-[2rem]',
                 'text-surface-900 dark:text-surface-50',

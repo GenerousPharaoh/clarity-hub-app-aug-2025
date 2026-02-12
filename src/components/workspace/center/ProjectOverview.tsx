@@ -486,9 +486,9 @@ function QuickActions({ onSwitchTab }: { onSwitchTab?: (tab: string) => void }) 
         />
         <QuickAction
           icon={<NotebookPen className="h-3.5 w-3.5" />}
-          label="New Note"
-          hint="Switch to Notes tab"
-          onClick={onSwitchTab ? () => onSwitchTab('notes') : undefined}
+          label="New Document"
+          hint="Open the Editor"
+          onClick={onSwitchTab ? () => onSwitchTab('editor') : undefined}
         />
         <QuickAction
           icon={<Tag className="h-3.5 w-3.5" />}

@@ -43,6 +43,8 @@ export function getFileType(filename: string): import('../types').ViewerFileType
     txt: 'text', md: 'text', json: 'text', csv: 'text', xml: 'text', html: 'text',
     js: 'text', ts: 'text', jsx: 'text', tsx: 'text', css: 'text', py: 'text',
     log: 'text', yml: 'text', yaml: 'text', toml: 'text', ini: 'text', cfg: 'text',
+    doc: 'document', docx: 'document', rtf: 'document',
+    ppt: 'document', pptx: 'document', xls: 'document', xlsx: 'document',
   };
   return map[ext] || 'unsupported';
 }

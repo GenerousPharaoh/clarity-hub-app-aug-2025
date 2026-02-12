@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import useAppStore from '@/store';
-import { getFileUrl } from '@/services/storageService';
+import { getFileUrl, getSignedUrl } from '@/services/storageService';
 import { getFileType, cn } from '@/lib/utils';
 import { FileSearch, RefreshCw } from 'lucide-react';
 import { PDFViewer } from './PDFViewer';
@@ -8,6 +8,7 @@ import { ImageViewer } from './ImageViewer';
 import { AudioViewer } from './AudioViewer';
 import { VideoViewer } from './VideoViewer';
 import { TextViewer } from './TextViewer';
+import { DocumentViewer } from './DocumentViewer';
 import { EmptyViewer } from './EmptyViewer';
 
 export function FileViewer() {
@@ -22,6 +23,10 @@ export function FileViewer() {
     ? files.find((f) => f.id === selectedFileId) ?? null
     : null;
 
+  // Determine file type to pick URL strategy
+  const fileType = selectedFile ? getFileType(selectedFile.name) : 'unsupported';
+  const needsSignedUrl = fileType === 'pdf' || fileType === 'document';
+
   useEffect(() => {
     if (!selectedFile?.file_path) {
       setFileUrl(null);
@@ -33,11 +38,17 @@ export function FileViewer() {
     setIsLoading(true);
     setError(null);
 
-    getFileUrl(selectedFile.file_path)
+    // Use signed URLs for PDFs and documents (iframes need real HTTPS URLs)
+    // Use blob URLs for everything else (no CORS issues)
+    const fetchUrl = needsSignedUrl
+      ? getSignedUrl(selectedFile.file_path, 3600).then((url) => ({ url, error: undefined }))
+      : getFileUrl(selectedFile.file_path);
+
+    fetchUrl
       .then(({ url, error: urlError }) => {
         if (cancelled) {
           // Revoke blob URL if the effect was cancelled before we could use it
-          if (url) URL.revokeObjectURL(url);
+          if (url && !needsSignedUrl) URL.revokeObjectURL(url);
           return;
         }
         if (urlError || !url) {
@@ -58,13 +69,17 @@ export function FileViewer() {
 
     return () => {
       cancelled = true;
-      // Revoke previous blob URL to free memory
-      setFileUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
+      // Revoke previous blob URL to free memory (only for blob URLs)
+      if (!needsSignedUrl) {
+        setFileUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return null;
+        });
+      } else {
+        setFileUrl(null);
+      }
     };
-  }, [selectedFile?.file_path, retryCount]);
+  }, [selectedFile?.file_path, retryCount, needsSignedUrl]);
 
   const handleRetry = useCallback(() => {
     setRetryCount((c) => c + 1);
@@ -145,9 +160,7 @@ export function FileViewer() {
     );
   }
 
-  // Determine file type and render the appropriate viewer
-  const fileType = getFileType(selectedFile.name);
-
+  // Render the appropriate viewer based on file type
   switch (fileType) {
     case 'pdf':
       return <PDFViewer url={fileUrl} fileName={selectedFile.name} />;
@@ -159,6 +172,8 @@ export function FileViewer() {
       return <VideoViewer url={fileUrl} fileName={selectedFile.name} />;
     case 'text':
       return <TextViewer url={fileUrl} fileName={selectedFile.name} />;
+    case 'document':
+      return <DocumentViewer url={fileUrl} fileName={selectedFile.name} />;
     default:
       return (
         <EmptyViewer

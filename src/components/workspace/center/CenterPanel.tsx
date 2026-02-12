@@ -11,20 +11,20 @@ import { ExhibitsTab } from './ExhibitsTab';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import {
   LayoutList,
-  NotebookPen,
+  PenLine,
   Tag,
   Plus,
-  FileText,
   Trash2,
   Loader2,
   AlertCircle,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
+  ChevronDown,
+  Check,
+  NotebookPen,
 } from 'lucide-react';
 import type { Note } from '@/types';
 
-type Tab = 'overview' | 'notes' | 'exhibits';
+type Tab = 'overview' | 'editor' | 'exhibits';
 
 export function CenterPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -42,11 +42,11 @@ export function CenterPanel() {
             controls="panel-overview"
           />
           <TabButton
-            active={activeTab === 'notes'}
-            onClick={() => setActiveTab('notes')}
-            icon={<NotebookPen className="h-3.5 w-3.5" />}
-            label="Notes"
-            controls="panel-notes"
+            active={activeTab === 'editor'}
+            onClick={() => setActiveTab('editor')}
+            icon={<PenLine className="h-3.5 w-3.5" />}
+            label="Editor"
+            controls="panel-editor"
           />
           <TabButton
             active={activeTab === 'exhibits'}
@@ -71,7 +71,7 @@ export function CenterPanel() {
           >
             {activeTab === 'overview' ? (
               <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as Tab)} />
-            ) : activeTab === 'notes' ? (
+            ) : activeTab === 'editor' ? (
               <NotesTab />
             ) : (
               <ExhibitsTab />
@@ -124,7 +124,7 @@ function TabButton({
   );
 }
 
-/* ── Notes Tab — unified master-detail (no sidebar split) ── */
+/* ── Notes Tab — editor-first with note dropdown ───────── */
 
 function NotesTab() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
@@ -135,10 +135,11 @@ function NotesTab() {
   const updateNote = useUpdateNote();
 
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
-  const [showEditor, setShowEditor] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Clean up debounce timer on unmount
   useEffect(() => {
@@ -147,18 +148,28 @@ function NotesTab() {
     };
   }, []);
 
-  // If active note gets deleted, go back to list
+  // Auto-select first note when notes load (or if active note is deleted)
   useEffect(() => {
     if (!notes || notes.length === 0) {
       setActiveNoteId(null);
-      setShowEditor(false);
       return;
     }
-    if (activeNoteId && !notes.find((n) => n.id === activeNoteId)) {
-      setActiveNoteId(null);
-      setShowEditor(false);
+    if (!activeNoteId || !notes.find((n) => n.id === activeNoteId)) {
+      setActiveNoteId(notes[0].id);
     }
   }, [notes, activeNoteId]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [dropdownOpen]);
 
   const activeNote = notes?.find((n) => n.id === activeNoteId) ?? null;
 
@@ -169,21 +180,13 @@ function NotesTab() {
       title: 'Untitled',
     });
     setActiveNoteId(result.id);
-    setShowEditor(true);
+    setDropdownOpen(false);
     setTimeout(() => titleInputRef.current?.focus(), 150);
   }, [selectedProjectId, user, createNote]);
 
   const handleNoteSelect = useCallback((noteId: string) => {
     setActiveNoteId(noteId);
-    setShowEditor(true);
-  }, []);
-
-  const handleBack = useCallback(() => {
-    setShowEditor(false);
-  }, []);
-
-  const handleDeleteRequest = useCallback((note: Note) => {
-    setNoteToDelete(note);
+    setDropdownOpen(false);
   }, []);
 
   const handleDeleteConfirm = useCallback(() => {
@@ -191,10 +194,6 @@ function NotesTab() {
     deleteNote.mutate({ id: noteToDelete.id, projectId: selectedProjectId });
     setNoteToDelete(null);
   }, [noteToDelete, selectedProjectId, deleteNote]);
-
-  const handleDeleteCancel = useCallback(() => {
-    setNoteToDelete(null);
-  }, []);
 
   const handleTitleChange = useCallback(
     (value: string) => {
@@ -222,20 +221,12 @@ function NotesTab() {
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col">
-        <div className="flex shrink-0 items-center justify-between px-4 py-3">
-          <div className="h-3 w-20 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-6 w-24 animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
+        <div className="flex h-11 shrink-0 items-center gap-2 border-b border-surface-200 px-3 dark:border-surface-800">
+          <div className="h-5 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="ml-auto h-6 w-20 animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
         </div>
-        <div className="space-y-1 px-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex items-center gap-3 rounded-lg px-3 py-3">
-              <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
-              <div className="flex-1 space-y-1.5">
-                <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-                <div className="h-2.5 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-5 w-5 animate-spin text-surface-300" />
         </div>
       </div>
     );
@@ -247,9 +238,6 @@ function NotesTab() {
         <AlertCircle className="h-6 w-6 text-red-400" />
         <p className="mt-3 text-sm font-medium text-surface-600 dark:text-surface-300">
           Failed to load notes
-        </p>
-        <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
-          Check your connection and try again.
         </p>
         <button
           onClick={() => refetch()}
@@ -267,27 +255,149 @@ function NotesTab() {
     );
   }
 
-  // ── Editor view — full width with back button ──────────
-  if (showEditor && activeNote) {
+  // ── Empty state — no notes yet ──────────────────────────
+  if (!notes || notes.length === 0) {
     return (
-      <div className="flex h-full flex-col">
-        <div className="flex h-11 shrink-0 items-center gap-2 border-b border-surface-200 bg-white px-2 dark:border-surface-800 dark:bg-surface-900">
+      <div className="flex flex-1 flex-col items-center justify-center px-8">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
+          <PenLine className="h-6 w-6 text-surface-400 dark:text-surface-500" />
+        </div>
+        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+          Start Building Your Case
+        </h3>
+        <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+          Create your first document to organize arguments, draft submissions, and build your case.
+        </p>
+        <button
+          onClick={handleCreate}
+          disabled={createNote.isPending}
+          className={cn(
+            'mt-4 flex items-center gap-1.5 rounded-lg px-4 py-2',
+            'bg-primary-600 text-xs font-medium text-white',
+            'transition-colors hover:bg-primary-700 active:bg-primary-700',
+            'disabled:opacity-50'
+          )}
+        >
+          {createNote.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Plus className="h-3.5 w-3.5" />
+          )}
+          Create Document
+        </button>
+      </div>
+    );
+  }
+
+  // ── Editor-first layout — always visible ────────────────
+  return (
+    <div className="flex h-full flex-col">
+      {/* Header bar: note selector dropdown + actions */}
+      <div className="flex h-11 shrink-0 items-center gap-2 border-b border-surface-200 bg-white px-2 dark:border-surface-800 dark:bg-surface-900">
+        {/* Note selector dropdown */}
+        <div className="relative min-w-0 flex-1" ref={dropdownRef}>
           <button
-            onClick={handleBack}
+            onClick={() => setDropdownOpen((prev) => !prev)}
             className={cn(
-              'flex items-center gap-1 rounded-lg px-2 py-1.5',
-              'text-xs font-medium text-primary-600 dark:text-primary-400',
-              'transition-colors hover:bg-primary-50 active:bg-primary-50',
-              'dark:hover:bg-primary-900/20 dark:active:bg-primary-900/20'
+              'flex max-w-[260px] items-center gap-1.5 rounded-lg px-2 py-1.5',
+              'text-xs font-medium text-surface-700 dark:text-surface-200',
+              'transition-colors hover:bg-surface-100 active:bg-surface-100',
+              'dark:hover:bg-surface-800 dark:active:bg-surface-800'
             )}
           >
-            <ChevronLeft className="h-4 w-4" />
-            Notes
+            <span className="truncate">{activeNote?.title || 'Untitled'}</span>
+            <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 text-surface-400 transition-transform', dropdownOpen && 'rotate-180')} />
           </button>
+
+          {/* Dropdown list */}
+          <AnimatePresence>
+            {dropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.12 }}
+                className={cn(
+                  'absolute left-0 top-full z-50 mt-1 w-72 overflow-hidden rounded-xl',
+                  'border border-surface-200 bg-white shadow-lg',
+                  'dark:border-surface-700 dark:bg-surface-850'
+                )}
+              >
+                <div className="max-h-64 overflow-y-auto py-1">
+                  {notes.map((note) => (
+                    <button
+                      key={note.id}
+                      onClick={() => handleNoteSelect(note.id)}
+                      className={cn(
+                        'flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs',
+                        'transition-colors hover:bg-surface-50 dark:hover:bg-surface-800',
+                        note.id === activeNoteId && 'bg-primary-50 dark:bg-primary-900/20'
+                      )}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-surface-700 dark:text-surface-200">
+                          {note.title || 'Untitled'}
+                        </p>
+                        <p className="mt-0.5 text-[10px] text-surface-400 dark:text-surface-500">
+                          {formatRelativeDate(note.last_modified ?? note.created_at)}
+                        </p>
+                      </div>
+                      {note.id === activeNoteId && (
+                        <Check className="h-3.5 w-3.5 shrink-0 text-primary-600 dark:text-primary-400" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-surface-100 p-1 dark:border-surface-700">
+                  <button
+                    onClick={handleCreate}
+                    disabled={createNote.isPending}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium',
+                      'text-primary-600 transition-colors hover:bg-primary-50',
+                      'dark:text-primary-400 dark:hover:bg-primary-900/20',
+                      'disabled:opacity-50'
+                    )}
+                  >
+                    {createNote.isPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
+                    New Document
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* New document shortcut */}
+        <button
+          onClick={handleCreate}
+          disabled={createNote.isPending}
+          className={cn(
+            'flex items-center gap-1 rounded-lg px-2 py-1.5',
+            'text-xs font-medium text-primary-600 dark:text-primary-400',
+            'transition-colors hover:bg-primary-50 active:bg-primary-50',
+            'dark:hover:bg-primary-900/20 dark:active:bg-primary-900/20',
+            'disabled:opacity-50'
+          )}
+          title="New document"
+        >
+          {createNote.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Plus className="h-3.5 w-3.5" />
+          )}
+        </button>
+
+        {/* Delete current note */}
+        {activeNote && (
           <button
-            onClick={() => handleDeleteRequest(activeNote)}
+            onClick={() => setNoteToDelete(activeNote)}
             className={cn(
-              'ml-auto rounded-lg p-1.5 text-surface-400 transition-colors',
+              'rounded-lg p-1.5 text-surface-400 transition-colors',
               'hover:bg-red-50 hover:text-red-500 active:bg-red-50 active:text-red-500',
               'dark:hover:bg-red-900/20 dark:hover:text-red-400',
               'dark:active:bg-red-900/20 dark:active:text-red-400'
@@ -296,7 +406,11 @@ function NotesTab() {
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
-        </div>
+        )}
+      </div>
+
+      {/* Full-width editor — takes all remaining space */}
+      {activeNote ? (
         <div className="flex-1 overflow-hidden">
           <TipTapEditor
             key={activeNote.id}
@@ -308,108 +422,20 @@ function NotesTab() {
             titleInputRef={titleInputRef}
           />
         </div>
-        <ConfirmDialog
-          open={noteToDelete !== null}
-          title="Delete Note"
-          message={`Are you sure you want to delete "${noteToDelete?.title || 'Untitled'}"? This action cannot be undone.`}
-          confirmLabel="Delete"
-          variant="danger"
-          onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
-        />
-      </div>
-    );
-  }
-
-  // ── Note list — full width ────────────────────────────
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-center justify-between border-b border-surface-200 px-4 py-3 dark:border-surface-800">
-        <span className="text-xs font-semibold text-surface-500 dark:text-surface-400">
-          {notes?.length ?? 0} Notes
-        </span>
-        <button
-          onClick={handleCreate}
-          disabled={createNote.isPending}
-          className={cn(
-            'flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
-            'text-xs font-medium text-primary-600 dark:text-primary-400',
-            'transition-colors hover:bg-primary-50 active:bg-primary-50',
-            'dark:hover:bg-primary-900/20 dark:active:bg-primary-900/20',
-            'disabled:opacity-50'
-          )}
-        >
-          {createNote.isPending ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            <Plus className="h-3 w-3" />
-          )}
-          New Note
-        </button>
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
-        {(!notes || notes.length === 0) ? (
-          <div className="flex flex-col items-center justify-center px-8 py-16">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
-              <NotebookPen className="h-6 w-6 text-surface-400 dark:text-surface-500" />
-            </div>
-            <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-              No Notes Yet
-            </h3>
-            <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-              Create your first note to start organizing your case analysis.
-            </p>
-            <button
-              onClick={handleCreate}
-              disabled={createNote.isPending}
-              className={cn(
-                'mt-4 flex items-center gap-1.5 rounded-lg px-4 py-2',
-                'bg-primary-600 text-xs font-medium text-white',
-                'transition-colors hover:bg-primary-700 active:bg-primary-700',
-                'disabled:opacity-50'
-              )}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Create Note
-            </button>
-          </div>
-        ) : (
-          notes.map((note) => (
-            <button
-              key={note.id}
-              onClick={() => handleNoteSelect(note.id)}
-              className={cn(
-                'flex w-full items-center gap-3 border-b border-surface-100 px-4 py-3 text-left',
-                'transition-colors hover:bg-surface-50 active:bg-surface-50',
-                'dark:border-surface-800 dark:hover:bg-surface-800/50 dark:active:bg-surface-800/50'
-              )}
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-100 dark:bg-surface-700">
-                <FileText className="h-4 w-4 text-surface-400 dark:text-surface-500" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200">
-                  {note.title || 'Untitled'}
-                </p>
-                <p className="mt-0.5 text-[11px] text-surface-400 dark:text-surface-500">
-                  {formatRelativeDate(note.last_modified ?? note.created_at)}
-                </p>
-              </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-surface-300 dark:text-surface-600" />
-            </button>
-          ))
-        )}
-      </div>
+      ) : (
+        <div className="flex flex-1 items-center justify-center">
+          <Loader2 className="h-5 w-5 animate-spin text-surface-300" />
+        </div>
+      )}
 
       <ConfirmDialog
         open={noteToDelete !== null}
-        title="Delete Note"
+        title="Delete document"
         message={`Are you sure you want to delete "${noteToDelete?.title || 'Untitled'}"? This action cannot be undone.`}
         confirmLabel="Delete"
         variant="danger"
         onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
+        onCancel={() => setNoteToDelete(null)}
       />
     </div>
   );

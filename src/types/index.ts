@@ -35,4 +35,4 @@ export interface PanelWidths {
 }
 
 // File viewer type
-export type ViewerFileType = 'pdf' | 'image' | 'audio' | 'video' | 'text' | 'unsupported';
+export type ViewerFileType = 'pdf' | 'image' | 'audio' | 'video' | 'text' | 'document' | 'unsupported';

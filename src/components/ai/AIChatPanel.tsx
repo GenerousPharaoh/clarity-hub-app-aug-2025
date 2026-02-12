@@ -135,8 +135,12 @@ export function AIChatPanel() {
                 request help with legal research.
               </p>
 
-              {/* Suggested prompts */}
-              <SuggestedPrompts onSelectPrompt={handlePromptSelect} />
+              {/* Suggested prompts — adapt to selected file */}
+              <SuggestedPrompts
+                onSelectPrompt={handlePromptSelect}
+                selectedFileType={selectedFile?.file_type}
+                selectedFileName={selectedFile?.name}
+              />
             </div>
           </div>
         ) : (

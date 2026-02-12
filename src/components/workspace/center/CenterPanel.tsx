@@ -27,7 +27,7 @@ import type { Note } from '@/types';
 type Tab = 'overview' | 'editor' | 'exhibits';
 
 export function CenterPanel() {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [activeTab, setActiveTab] = useState<Tab>('editor');
 
   return (
     <div className="flex h-full w-full flex-col bg-white dark:bg-surface-900">
@@ -45,7 +45,7 @@ export function CenterPanel() {
             active={activeTab === 'editor'}
             onClick={() => setActiveTab('editor')}
             icon={<PenLine className="h-3.5 w-3.5" />}
-            label="Editor"
+            label="Documents"
             controls="panel-editor"
           />
           <TabButton

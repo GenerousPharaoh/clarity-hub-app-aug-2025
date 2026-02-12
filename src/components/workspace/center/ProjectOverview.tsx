@@ -69,25 +69,30 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
         {/* Editable Project Header */}
         <EditableProjectHeader project={project} />
 
-        {/* Stats row */}
+        {/* Stats row — clickable to navigate */}
         <div className="grid grid-cols-3 gap-3">
           <StatCard
             icon={<FileText className="h-4 w-4" />}
             label="Files"
             value={fileCount}
             color="primary"
+            hint={fileCount > 0 ? 'View in left panel' : 'Upload files to start'}
           />
           <StatCard
             icon={<NotebookPen className="h-4 w-4" />}
-            label="Notes"
+            label="Documents"
             value={noteCount}
             color="accent"
+            onClick={onSwitchTab ? () => onSwitchTab('editor') : undefined}
+            hint="Open documents"
           />
           <StatCard
             icon={<Tag className="h-4 w-4" />}
             label="Exhibits"
             value={exhibitCount}
             color="emerald"
+            onClick={onSwitchTab ? () => onSwitchTab('exhibits') : undefined}
+            hint="Manage exhibits"
           />
         </div>
 
@@ -98,6 +103,12 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
         <RecentActivity
           files={projectFiles}
           notes={notes ?? []}
+          onFileClick={(fileId) => {
+            useAppStore.getState().setSelectedFile(fileId);
+            useAppStore.getState().setRightPanel(true);
+            useAppStore.getState().setRightTab('viewer');
+          }}
+          onNoteClick={onSwitchTab ? () => onSwitchTab('editor') : undefined}
         />
 
         {/* Metadata */}
@@ -125,8 +136,8 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <QuickActions onSwitchTab={onSwitchTab} />
+        {/* Quick Upload */}
+        <QuickActions />
       </div>
     </FadeIn>
   );
@@ -376,9 +387,13 @@ function FileTypeBreakdown({
 function RecentActivity({
   files,
   notes,
+  onFileClick,
+  onNoteClick,
 }: {
-  files: { name: string; added_at: string | null; last_modified: string | null }[];
-  notes: { title: string | null; last_modified: string | null; created_at: string | null }[];
+  files: { id: string; name: string; added_at: string | null; last_modified: string | null }[];
+  notes: { id: string; title: string | null; last_modified: string | null; created_at: string | null }[];
+  onFileClick?: (fileId: string) => void;
+  onNoteClick?: () => void;
 }) {
   const recentFiles = [...files]
     .sort(
@@ -403,9 +418,13 @@ function RecentActivity({
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
         Recent Activity
       </h3>
-      <div className="space-y-1.5">
-        {recentFiles.map((f, i) => (
-          <div key={`f-${i}`} className="flex items-center gap-2 text-xs">
+      <div className="space-y-0.5">
+        {recentFiles.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => onFileClick?.(f.id)}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-50 dark:hover:bg-surface-800/50"
+          >
             <Upload className="h-3 w-3 shrink-0 text-primary-400" />
             <span className="flex-1 truncate text-surface-600 dark:text-surface-300">
               {f.name}
@@ -413,10 +432,14 @@ function RecentActivity({
             <span className="shrink-0 text-[10px] text-surface-400">
               {formatRelativeDate(f.added_at)}
             </span>
-          </div>
+          </button>
         ))}
-        {recentNotes.map((n, i) => (
-          <div key={`n-${i}`} className="flex items-center gap-2 text-xs">
+        {recentNotes.map((n) => (
+          <button
+            key={n.id}
+            onClick={() => onNoteClick?.()}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-50 dark:hover:bg-surface-800/50"
+          >
             <NotebookPen className="h-3 w-3 shrink-0 text-accent-400" />
             <span className="flex-1 truncate text-surface-600 dark:text-surface-300">
               {n.title || 'Untitled'}
@@ -424,7 +447,7 @@ function RecentActivity({
             <span className="shrink-0 text-[10px] text-surface-400">
               {formatRelativeDate(n.last_modified ?? n.created_at)}
             </span>
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -433,7 +456,7 @@ function RecentActivity({
 
 /* ── Quick Actions ────────────────────────────────────────── */
 
-function QuickActions({ onSwitchTab }: { onSwitchTab?: (tab: string) => void }) {
+function QuickActions() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const uploadFile = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -455,20 +478,15 @@ function QuickActions({ onSwitchTab }: { onSwitchTab?: (tab: string) => void }) 
           toast.error(`Failed: ${file.name}`);
         }
       }
-      // Reset input so the same file can be re-selected
       e.target.value = '';
     },
     [selectedProjectId, uploadFile]
   );
 
-  // Build accept string from ACCEPTED_FILE_TYPES
   const acceptStr = Object.keys(ACCEPTED_FILE_TYPES).join(',');
 
   return (
-    <div className="rounded-lg border border-surface-100 p-4 dark:border-surface-700">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-        Quick Actions
-      </h3>
+    <div>
       <input
         ref={fileInputRef}
         type="file"
@@ -477,65 +495,20 @@ function QuickActions({ onSwitchTab }: { onSwitchTab?: (tab: string) => void }) 
         onChange={handleFileChange}
         className="hidden"
       />
-      <div className="flex flex-wrap gap-2">
-        <QuickAction
-          icon={<Upload className="h-3.5 w-3.5" />}
-          label="Upload File"
-          hint="Select files to upload"
-          onClick={() => fileInputRef.current?.click()}
-        />
-        <QuickAction
-          icon={<NotebookPen className="h-3.5 w-3.5" />}
-          label="New Document"
-          hint="Open the Editor"
-          onClick={onSwitchTab ? () => onSwitchTab('editor') : undefined}
-        />
-        <QuickAction
-          icon={<Tag className="h-3.5 w-3.5" />}
-          label="Exhibits"
-          hint="Manage exhibit markers"
-          onClick={onSwitchTab ? () => onSwitchTab('exhibits') : undefined}
-        />
-      </div>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className={cn(
+          'flex w-full items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-3',
+          'border-surface-300 text-sm font-medium text-surface-500',
+          'transition-all hover:border-primary-400 hover:bg-primary-50/50 hover:text-primary-600',
+          'dark:border-surface-700 dark:text-surface-400',
+          'dark:hover:border-primary-500 dark:hover:bg-primary-900/20 dark:hover:text-primary-400'
+        )}
+      >
+        <Upload className="h-4 w-4" />
+        Upload Files
+      </button>
     </div>
-  );
-}
-
-function QuickAction({
-  icon,
-  label,
-  hint,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  hint: string;
-  onClick?: () => void;
-}) {
-  const Component = onClick ? 'button' : 'div';
-  return (
-    <Component
-      onClick={onClick}
-      className={cn(
-        'group flex items-center gap-2 rounded-lg bg-surface-50 px-3 py-2 dark:bg-surface-700/50',
-        onClick && 'cursor-pointer transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20'
-      )}
-    >
-      <span className={cn(
-        'text-primary-500 dark:text-primary-400',
-        onClick && 'group-hover:text-primary-600 dark:group-hover:text-primary-300'
-      )}>
-        {icon}
-      </span>
-      <div>
-        <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
-          {label}
-        </p>
-        <p className="text-[10px] text-surface-400 dark:text-surface-500">
-          {hint}
-        </p>
-      </div>
-    </Component>
   );
 }
 
@@ -546,11 +519,15 @@ function StatCard({
   label,
   value,
   color,
+  onClick,
+  hint,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
   color: 'primary' | 'accent' | 'emerald';
+  onClick?: () => void;
+  hint?: string;
 }) {
   const styles = {
     primary: {
@@ -568,9 +545,18 @@ function StatCard({
   };
 
   const s = styles[color];
+  const Component = onClick ? 'button' : 'div';
 
   return (
-    <div className={cn('rounded-lg p-3 md:p-4', s.bg)}>
+    <Component
+      onClick={onClick}
+      className={cn(
+        'rounded-lg p-3 text-left md:p-4',
+        s.bg,
+        onClick && 'cursor-pointer transition-all hover:ring-2 hover:ring-surface-300/50 dark:hover:ring-surface-600/50'
+      )}
+      title={hint}
+    >
       <div className={cn('mb-1.5 md:mb-2', s.icon)}>{icon}</div>
       <p className="font-heading text-xl font-semibold text-surface-900 md:text-2xl dark:text-surface-50">
         {value}
@@ -578,7 +564,7 @@ function StatCard({
       <p className="text-[11px] font-medium text-surface-500 md:text-xs dark:text-surface-400">
         {label}
       </p>
-    </div>
+    </Component>
   );
 }
 

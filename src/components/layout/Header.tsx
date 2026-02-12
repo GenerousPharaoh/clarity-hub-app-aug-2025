@@ -66,7 +66,7 @@ export function Header() {
               )}
             >
               <LayoutDashboard className="h-3 w-3" />
-              <span className="hidden sm:inline">Dashboard</span>
+              <span>Dashboard</span>
             </Link>
             {projectName && (
               <>

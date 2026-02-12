@@ -8,9 +8,7 @@ import {
   Moon,
   Monitor,
   LogOut,
-  Trash2,
   Scale,
-  AlertTriangle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -230,31 +228,6 @@ export function SettingsPage() {
               </button>
             </div>
 
-            {/* Danger zone */}
-            <div className="rounded-lg border border-red-200 bg-red-50/50 p-4 dark:border-red-900/50 dark:bg-red-950/20">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-500 dark:text-red-400" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-red-700 dark:text-red-300">
-                    Danger zone
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-red-600/80 dark:text-red-400/70">
-                    Permanently delete all your projects, files, and notes. This
-                    action cannot be undone.
-                  </p>
-                  <button
-                    disabled
-                    className="mt-3 inline-flex cursor-not-allowed items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 opacity-50 dark:border-red-800 dark:bg-surface-900 dark:text-red-400"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete all data
-                  </button>
-                  <p className="mt-2 text-[11px] text-surface-400 dark:text-surface-500">
-                    This feature is not yet available.
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 

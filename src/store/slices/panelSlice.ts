@@ -29,16 +29,19 @@ function savePanelState(state: PersistedPanelState) {
 }
 
 export type RightTab = 'viewer' | 'ai';
+export type MobileTab = 'files' | 'content' | 'viewer';
 
 export interface PanelSlice {
   isLeftPanelOpen: boolean;
   isRightPanelOpen: boolean;
   rightTab: RightTab;
+  mobileTab: MobileTab;
   toggleLeftPanel: () => void;
   toggleRightPanel: () => void;
   setLeftPanel: (open: boolean) => void;
   setRightPanel: (open: boolean) => void;
   setRightTab: (tab: RightTab) => void;
+  setMobileTab: (tab: MobileTab) => void;
 }
 
 const initial = loadPanelState();
@@ -47,6 +50,7 @@ export const createPanelSlice: StateCreator<PanelSlice> = (set) => ({
   isLeftPanelOpen: initial.isLeftPanelOpen,
   isRightPanelOpen: initial.isRightPanelOpen,
   rightTab: 'viewer' as RightTab,
+  mobileTab: 'content' as MobileTab,
   toggleLeftPanel: () =>
     set((s) => {
       const next = !s.isLeftPanelOpen;
@@ -70,4 +74,5 @@ export const createPanelSlice: StateCreator<PanelSlice> = (set) => ({
       return { isRightPanelOpen: open };
     }),
   setRightTab: (tab) => set({ rightTab: tab }),
+  setMobileTab: (tab) => set({ mobileTab: tab }),
 });

@@ -47,6 +47,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
+  const setMobileTab = useAppStore((s) => s.setMobileTab);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const themeMode = useAppStore((s) => s.themeMode);
   const setShowKeyboardShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
@@ -98,7 +99,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           group: 'Files',
           icon: <FileText className="h-4 w-4" />,
           keywords: file.file_type ?? '',
-          action: () => { setSelectedFile(file.id); setRightPanel(true); setRightTab('viewer'); onClose(); },
+          action: () => { setSelectedFile(file.id); setRightPanel(true); setRightTab('viewer'); setMobileTab('viewer'); onClose(); },
         });
       }
     }
@@ -147,7 +148,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     });
 
     return items;
-  }, [projects, files, selectedProjectId, isInWorkspace, themeMode, navigate, onClose, toggleLeft, toggleRight, setSelectedFile, setRightPanel, setRightTab, toggleTheme, setShowKeyboardShortcuts]);
+  }, [projects, files, selectedProjectId, isInWorkspace, themeMode, navigate, onClose, toggleLeft, toggleRight, setSelectedFile, setRightPanel, setRightTab, setMobileTab, toggleTheme, setShowKeyboardShortcuts]);
 
   // Filter commands
   const filtered = useMemo(() => {

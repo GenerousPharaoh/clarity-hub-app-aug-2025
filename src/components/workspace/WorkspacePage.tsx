@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Panel,
@@ -19,8 +19,6 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { FolderOpen, Eye, Sparkles, LayoutList } from 'lucide-react';
 
-type MobileTab = 'files' | 'content' | 'viewer';
-
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
@@ -32,6 +30,8 @@ export function WorkspacePage() {
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const rightTab = useAppStore((s) => s.rightTab);
   const setRightTab = useAppStore((s) => s.setRightTab);
+  const mobileTab = useAppStore((s) => s.mobileTab);
+  const setMobileTab = useAppStore((s) => s.setMobileTab);
 
   const projects = useAppStore((s) => s.projects);
   const projectName = projects.find((p) => p.id === projectId)?.name;
@@ -41,7 +41,6 @@ export function WorkspacePage() {
   const setShowShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
 
   const isMobile = useIsMobile();
-  const [mobileTab, setMobileTab] = useState<MobileTab>('content');
 
   const leftRef = useRef<ImperativePanelHandle>(null);
   const rightRef = useRef<ImperativePanelHandle>(null);
@@ -83,7 +82,7 @@ export function WorkspacePage() {
     } else {
       toggleRight();
     }
-  }, [isMobile, isRightOpen, rightTab, setRightPanel, setRightTab, toggleRight]);
+  }, [isMobile, isRightOpen, rightTab, setRightPanel, setRightTab, setMobileTab, toggleRight]);
 
   const shortcutHandlers = useMemo(
     () => ({
@@ -92,7 +91,7 @@ export function WorkspacePage() {
       onToggleAIChat: handleToggleAIChat,
       onShowHelp: () => setShowShortcuts(true),
     }),
-    [isMobile, toggleLeft, toggleRight, handleToggleAIChat, setShowShortcuts]
+    [isMobile, toggleLeft, toggleRight, handleToggleAIChat, setShowShortcuts, setMobileTab]
   );
 
   useKeyboardShortcuts(shortcutHandlers);

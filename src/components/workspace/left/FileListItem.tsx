@@ -69,13 +69,16 @@ export function FileListItem({ file }: FileListItemProps) {
 
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
+  const setMobileTab = useAppStore((s) => s.setMobileTab);
 
   const handleClick = useCallback(() => {
     setSelectedFile(file.id);
-    // Ensure right panel is open and on viewer tab
+    // Desktop: open right panel + viewer tab
     setRightPanel(true);
     setRightTab('viewer');
-  }, [file.id, setSelectedFile, setRightPanel, setRightTab]);
+    // Mobile: navigate to viewer tab
+    setMobileTab('viewer');
+  }, [file.id, setSelectedFile, setRightPanel, setRightTab, setMobileTab]);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {

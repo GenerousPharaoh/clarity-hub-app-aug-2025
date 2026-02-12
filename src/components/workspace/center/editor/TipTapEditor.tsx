@@ -134,7 +134,7 @@ export function TipTapEditor({
 
         {/* Notion-style inline title — aligned with editor content */}
         {onTitleChange && (
-          <div className="mx-auto max-w-[720px] px-10 pt-14 pb-0">
+          <div className="mx-auto max-w-[720px] px-4 pt-8 pb-0 md:px-10 md:pt-14">
             <input
               ref={titleInputRef}
               type="text"
@@ -150,7 +150,7 @@ export function TipTapEditor({
               }}
               placeholder="Untitled"
               className={cn(
-                'w-full bg-transparent font-heading text-[2rem] font-bold leading-tight tracking-tight',
+                'w-full bg-transparent font-heading text-2xl font-bold leading-tight tracking-tight md:text-[2rem]',
                 'text-surface-900 dark:text-surface-50',
                 'placeholder:text-surface-300 dark:placeholder:text-surface-600',
                 'border-none outline-none focus:outline-none focus:ring-0'

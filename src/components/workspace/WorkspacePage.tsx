@@ -17,7 +17,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
-import { FolderOpen, Eye, Sparkles, LayoutList } from 'lucide-react';
+import { FolderOpen, Eye, Sparkles, LayoutList, PanelRight } from 'lucide-react';
 
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -134,8 +134,8 @@ export function WorkspacePage() {
           />
           <MobileTabButton
             active={mobileTab === 'viewer'}
-            icon={<Sparkles className="h-4 w-4" />}
-            label="Viewer & AI"
+            icon={<PanelRight className="h-4 w-4" />}
+            label="Viewer"
             onClick={() => setMobileTab('viewer')}
           />
         </nav>

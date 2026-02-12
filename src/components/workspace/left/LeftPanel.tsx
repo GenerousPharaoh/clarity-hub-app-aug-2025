@@ -3,6 +3,7 @@ import { ChevronLeft, FolderOpen, Search, X, FileText, AlertCircle, RefreshCw } 
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useFiles } from '@/hooks/useFiles';
 import { FileListItem } from './FileListItem';
 import { FileUploadZone } from './FileUploadZone';
@@ -10,6 +11,7 @@ import { FileUploadZone } from './FileUploadZone';
 export function LeftPanel() {
   const toggleLeft = useAppStore((s) => s.toggleLeftPanel);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const isMobile = useIsMobile();
   const searchQuery = useAppStore((s) => s.searchQuery);
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
 
@@ -50,19 +52,21 @@ export function LeftPanel() {
             Files
           </span>
         </div>
-        <button
-          onClick={toggleLeft}
-          className={cn(
-            'flex h-6 w-6 items-center justify-center rounded-md',
-            'text-surface-400 transition-all',
-            'hover:bg-surface-100 hover:text-surface-600',
-            'dark:hover:bg-surface-800 dark:hover:text-surface-300'
-          )}
-          title="Collapse panel"
-          aria-label="Collapse file browser"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-        </button>
+        {!isMobile && (
+          <button
+            onClick={toggleLeft}
+            className={cn(
+              'flex h-6 w-6 items-center justify-center rounded-md',
+              'text-surface-400 transition-all',
+              'hover:bg-surface-100 hover:text-surface-600',
+              'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+            )}
+            title="Collapse panel"
+            aria-label="Collapse file browser"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* ── Search bar ────────────────────────────────────── */}

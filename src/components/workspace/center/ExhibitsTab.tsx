@@ -338,7 +338,7 @@ function ExhibitCard({
                 No description — click to add
               </p>
             )}
-            <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 text-surface-300 opacity-0 group-hover:opacity-100" />
+            <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 text-surface-300 max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100" />
           </div>
         )}
       </div>

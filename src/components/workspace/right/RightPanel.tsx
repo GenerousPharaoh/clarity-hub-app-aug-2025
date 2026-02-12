@@ -4,11 +4,13 @@ import { cn } from '@/lib/utils';
 import { ChevronRight, Eye, Sparkles } from 'lucide-react';
 import { FileViewer } from '@/components/viewers/FileViewer';
 import { AIChatPanel } from '@/components/ai/AIChatPanel';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 export function RightPanel() {
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
   const activeTab = useAppStore((s) => s.rightTab);
   const setActiveTab = useAppStore((s) => s.setRightTab);
+  const isMobile = useIsMobile();
 
   return (
     <div className="flex h-full w-full flex-col bg-surface-50 dark:bg-surface-900">
@@ -31,19 +33,21 @@ export function RightPanel() {
             controls="panel-ai"
           />
         </div>
-        <button
-          onClick={toggleRight}
-          className={cn(
-            'mr-2 flex h-6 w-6 items-center justify-center rounded-md',
-            'text-surface-400 transition-all',
-            'hover:bg-surface-100 hover:text-surface-600',
-            'dark:hover:bg-surface-800 dark:hover:text-surface-300'
-          )}
-          title="Collapse panel"
-          aria-label="Collapse viewer panel"
-        >
-          <ChevronRight className="h-3.5 w-3.5" />
-        </button>
+        {!isMobile && (
+          <button
+            onClick={toggleRight}
+            className={cn(
+              'mr-2 flex h-6 w-6 items-center justify-center rounded-md',
+              'text-surface-400 transition-all',
+              'hover:bg-surface-100 hover:text-surface-600',
+              'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+            )}
+            title="Collapse panel"
+            aria-label="Collapse viewer panel"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Content */}

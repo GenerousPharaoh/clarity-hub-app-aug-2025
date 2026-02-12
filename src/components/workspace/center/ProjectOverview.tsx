@@ -65,7 +65,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
 
   return (
     <FadeIn className="flex-1 overflow-y-auto">
-      <div className="mx-auto max-w-2xl space-y-6 p-6">
+      <div className="mx-auto max-w-2xl space-y-5 p-4 md:space-y-6 md:p-6">
         {/* Editable Project Header */}
         <EditableProjectHeader project={project} />
 
@@ -231,7 +231,7 @@ function EditableProjectHeader({
               setTimeout(() => nameInputRef.current?.focus(), 50);
             }}
             aria-label="Edit project name"
-            className="flex h-6 w-6 items-center justify-center rounded text-surface-300 opacity-0 transition-opacity hover:bg-surface-100 hover:text-surface-500 group-hover:opacity-100 dark:hover:bg-surface-700"
+            className="flex h-6 w-6 items-center justify-center rounded text-surface-300 transition-opacity hover:bg-surface-100 hover:text-surface-500 group-hover:opacity-100 dark:hover:bg-surface-700 max-md:opacity-60 md:opacity-0"
           >
             <Pencil className="h-3 w-3" />
           </button>
@@ -570,12 +570,12 @@ function StatCard({
   const s = styles[color];
 
   return (
-    <div className={cn('rounded-lg p-4', s.bg)}>
-      <div className={cn('mb-2', s.icon)}>{icon}</div>
-      <p className="font-heading text-2xl font-semibold text-surface-900 dark:text-surface-50">
+    <div className={cn('rounded-lg p-3 md:p-4', s.bg)}>
+      <div className={cn('mb-1.5 md:mb-2', s.icon)}>{icon}</div>
+      <p className="font-heading text-xl font-semibold text-surface-900 md:text-2xl dark:text-surface-50">
         {value}
       </p>
-      <p className="text-xs font-medium text-surface-500 dark:text-surface-400">
+      <p className="text-[11px] font-medium text-surface-500 md:text-xs dark:text-surface-400">
         {label}
       </p>
     </div>

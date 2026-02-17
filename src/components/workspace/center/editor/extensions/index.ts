@@ -28,6 +28,9 @@ export function getExtensions() {
       horizontalRule: {
         HTMLAttributes: { class: 'tiptap-hr' },
       },
+      // Disable extensions we configure separately below
+      link: false,
+      underline: false,
     }),
     Placeholder.configure({
       placeholder: 'Start drafting your document - use "/" for commands...',

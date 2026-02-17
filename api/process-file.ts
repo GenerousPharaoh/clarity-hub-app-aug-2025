@@ -50,10 +50,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // Verify user can access this project
-    const { data: membership, error: memberError } = await userClient
-      .rpc('is_project_member', { p_project_id: projectId });
+    const { data: hasAccess, error: memberError } = await userClient
+      .rpc('user_has_project_access', { p_project_id: projectId });
 
-    if (memberError || !membership) {
+    if (memberError || !hasAccess) {
       return res.status(403).json({ error: 'Not authorized to access this project' });
     }
 

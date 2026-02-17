@@ -135,7 +135,7 @@ export function TipTapEditor({
       {/* Scrollable document canvas with subtle background */}
       <div className="flex-1 overflow-y-auto bg-surface-100/40 dark:bg-surface-950/30">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
-        <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} />
+        <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} onInsertLink={handleInsertLink} />
 
         {/* Paper-like container */}
         <div className="mx-auto my-6 max-w-[860px] rounded-lg bg-white shadow-sm ring-1 ring-surface-200/50 dark:bg-surface-900 dark:ring-surface-800/50 md:my-10">

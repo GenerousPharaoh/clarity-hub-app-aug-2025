@@ -45,6 +45,11 @@ export function WorkspacePage() {
   const leftRef = useRef<ImperativePanelHandle>(null);
   const rightRef = useRef<ImperativePanelHandle>(null);
 
+  // Track previous panel sizes so we can auto-collapse only when SHRINKING
+  const prevLeftSize = useRef(20);
+  const prevRightSize = useRef(35);
+  const COLLAPSE_THRESHOLD = 8; // percent — auto-collapse when shrunk below this
+
   // Set active project
   useEffect(() => {
     if (projectId) setSelectedProject(projectId);
@@ -177,7 +182,15 @@ export function WorkspacePage() {
           collapsible
           collapsedSize={0}
           className="overflow-hidden"
+          onResize={(size: number) => {
+            // Auto-collapse when user drags the panel below the useful threshold
+            if (prevLeftSize.current >= COLLAPSE_THRESHOLD && size > 0 && size < COLLAPSE_THRESHOLD) {
+              leftRef.current?.collapse();
+            }
+            prevLeftSize.current = size;
+          }}
           onCollapse={() => {
+            prevLeftSize.current = 0;
             if (useAppStore.getState().isLeftPanelOpen)
               useAppStore.getState().setLeftPanel(false);
           }}
@@ -191,7 +204,7 @@ export function WorkspacePage() {
 
         <PanelGrip id="grip-left" />
 
-        <Panel id="center" order={2} defaultSize={45} minSize={20} className="overflow-hidden">
+        <Panel id="center" order={2} defaultSize={45} minSize={30} className="overflow-hidden">
           <CenterPanel />
         </Panel>
 
@@ -206,7 +219,14 @@ export function WorkspacePage() {
           collapsible
           collapsedSize={0}
           className="overflow-hidden"
+          onResize={(size: number) => {
+            if (prevRightSize.current >= COLLAPSE_THRESHOLD && size > 0 && size < COLLAPSE_THRESHOLD) {
+              rightRef.current?.collapse();
+            }
+            prevRightSize.current = size;
+          }}
           onCollapse={() => {
+            prevRightSize.current = 0;
             if (useAppStore.getState().isRightPanelOpen)
               useAppStore.getState().setRightPanel(false);
           }}

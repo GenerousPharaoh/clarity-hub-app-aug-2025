@@ -77,7 +77,7 @@ export const SlashCommands = Extension.create({
               window.dispatchEvent(slashEvent);
 
               if (event.key === 'Escape') {
-                // Close menu and remove the slash
+                // Close menu (keep the slash text so user can continue typing)
                 view.dispatch(
                   view.state.tr.setMeta(slashCommandPluginKey, {
                     active: false,
@@ -88,10 +88,8 @@ export const SlashCommands = Extension.create({
                 );
               }
 
-              if (event.key !== 'Escape') {
-                event.preventDefault();
-                return true;
-              }
+              event.preventDefault();
+              return true;
             }
 
             return false;

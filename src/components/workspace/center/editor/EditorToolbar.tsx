@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, forwardRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { cn } from '@/lib/utils';
 import {
@@ -48,7 +48,6 @@ interface ToolbarItem {
 interface ToolbarGroup {
   id: string;
   label: string;
-  /** Priority: lower = shown first, hidden last. Groups are hidden highest priority first. */
   priority: number;
   items: ToolbarItem[];
 }
@@ -281,14 +280,13 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
 const BTN = 32;          // w-8 button
 const GAP = 2;           // gap-0.5 (0.125rem)
 const DIV_W = 9;         // Divider: mx-1 (4+4) + w-px (1)
-// More section: [Divider + Button] inside a flex wrapper
-const MORE_W = DIV_W + BTN; // 41px
+const MORE_W = DIV_W + BTN; // 41px — [Divider + Button]
 
 /* ── Main component ────────────────────────────────────── */
 
 export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToolbarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(1000);
+  const [containerWidth, setContainerWidth] = useState(0);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const overflowRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
@@ -296,36 +294,35 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
 
   const groups = buildGroups(onInsertLink, onInsertImage);
 
-  // Observe container width — observe both the toolbar and its parent for robustness
+  // Measure content width (element width minus padding)
+  const measure = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    const px = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    setContainerWidth(Math.max(0, rect.width - px));
+  }, []);
+
+  // Synchronous initial measurement before first paint
+  useLayoutEffect(() => {
+    measure();
+  }, [measure]);
+
+  // ResizeObserver for ongoing panel size changes
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-
-    const measure = () => {
-      const rect = el.getBoundingClientRect();
-      const style = getComputedStyle(el);
-      const pl = parseFloat(style.paddingLeft) || 0;
-      const pr = parseFloat(style.paddingRight) || 0;
-      setContainerWidth(Math.max(0, rect.width - pl - pr));
-    };
-
-    // Initial measurement
-    measure();
-
-    const ro = new ResizeObserver(() => {
-      requestAnimationFrame(measure);
-    });
+    const ro = new ResizeObserver(() => measure());
     ro.observe(el);
-    // Also observe parent — catches panel resizes that don't propagate immediately
     if (el.parentElement) ro.observe(el.parentElement);
-
     return () => ro.disconnect();
-  }, []);
+  }, [measure]);
 
   // Decide which groups fit inline vs overflow
   const { inlineGroups, overflowGroups } = splitGroups(groups, containerWidth);
 
-  // Close overflow on outside click
+  // Close overflow dropdown on outside click
   useEffect(() => {
     if (!overflowOpen) return;
     const handle = (e: MouseEvent) => {
@@ -336,6 +333,12 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
   }, [overflowOpen]);
+
+  // Close dropdown on any resize so it doesn't float in the wrong spot
+  useEffect(() => {
+    if (overflowOpen) setOverflowOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [containerWidth]);
 
   const handleAction = useCallback(
     (item: ToolbarItem) => {
@@ -348,31 +351,32 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
   return (
     <div
       ref={containerRef}
-      className="flex shrink-0 items-center gap-0.5 border-b border-surface-200 bg-surface-50/50 px-2 py-1.5 dark:border-surface-800 dark:bg-surface-850/50"
+      className="flex shrink-0 items-center overflow-hidden border-b border-surface-200 bg-surface-50/50 px-2 py-1.5 dark:border-surface-800 dark:bg-surface-850/50"
     >
-      {/* Inline groups */}
-      {inlineGroups.map((group, gi) => (
-        <div key={group.id} className="flex items-center gap-0.5">
-          {group.items.map((item) => (
-            <ToolbarButton
-              key={item.key}
-              onClick={() => handleAction(item)}
-              active={item.getActive?.(editor)}
-              disabled={item.getDisabled?.(editor)}
-              label={item.label}
-              shortcut={item.shortcut}
-            >
-              {item.icon}
-            </ToolbarButton>
-          ))}
-          {gi < inlineGroups.length - 1 && <Divider />}
-        </div>
-      ))}
+      {/* Inline groups — clipped to available space */}
+      <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden">
+        {inlineGroups.map((group, gi) => (
+          <div key={group.id} className="flex shrink-0 items-center gap-0.5">
+            {group.items.map((item) => (
+              <ToolbarButton
+                key={item.key}
+                onClick={() => handleAction(item)}
+                active={item.getActive?.(editor)}
+                disabled={item.getDisabled?.(editor)}
+                title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
+              >
+                {item.icon}
+              </ToolbarButton>
+            ))}
+            {gi < inlineGroups.length - 1 && <Divider />}
+          </div>
+        ))}
+      </div>
 
-      {/* Overflow "More" dropdown */}
+      {/* More button — pinned to the right edge, never clipped */}
       {overflowGroups.length > 0 && (
-        <div ref={overflowRef} className="flex items-center">
-          {inlineGroups.length > 0 && <Divider />}
+        <div ref={overflowRef} className="flex shrink-0 items-center">
+          <Divider />
           <ToolbarButton
             ref={moreButtonRef}
             onClick={() => {
@@ -386,7 +390,7 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
               setOverflowOpen((prev) => !prev);
             }}
             active={overflowOpen}
-            label="More"
+            title="More tools"
           >
             <MoreHorizontal className="h-4 w-4" />
           </ToolbarButton>
@@ -410,8 +414,7 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
                         onClick={() => handleAction(item)}
                         active={item.getActive?.(editor)}
                         disabled={item.getDisabled?.(editor)}
-                        label={item.label}
-                        shortcut={item.shortcut}
+                        title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
                       >
                         {item.icon}
                       </ToolbarButton>
@@ -435,10 +438,8 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
 /** Pixel width of a group's flex container (buttons + internal gaps + optional trailing divider) */
 function groupPx(itemCount: number, hasTrailingDivider: boolean): number {
   if (hasTrailingDivider) {
-    // N buttons + 1 divider → N+1 items, N internal gaps
     return itemCount * BTN + DIV_W + itemCount * GAP;
   }
-  // N buttons → N-1 internal gaps
   return itemCount * BTN + Math.max(0, itemCount - 1) * GAP;
 }
 
@@ -449,7 +450,6 @@ function calcInlineWidth(groups: ToolbarGroup[]): number {
   for (let i = 0; i < groups.length; i++) {
     w += groupPx(groups[i].items.length, i < groups.length - 1);
   }
-  // Parent flex gaps between group containers
   w += (groups.length - 1) * GAP;
   return w;
 }
@@ -463,8 +463,7 @@ function splitGroups(groups: ToolbarGroup[], availableWidth: number) {
     const candidate = [...inlineGroups, sorted[i]];
     const remainingCount = sorted.length - candidate.length;
     const inlineW = calcInlineWidth(candidate);
-    // If remaining groups exist, reserve space for [gap + More section]
-    const moreW = remainingCount > 0 ? GAP + MORE_W : 0;
+    const moreW = remainingCount > 0 ? MORE_W : 0;
 
     if (inlineW + moreW <= availableWidth) {
       inlineGroups.push(sorted[i]);
@@ -486,19 +485,19 @@ const ToolbarButton = forwardRef<
     onClick: () => void;
     active?: boolean;
     disabled?: boolean;
-    label?: string;
-    shortcut?: string;
+    title?: string;
     children: React.ReactNode;
   }
->(function ToolbarButton({ onClick, active, disabled, label, shortcut, children }, ref) {
+>(function ToolbarButton({ onClick, active, disabled, title, children }, ref) {
   return (
     <button
       ref={ref}
       type="button"
       onClick={onClick}
       disabled={disabled}
+      title={title}
       className={cn(
-        'group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors',
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors',
         active
           ? 'bg-primary-100 text-primary-700 shadow-sm dark:bg-primary-900/40 dark:text-primary-300'
           : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200',
@@ -506,14 +505,6 @@ const ToolbarButton = forwardRef<
       )}
     >
       {children}
-      {label && (
-        <span className="pointer-events-none absolute -bottom-9 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-md bg-surface-800 px-2 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-surface-200 dark:text-surface-900">
-          {label}
-          {shortcut && (
-            <span className="ml-1 text-surface-400 dark:text-surface-500">{shortcut}</span>
-          )}
-        </span>
-      )}
     </button>
   );
 });

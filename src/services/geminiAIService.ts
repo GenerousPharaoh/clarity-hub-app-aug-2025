@@ -1,8 +1,8 @@
 /**
- * Gemini AI Service - Document Processing with Gemini 2.5 Pro
+ * Gemini AI Service - Document Processing with Gemini 2.5 Flash
  *
- * Uses Google's Gemini 2.5 Pro for legal document analysis.
- * Native multimodal (text, images, audio, video in same context).
+ * Uses Google's Gemini 2.5 Flash for legal document analysis.
+ * Fast, high rate limits, native multimodal support.
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -57,7 +57,7 @@ class GeminiAIService {
       return;
     }
     this.model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         temperature: 0.7,
         topK: 40,

@@ -1,0 +1,6 @@
+file '/Users/kareemhassanein/Desktop/clarity-hub-app/output/sora-ad/shot-01.mp4'
+file '/Users/kareemhassanein/Desktop/clarity-hub-app/output/sora-ad/shot-02.mp4'
+file '/Users/kareemhassanein/Desktop/clarity-hub-app/output/sora-ad/shot-03.mp4'
+file '/Users/kareemhassanein/Desktop/clarity-hub-app/output/sora-ad/shot-04.mp4'
+file '/Users/kareemhassanein/Desktop/clarity-hub-app/output/sora-ad/shot-05.mp4'
+file '/Users/kareemhassanein/Desktop/clarity-hub-app/output/sora-ad/shot-06.mp4'

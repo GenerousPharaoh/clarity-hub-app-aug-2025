@@ -1,0 +1,32 @@
+{
+  "create": {
+    "completed_at": null,
+    "created_at": 1771291139,
+    "error": null,
+    "expires_at": null,
+    "id": "video_6993c203c1bc81918d826cf164a46a3e0b6f25b42aaa553a",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 0,
+    "prompt": "Use case: social ad\nPrimary request: show a three-panel legal workspace as the central product moment\nScene/background: clean desktop app environment, neutral backdrop\nSubject: left panel with files, center drafting panel, right panel with viewer and AI tab\nAction: beat 1 (0-1.5s) left panel expands; beat 2 (1.5-3s) center editor highlights; beat 3 (3-4s) right panel tab switches to AI\nCamera: straight-on UI view with subtle push-in\nLighting/mood: precise, modern, focused\nColor palette: cool gray, off-white, cyan accents\nText (verbatim): \"One case workspace\"\nConstraints: no people; no logos; text must stay crisp and readable\nAvoid: perspective distortion, shaky camera, tiny text",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "queued"
+  },
+  "final": {
+    "completed_at": 1771291196,
+    "created_at": 1771291139,
+    "error": null,
+    "expires_at": 1771294796,
+    "id": "video_6993c203c1bc81918d826cf164a46a3e0b6f25b42aaa553a",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 100,
+    "prompt": "Use case: social ad\nPrimary request: show a three-panel legal workspace as the central product moment\nScene/background: clean desktop app environment, neutral backdrop\nSubject: left panel with files, center drafting panel, right panel with viewer and AI tab\nAction: beat 1 (0-1.5s) left panel expands; beat 2 (1.5-3s) center editor highlights; beat 3 (3-4s) right panel tab switches to AI\nCamera: straight-on UI view with subtle push-in\nLighting/mood: precise, modern, focused\nColor palette: cool gray, off-white, cyan accents\nText (verbatim): \"One case workspace\"\nConstraints: no people; no logos; text must stay crisp and readable\nAvoid: perspective distortion, shaky camera, tiny text",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "completed"
+  }
+}

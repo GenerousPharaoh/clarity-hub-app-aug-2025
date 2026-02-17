@@ -5,7 +5,18 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist'] },
+  {
+    ignores: [
+      'dist',
+      // Legacy Supabase function prototypes retained for reference only.
+      'supabase/functions/analyze-file/**',
+      'supabase/functions/process-analysis-queue/**',
+      'supabase/functions/process-document/**',
+      'supabase/functions/project-qa/**',
+      'supabase/functions/semantic-search/**',
+      'supabase/functions/suggest-filename/**',
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

@@ -1,0 +1,11 @@
+Use case: social ad
+Primary request: demonstrate AI answer with source citations linked to files
+Scene/background: AI chat panel beside file viewer panel
+Subject: assistant response bubble with source chips, clickable citation opens source file
+Action: beat 1 (0-1.3s) AI response appears; beat 2 (1.3-2.6s) source chip is selected; beat 3 (2.6-4s) linked source opens in viewer panel
+Camera: smooth push toward citation chip then slight pan to viewer
+Lighting/mood: analytical, trustworthy
+Color palette: charcoal, light gray, accent teal
+Text (verbatim): "AI chat with source links"
+Constraints: no people; no logos; text must remain clear
+Avoid: flicker, noisy backgrounds, unreadable badges

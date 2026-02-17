@@ -6,7 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
-import { chunkText, chunkTranscript, type Chunk } from './chunker.js';
+import { chunkText } from './chunker.js';
 import { embedBatch } from './embeddings.js';
 
 // Initialize clients
@@ -57,6 +57,11 @@ export async function processFile(
       throw new Error(`File not found: ${fileError?.message || 'unknown'}`);
     }
 
+    // Guard against cross-project processing requests.
+    if (file.project_id !== projectId) {
+      throw new Error('File does not belong to the specified project');
+    }
+
     // 2. Download file from storage
     const { data: fileData, error: downloadError } = await supabase.storage
       .from('files')
@@ -105,7 +110,7 @@ export async function processFile(
     const parentChunks = chunks.filter((c) => c.chunkType === 'parent');
     const childChunks = chunks.filter((c) => c.chunkType === 'child');
 
-    const parentRows = parentChunks.map((chunk, i) => {
+    const parentRows = parentChunks.map((chunk) => {
       const globalIndex = chunks.indexOf(chunk);
       return {
         file_id: fileId,

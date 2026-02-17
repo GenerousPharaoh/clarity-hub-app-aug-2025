@@ -5,7 +5,9 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ACCEPTED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/constants';
 import { useUploadFile } from '@/hooks/useFiles';
+import { useProcessFile } from '@/hooks/useProcessFile';
 import { formatFileSize } from '@/lib/utils';
+import useAppStore from '@/store';
 
 interface FileUploadZoneProps {
   projectId: string;
@@ -13,6 +15,8 @@ interface FileUploadZoneProps {
 
 export function FileUploadZone({ projectId }: FileUploadZoneProps) {
   const uploadFile = useUploadFile();
+  const { processFile } = useProcessFile();
+  const processOnUpload = useAppStore((s) => s.processOnUpload);
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
 
   const onDrop = useCallback(
@@ -30,11 +34,27 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         try {
           setUploadingFile(file.name);
 
-          await uploadFile.mutateAsync({ file, projectId });
+          const fileRecord = await uploadFile.mutateAsync({ file, projectId });
 
           toast.success(`Uploaded ${file.name}`, {
             icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
           });
+
+          if (processOnUpload) {
+            void processFile(fileRecord.id, projectId, {
+              fileSizeBytes: file.size,
+              source: 'auto',
+            })
+              .then(() => {
+                toast.success(`Processed ${file.name} for AI search`);
+              })
+              .catch((err) => {
+                const description = err instanceof Error ? err.message : 'Processing skipped';
+                toast.error(`Uploaded ${file.name}, but processing was skipped`, {
+                  description,
+                });
+              });
+          }
 
           setUploadingFile(null);
         } catch (err) {
@@ -48,7 +68,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         }
       }
     },
-    [projectId, uploadFile]
+    [processFile, processOnUpload, projectId, uploadFile]
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({

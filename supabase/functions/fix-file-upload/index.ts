@@ -1,3 +1,5 @@
+// ACTIVE UTILITY FUNCTION.
+// Function inventory and policy are documented in supabase/functions/README.md.
 // Follow Deno's TS format
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 import { corsHeaders } from '../_shared/cors.ts';

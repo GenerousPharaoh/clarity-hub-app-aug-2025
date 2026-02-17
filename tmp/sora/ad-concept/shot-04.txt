@@ -1,0 +1,11 @@
+Use case: social ad
+Primary request: show drafting flow with autosave and AI writing assist
+Scene/background: rich text editor interface in focus
+Subject: legal draft text, formatting toolbar, AI writing popup, save status indicator
+Action: beat 1 (0-1.3s) text is edited; beat 2 (1.3-2.6s) AI rewrite option applies improved sentence; beat 3 (2.6-4s) save status turns to saved
+Camera: straight-on medium close UI shot, no rotation
+Lighting/mood: calm precision, productivity
+Color palette: paper white, deep gray, subtle accent blue
+Text (verbatim): "Draft faster. Keep control."
+Constraints: no people; no logos; preserve text legibility
+Avoid: blurry UI text, excessive motion blur

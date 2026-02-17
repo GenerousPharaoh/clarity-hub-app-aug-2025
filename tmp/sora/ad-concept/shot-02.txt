@@ -1,0 +1,11 @@
+Use case: social ad
+Primary request: show a three-panel legal workspace as the central product moment
+Scene/background: clean desktop app environment, neutral backdrop
+Subject: left panel with files, center drafting panel, right panel with viewer and AI tab
+Action: beat 1 (0-1.5s) left panel expands; beat 2 (1.5-3s) center editor highlights; beat 3 (3-4s) right panel tab switches to AI
+Camera: straight-on UI view with subtle push-in
+Lighting/mood: precise, modern, focused
+Color palette: cool gray, off-white, cyan accents
+Text (verbatim): "One case workspace"
+Constraints: no people; no logos; text must stay crisp and readable
+Avoid: perspective distortion, shaky camera, tiny text

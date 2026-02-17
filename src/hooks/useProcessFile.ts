@@ -1,10 +1,16 @@
 import { useState, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { checkProcessingBudget, reserveProcessingBudget } from '@/lib/processingBudget';
 
 interface ProcessFileState {
   isProcessing: boolean;
   error: string | null;
+}
+
+interface ProcessFileOptions {
+  fileSizeBytes?: number;
+  source?: 'manual' | 'auto';
 }
 
 /**
@@ -17,7 +23,7 @@ export function useProcessFile() {
   const pollingRefs = useRef<Record<string, ReturnType<typeof setInterval>>>({});
 
   const processFile = useCallback(
-    async (fileId: string, projectId: string) => {
+    async (fileId: string, projectId: string, options?: ProcessFileOptions) => {
       // Set processing state
       setStates((prev) => ({
         ...prev,
@@ -31,6 +37,11 @@ export function useProcessFile() {
           throw new Error('Not authenticated');
         }
 
+        // Conservative local budget guardrails to prevent accidental API overuse.
+        const budget = checkProcessingBudget(options?.fileSizeBytes);
+        if (!budget.allowed) {
+          throw new Error(budget.reason || 'Daily processing budget reached');
+        }
         // Call the serverless processing endpoint
         const response = await fetch('/api/process-file', {
           method: 'POST',
@@ -46,6 +57,8 @@ export function useProcessFile() {
         if (!response.ok) {
           throw new Error(result.error || 'Processing failed');
         }
+
+        reserveProcessingBudget(options?.fileSizeBytes);
 
         // Invalidate file queries to refresh UI
         queryClient.invalidateQueries({ queryKey: ['files', projectId] });

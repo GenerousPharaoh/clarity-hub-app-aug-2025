@@ -23,6 +23,10 @@ interface FileListItemProps {
   file: FileRecord;
   onProcess?: (fileId: string) => void;
   processingState?: { isProcessing: boolean; error: string | null };
+  showBatchSelector?: boolean;
+  isBatchSelected?: boolean;
+  onToggleBatchSelection?: (fileId: string) => void;
+  estimatedTokenLabel?: string;
 }
 
 const typeIconMap: Record<string, React.ElementType> = {
@@ -36,7 +40,15 @@ const typeIconMap: Record<string, React.ElementType> = {
   other: File,
 };
 
-export function FileListItem({ file, onProcess, processingState }: FileListItemProps) {
+export function FileListItem({
+  file,
+  onProcess,
+  processingState,
+  showBatchSelector = false,
+  isBatchSelected = false,
+  onToggleBatchSelection,
+  estimatedTokenLabel,
+}: FileListItemProps) {
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const deleteFile = useDeleteFile();
@@ -49,6 +61,10 @@ export function FileListItem({ file, onProcess, processingState }: FileListItemP
   const fileType = file.file_type || getFileTypeFromExtension(ext);
   const IconComponent = typeIconMap[fileType] || File;
   const colorClass = FILE_TYPE_COLORS[fileType] || FILE_TYPE_COLORS.other;
+  const canProcess =
+    !file.processing_status ||
+    file.processing_status === 'pending' ||
+    file.processing_status === 'failed';
 
   // Close menu when clicking outside or pressing Escape
   useEffect(() => {
@@ -131,6 +147,27 @@ export function FileListItem({ file, onProcess, processingState }: FileListItemP
           'focus-visible:outline-none focus-visible:bg-surface-100 dark:focus-visible:bg-surface-700'
         )}
       >
+        {/* Batch select checkbox */}
+        {showBatchSelector && onToggleBatchSelection && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleBatchSelection(file.id);
+            }}
+            className={cn(
+              'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+              isBatchSelected
+                ? 'border-primary-500 bg-primary-500 text-white'
+                : 'border-surface-300 bg-white text-transparent hover:border-primary-400 dark:border-surface-600 dark:bg-surface-800'
+            )}
+            aria-label={isBatchSelected ? `Deselect ${file.name}` : `Select ${file.name}`}
+            title={isBatchSelected ? 'Deselect file' : 'Select file'}
+          >
+            <span className="text-[10px] leading-none">✓</span>
+          </button>
+        )}
+
         {/* File type icon */}
         <div
           className={cn(
@@ -170,6 +207,12 @@ export function FileListItem({ file, onProcess, processingState }: FileListItemP
                 {ext}
               </span>
             )}
+            {/* Estimated token usage */}
+            {estimatedTokenLabel && canProcess && (
+              <span className="rounded px-1 py-px text-[10px] font-medium text-accent-600 dark:text-accent-400">
+                {estimatedTokenLabel}
+              </span>
+            )}
             {/* Date */}
             {file.added_at && (
               <span className="text-[11px] text-surface-400 dark:text-surface-500">
@@ -191,7 +234,7 @@ export function FileListItem({ file, onProcess, processingState }: FileListItemP
         </div>
 
         {/* Process button */}
-        {onProcess && (!file.processing_status || file.processing_status === 'pending' || file.processing_status === 'failed') && (
+        {onProcess && canProcess && (
           <button
             type="button"
             onClick={(e) => {

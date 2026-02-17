@@ -1,0 +1,11 @@
+Use case: social ad
+Primary request: visualize upload to processing to searchable workflow
+Scene/background: product UI close-up with file list and status indicators
+Subject: drag-and-drop upload area, file row statuses, search field
+Action: beat 1 (0-1.3s) file card drops into upload zone; beat 2 (1.3-2.6s) status moves from spinner to check; beat 3 (2.6-4s) search highlights relevant result
+Camera: locked-off UI camera, slight zoom progression
+Lighting/mood: efficient, confident, operational
+Color palette: white, graphite, green status accents
+Text (verbatim): "Upload -> Process -> Search"
+Constraints: no people; no logos; keep interface text readable
+Avoid: fast transitions, glitch artifacts

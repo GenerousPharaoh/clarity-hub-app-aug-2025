@@ -1,0 +1,11 @@
+Use case: social ad
+Primary request: legal document chaos transforms into one clean software workspace
+Scene/background: abstract studio space with floating document cards and interface panels
+Subject: stylized software UI elements for files, notes, evidence, and AI tools
+Action: beat 1 (0-1.3s) scattered cards drift in; beat 2 (1.3-2.6s) cards snap into order; beat 3 (2.6-4s) camera settles on one unified dashboard
+Camera: 35mm smooth dolly-in, stabilized
+Lighting/mood: sharp, premium, high-trust
+Color palette: slate, ivory, teal, charcoal
+Text (verbatim): "Files. Notes. Evidence. AI. One workspace."
+Constraints: no people; no logos; keep text legible; avoid fast motion
+Avoid: flicker, jitter, warped text, cluttered framing

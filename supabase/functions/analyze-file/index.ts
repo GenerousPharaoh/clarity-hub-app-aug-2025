@@ -1,3 +1,5 @@
+// LEGACY PROTOTYPE: retained for reference only.
+// Canonical processing flow is documented in docs/processing-architecture.md.
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { handleCors } from '../_shared/cors.ts';
 import { generateText, generateEmbeddings } from '../utils/googleai.ts';

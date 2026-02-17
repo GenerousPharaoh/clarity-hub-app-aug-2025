@@ -1,0 +1,32 @@
+{
+  "create": {
+    "completed_at": null,
+    "created_at": 1771291294,
+    "error": null,
+    "expires_at": null,
+    "id": "video_6993c29e3290819092df626f1690ada4005c1cec5113cf06",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 0,
+    "prompt": "Use case: social ad\nPrimary request: show drafting flow with autosave and AI writing assist\nScene/background: rich text editor interface in focus\nSubject: legal draft text, formatting toolbar, AI writing popup, save status indicator\nAction: beat 1 (0-1.3s) text is edited; beat 2 (1.3-2.6s) AI rewrite option applies improved sentence; beat 3 (2.6-4s) save status turns to saved\nCamera: straight-on medium close UI shot, no rotation\nLighting/mood: calm precision, productivity\nColor palette: paper white, deep gray, subtle accent blue\nText (verbatim): \"Draft faster. Keep control.\"\nConstraints: no people; no logos; preserve text legibility\nAvoid: blurry UI text, excessive motion blur",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "queued"
+  },
+  "final": {
+    "completed_at": 1771291356,
+    "created_at": 1771291294,
+    "error": null,
+    "expires_at": 1771294956,
+    "id": "video_6993c29e3290819092df626f1690ada4005c1cec5113cf06",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 100,
+    "prompt": "Use case: social ad\nPrimary request: show drafting flow with autosave and AI writing assist\nScene/background: rich text editor interface in focus\nSubject: legal draft text, formatting toolbar, AI writing popup, save status indicator\nAction: beat 1 (0-1.3s) text is edited; beat 2 (1.3-2.6s) AI rewrite option applies improved sentence; beat 3 (2.6-4s) save status turns to saved\nCamera: straight-on medium close UI shot, no rotation\nLighting/mood: calm precision, productivity\nColor palette: paper white, deep gray, subtle accent blue\nText (verbatim): \"Draft faster. Keep control.\"\nConstraints: no people; no logos; preserve text legibility\nAvoid: blurry UI text, excessive motion blur",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "completed"
+  }
+}

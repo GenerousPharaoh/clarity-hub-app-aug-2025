@@ -1,0 +1,32 @@
+{
+  "create": {
+    "completed_at": null,
+    "created_at": 1771291212,
+    "error": null,
+    "expires_at": null,
+    "id": "video_6993c24cdac08193a6056cd61906d6540c404f1c1172f256",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 0,
+    "prompt": "Use case: social ad\nPrimary request: visualize upload to processing to searchable workflow\nScene/background: product UI close-up with file list and status indicators\nSubject: drag-and-drop upload area, file row statuses, search field\nAction: beat 1 (0-1.3s) file card drops into upload zone; beat 2 (1.3-2.6s) status moves from spinner to check; beat 3 (2.6-4s) search highlights relevant result\nCamera: locked-off UI camera, slight zoom progression\nLighting/mood: efficient, confident, operational\nColor palette: white, graphite, green status accents\nText (verbatim): \"Upload -> Process -> Search\"\nConstraints: no people; no logos; keep interface text readable\nAvoid: fast transitions, glitch artifacts",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "queued"
+  },
+  "final": {
+    "completed_at": 1771291282,
+    "created_at": 1771291212,
+    "error": null,
+    "expires_at": 1771294882,
+    "id": "video_6993c24cdac08193a6056cd61906d6540c404f1c1172f256",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 100,
+    "prompt": "Use case: social ad\nPrimary request: visualize upload to processing to searchable workflow\nScene/background: product UI close-up with file list and status indicators\nSubject: drag-and-drop upload area, file row statuses, search field\nAction: beat 1 (0-1.3s) file card drops into upload zone; beat 2 (1.3-2.6s) status moves from spinner to check; beat 3 (2.6-4s) search highlights relevant result\nCamera: locked-off UI camera, slight zoom progression\nLighting/mood: efficient, confident, operational\nColor palette: white, graphite, green status accents\nText (verbatim): \"Upload -> Process -> Search\"\nConstraints: no people; no logos; keep interface text readable\nAvoid: fast transitions, glitch artifacts",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "completed"
+  }
+}

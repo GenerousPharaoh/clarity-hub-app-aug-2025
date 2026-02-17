@@ -1,0 +1,32 @@
+{
+  "create": {
+    "completed_at": null,
+    "created_at": 1771291495,
+    "error": null,
+    "expires_at": null,
+    "id": "video_6993c367a3e881909055fe48a38b481709f511c95186bb1e",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 0,
+    "prompt": "Use case: social ad\nPrimary request: final product hero with clear call to action\nScene/background: clean product hero frame with subtle gradient atmosphere\nSubject: full product interface centered, logo-free composition\nAction: beat 1 (0-2s) interface gently settles into center; beat 2 (2-4s) CTA text fades in and locks\nCamera: slow cinematic push-in, stabilized\nLighting/mood: premium, decisive, launch-ready\nColor palette: midnight blue, slate, soft cyan glow\nText (verbatim): \"Book your private demo\"\nConstraints: no people; no logos; keep text large and legible\nAvoid: over-stylization, aggressive camera motion",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "queued"
+  },
+  "final": {
+    "completed_at": 1771291551,
+    "created_at": 1771291495,
+    "error": null,
+    "expires_at": 1771295151,
+    "id": "video_6993c367a3e881909055fe48a38b481709f511c95186bb1e",
+    "model": "sora-2",
+    "object": "video",
+    "progress": 100,
+    "prompt": "Use case: social ad\nPrimary request: final product hero with clear call to action\nScene/background: clean product hero frame with subtle gradient atmosphere\nSubject: full product interface centered, logo-free composition\nAction: beat 1 (0-2s) interface gently settles into center; beat 2 (2-4s) CTA text fades in and locks\nCamera: slow cinematic push-in, stabilized\nLighting/mood: premium, decisive, launch-ready\nColor palette: midnight blue, slate, soft cyan glow\nText (verbatim): \"Book your private demo\"\nConstraints: no people; no logos; keep text large and legible\nAvoid: over-stylization, aggressive camera motion",
+    "remixed_from_video_id": null,
+    "seconds": "4",
+    "size": "1280x720",
+    "status": "completed"
+  }
+}

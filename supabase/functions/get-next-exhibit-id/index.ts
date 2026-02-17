@@ -1,3 +1,5 @@
+// ACTIVE UTILITY FUNCTION.
+// Function inventory and policy are documented in supabase/functions/README.md.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getNextExhibitId } from "../utils/database.ts";
 import { handleCors, handleError } from "../_shared/cors.ts";

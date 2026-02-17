@@ -1,0 +1,11 @@
+Use case: social ad
+Primary request: final product hero with clear call to action
+Scene/background: clean product hero frame with subtle gradient atmosphere
+Subject: full product interface centered, logo-free composition
+Action: beat 1 (0-2s) interface gently settles into center; beat 2 (2-4s) CTA text fades in and locks
+Camera: slow cinematic push-in, stabilized
+Lighting/mood: premium, decisive, launch-ready
+Color palette: midnight blue, slate, soft cyan glow
+Text (verbatim): "Book your private demo"
+Constraints: no people; no logos; keep text large and legible
+Avoid: over-stylization, aggressive camera motion

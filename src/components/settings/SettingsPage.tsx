@@ -1,14 +1,22 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import useAppStore from '@/store';
 import type { ThemeMode } from '@/store/slices/authSlice';
 import { FadeIn } from '@/components/shared/FadeIn';
 import {
+  getProcessingUsage,
+  PROCESSING_DAILY_FILE_LIMIT,
+  PROCESSING_DAILY_MB_LIMIT_BYTES,
+} from '@/lib/processingBudget';
+import { formatFileSize } from '@/lib/utils';
+import {
   Sun,
   Moon,
   Monitor,
   LogOut,
   Scale,
+  RefreshCw,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -69,8 +77,11 @@ export function SettingsPage() {
   useDocumentTitle('Settings');
   const { user, signOut } = useAuth();
   const { themeMode, setTheme } = useAppStore();
+  const processOnUpload = useAppStore((s) => s.processOnUpload);
+  const setProcessOnUpload = useAppStore((s) => s.setProcessOnUpload);
   const storeUser = useAppStore((s) => s.user);
   const navigate = useNavigate();
+  const [usage, setUsage] = useState(() => getProcessingUsage());
 
   const displayName =
     user?.user_metadata?.full_name ?? storeUser?.full_name ?? 'User';
@@ -83,6 +94,14 @@ export function SettingsPage() {
     await signOut();
     navigate('/login');
   };
+
+  const refreshUsage = () => setUsage(getProcessingUsage());
+
+  useEffect(() => {
+    const onFocus = () => refreshUsage();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
 
   return (
     <FadeIn className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
@@ -196,6 +215,64 @@ export function SettingsPage() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── AI Processing ────────────────────────────────── */}
+        <section className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+          <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
+            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+              AI Processing
+            </h2>
+          </div>
+
+          <div className="px-6 py-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+                  Process files automatically after upload
+                </p>
+                <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                  Default is off to prevent accidental API usage spikes.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={processOnUpload}
+                onClick={() => setProcessOnUpload(!processOnUpload)}
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                  processOnUpload
+                    ? 'bg-primary-600'
+                    : 'bg-surface-300 dark:bg-surface-600'
+                }`}
+                title={processOnUpload ? 'Auto processing enabled' : 'Auto processing disabled'}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                    processOnUpload ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="mt-4 rounded-lg bg-surface-50 p-3 dark:bg-surface-800/60">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-surface-600 dark:text-surface-300">
+                  Daily safety limits (local): {PROCESSING_DAILY_FILE_LIMIT} files, {Math.round(PROCESSING_DAILY_MB_LIMIT_BYTES / (1024 * 1024))}MB.
+                </p>
+                <button
+                  onClick={refreshUsage}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-surface-500 transition-colors hover:bg-surface-200 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Refresh
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-surface-500 dark:text-surface-400">
+                Today: {usage.files} file{usage.files !== 1 ? 's' : ''} processed, {formatFileSize(usage.bytes)} of data.
+              </p>
             </div>
           </div>
         </section>

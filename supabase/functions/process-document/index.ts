@@ -1,3 +1,5 @@
+// LEGACY PROTOTYPE: retained for reference only.
+// Canonical processing flow is documented in docs/processing-architecture.md.
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.4'
 import { generateText, generateEmbeddings, analyzeImage } from '../utils/googleai.ts'

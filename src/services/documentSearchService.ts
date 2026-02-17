@@ -92,7 +92,19 @@ async function textOnlySearch(
   limit: number
 ): Promise<SearchResult[]> {
   try {
-    let q = supabase
+    // Restrict fallback search to files in the active project.
+    const { data: projectFiles, error: filesError } = await supabase
+      .from('files')
+      .select('id')
+      .eq('project_id', projectId)
+      .is('is_deleted', false);
+
+    if (filesError) return [];
+
+    const fileIds = (projectFiles ?? []).map((f) => f.id);
+    if (fileIds.length === 0) return [];
+
+    const baseQuery = supabase
       .from('document_chunks')
       .select(`
         id,
@@ -105,11 +117,14 @@ async function textOnlySearch(
         timestamp_start
       `)
       .textSearch('fts', query, { type: 'websearch' })
+      .in('file_id', fileIds)
       .limit(limit);
 
-    // Filter by project via files join is not directly available,
-    // so we'll filter client-side
-    const { data, error } = await q;
+    const queryBuilder = fileType
+      ? baseQuery.eq('source_file_type', fileType)
+      : baseQuery;
+
+    const { data, error } = await queryBuilder;
 
     if (error || !data) return [];
 

@@ -19,6 +19,8 @@ import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { FolderOpen, Eye, Sparkles, LayoutList, PanelRight } from 'lucide-react';
 
+const COLLAPSE_THRESHOLD = 8; // percent — auto-collapse when shrunk below this
+
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
@@ -44,11 +46,30 @@ export function WorkspacePage() {
 
   const leftRef = useRef<ImperativePanelHandle>(null);
   const rightRef = useRef<ImperativePanelHandle>(null);
+  const didNormalizeInitialLayout = useRef(false);
 
   // Track previous panel sizes so we can auto-collapse only when SHRINKING
   const prevLeftSize = useRef(20);
   const prevRightSize = useRef(35);
-  const COLLAPSE_THRESHOLD = 8; // percent — auto-collapse when shrunk below this
+
+  const handleLayout = useCallback((sizes: number[]) => {
+    const leftSize = typeof sizes[0] === 'number' ? sizes[0] : prevLeftSize.current;
+    const rightSize = typeof sizes[2] === 'number' ? sizes[2] : prevRightSize.current;
+
+    prevLeftSize.current = leftSize;
+    prevRightSize.current = rightSize;
+
+    // Normalize persisted tiny slivers on first layout paint.
+    if (didNormalizeInitialLayout.current) return;
+    didNormalizeInitialLayout.current = true;
+
+    if (leftSize > 0 && leftSize < COLLAPSE_THRESHOLD) {
+      leftRef.current?.collapse();
+    }
+    if (rightSize > 0 && rightSize < COLLAPSE_THRESHOLD) {
+      rightRef.current?.collapse();
+    }
+  }, []);
 
   // Set active project
   useEffect(() => {
@@ -171,6 +192,7 @@ export function WorkspacePage() {
       <PanelGroup
         direction="horizontal"
         autoSaveId="clarity-hub-workspace"
+        onLayout={handleLayout}
         className="h-full flex-1"
       >
         <Panel

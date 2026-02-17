@@ -125,74 +125,73 @@ export function TipTapEditor({
   if (!editor) return null;
 
   const wordCount = editor.storage.characterCount?.words() ?? 0;
+  const readingTime = Math.max(1, Math.round(wordCount / 230));
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden bg-white dark:bg-surface-900">
-      {/* Fixed toolbar at top — Google Docs style */}
+      {/* Fixed toolbar at top */}
       <EditorToolbar editor={editor} onInsertLink={handleInsertLink} onInsertImage={handleInsertImage} />
 
-      {/* Scrollable document canvas */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Scrollable document canvas with subtle background */}
+      <div className="flex-1 overflow-y-auto bg-surface-100/40 dark:bg-surface-950/30">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
         <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} />
 
-        {/* Notion-style inline title — aligned with editor content */}
-        {onTitleChange && (
-          <div className="mx-auto max-w-[720px] px-4 pt-8 pb-0 md:px-10 md:pt-14">
-            <input
-              ref={titleInputRef}
-              type="text"
-              defaultValue={title || ''}
-              key={noteId}
-              onChange={(e) => onTitleChange(e.target.value)}
-              onKeyDown={(e) => {
-                // Enter in title → focus editor
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  editor.commands.focus('start');
-                }
-              }}
-              placeholder="Untitled Document"
-              className={cn(
-                'w-full bg-transparent font-heading text-2xl font-bold leading-tight tracking-tight md:text-[2rem]',
-                'text-surface-900 dark:text-surface-50',
-                'placeholder:text-surface-300 dark:placeholder:text-surface-600',
-                'border-none outline-none focus:outline-none focus:ring-0'
-              )}
-            />
-          </div>
-        )}
+        {/* Paper-like container */}
+        <div className="mx-auto my-6 max-w-[860px] rounded-lg bg-white shadow-sm ring-1 ring-surface-200/50 dark:bg-surface-900 dark:ring-surface-800/50 md:my-10">
+          {/* Notion-style inline title */}
+          {onTitleChange && (
+            <div className="mx-auto max-w-[800px] px-6 pt-8 pb-0 md:px-12 md:pt-14">
+              <input
+                ref={titleInputRef}
+                type="text"
+                defaultValue={title || ''}
+                key={noteId}
+                onChange={(e) => onTitleChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    editor.commands.focus('start');
+                  }
+                }}
+                placeholder="Untitled Document"
+                className={cn(
+                  'w-full bg-transparent font-heading text-3xl font-bold leading-tight tracking-tight md:text-[2.25rem]',
+                  'text-surface-900 dark:text-surface-50',
+                  'placeholder:text-surface-300 dark:placeholder:text-surface-600',
+                  'border-none outline-none focus:outline-none focus:ring-0'
+                )}
+              />
+            </div>
+          )}
 
-        {/* Editor content — .tiptap CSS handles centering & typography */}
-        <EditorContent editor={editor} className="min-h-[60vh]" />
+          {/* Editor content */}
+          <EditorContent editor={editor} className="min-h-[60vh]" />
+        </div>
       </div>
 
-      {/* Floating save status — bottom-right corner */}
-      <div
-        className={cn(
-          'pointer-events-none absolute bottom-3 right-3 z-10',
-          'flex items-center gap-1.5 rounded-full px-2.5 py-1',
-          'text-[10px] font-medium tabular-nums',
-          'bg-white/80 backdrop-blur-sm dark:bg-surface-800/80',
-          'border border-surface-100 dark:border-surface-700/50',
-          'shadow-sm transition-opacity duration-500',
-          saveStatus === 'idle' && 'opacity-0',
-          saveStatus === 'saving' && 'opacity-100 text-surface-400 dark:text-surface-500',
-          saveStatus === 'saved' && 'opacity-100 text-green-500 dark:text-green-400',
-          saveStatus === 'error' && 'opacity-100 text-red-500 dark:text-red-400'
-        )}
-      >
-        {saveStatus === 'saving' && <Loader2 className="h-2.5 w-2.5 animate-spin" />}
-        {saveStatus === 'saved' && <Check className="h-2.5 w-2.5" />}
-        {saveStatus === 'error' && <AlertCircle className="h-2.5 w-2.5" />}
-        {saveStatus === 'saving' && 'Saving...'}
-        {saveStatus === 'saved' && 'Saved'}
-        {saveStatus === 'error' && 'Failed'}
-        {saveStatus !== 'idle' && (
-          <span className="text-surface-400 dark:text-surface-500">
-            · {wordCount}w
-          </span>
-        )}
+      {/* Persistent status bar */}
+      <div className="flex h-7 shrink-0 items-center justify-between border-t border-surface-200 bg-surface-50 px-3 dark:border-surface-800 dark:bg-surface-850">
+        <div className="flex items-center gap-3 text-[11px] tabular-nums text-surface-400 dark:text-surface-500">
+          <span>{wordCount.toLocaleString()} words</span>
+          <span>{readingTime} min read</span>
+        </div>
+        <div
+          className={cn(
+            'flex items-center gap-1.5 text-[11px] font-medium tabular-nums transition-opacity duration-300',
+            saveStatus === 'idle' && 'opacity-0',
+            saveStatus === 'saving' && 'text-surface-400 dark:text-surface-500',
+            saveStatus === 'saved' && 'text-green-500 dark:text-green-400',
+            saveStatus === 'error' && 'text-red-500 dark:text-red-400'
+          )}
+        >
+          {saveStatus === 'saving' && <Loader2 className="h-3 w-3 animate-spin" />}
+          {saveStatus === 'saved' && <Check className="h-3 w-3" />}
+          {saveStatus === 'error' && <AlertCircle className="h-3 w-3" />}
+          {saveStatus === 'saving' && 'Saving...'}
+          {saveStatus === 'saved' && 'Saved'}
+          {saveStatus === 'error' && 'Failed'}
+        </div>
       </div>
 
       {/* Link / Image URL dialog */}

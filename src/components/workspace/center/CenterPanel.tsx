@@ -222,7 +222,7 @@ function NotesTab() {
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col">
-        <div className="flex h-11 shrink-0 items-center gap-2 border-b border-surface-200 px-3 dark:border-surface-800">
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-surface-200 px-3 dark:border-surface-800">
           <div className="h-5 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
           <div className="ml-auto h-6 w-20 animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
         </div>
@@ -294,14 +294,17 @@ function NotesTab() {
   return (
     <div className="flex h-full flex-col">
       {/* Header bar: note selector dropdown + actions */}
-      <div className="flex h-11 shrink-0 items-center gap-2 border-b border-surface-200 bg-white px-2 dark:border-surface-800 dark:bg-surface-900">
+      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-surface-200 bg-white px-3 dark:border-surface-800 dark:bg-surface-900">
+        {/* Document icon */}
+        <NotebookPen className="h-4 w-4 shrink-0 text-surface-400 dark:text-surface-500" />
+
         {/* Note selector dropdown */}
         <div className="relative min-w-0 flex-1" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
             className={cn(
-              'flex max-w-[260px] items-center gap-1.5 rounded-lg px-2 py-1.5',
-              'text-xs font-medium text-surface-700 dark:text-surface-200',
+              'flex max-w-[360px] items-center gap-1.5 rounded-lg px-2 py-1.5',
+              'text-sm font-medium text-surface-700 dark:text-surface-200',
               'transition-colors hover:bg-surface-100 active:bg-surface-100',
               'dark:hover:bg-surface-800 dark:active:bg-surface-800'
             )}
@@ -330,16 +333,16 @@ function NotesTab() {
                       key={note.id}
                       onClick={() => handleNoteSelect(note.id)}
                       className={cn(
-                        'flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs',
+                        'flex w-full items-center gap-2.5 px-3 py-2.5 text-left',
                         'transition-colors hover:bg-surface-50 dark:hover:bg-surface-800',
                         note.id === activeNoteId && 'bg-primary-50 dark:bg-primary-900/20'
                       )}
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-surface-700 dark:text-surface-200">
+                        <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200">
                           {note.title || 'Untitled'}
                         </p>
-                        <p className="mt-0.5 text-[10px] text-surface-400 dark:text-surface-500">
+                        <p className="mt-0.5 text-[11px] text-surface-400 dark:text-surface-500">
                           {formatRelativeDate(note.last_modified ?? note.created_at)}
                         </p>
                       </div>
@@ -373,25 +376,12 @@ function NotesTab() {
           </AnimatePresence>
         </div>
 
-        {/* New document shortcut */}
-        <button
-          onClick={handleCreate}
-          disabled={createNote.isPending}
-          className={cn(
-            'flex items-center gap-1 rounded-lg px-2 py-1.5',
-            'text-xs font-medium text-primary-600 dark:text-primary-400',
-            'transition-colors hover:bg-primary-50 active:bg-primary-50',
-            'dark:hover:bg-primary-900/20 dark:active:bg-primary-900/20',
-            'disabled:opacity-50'
-          )}
-          title="New document"
-        >
-          {createNote.isPending ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Plus className="h-3.5 w-3.5" />
-          )}
-        </button>
+        {/* Last edited timestamp — hidden on mobile */}
+        {activeNote && (
+          <span className="hidden text-[11px] text-surface-400 dark:text-surface-500 md:block">
+            {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
+          </span>
+        )}
 
         {/* Export current note */}
         {activeNote && (

@@ -190,7 +190,7 @@ export function WorkspacePage() {
 
         <PanelGrip id="grip-left" />
 
-        <Panel id="center" order={2} defaultSize={45} minSize={30}>
+        <Panel id="center" order={2} defaultSize={45} minSize={20}>
           <CenterPanel />
         </Panel>
 
@@ -201,7 +201,7 @@ export function WorkspacePage() {
           id="right"
           order={3}
           defaultSize={35}
-          minSize={20}
+          minSize={15}
           collapsible
           collapsedSize={0}
           onCollapse={() => {

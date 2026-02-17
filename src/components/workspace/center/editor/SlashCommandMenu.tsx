@@ -179,18 +179,30 @@ export function SlashCommandMenu({ editor, onInsertImage }: SlashCommandMenuProp
 
   if (!active || filtered.length === 0) return null;
 
-  // Position the menu near the cursor
+  // Position the menu near the cursor with viewport bounds check
   const coords = editor.view.coordsAtPos(slashRange.from);
   const editorRect = editor.view.dom.closest('.overflow-y-auto')?.getBoundingClientRect();
-  const top = editorRect ? coords.bottom - editorRect.top + 4 : coords.bottom + 4;
-  const left = editorRect ? coords.left - editorRect.left : coords.left;
+  let top = editorRect ? coords.bottom - editorRect.top + 4 : coords.bottom + 4;
+  let left = editorRect ? coords.left - editorRect.left : coords.left;
+
+  // Prevent menu from overflowing right edge
+  if (editorRect && left + 288 > editorRect.width) {
+    left = Math.max(8, editorRect.width - 296);
+  }
 
   return (
     <div
       ref={menuRef}
-      className="absolute z-50 max-h-64 w-64 overflow-y-auto rounded-lg border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-700 dark:bg-surface-800"
+      className="absolute z-50 max-h-80 w-72 overflow-y-auto rounded-xl border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-700 dark:bg-surface-800"
       style={{ top, left }}
     >
+      {/* Header */}
+      <div className="px-3 pb-1.5 pt-2">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+          Commands
+        </span>
+      </div>
+
       {filtered.map((cmd, index) => (
         <button
           key={cmd.title}
@@ -206,10 +218,10 @@ export function SlashCommandMenu({ editor, onInsertImage }: SlashCommandMenuProp
         >
           <div
             className={cn(
-              'flex h-8 w-8 shrink-0 items-center justify-center rounded-md border',
+              'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
               index === selectedIndex
-                ? 'border-primary-200 bg-primary-100 text-primary-700 dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300'
-                : 'border-surface-200 bg-surface-50 text-surface-500 dark:border-surface-700 dark:bg-surface-700 dark:text-surface-400'
+                ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                : 'bg-surface-100 text-surface-500 dark:bg-surface-700 dark:text-surface-400'
             )}
           >
             {cmd.icon}
@@ -218,7 +230,7 @@ export function SlashCommandMenu({ editor, onInsertImage }: SlashCommandMenuProp
             <div className="truncate text-xs font-medium text-surface-700 dark:text-surface-200">
               {cmd.title}
             </div>
-            <div className="truncate text-[10px] text-surface-400 dark:text-surface-500">
+            <div className="truncate text-[11px] text-surface-400 dark:text-surface-500">
               {cmd.description}
             </div>
           </div>

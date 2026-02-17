@@ -37,19 +37,21 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
   };
 
   return (
-    <div className="flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-surface-200 bg-surface-50/50 px-2 py-1 dark:border-surface-800 dark:bg-surface-850/50">
+    <div className="flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-surface-200 bg-surface-50/50 px-3 py-1.5 dark:border-surface-800 dark:bg-surface-850/50">
       {/* Undo / Redo */}
       <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
-        title="Undo (Cmd+Z)"
+        label="Undo"
+        shortcut="\u2318Z"
       >
         <Undo2 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
-        title="Redo (Cmd+Shift+Z)"
+        label="Redo"
+        shortcut="\u2318\u21e7Z"
       >
         <Redo2 className="h-4 w-4" />
       </ToolbarButton>
@@ -60,42 +62,46 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBold().run()}
         active={editor.isActive('bold')}
-        title="Bold (Cmd+B)"
+        label="Bold"
+        shortcut="\u2318B"
       >
         <Bold className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleItalic().run()}
         active={editor.isActive('italic')}
-        title="Italic (Cmd+I)"
+        label="Italic"
+        shortcut="\u2318I"
       >
         <Italic className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleUnderline().run()}
         active={editor.isActive('underline')}
-        title="Underline (Cmd+U)"
+        label="Underline"
+        shortcut="\u2318U"
       >
         <Underline className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleStrike().run()}
         active={editor.isActive('strike')}
-        title="Strikethrough"
+        label="Strikethrough"
       >
         <Strikethrough className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCode().run()}
         active={editor.isActive('code')}
-        title="Inline Code"
+        label="Inline Code"
       >
         <Code className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHighlight().run()}
         active={editor.isActive('highlight')}
-        title="Highlight (Cmd+Shift+H)"
+        label="Highlight"
+        shortcut="\u2318\u21e7H"
       >
         <span className="flex h-4 w-4 items-center justify-center rounded bg-yellow-300/40 text-[11px] font-bold dark:bg-yellow-400/30">H</span>
       </ToolbarButton>
@@ -106,21 +112,21 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         active={editor.isActive('heading', { level: 1 })}
-        title="Heading 1"
+        label="Heading 1"
       >
         <Heading1 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         active={editor.isActive('heading', { level: 2 })}
-        title="Heading 2"
+        label="Heading 2"
       >
         <Heading2 className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         active={editor.isActive('heading', { level: 3 })}
-        title="Heading 3"
+        label="Heading 3"
       >
         <Heading3 className="h-4 w-4" />
       </ToolbarButton>
@@ -131,21 +137,21 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         active={editor.isActive('bulletList')}
-        title="Bullet List"
+        label="Bullet List"
       >
         <List className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         active={editor.isActive('orderedList')}
-        title="Ordered List"
+        label="Ordered List"
       >
         <ListOrdered className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleTaskList().run()}
         active={editor.isActive('taskList')}
-        title="Task List"
+        label="Task List"
       >
         <ListChecks className="h-4 w-4" />
       </ToolbarButton>
@@ -156,21 +162,22 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         active={editor.isActive('blockquote')}
-        title="Blockquote"
+        label="Blockquote"
       >
         <Quote className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         active={editor.isActive('codeBlock')}
-        title="Code Block"
+        label="Code Block"
       >
         <CodeSquare className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={onInsertLink}
         active={editor.isActive('link')}
-        title="Insert Link (Cmd+K)"
+        label="Insert Link"
+        shortcut="\u2318K"
       >
         <Link className="h-4 w-4" />
       </ToolbarButton>
@@ -178,16 +185,16 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
       <Divider />
 
       {/* Insert */}
-      <ToolbarButton onClick={insertTable} title="Insert Table">
+      <ToolbarButton onClick={insertTable} label="Insert Table">
         <Table className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        title="Horizontal Rule"
+        label="Horizontal Rule"
       >
         <Minus className="h-4 w-4" />
       </ToolbarButton>
-      <ToolbarButton onClick={onInsertImage} title="Insert Image">
+      <ToolbarButton onClick={onInsertImage} label="Insert Image">
         <ImageIcon className="h-4 w-4" />
       </ToolbarButton>
 
@@ -197,21 +204,21 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
       <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('left').run()}
         active={editor.isActive({ textAlign: 'left' })}
-        title="Align Left"
+        label="Align Left"
       >
         <AlignLeft className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('center').run()}
         active={editor.isActive({ textAlign: 'center' })}
-        title="Align Center"
+        label="Align Center"
       >
         <AlignCenter className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().setTextAlign('right').run()}
         active={editor.isActive({ textAlign: 'right' })}
-        title="Align Right"
+        label="Align Right"
       >
         <AlignRight className="h-4 w-4" />
       </ToolbarButton>
@@ -223,13 +230,15 @@ function ToolbarButton({
   onClick,
   active,
   disabled,
-  title,
+  label,
+  shortcut,
   children,
 }: {
   onClick: () => void;
   active?: boolean;
   disabled?: boolean;
-  title?: string;
+  label?: string;
+  shortcut?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -237,16 +246,21 @@ function ToolbarButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      title={title}
       className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-md transition-colors',
+        'group relative flex h-8 w-8 items-center justify-center rounded-md transition-colors',
         active
-          ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
+          ? 'bg-primary-100 text-primary-700 shadow-sm dark:bg-primary-900/40 dark:text-primary-300'
           : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200',
         disabled && 'opacity-30 cursor-not-allowed'
       )}
     >
       {children}
+      {label && (
+        <span className="pointer-events-none absolute -bottom-9 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-md bg-surface-800 px-2 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 dark:bg-surface-200 dark:text-surface-900">
+          {label}
+          {shortcut && <span className="ml-1 text-surface-400 dark:text-surface-500">{shortcut}</span>}
+        </span>
+      )}
     </button>
   );
 }

@@ -32,9 +32,13 @@ export function CenterPanel() {
 
   return (
     <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
-      {/* Tab bar — fixed 40px header */}
-      <div className="flex h-10 shrink-0 items-center border-b border-surface-200 bg-surface-50/50 dark:border-surface-800 dark:bg-surface-850/50">
-        <div className="flex h-full items-center gap-0 px-1" role="tablist" aria-label="Content tabs">
+      {/* Tab bar */}
+      <div className="flex h-12 shrink-0 items-center border-b border-surface-200/80 bg-surface-50/70 px-2 dark:border-surface-800 dark:bg-surface-850/70">
+        <div
+          className="flex items-center gap-1 rounded-xl bg-surface-100/80 p-1 dark:bg-surface-800/80"
+          role="tablist"
+          aria-label="Content tabs"
+        >
           <TabButton
             active={activeTab === 'overview'}
             onClick={() => setActiveTab('overview')}
@@ -106,21 +110,15 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-full items-center gap-1.5 px-3 text-xs font-medium transition-colors',
+        'relative flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-all',
         active
-          ? 'text-primary-600 dark:text-primary-400'
-          : 'text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200'
+          ? 'bg-white text-primary-700 shadow-sm dark:bg-surface-700 dark:text-primary-300'
+          : 'text-surface-500 hover:bg-white/70 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700/70 dark:hover:text-surface-200'
       )}
     >
       {icon}
       {label}
-      {active && (
-        <motion.div
-          layoutId="center-tab-indicator"
-          className="absolute bottom-0 left-3 right-3 h-[2px] rounded-full bg-primary-600 dark:bg-primary-400"
-          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-        />
-      )}
+      {active && <motion.span layoutId="center-tab-pill" className="absolute inset-0 -z-10 rounded-lg" />}
     </button>
   );
 }
@@ -294,19 +292,22 @@ function NotesTab() {
   return (
     <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Header bar: note selector dropdown + actions */}
-      <div className="flex h-12 shrink-0 items-center gap-2 overflow-hidden border-b border-surface-200 bg-white px-3 dark:border-surface-800 dark:bg-surface-900">
+      <div className="flex h-14 shrink-0 items-center gap-2 overflow-hidden border-b border-surface-200 bg-white/90 px-3 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90 sm:px-4">
         {/* Document icon */}
-        <NotebookPen className="h-4 w-4 shrink-0 text-surface-400 dark:text-surface-500" />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-100 dark:bg-surface-800">
+          <NotebookPen className="h-4 w-4 text-surface-500 dark:text-surface-400" />
+        </div>
 
         {/* Note selector dropdown */}
-        <div className="relative min-w-0 flex-1" ref={dropdownRef}>
+        <div className="relative min-w-0 max-w-[28rem] flex-1" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen((prev) => !prev)}
             className={cn(
-              'flex max-w-full items-center gap-1.5 rounded-lg px-2 py-1.5',
-              'text-sm font-medium text-surface-700 dark:text-surface-200',
-              'transition-colors hover:bg-surface-100 active:bg-surface-100',
-              'dark:hover:bg-surface-800 dark:active:bg-surface-800'
+              'flex w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5',
+              'border-surface-200 bg-surface-50 text-sm font-medium text-surface-700',
+              'transition-colors hover:border-surface-300 hover:bg-surface-100',
+              'dark:border-surface-700 dark:bg-surface-800/70 dark:text-surface-200',
+              'dark:hover:border-surface-600 dark:hover:bg-surface-800'
             )}
           >
             <span className="min-w-0 truncate">{activeNote?.title || 'Untitled'}</span>
@@ -322,7 +323,7 @@ function NotesTab() {
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.12 }}
                 className={cn(
-                  'absolute left-0 top-full z-50 mt-1 w-72 overflow-hidden rounded-xl',
+                  'absolute left-0 top-full z-50 mt-1 max-h-[70vh] min-w-[18rem] max-w-[28rem] overflow-hidden rounded-xl',
                   'border border-surface-200 bg-white shadow-lg',
                   'dark:border-surface-700 dark:bg-surface-850'
                 )}
@@ -376,37 +377,58 @@ function NotesTab() {
           </AnimatePresence>
         </div>
 
-        {/* Last edited timestamp — hidden on mobile */}
-        {activeNote && (
-          <span className="hidden text-[11px] text-surface-400 dark:text-surface-500 md:block">
-            {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
-          </span>
-        )}
+        <button
+          onClick={handleCreate}
+          disabled={createNote.isPending}
+          className={cn(
+            'flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium',
+            'border-surface-200 bg-white text-surface-600 transition-colors hover:bg-surface-50',
+            'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700',
+            'disabled:cursor-not-allowed disabled:opacity-50'
+          )}
+          title="Create document"
+        >
+          {createNote.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Plus className="h-3.5 w-3.5" />
+          )}
+          <span className="hidden sm:inline">New</span>
+        </button>
 
-        {/* Export current note */}
-        {activeNote && (
-          <ExportButton
-            content={activeNote.content || ''}
-            title={activeNote.title || 'Untitled'}
-            type="note"
-          />
-        )}
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          {/* Last edited timestamp — hidden on mobile */}
+          {activeNote && (
+            <span className="hidden rounded-full bg-surface-100 px-2.5 py-1 text-[11px] text-surface-500 dark:bg-surface-800 dark:text-surface-400 md:inline">
+              Edited {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
+            </span>
+          )}
 
-        {/* Delete current note */}
-        {activeNote && (
-          <button
-            onClick={() => setNoteToDelete(activeNote)}
-            className={cn(
-              'rounded-lg p-1.5 text-surface-400 transition-colors',
-              'hover:bg-red-50 hover:text-red-500 active:bg-red-50 active:text-red-500',
-              'dark:hover:bg-red-900/20 dark:hover:text-red-400',
-              'dark:active:bg-red-900/20 dark:active:text-red-400'
-            )}
-            title="Delete note"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        )}
+          {/* Export current note */}
+          {activeNote && (
+            <ExportButton
+              content={activeNote.content || ''}
+              title={activeNote.title || 'Untitled'}
+              type="note"
+              className="rounded-lg border border-surface-200 bg-white px-2.5 py-1.5 hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:hover:bg-surface-700"
+            />
+          )}
+
+          {/* Delete current note */}
+          {activeNote && (
+            <button
+              onClick={() => setNoteToDelete(activeNote)}
+              className={cn(
+                'rounded-lg border border-transparent p-1.5 text-surface-400 transition-colors',
+                'hover:border-red-200 hover:bg-red-50 hover:text-red-500',
+                'dark:hover:border-red-900/40 dark:hover:bg-red-900/20 dark:hover:text-red-400'
+              )}
+              title="Delete note"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Full-width editor — takes all remaining space */}

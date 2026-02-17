@@ -351,7 +351,7 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
   return (
     <div
       ref={containerRef}
-      className="flex shrink-0 items-center overflow-hidden border-b border-surface-200 bg-surface-50/50 px-2 py-1.5 dark:border-surface-800 dark:bg-surface-850/50"
+      className="flex shrink-0 items-center overflow-hidden border-b border-surface-200/80 bg-white/90 px-2.5 py-1.5 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90"
     >
       {/* Inline groups — clipped to available space */}
       <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden">
@@ -397,7 +397,7 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
 
           {overflowOpen && (
             <div
-              className="fixed z-[60] max-h-[70vh] w-56 overflow-y-auto rounded-xl border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-700 dark:bg-surface-800"
+              className="fixed z-[60] max-h-[70vh] w-56 overflow-y-auto rounded-xl border border-surface-200 bg-white/95 py-1 shadow-xl ring-1 ring-surface-100 dark:border-surface-700 dark:bg-surface-800/95 dark:ring-surface-800"
               style={{ top: dropdownPos.top, right: dropdownPos.right }}
             >
               {overflowGroups.map((group, gi) => (
@@ -497,11 +497,12 @@ const ToolbarButton = forwardRef<
       disabled={disabled}
       title={title}
       className={cn(
-        'flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors',
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-transparent transition-colors',
         active
-          ? 'bg-primary-100 text-primary-700 shadow-sm dark:bg-primary-900/40 dark:text-primary-300'
-          : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200',
-        disabled && 'opacity-30 cursor-not-allowed'
+          ? 'border-primary-200 bg-primary-50 text-primary-700 shadow-sm dark:border-primary-800/60 dark:bg-primary-900/40 dark:text-primary-300'
+          : 'text-surface-500 hover:border-surface-200 hover:bg-white hover:text-surface-700 dark:text-surface-400 dark:hover:border-surface-700 dark:hover:bg-surface-800 dark:hover:text-surface-200',
+        disabled &&
+          'cursor-not-allowed opacity-35 hover:border-transparent hover:bg-transparent hover:text-surface-500 dark:hover:bg-transparent dark:hover:text-surface-400'
       )}
     >
       {children}
@@ -510,5 +511,5 @@ const ToolbarButton = forwardRef<
 });
 
 function Divider() {
-  return <div className="mx-1 h-5 w-px shrink-0 bg-surface-200 dark:bg-surface-700" />;
+  return <div className="mx-1 h-4.5 w-px shrink-0 bg-surface-200/90 dark:bg-surface-700/90" />;
 }

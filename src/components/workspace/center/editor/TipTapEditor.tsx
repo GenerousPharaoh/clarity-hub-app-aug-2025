@@ -133,48 +133,51 @@ export function TipTapEditor({
       <EditorToolbar editor={editor} onInsertLink={handleInsertLink} onInsertImage={handleInsertImage} />
 
       {/* Scrollable document canvas with subtle background */}
-      <div className="flex-1 overflow-y-auto bg-surface-100/40 dark:bg-surface-950/30">
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-surface-100/80 via-surface-50 to-surface-100/50 dark:from-surface-950/50 dark:via-surface-900 dark:to-surface-950/60">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
         <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} onInsertLink={handleInsertLink} />
 
         {/* Paper-like container */}
-        <div className="mx-auto my-6 max-w-[860px] rounded-lg bg-white shadow-sm ring-1 ring-surface-200/50 dark:bg-surface-900 dark:ring-surface-800/50 md:my-10">
-          {/* Notion-style inline title */}
-          {onTitleChange && (
-            <div className="mx-auto max-w-[800px] px-6 pt-8 pb-0 md:px-12 md:pt-14">
-              <input
-                ref={titleInputRef}
-                type="text"
-                defaultValue={title || ''}
-                key={noteId}
-                onChange={(e) => onTitleChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    editor.commands.focus('start');
-                  }
-                }}
-                placeholder="Untitled Document"
-                className={cn(
-                  'w-full bg-transparent font-heading text-3xl font-bold leading-tight tracking-tight md:text-[2.25rem]',
-                  'text-surface-900 dark:text-surface-50',
-                  'placeholder:text-surface-300 dark:placeholder:text-surface-600',
-                  'border-none outline-none focus:outline-none focus:ring-0'
-                )}
-              />
-            </div>
-          )}
+        <div className="mx-auto w-full max-w-[1020px] px-3 py-4 md:px-6 md:py-8">
+          <div className="rounded-2xl border border-surface-200/80 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.45)] ring-1 ring-white/70 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/40">
+            {/* Notion-style inline title */}
+            {onTitleChange && (
+              <div className="mx-auto max-w-[800px] px-6 pt-8 pb-0 md:px-12 md:pt-12">
+                <input
+                  ref={titleInputRef}
+                  type="text"
+                  defaultValue={title || ''}
+                  key={noteId}
+                  onChange={(e) => onTitleChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      editor.commands.focus('start');
+                    }
+                  }}
+                  placeholder="Untitled Document"
+                  className={cn(
+                    'w-full bg-transparent font-heading text-3xl font-bold leading-tight tracking-tight md:text-[2.25rem]',
+                    'text-surface-900 dark:text-surface-50',
+                    'placeholder:text-surface-300 dark:placeholder:text-surface-600',
+                    'border-none outline-none focus:outline-none focus:ring-0'
+                  )}
+                />
+              </div>
+            )}
 
-          {/* Editor content */}
-          <EditorContent editor={editor} className="min-h-[60vh]" />
+            {/* Editor content */}
+            <EditorContent editor={editor} className="min-h-[62vh]" />
+          </div>
         </div>
       </div>
 
       {/* Persistent status bar */}
-      <div className="flex h-7 shrink-0 items-center justify-between overflow-hidden border-t border-surface-200 bg-surface-50 px-3 dark:border-surface-800 dark:bg-surface-850">
+      <div className="flex h-8 shrink-0 items-center justify-between overflow-hidden border-t border-surface-200/80 bg-white/90 px-3.5 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90">
         <div className="flex min-w-0 items-center gap-3 text-[11px] tabular-nums text-surface-400 dark:text-surface-500">
           <span className="whitespace-nowrap">{wordCount.toLocaleString()} words</span>
           <span className="whitespace-nowrap">{readingTime} min read</span>
+          <span className="hidden whitespace-nowrap md:inline">Type "/" for commands</span>
         </div>
         <div
           className={cn(

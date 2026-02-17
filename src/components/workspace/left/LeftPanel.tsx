@@ -53,7 +53,7 @@ export function LeftPanel() {
     setDebouncedQuery('');
   }, [setSearchQuery]);
   return (
-    <div className="flex h-full w-full flex-col bg-surface-50 dark:bg-surface-900">
+    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50 dark:bg-surface-900">
       {/* ── Header ────────────────────────────────────────── */}
       <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 bg-surface-50/80 px-3 dark:border-surface-800 dark:bg-surface-850/50">
         <div className="flex items-center gap-2">

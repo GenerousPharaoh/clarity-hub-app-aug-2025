@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Download, ExternalLink, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 
 interface PDFViewerProps {
   url: string;
@@ -8,6 +9,7 @@ interface PDFViewerProps {
 }
 
 export function PDFViewer({ url, fileName }: PDFViewerProps) {
+  const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -69,6 +71,64 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
             <ExternalLink className="h-3.5 w-3.5" />
             Open in Tab
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile fallback — iframe PDF viewing is unreliable on mobile browsers
+  if (isMobile) {
+    return (
+      <div className="flex h-full flex-col">
+        <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-2 dark:border-surface-700">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <FileText className="h-3.5 w-3.5 shrink-0 text-red-500" />
+            <span
+              className="truncate text-xs font-medium text-surface-600 dark:text-surface-300"
+              title={fileName}
+            >
+              {fileName}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/20">
+            <FileText className="h-8 w-8 text-red-400" />
+          </div>
+          <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+            {fileName}
+          </h3>
+          <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+            Tap the button below to view this PDF in your device's native viewer.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={handleOpenInTab}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-5 py-2.5',
+                'bg-primary-600 text-xs font-medium text-white',
+                'transition-colors hover:bg-primary-700 active:bg-primary-700',
+                'shadow-sm shadow-primary-500/25'
+              )}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open PDF
+            </button>
+            <button
+              onClick={handleDownload}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2.5',
+                'text-xs font-medium text-surface-600',
+                'border border-surface-200 transition-colors',
+                'hover:bg-surface-50 dark:border-surface-700',
+                'dark:text-surface-300 dark:hover:bg-surface-800'
+              )}
+            >
+              <Download className="h-4 w-4" />
+              Download
+            </button>
+          </div>
         </div>
       </div>
     );

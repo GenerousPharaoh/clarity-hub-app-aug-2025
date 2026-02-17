@@ -228,6 +228,50 @@ button, [role="button"], a {
   100% { transform: translateX(300%); }
 }
 
+/* ── Accessibility: Reduced Motion ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Accessibility: High Contrast ─────────────────────── */
+@media (prefers-contrast: more) {
+  :root {
+    --border-width: 2px;
+  }
+
+  * {
+    border-width: 2px;
+  }
+
+  :focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* ── Skip to Content Link ─────────────────────────────── */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--color-primary-600);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 0 0 8px 0;
+}
+
+.skip-to-content:focus {
+  left: 0;
+}
+
 /* ── Ambient Background (for dark mode depth) ─────────── */
 .dark .ambient-glow::before {
   content: '';

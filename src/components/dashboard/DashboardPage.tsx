@@ -155,12 +155,10 @@ export function DashboardPage() {
           </FadeIn>
         )}
 
-        {/* Loading skeletons */}
+        {/* Loading state — single skeleton to avoid layout flicker */}
         {isLoading && (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
+            <SkeletonCard />
           </div>
         )}
 

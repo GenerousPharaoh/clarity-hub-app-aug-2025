@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { useAIChat } from '@/hooks/useAIChat';
 import { ChatMessageComponent } from './ChatMessage';
 import { SuggestedPrompts } from './SuggestedPrompts';
@@ -145,8 +146,20 @@ export function AIChatPanel() {
           </div>
         ) : (
           <div className="py-2">
-            {/* Clear chat button */}
-            <div className="flex justify-end px-4 pb-1">
+            {/* Chat actions: export + clear */}
+            <div className="flex justify-end gap-1 px-4 pb-1">
+              <ExportButton
+                content=""
+                title="AI Chat Conversation"
+                type="chat"
+                chatMessages={messages.map((m) => ({
+                  role: m.role,
+                  content: m.content,
+                  model: m.model,
+                  timestamp: m.timestamp,
+                }))}
+                className="text-[10px] py-1 px-2"
+              />
               <button
                 onClick={() => setShowClearConfirm(true)}
                 className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"

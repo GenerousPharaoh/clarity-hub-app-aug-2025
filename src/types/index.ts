@@ -17,6 +17,19 @@ export interface AppUser {
   avatar_url: string | null;
 }
 
+// AI Chat source citation
+export interface ChatSource {
+  sourceIndex: number;
+  chunkId: string;
+  fileId: string;
+  fileName: string;
+  fileType: string | null;
+  pageNumber: number | null;
+  sectionHeading: string | null;
+  contentPreview: string;
+  timestampStart: number | null;
+}
+
 // AI Chat types (UI representation)
 export interface ChatMessage {
   id: string;
@@ -25,6 +38,8 @@ export interface ChatMessage {
   model?: 'gemini' | 'gpt';
   timestamp: Date;
   fileContext?: string;
+  sources?: ChatSource[];
+  complexity?: string;
 }
 
 // Panel state

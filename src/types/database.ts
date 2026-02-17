@@ -18,6 +18,8 @@ export type Database = {
           model: string | null
           file_context: string | null
           created_at: string | null
+          sources: Json | null
+          complexity: string | null
         }
         Insert: {
           id?: string
@@ -27,6 +29,8 @@ export type Database = {
           model?: string | null
           file_context?: string | null
           created_at?: string | null
+          sources?: Json | null
+          complexity?: string | null
         }
         Update: {
           id?: string
@@ -36,6 +40,8 @@ export type Database = {
           model?: string | null
           file_context?: string | null
           created_at?: string | null
+          sources?: Json | null
+          complexity?: string | null
         }
         Relationships: [
           {
@@ -55,6 +61,18 @@ export type Database = {
           file_id: string
           id: string
           metadata: Json | null
+          chunk_type: string | null
+          chunk_index: number | null
+          parent_chunk_id: string | null
+          page_number: number | null
+          section_heading: string | null
+          char_start: number | null
+          char_end: number | null
+          timestamp_start: number | null
+          timestamp_end: number | null
+          source_file_name: string | null
+          source_file_type: string | null
+          fts: unknown
         }
         Insert: {
           content: string
@@ -63,6 +81,17 @@ export type Database = {
           file_id: string
           id?: string
           metadata?: Json | null
+          chunk_type?: string | null
+          chunk_index?: number | null
+          parent_chunk_id?: string | null
+          page_number?: number | null
+          section_heading?: string | null
+          char_start?: number | null
+          char_end?: number | null
+          timestamp_start?: number | null
+          timestamp_end?: number | null
+          source_file_name?: string | null
+          source_file_type?: string | null
         }
         Update: {
           content?: string
@@ -71,6 +100,17 @@ export type Database = {
           file_id?: string
           id?: string
           metadata?: Json | null
+          chunk_type?: string | null
+          chunk_index?: number | null
+          parent_chunk_id?: string | null
+          page_number?: number | null
+          section_heading?: string | null
+          char_start?: number | null
+          char_end?: number | null
+          timestamp_start?: number | null
+          timestamp_end?: number | null
+          source_file_name?: string | null
+          source_file_type?: string | null
         }
         Relationships: [
           {
@@ -121,6 +161,12 @@ export type Database = {
           last_modified: string | null
           name: string
           project_id: string
+          processing_status: string | null
+          processed_at: string | null
+          ai_summary: string | null
+          extracted_text: string | null
+          chunk_count: number | null
+          processing_error: string | null
         }
         Insert: {
           added_at?: string | null
@@ -133,6 +179,12 @@ export type Database = {
           last_modified?: string | null
           name: string
           project_id: string
+          processing_status?: string | null
+          processed_at?: string | null
+          ai_summary?: string | null
+          extracted_text?: string | null
+          chunk_count?: number | null
+          processing_error?: string | null
         }
         Update: {
           added_at?: string | null
@@ -145,6 +197,12 @@ export type Database = {
           last_modified?: string | null
           name?: string
           project_id?: string
+          processing_status?: string | null
+          processed_at?: string | null
+          ai_summary?: string | null
+          extracted_text?: string | null
+          chunk_count?: number | null
+          processing_error?: string | null
         }
         Relationships: [
           {
@@ -330,6 +388,30 @@ export type Database = {
           source_id: string
           source_type: string
           topics: string[]
+        }[]
+      }
+      search_documents: {
+        Args: {
+          p_query_text: string
+          p_query_embedding: string
+          p_match_count?: number
+          p_project_id?: string
+          p_file_type?: string
+          p_full_text_weight?: number
+          p_semantic_weight?: number
+          p_rrf_k?: number
+        }
+        Returns: {
+          chunk_id: string
+          file_id: string
+          content: string
+          page_number: number | null
+          section_heading: string | null
+          chunk_type: string
+          source_file_name: string
+          source_file_type: string
+          timestamp_start: number | null
+          rrf_score: number
         }[]
       }
     }

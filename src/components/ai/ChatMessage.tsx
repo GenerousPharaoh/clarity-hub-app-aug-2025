@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback, useState } from 'react';
+import { memo, useMemo, useCallback, useState, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -6,7 +6,8 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { cn } from '@/lib/utils';
 import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check } from 'lucide-react';
-import type { ChatMessage as ChatMessageType } from '@/types';
+import { ChatCitation, SourcesList } from './ChatCitation';
+import type { ChatMessage as ChatMessageType, ChatSource } from '@/types';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -25,6 +26,55 @@ const MODEL_CONFIG = {
       'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
   },
 } as const;
+
+const COMPLEXITY_CONFIG: Record<string, { label: string; className: string }> = {
+  deep: {
+    label: 'Deep Analysis',
+    className: 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+  },
+  moderate: {
+    label: 'Analysis',
+    className: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  },
+};
+
+/**
+ * Replace [Source N] patterns in text with ChatCitation components.
+ * Returns an array of string and ReactNode segments.
+ */
+function renderWithCitations(text: string, sources?: ChatSource[]): ReactNode[] {
+  if (!sources || sources.length === 0) return [text];
+
+  const parts: ReactNode[] = [];
+  const regex = /\[Source\s+(\d+)(?:[^\]]*)\]/gi;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const sourceNum = parseInt(match[1], 10);
+    const source = sources.find((s) => s.sourceIndex === sourceNum);
+
+    if (source) {
+      parts.push(<ChatCitation key={`citation-${match.index}`} source={source} />);
+    } else {
+      parts.push(match[0]); // Keep original text if source not found
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
+}
 
 function formatTimestamp(date: Date): string {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -112,6 +162,37 @@ function CodeBlock({
   );
 }
 
+/**
+ * Process React children from ReactMarkdown to replace [Source N] text nodes
+ * with ChatCitation components.
+ */
+function processChildrenForCitations(children: ReactNode, sources: ChatSource[]): ReactNode {
+  if (!children) return children;
+
+  // Handle array of children
+  if (Array.isArray(children)) {
+    return children.map((child, i) => {
+      if (typeof child === 'string') {
+        const parts = renderWithCitations(child, sources);
+        return parts.length === 1 && typeof parts[0] === 'string'
+          ? parts[0]
+          : <span key={i}>{parts}</span>;
+      }
+      return child;
+    });
+  }
+
+  // Handle single string child
+  if (typeof children === 'string') {
+    const parts = renderWithCitations(children, sources);
+    return parts.length === 1 && typeof parts[0] === 'string'
+      ? parts[0]
+      : <span>{parts}</span>;
+  }
+
+  return children;
+}
+
 export const ChatMessageComponent = memo(function ChatMessageComponent({
   message,
   onRetry,
@@ -179,22 +260,34 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          {/* Model badge */}
-          {modelConfig && !isError && (
-            <div className="mb-1.5">
-              <span
-                className={cn(
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
-                  modelConfig.className
-                )}
-                title={
-                  message.model === 'gpt'
-                    ? 'GPT-5.2 — used for deep legal reasoning and complex analysis'
-                    : 'Gemini — used for general questions and file analysis'
-                }
-              >
-                {modelConfig.label}
-              </span>
+          {/* Model + complexity badges */}
+          {(modelConfig || message.complexity) && !isError && (
+            <div className="mb-1.5 flex items-center gap-1.5">
+              {modelConfig && (
+                <span
+                  className={cn(
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    modelConfig.className
+                  )}
+                  title={
+                    message.model === 'gpt'
+                      ? 'GPT-5.2 — used for deep legal reasoning and complex analysis'
+                      : 'Gemini — used for general questions and file analysis'
+                  }
+                >
+                  {modelConfig.label}
+                </span>
+              )}
+              {message.complexity && COMPLEXITY_CONFIG[message.complexity] && (
+                <span
+                  className={cn(
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    COMPLEXITY_CONFIG[message.complexity].className
+                  )}
+                >
+                  {COMPLEXITY_CONFIG[message.complexity].label}
+                </span>
+              )}
             </div>
           )}
 
@@ -261,7 +354,14 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                       </code>
                     );
                   },
-                  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                  p: ({ children }) => {
+                    // Process children to replace [Source N] text with citation chips
+                    if (message.sources && message.sources.length > 0) {
+                      const processed = processChildrenForCitations(children, message.sources);
+                      return <p className="mb-2 last:mb-0">{processed}</p>;
+                    }
+                    return <p className="mb-2 last:mb-0">{children}</p>;
+                  },
                   ul: ({ children }) => (
                     <ul className="mb-2 ml-4 list-disc space-y-1 last:mb-0">{children}</ul>
                   ),
@@ -333,6 +433,13 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               </ReactMarkdown>
             </div>
           </div>
+
+          {/* Sources list */}
+          {!isError && message.sources && message.sources.length > 0 && (
+            <div className="mt-1">
+              <SourcesList sources={message.sources} />
+            </div>
+          )}
 
           {/* Retry button for error messages */}
           {isError && onRetry && (

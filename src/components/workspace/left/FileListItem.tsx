@@ -8,6 +8,10 @@ import {
   File,
   Trash2,
   MoreVertical,
+  Zap,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn, formatDate, getFileExtension, getFileTypeFromExtension } from '@/lib/utils';
 import { FILE_TYPE_COLORS } from '@/lib/constants';
@@ -17,6 +21,8 @@ import type { FileRecord } from '@/types';
 
 interface FileListItemProps {
   file: FileRecord;
+  onProcess?: (fileId: string) => void;
+  processingState?: { isProcessing: boolean; error: string | null };
 }
 
 const typeIconMap: Record<string, React.ElementType> = {
@@ -30,7 +36,7 @@ const typeIconMap: Record<string, React.ElementType> = {
   other: File,
 };
 
-export function FileListItem({ file }: FileListItemProps) {
+export function FileListItem({ file, onProcess, processingState }: FileListItemProps) {
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const deleteFile = useDeleteFile();
@@ -170,8 +176,50 @@ export function FileListItem({ file }: FileListItemProps) {
                 {formatDate(file.added_at)}
               </span>
             )}
+            {/* Processing status badge */}
+            {file.processing_status === 'completed' && (
+              <span title={file.ai_summary || 'Processed'}>
+                <CheckCircle2 className="h-3 w-3 text-green-500" />
+              </span>
+            )}
+            {file.processing_status === 'failed' && (
+              <span title={file.processing_error || 'Processing failed'}>
+                <AlertTriangle className="h-3 w-3 text-red-400" />
+              </span>
+            )}
           </div>
         </div>
+
+        {/* Process button */}
+        {onProcess && (!file.processing_status || file.processing_status === 'pending' || file.processing_status === 'failed') && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onProcess(file.id);
+            }}
+            disabled={processingState?.isProcessing}
+            className={cn(
+              'flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors',
+              processingState?.isProcessing
+                ? 'text-accent-500'
+                : 'text-surface-400 hover:bg-accent-50 hover:text-accent-600 dark:hover:bg-accent-900/20 dark:hover:text-accent-400'
+            )}
+            title={file.processing_status === 'failed' ? 'Retry processing' : 'Process file for AI search'}
+            aria-label={`Process ${file.name}`}
+          >
+            {processingState?.isProcessing ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Zap className="h-3.5 w-3.5" />
+            )}
+          </button>
+        )}
+        {file.processing_status === 'processing' && !processingState?.isProcessing && (
+          <div className="flex h-6 w-6 shrink-0 items-center justify-center">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-500" />
+          </div>
+        )}
 
         {/* Menu button (shows on hover or when menu is open) */}
         <button

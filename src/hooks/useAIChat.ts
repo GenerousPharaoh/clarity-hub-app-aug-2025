@@ -4,7 +4,8 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { aiRouter } from '@/services/aiRouter';
 import { downloadFile } from '@/services/storageService';
-import type { ChatMessage } from '@/types';
+import { searchDocuments, formatSearchContext, type SearchResult } from '@/services/documentSearchService';
+import type { ChatMessage, ChatSource } from '@/types';
 import type { TablesInsert } from '@/types/database';
 
 const CHAT_KEY = 'chat-messages';
@@ -21,6 +22,8 @@ function rowToMessage(row: {
   model: string | null;
   file_context: string | null;
   created_at: string | null;
+  sources?: unknown;
+  complexity?: string | null;
 }): ChatMessage {
   return {
     id: row.id,
@@ -29,7 +32,24 @@ function rowToMessage(row: {
     model: (row.model as 'gemini' | 'gpt') ?? undefined,
     timestamp: row.created_at ? new Date(row.created_at) : new Date(),
     fileContext: row.file_context ?? undefined,
+    sources: (row.sources as ChatSource[] | undefined) ?? undefined,
+    complexity: row.complexity ?? undefined,
   };
+}
+
+/** Convert search results into ChatSource objects. */
+function searchResultsToSources(results: SearchResult[]): ChatSource[] {
+  return results.map((r, i) => ({
+    sourceIndex: i + 1,
+    chunkId: r.chunkId,
+    fileId: r.fileId,
+    fileName: r.sourceFileName,
+    fileType: r.sourceFileType,
+    pageNumber: r.pageNumber,
+    sectionHeading: r.sectionHeading,
+    contentPreview: r.content.slice(0, 200),
+    timestampStart: r.timestampStart,
+  }));
 }
 
 /**
@@ -244,16 +264,38 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           },
         ]);
 
+        // Search processed documents for relevant context
+        let documentContext = '';
+        let sources: ChatSource[] = [];
+        try {
+          const searchResults = await searchDocuments({
+            query: content.trim(),
+            projectId,
+          });
+          if (searchResults.length > 0) {
+            documentContext = formatSearchContext(searchResults);
+            sources = searchResultsToSources(searchResults);
+          }
+        } catch {
+          // Non-critical: proceed without search context
+        }
+
         // Build conversation history from cache (avoids stale closure)
         const currentMessages = queryClient.getQueryData<ChatMessage[]>(chatKey(projectId)) ?? [];
         const conversationHistory = currentMessages
           .filter((m) => m.content !== '__loading__')
           .map((m) => ({ role: m.role, content: m.content }));
 
+        // Combine file context with document search context
+        const fullContext = [enrichedContext || fileContextStr, documentContext]
+          .filter(Boolean)
+          .join('\n');
+
         const result = await aiRouter.routeQuery({
           query: content.trim(),
           conversationHistory,
-          caseContext: enrichedContext || fileContextStr,
+          caseContext: fullContext || undefined,
+          sources: sources.length > 0 ? sources : undefined,
         });
 
         if (abortRef.current) return;
@@ -265,6 +307,8 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           content: result.response,
           model: result.model,
           file_context: null,
+          sources: sources.length > 0 ? JSON.parse(JSON.stringify(sources)) : null,
+          complexity: result.complexity,
         });
 
         // Remove loading indicator and add real response

@@ -64,6 +64,9 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
       <BrowserRouter>
         <AuthProvider>
           <Suspense fallback={<LoadingScreen />}>

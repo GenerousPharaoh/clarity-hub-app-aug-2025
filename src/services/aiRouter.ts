@@ -93,6 +93,7 @@ class AIRouter {
     query: string;
     conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
     caseContext?: string;
+    sources?: Array<{ sourceIndex: number; fileName: string; pageNumber: number | null; sectionHeading: string | null }>;
   }): Promise<{
     response: string;
     model: ModelChoice;
@@ -105,10 +106,15 @@ class AIRouter {
     // Build legal knowledge context from the RAG pipeline
     const legalContext = await legalKnowledge.buildLegalContext(params.query);
 
+    // Build citation instruction if sources are available
+    const citationInstruction = params.sources && params.sources.length > 0
+      ? '\n\nIMPORTANT: When referencing information from the provided document search results, cite them using [Source N] notation (e.g., [Source 1], [Source 2]). Each [Source N] corresponds to a specific document chunk provided in the context. Only cite sources that are actually relevant to your answer.'
+      : '';
+
     if (model === 'gpt') {
       const result = await openaiService.deepLegalReasoning({
         query: params.query,
-        legalContext,
+        legalContext: legalContext + citationInstruction,
         caseContext: params.caseContext,
         conversationHistory: params.conversationHistory,
       });
@@ -123,7 +129,7 @@ class AIRouter {
 
     // Gemini path
     const contextParts: string[] = [];
-    if (legalContext) contextParts.push(legalContext);
+    if (legalContext) contextParts.push(legalContext + citationInstruction);
     if (params.caseContext) contextParts.push(params.caseContext);
 
     const response = await geminiAI.chatWithContext(

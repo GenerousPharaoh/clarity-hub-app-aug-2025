@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { useFiles } from '@/hooks/useFiles';
+import { useProcessFile } from '@/hooks/useProcessFile';
 import { FileListItem } from './FileListItem';
 import { FileUploadZone } from './FileUploadZone';
 
@@ -16,6 +17,15 @@ export function LeftPanel() {
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
 
   const { data: files = [], isLoading, isError, refetch } = useFiles(selectedProjectId);
+  const { processFile, getState: getProcessState } = useProcessFile();
+
+  const handleProcess = useCallback(
+    (fileId: string) => {
+      if (!selectedProjectId) return;
+      processFile(fileId, selectedProjectId);
+    },
+    [selectedProjectId, processFile]
+  );
 
   // Debounced search: input updates immediately, filtering deferred by 150ms
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
@@ -171,7 +181,11 @@ export function LeftPanel() {
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <FileListItem file={file} />
+                  <FileListItem
+                    file={file}
+                    onProcess={handleProcess}
+                    processingState={getProcessState(file.id)}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>

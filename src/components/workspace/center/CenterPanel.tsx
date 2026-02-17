@@ -9,6 +9,7 @@ import { ProjectOverview } from './ProjectOverview';
 import { TipTapEditor } from './editor/TipTapEditor';
 import { ExhibitsTab } from './ExhibitsTab';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { ExportButton } from '@/components/shared/ExportButton';
 import {
   LayoutList,
   PenLine,
@@ -391,6 +392,15 @@ function NotesTab() {
             <Plus className="h-3.5 w-3.5" />
           )}
         </button>
+
+        {/* Export current note */}
+        {activeNote && (
+          <ExportButton
+            content={activeNote.content || ''}
+            title={activeNote.title || 'Untitled'}
+            type="note"
+          />
+        )}
 
         {/* Delete current note */}
         {activeNote && (

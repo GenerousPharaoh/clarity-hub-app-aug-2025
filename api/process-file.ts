@@ -66,17 +66,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'Invalid or expired authorization token' });
     }
 
-    // Verify project access with explicit user ID to avoid auth-context mismatch.
-    const { data: hasAccess, error: memberError } = await serviceClient.rpc(
-      'user_has_project_access',
-      { p_project_id: projectId, p_user_id: userData.user.id }
-    );
+    // Verify project access: check ownership OR membership via direct queries.
+    const userId = userData.user.id;
 
-    if (memberError) {
-      console.error('Project access check failed:', memberError);
+    const [ownerResult, memberResult] = await Promise.all([
+      serviceClient
+        .from('projects')
+        .select('id')
+        .eq('id', projectId)
+        .eq('owner_id', userId)
+        .maybeSingle(),
+      serviceClient
+        .from('projects_users')
+        .select('project_id')
+        .eq('project_id', projectId)
+        .eq('user_id', userId)
+        .maybeSingle(),
+    ]);
+
+    if (ownerResult.error && memberResult.error) {
+      console.error('Project access check failed:', ownerResult.error, memberResult.error);
       return res.status(500).json({ error: 'Failed to verify project access' });
     }
-    if (!hasAccess) {
+    if (!ownerResult.data && !memberResult.data) {
       return res.status(403).json({ error: 'Not authorized to access this project' });
     }
 

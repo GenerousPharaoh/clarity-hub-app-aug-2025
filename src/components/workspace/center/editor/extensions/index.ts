@@ -30,7 +30,7 @@ export function getExtensions() {
       },
     }),
     Placeholder.configure({
-      placeholder: 'Start writing — use "/" for commands...',
+      placeholder: 'Start drafting your document - use "/" for commands...',
       emptyEditorClass: 'is-editor-empty',
     }),
     Underline,

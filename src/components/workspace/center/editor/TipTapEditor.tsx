@@ -14,7 +14,6 @@ interface TipTapEditorProps {
   noteId: string;
   projectId: string;
   initialContent: string;
-  title?: string;
 }
 
 type DialogType = 'link' | 'image' | null;
@@ -23,7 +22,6 @@ export function TipTapEditor({
   noteId,
   projectId,
   initialContent,
-  title,
 }: TipTapEditorProps) {
   const { saveStatus, triggerSave, cleanup } = useAutoSave(noteId, projectId);
   const [dialogType, setDialogType] = useState<DialogType>(null);
@@ -121,6 +119,7 @@ export function TipTapEditor({
   if (!editor) return null;
 
   const wordCount = editor.storage.characterCount?.words() ?? 0;
+  const charCount = editor.storage.characterCount?.characters() ?? 0;
   const readingTime = Math.max(1, Math.round(wordCount / 230));
 
   return (
@@ -128,23 +127,18 @@ export function TipTapEditor({
       {/* Fixed toolbar at top */}
       <EditorToolbar editor={editor} onInsertLink={handleInsertLink} onInsertImage={handleInsertImage} />
 
-      {/* Scrollable document canvas with subtle background */}
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-surface-100/80 via-surface-50 to-surface-100/50 dark:from-surface-950/50 dark:via-surface-900 dark:to-surface-950/60">
+      {/* Scrollable document canvas */}
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-surface-100/90 via-surface-50 to-surface-100/70 dark:from-surface-950/70 dark:via-surface-900 dark:to-surface-950/70">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
         <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} onInsertLink={handleInsertLink} />
 
-        {/* Paper-like container */}
-        <div className="mx-auto w-full max-w-[1020px] px-3 py-4 md:px-6 md:py-8">
-          <div className="rounded-2xl border border-surface-200/80 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.45)] ring-1 ring-white/70 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/40">
-            <div className="mx-auto max-w-[800px] px-6 pt-8 pb-0 md:px-12 md:pt-12">
-              <h1
-                className={cn(
-                  'font-heading text-3xl font-bold leading-tight tracking-tight md:text-[2.25rem]',
-                  'text-surface-900 dark:text-surface-50'
-                )}
-              >
-                {(title || 'Untitled').trim() || 'Untitled'}
-              </h1>
+        {/* Paper canvas */}
+        <div className="mx-auto w-full max-w-[1080px] px-3 py-4 md:px-6 md:py-8">
+          <div className="relative overflow-hidden rounded-[24px] border border-surface-200/90 bg-white shadow-[0_24px_56px_-36px_rgba(15,23,42,0.5)] ring-1 ring-white/80 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/45">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-primary-50/60 to-transparent dark:from-primary-900/20" />
+            <div className="mx-auto flex max-w-[800px] items-center justify-between px-6 pt-4 text-[10px] font-medium uppercase tracking-[0.08em] text-surface-400 dark:text-surface-500 md:px-12 md:pt-5">
+              <span>Document body</span>
+              <span className="hidden md:inline">Tip: Type "/" for commands</span>
             </div>
 
             {/* Editor content */}
@@ -154,9 +148,10 @@ export function TipTapEditor({
       </div>
 
       {/* Persistent status bar */}
-      <div className="flex h-8 shrink-0 items-center justify-between overflow-hidden border-t border-surface-200/80 bg-white/90 px-3.5 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90">
+      <div className="flex h-9 shrink-0 items-center justify-between overflow-hidden border-t border-surface-200/80 bg-white/90 px-3.5 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90">
         <div className="flex min-w-0 items-center gap-3 text-[11px] tabular-nums text-surface-400 dark:text-surface-500">
           <span className="whitespace-nowrap">{wordCount.toLocaleString()} words</span>
+          <span className="hidden whitespace-nowrap sm:inline">{charCount.toLocaleString()} chars</span>
           <span className="whitespace-nowrap">{readingTime} min read</span>
           <span className="hidden whitespace-nowrap md:inline">Type "/" for commands</span>
         </div>
@@ -173,7 +168,7 @@ export function TipTapEditor({
           {saveStatus === 'saved' && <Check className="h-3 w-3" />}
           {saveStatus === 'error' && <AlertCircle className="h-3 w-3" />}
           {saveStatus === 'saving' && 'Saving...'}
-          {saveStatus === 'saved' && 'Saved'}
+          {saveStatus === 'saved' && 'All changes saved'}
           {saveStatus === 'error' && 'Failed'}
         </div>
       </div>

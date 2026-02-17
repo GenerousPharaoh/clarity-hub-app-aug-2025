@@ -351,7 +351,7 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
   return (
     <div
       ref={containerRef}
-      className="flex shrink-0 items-center overflow-hidden border-b border-surface-200/80 bg-white/90 px-2.5 py-1.5 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90"
+      className="flex shrink-0 items-center overflow-hidden border-b border-surface-200/90 bg-gradient-to-b from-white/95 to-white/85 px-2.5 py-1.5 backdrop-blur dark:border-surface-800 dark:from-surface-900/95 dark:to-surface-900/85"
     >
       {/* Inline groups — clipped to available space */}
       <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-hidden">
@@ -497,12 +497,12 @@ const ToolbarButton = forwardRef<
       disabled={disabled}
       title={title}
       className={cn(
-        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-transparent transition-colors',
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-transparent transition-all duration-150',
         active
-          ? 'border-primary-200 bg-primary-50 text-primary-700 shadow-sm dark:border-primary-800/60 dark:bg-primary-900/40 dark:text-primary-300'
-          : 'text-surface-500 hover:border-surface-200 hover:bg-white hover:text-surface-700 dark:text-surface-400 dark:hover:border-surface-700 dark:hover:bg-surface-800 dark:hover:text-surface-200',
+          ? 'border-primary-200 bg-primary-50 text-primary-700 shadow-[0_1px_2px_rgba(15,23,42,0.1)] ring-1 ring-primary-100 dark:border-primary-800/60 dark:bg-primary-900/40 dark:text-primary-300 dark:ring-primary-900/40'
+          : 'text-surface-500 hover:-translate-y-px hover:border-surface-200 hover:bg-white hover:text-surface-700 dark:text-surface-400 dark:hover:border-surface-700 dark:hover:bg-surface-800 dark:hover:text-surface-200',
         disabled &&
-          'cursor-not-allowed opacity-35 hover:border-transparent hover:bg-transparent hover:text-surface-500 dark:hover:bg-transparent dark:hover:text-surface-400'
+          'cursor-not-allowed opacity-35 hover:translate-y-0 hover:border-transparent hover:bg-transparent hover:text-surface-500 dark:hover:bg-transparent dark:hover:text-surface-400'
       )}
     >
       {children}
@@ -511,5 +511,5 @@ const ToolbarButton = forwardRef<
 });
 
 function Divider() {
-  return <div className="mx-1 h-4.5 w-px shrink-0 bg-surface-200/90 dark:bg-surface-700/90" />;
+  return <div className="mx-1 h-4.5 w-px shrink-0 bg-surface-200/70 dark:bg-surface-700/80" />;
 }

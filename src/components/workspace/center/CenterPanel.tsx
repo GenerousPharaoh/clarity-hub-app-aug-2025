@@ -489,7 +489,6 @@ function NotesTab() {
             noteId={activeNote.id}
             projectId={activeNote.project_id}
             initialContent={activeNote.content || ''}
-            title={activeNote.title || ''}
           />
         </div>
       ) : (

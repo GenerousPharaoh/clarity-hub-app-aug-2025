@@ -5,6 +5,7 @@ interface SuggestedPromptsProps {
   onSelectPrompt: (prompt: string) => void;
   selectedFileType?: string | null;
   selectedFileName?: string | null;
+  compact?: boolean;
 }
 
 interface Prompt {
@@ -149,9 +150,15 @@ function getFilePrompts(fileType: string | null, fileName: string | null): Promp
   }
 }
 
-export function SuggestedPrompts({ onSelectPrompt, selectedFileType, selectedFileName }: SuggestedPromptsProps) {
+export function SuggestedPrompts({
+  onSelectPrompt,
+  selectedFileType,
+  selectedFileName,
+  compact = false,
+}: SuggestedPromptsProps) {
   const filePrompts = selectedFileType ? getFilePrompts(selectedFileType, selectedFileName ?? null) : [];
   const prompts = filePrompts.length > 0 ? filePrompts : GENERAL_PROMPTS;
+  const visiblePrompts = compact ? prompts.slice(0, 4) : prompts;
 
   return (
     <div className="w-full">
@@ -160,17 +167,26 @@ export function SuggestedPrompts({ onSelectPrompt, selectedFileType, selectedFil
           Suggestions for selected file
         </p>
       )}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(164px,1fr))] gap-2 px-4">
-        {prompts.map((prompt) => (
+      <div
+        className={compact
+          ? 'grid grid-cols-1 gap-2 px-3'
+          : 'grid grid-cols-[repeat(auto-fit,minmax(164px,1fr))] gap-2 px-4'}
+      >
+        {visiblePrompts.map((prompt) => (
           <button
             key={prompt.label}
             onClick={() => onSelectPrompt(prompt.text)}
-            className="group flex min-h-20 items-start gap-2.5 rounded-lg border border-surface-200 bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-50/50 hover:shadow-md dark:border-surface-700 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:shadow-lg dark:hover:shadow-surface-950/30"
+            className={compact
+              ? 'group flex items-start gap-2 rounded-lg border border-surface-200 bg-white px-2.5 py-2 text-left shadow-sm transition-all hover:border-accent-300 hover:bg-accent-50/50 dark:border-surface-700 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'
+              : 'group flex min-h-20 items-start gap-2.5 rounded-lg border border-surface-200 bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-50/50 hover:shadow-md dark:border-surface-700 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:shadow-lg dark:hover:shadow-surface-950/30'}
           >
             <div className="mt-0.5 shrink-0 text-surface-400 transition-colors group-hover:text-accent-500 dark:text-surface-500 dark:group-hover:text-accent-400">
               {prompt.icon}
             </div>
-            <span className="text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200">
+            <span className={compact
+              ? 'text-[11px] leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'
+              : 'text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'}
+            >
               {prompt.label}
             </span>
           </button>

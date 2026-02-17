@@ -25,11 +25,13 @@ export function AIChatPanel() {
   const [input, setInput] = useState('');
   const [effort, setEffort] = useState<EffortLevel>('standard');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const userHasScrolledRef = useRef(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(0);
 
   // Smart auto-scroll: only scroll if user hasn't manually scrolled up
   useEffect(() => {
@@ -58,6 +60,19 @@ export function AIChatPanel() {
 
     container.addEventListener('scroll', handleScroll, { passive: true });
     return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Track panel width to switch to compact layouts when the panel is narrow.
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+
+    const update = () => setPanelWidth(el.clientWidth);
+    update();
+
+    const ro = new ResizeObserver(() => update());
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // Auto-resize textarea
@@ -146,6 +161,8 @@ export function AIChatPanel() {
   );
 
   const isEmpty = messages.length === 0;
+  const narrow = panelWidth > 0 && panelWidth < 320;
+  const compact = panelWidth > 0 && panelWidth < 250;
 
   // Loading label based on effort
   const loadingLabel = effort === 'deep'
@@ -166,7 +183,7 @@ export function AIChatPanel() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div ref={panelRef} className="flex h-full min-w-0 flex-col">
       {/* Messages area */}
       <div
         ref={messagesContainerRef}
@@ -182,14 +199,14 @@ export function AIChatPanel() {
         ) : isEmpty ? (
           <div className="flex h-full flex-col">
             {/* Welcome section */}
-            <div className="flex flex-1 flex-col items-center justify-center px-6 pb-4">
+            <div className={cn('flex flex-1 flex-col items-center justify-center pb-4', narrow ? 'px-3' : 'px-6')}>
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-50 dark:bg-accent-900/30">
                 <Sparkles className="h-6 w-6 text-accent-500 dark:text-accent-400" />
               </div>
               <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
                 AI Legal Assistant
               </h3>
-              <p className="mt-1.5 mb-6 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+              <p className={cn('mt-1.5 mb-6 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[12rem]' : 'max-w-xs')}>
                 Ask questions about your documents, get case analysis, or
                 request help with legal research.
               </p>
@@ -199,6 +216,7 @@ export function AIChatPanel() {
                 onSelectPrompt={handlePromptSelect}
                 selectedFileType={selectedFile?.file_type}
                 selectedFileName={selectedFile?.name}
+                compact={narrow}
               />
             </div>
           </div>
@@ -286,7 +304,7 @@ export function AIChatPanel() {
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 border-t border-surface-200 p-3 dark:border-surface-700">
+      <div className={cn('shrink-0 border-t border-surface-200 dark:border-surface-700', compact ? 'p-2' : 'p-3')}>
         {/* File context indicator */}
         {selectedFile && (
           <div className="mb-2 flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 dark:border-primary-800/50 dark:bg-primary-900/20">
@@ -311,7 +329,7 @@ export function AIChatPanel() {
 
         {/* Effort selector */}
         <div className="mb-2">
-          <EffortSelector value={effort} onChange={setEffort} variant="full" wrap />
+          <EffortSelector value={effort} onChange={setEffort} variant={narrow ? 'compact' : 'full'} wrap={!narrow} />
         </div>
 
         <div
@@ -327,7 +345,7 @@ export function AIChatPanel() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             rows={1}
-            placeholder="Ask about your case..."
+            placeholder={compact ? 'Ask...' : 'Ask about your case...'}
             disabled={isLoading}
             className="flex-1 resize-none bg-transparent text-[13px] text-surface-700 placeholder:text-surface-400 focus:outline-none disabled:opacity-50 dark:text-surface-200 dark:placeholder:text-surface-500"
             style={{ minHeight: '24px', maxHeight: '120px' }}
@@ -351,12 +369,14 @@ export function AIChatPanel() {
           </button>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-1 px-1">
-          <span className="text-[10px] text-surface-400 dark:text-surface-500">
-            <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
-            <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>
-            <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Shift+Enter</kbd> new line
-          </span>
+        <div className={cn('mt-2 flex flex-wrap items-center gap-1 px-1', compact ? 'justify-end' : 'justify-between')}>
+          {!compact && (
+            <span className="text-[10px] text-surface-400 dark:text-surface-500">
+              <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
+              <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>
+              <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Shift+Enter</kbd> new line
+            </span>
+          )}
           <span className={cn(
             'text-[10px]',
             input.length > 3600

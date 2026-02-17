@@ -1,9 +1,8 @@
 /**
- * Gemini AI Service - Document Processing with Gemini 3.0 Pro
+ * Gemini AI Service - Document Processing with Gemini 2.5 Pro
  *
- * Uses Google's Gemini 3.0 Pro for legal document analysis.
- * Highest LegalBench accuracy (87%), lowest hallucination rate (0.7%),
- * native multimodal (text, images, audio, video in same context).
+ * Uses Google's Gemini 2.5 Pro for legal document analysis.
+ * Native multimodal (text, images, audio, video in same context).
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -58,7 +57,7 @@ class GeminiAIService {
       return;
     }
     this.model = genAI.getGenerativeModel({
-      model: 'gemini-3.0-pro',
+      model: 'gemini-2.5-pro',
       generationConfig: {
         temperature: 0.7,
         topK: 40,

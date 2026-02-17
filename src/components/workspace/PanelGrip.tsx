@@ -12,7 +12,7 @@ export function PanelGrip({ className, id }: PanelGripProps) {
     <PanelResizeHandle
       id={id}
       className={cn(
-        'group relative flex w-2 items-center justify-center',
+        'group relative z-10 flex w-2 items-center justify-center',
         'hover:w-2 active:w-2',
         'transition-colors duration-100',
         className

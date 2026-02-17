@@ -176,6 +176,7 @@ export function WorkspacePage() {
           minSize={1}
           collapsible
           collapsedSize={0}
+          className="overflow-hidden"
           onCollapse={() => {
             if (useAppStore.getState().isLeftPanelOpen)
               useAppStore.getState().setLeftPanel(false);
@@ -190,7 +191,7 @@ export function WorkspacePage() {
 
         <PanelGrip id="grip-left" />
 
-        <Panel id="center" order={2} defaultSize={45} minSize={20}>
+        <Panel id="center" order={2} defaultSize={45} minSize={20} className="overflow-hidden">
           <CenterPanel />
         </Panel>
 
@@ -204,6 +205,7 @@ export function WorkspacePage() {
           minSize={1}
           collapsible
           collapsedSize={0}
+          className="overflow-hidden"
           onCollapse={() => {
             if (useAppStore.getState().isRightPanelOpen)
               useAppStore.getState().setRightPanel(false);

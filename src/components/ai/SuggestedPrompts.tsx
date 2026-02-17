@@ -160,17 +160,17 @@ export function SuggestedPrompts({ onSelectPrompt, selectedFileType, selectedFil
           Suggestions for selected file
         </p>
       )}
-      <div className="grid grid-cols-1 gap-2 px-4 sm:grid-cols-2">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(164px,1fr))] gap-2 px-4">
         {prompts.map((prompt) => (
           <button
             key={prompt.label}
             onClick={() => onSelectPrompt(prompt.text)}
-            className="group flex items-start gap-2.5 rounded-lg border border-surface-200 bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-50/50 hover:shadow-md dark:border-surface-700 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:shadow-lg dark:hover:shadow-surface-950/30"
+            className="group flex min-h-20 items-start gap-2.5 rounded-lg border border-surface-200 bg-white p-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-50/50 hover:shadow-md dark:border-surface-700 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20 dark:hover:shadow-lg dark:hover:shadow-surface-950/30"
           >
             <div className="mt-0.5 shrink-0 text-surface-400 transition-colors group-hover:text-accent-500 dark:text-surface-500 dark:group-hover:text-accent-400">
               {prompt.icon}
             </div>
-            <span className="text-xs leading-relaxed text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200">
+            <span className="text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200">
               {prompt.label}
             </span>
           </button>

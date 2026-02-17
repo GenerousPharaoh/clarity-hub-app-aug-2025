@@ -99,14 +99,14 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-full items-center gap-1.5 px-3 text-xs font-medium transition-colors',
+        'relative flex h-full min-w-0 items-center gap-1.5 px-2.5 text-xs font-medium transition-colors',
         active
           ? activeColor
           : 'text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200'
       )}
     >
       {icon}
-      {label}
+      <span className="truncate">{label}</span>
       {active && (
         <motion.div
           layoutId="right-tab-indicator"

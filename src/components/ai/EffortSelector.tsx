@@ -19,6 +19,7 @@ interface EffortSelectorProps {
   onChange: (level: EffortLevel) => void;
   variant?: 'compact' | 'full';
   disabled?: boolean;
+  wrap?: boolean;
 }
 
 export function EffortSelector({
@@ -26,6 +27,7 @@ export function EffortSelector({
   onChange,
   variant = 'full',
   disabled = false,
+  wrap = false,
 }: EffortSelectorProps) {
   return (
     <div
@@ -33,6 +35,7 @@ export function EffortSelector({
       aria-label="AI reasoning effort level"
       className={cn(
         'flex items-center gap-1',
+        wrap && 'flex-wrap',
         disabled && 'pointer-events-none opacity-50'
       )}
     >
@@ -47,7 +50,7 @@ export function EffortSelector({
             title={description}
             onClick={() => onChange(level)}
             className={cn(
-              'flex items-center gap-1.5 rounded-full border px-2 py-1 text-[11px] font-medium transition-all',
+              'flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-1 text-[11px] font-medium transition-all',
               selected
                 ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700',

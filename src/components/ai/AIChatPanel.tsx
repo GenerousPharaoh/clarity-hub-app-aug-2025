@@ -311,7 +311,7 @@ export function AIChatPanel() {
 
         {/* Effort selector */}
         <div className="mb-2">
-          <EffortSelector value={effort} onChange={setEffort} variant="full" />
+          <EffortSelector value={effort} onChange={setEffort} variant="full" wrap />
         </div>
 
         <div
@@ -351,7 +351,7 @@ export function AIChatPanel() {
           </button>
         </div>
 
-        <div className="mt-2 flex items-center justify-between px-1">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-1 px-1">
           <span className="text-[10px] text-surface-400 dark:text-surface-500">
             <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
             <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>

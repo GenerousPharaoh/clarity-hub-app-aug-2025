@@ -134,9 +134,9 @@ function NotesTab() {
   const updateNote = useUpdateNote();
 
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [titleDraft, setTitleDraft] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
-  const titleInputRef = useRef<HTMLInputElement>(null);
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -172,6 +172,10 @@ function NotesTab() {
 
   const activeNote = notes?.find((n) => n.id === activeNoteId) ?? null;
 
+  useEffect(() => {
+    setTitleDraft(activeNote?.title || 'Untitled');
+  }, [activeNote?.id, activeNote?.title]);
+
   const handleCreate = useCallback(async () => {
     if (!selectedProjectId || !user) return;
     const result = await createNote.mutateAsync({
@@ -179,8 +183,8 @@ function NotesTab() {
       title: 'Untitled',
     });
     setActiveNoteId(result.id);
+    setTitleDraft('Untitled');
     setDropdownOpen(false);
-    setTimeout(() => titleInputRef.current?.focus(), 150);
   }, [selectedProjectId, user, createNote]);
 
   const handleNoteSelect = useCallback((noteId: string) => {
@@ -208,6 +212,23 @@ function NotesTab() {
     },
     [activeNote, selectedProjectId, updateNote]
   );
+
+  const commitTitleChange = useCallback(() => {
+    if (!activeNote || !selectedProjectId) return;
+    const nextTitle = titleDraft.trim() || 'Untitled';
+    if ((activeNote.title || 'Untitled') === nextTitle) return;
+    if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
+    updateNote.mutate({
+      id: activeNote.id,
+      projectId: selectedProjectId,
+      title: nextTitle,
+    });
+    setTitleDraft(nextTitle);
+  }, [activeNote, selectedProjectId, titleDraft, updateNote]);
+
+  const resetTitleDraft = useCallback(() => {
+    setTitleDraft(activeNote?.title || 'Untitled');
+  }, [activeNote?.title]);
 
   if (!selectedProjectId) {
     return (
@@ -300,19 +321,48 @@ function NotesTab() {
 
         {/* Note selector dropdown */}
         <div className="relative min-w-0 max-w-[28rem] flex-1" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen((prev) => !prev)}
+          <div
             className={cn(
-              'flex w-full items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5',
+              'flex h-9 w-full items-center rounded-lg border',
               'border-surface-200 bg-surface-50 text-sm font-medium text-surface-700',
               'transition-colors hover:border-surface-300 hover:bg-surface-100',
               'dark:border-surface-700 dark:bg-surface-800/70 dark:text-surface-200',
               'dark:hover:border-surface-600 dark:hover:bg-surface-800'
             )}
           >
-            <span className="min-w-0 truncate">{activeNote?.title || 'Untitled'}</span>
-            <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 text-surface-400 transition-transform', dropdownOpen && 'rotate-180')} />
-          </button>
+            <input
+              type="text"
+              value={titleDraft}
+              onChange={(e) => {
+                setTitleDraft(e.target.value);
+                handleTitleChange(e.target.value);
+              }}
+              onBlur={commitTitleChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commitTitleChange();
+                  (e.target as HTMLInputElement).blur();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  resetTitleDraft();
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+              className="min-w-0 flex-1 bg-transparent px-2.5 text-sm font-medium text-surface-700 outline-none placeholder:text-surface-400 dark:text-surface-200 dark:placeholder:text-surface-500"
+              placeholder="Untitled"
+              aria-label="Document title"
+            />
+            <button
+              type="button"
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="mr-1 flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-200 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title="Document list"
+              aria-label="Open document list"
+            >
+              <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', dropdownOpen && 'rotate-180')} />
+            </button>
+          </div>
 
           {/* Dropdown list */}
           <AnimatePresence>
@@ -440,8 +490,6 @@ function NotesTab() {
             projectId={activeNote.project_id}
             initialContent={activeNote.content || ''}
             title={activeNote.title || ''}
-            onTitleChange={handleTitleChange}
-            titleInputRef={titleInputRef}
           />
         </div>
       ) : (

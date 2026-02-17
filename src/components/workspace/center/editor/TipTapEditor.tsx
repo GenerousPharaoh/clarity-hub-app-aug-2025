@@ -15,8 +15,6 @@ interface TipTapEditorProps {
   projectId: string;
   initialContent: string;
   title?: string;
-  onTitleChange?: (value: string) => void;
-  titleInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 type DialogType = 'link' | 'image' | null;
@@ -26,8 +24,6 @@ export function TipTapEditor({
   projectId,
   initialContent,
   title,
-  onTitleChange,
-  titleInputRef,
 }: TipTapEditorProps) {
   const { saveStatus, triggerSave, cleanup } = useAutoSave(noteId, projectId);
   const [dialogType, setDialogType] = useState<DialogType>(null);
@@ -140,31 +136,16 @@ export function TipTapEditor({
         {/* Paper-like container */}
         <div className="mx-auto w-full max-w-[1020px] px-3 py-4 md:px-6 md:py-8">
           <div className="rounded-2xl border border-surface-200/80 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.45)] ring-1 ring-white/70 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/40">
-            {/* Notion-style inline title */}
-            {onTitleChange && (
-              <div className="mx-auto max-w-[800px] px-6 pt-8 pb-0 md:px-12 md:pt-12">
-                <input
-                  ref={titleInputRef}
-                  type="text"
-                  defaultValue={title || ''}
-                  key={noteId}
-                  onChange={(e) => onTitleChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      editor.commands.focus('start');
-                    }
-                  }}
-                  placeholder="Untitled Document"
-                  className={cn(
-                    'w-full bg-transparent font-heading text-3xl font-bold leading-tight tracking-tight md:text-[2.25rem]',
-                    'text-surface-900 dark:text-surface-50',
-                    'placeholder:text-surface-300 dark:placeholder:text-surface-600',
-                    'border-none outline-none focus:outline-none focus:ring-0'
-                  )}
-                />
-              </div>
-            )}
+            <div className="mx-auto max-w-[800px] px-6 pt-8 pb-0 md:px-12 md:pt-12">
+              <h1
+                className={cn(
+                  'font-heading text-3xl font-bold leading-tight tracking-tight md:text-[2.25rem]',
+                  'text-surface-900 dark:text-surface-50'
+                )}
+              >
+                {(title || 'Untitled').trim() || 'Untitled'}
+              </h1>
+            </div>
 
             {/* Editor content */}
             <EditorContent editor={editor} className="min-h-[62vh]" />

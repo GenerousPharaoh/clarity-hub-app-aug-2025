@@ -256,15 +256,7 @@ export function AIChatPanel() {
               />
             ))}
 
-            {/* Follow-up suggestions (below last message, only when not loading) */}
-            {!isLoading && latestFollowUps.length > 0 && (
-              <div className="px-4 pb-2 pl-[52px]">
-                <FollowUpSuggestions
-                  suggestions={latestFollowUps}
-                  onSelect={handleFollowUpSelect}
-                />
-              </div>
-            )}
+            {/* Follow-up suggestions are rendered inside ChatMessage for the latest assistant message */}
 
             {/* Loading indicator */}
             {isLoading && (

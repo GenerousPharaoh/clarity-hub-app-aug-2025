@@ -2,7 +2,7 @@
  * AI Router - Smart Model Selection
  *
  * Routes queries to the optimal AI model:
- * - Gemini 3.0 Pro: multimodal processing, general chat, document analysis
+ * - Gemini 2.5 Flash: multimodal processing, general chat, document analysis
  * - GPT-5.2: deep legal reasoning, complex analysis, strategy questions
  * - OpenAI embeddings: RAG vector search (text-embedding-3-small)
  *
@@ -171,7 +171,8 @@ class AIRouter {
       (params.conversationHistory ?? []).map((m) => ({
         role: m.role,
         content: m.content,
-      }))
+      })),
+      { maxOutputTokens: effortCfg.maxTokens }
     );
 
     return {
@@ -216,9 +217,8 @@ Answer: ${response.slice(0, 1000)}`;
     if (openaiService.isAvailable()) {
       return openaiService.generateEmbedding(text);
     }
-    if (geminiAI.isAvailable()) {
-      return geminiAI.generateEmbeddings(text);
-    }
+    // Don't fall back to Gemini embeddings (768-dim) — they are incompatible
+    // with the document_chunks table which uses 1536-dim vectors.
     return [];
   }
 
@@ -229,14 +229,7 @@ Answer: ${response.slice(0, 1000)}`;
     if (openaiService.isAvailable()) {
       return openaiService.generateEmbeddings(texts);
     }
-    // Gemini doesn't support batch, so do them one by one
-    if (geminiAI.isAvailable()) {
-      const results: number[][] = [];
-      for (const text of texts) {
-        results.push(await geminiAI.generateEmbeddings(text));
-      }
-      return results;
-    }
+    // Don't fall back to Gemini embeddings (768-dim) — incompatible with 1536-dim storage.
     return [];
   }
 }

@@ -53,25 +53,37 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
   const results: number[][] = [];
 
   for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-    const batch = texts.slice(i, i + BATCH_SIZE)
-      .map((t) => truncateForEmbedding(t.trim()))
-      .filter((t) => t.length > 0);
+    const slice = texts.slice(i, i + BATCH_SIZE);
+    const prepared = slice.map((t) => truncateForEmbedding(t.trim()));
 
-    if (batch.length === 0) {
-      // Fill with empty arrays for skipped entries
-      for (let j = 0; j < Math.min(BATCH_SIZE, texts.length - i); j++) {
-        results.push([]);
+    // Track which indices have content vs empty
+    const nonEmptyIndices: number[] = [];
+    const nonEmptyTexts: string[] = [];
+    for (let j = 0; j < prepared.length; j++) {
+      if (prepared[j].length > 0) {
+        nonEmptyIndices.push(j);
+        nonEmptyTexts.push(prepared[j]);
       }
+    }
+
+    if (nonEmptyTexts.length === 0) {
+      for (let j = 0; j < slice.length; j++) results.push([]);
       continue;
     }
 
     const response = await client.embeddings.create({
       model: EMBEDDING_MODEL,
-      input: batch,
+      input: nonEmptyTexts,
     });
 
-    for (const item of response.data) {
-      results.push(item.embedding);
+    // Map embeddings back to correct positions, empty for skipped texts
+    const embeddingMap = new Map<number, number[]>();
+    for (let j = 0; j < response.data.length; j++) {
+      embeddingMap.set(nonEmptyIndices[j], response.data[j].embedding);
+    }
+
+    for (let j = 0; j < slice.length; j++) {
+      results.push(embeddingMap.get(j) ?? []);
     }
   }
 

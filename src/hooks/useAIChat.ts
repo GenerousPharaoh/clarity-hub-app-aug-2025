@@ -328,6 +328,8 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           file_context: null,
           sources: sources.length > 0 ? JSON.parse(JSON.stringify(sources)) : null,
           complexity: result.complexity,
+          effort_level: effort,
+          follow_ups: followUps.length > 0 ? followUps : null,
         });
 
         // Remove loading indicator and add real response with effort + follow-ups
@@ -350,7 +352,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
             project_id: projectId,
             role: 'assistant',
             content: errorContent,
-            model: 'gemini',
+            model: null,
             file_context: null,
           });
 

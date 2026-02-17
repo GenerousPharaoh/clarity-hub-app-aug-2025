@@ -72,7 +72,7 @@ class GeminiAIService {
   }
 
   /**
-   * Analyze a legal document with Gemini 3.0 Pro
+   * Analyze a legal document with Gemini 2.5 Flash
    */
   async analyzeDocument(
     fileContent: string | Uint8Array,
@@ -88,7 +88,7 @@ class GeminiAIService {
     try {
       const prompt = this.buildLegalAnalysisPrompt(fileName, fileType, caseContext);
 
-      // Gemini 3.0 Pro can handle multiple input types natively
+      // Gemini 2.5 Flash can handle multiple input types natively
       const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> =
         [{ text: prompt }];
 
@@ -146,7 +146,8 @@ class GeminiAIService {
   async chatWithContext(
     message: string,
     documentContext: string[],
-    conversationHistory: Array<{ role: string; content: string }>
+    conversationHistory: Array<{ role: string; content: string }>,
+    options?: { maxOutputTokens?: number }
   ): Promise<string> {
     if (!this.model)
       throw new Error(
@@ -160,7 +161,7 @@ class GeminiAIService {
           parts: [{ text: msg.content }],
         })),
         generationConfig: {
-          maxOutputTokens: 4096,
+          maxOutputTokens: options?.maxOutputTokens ?? 4096,
           temperature: 0.8,
         },
       });

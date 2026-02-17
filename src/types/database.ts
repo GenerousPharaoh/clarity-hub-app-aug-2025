@@ -20,6 +20,8 @@ export type Database = {
           created_at: string | null
           sources: Json | null
           complexity: string | null
+          effort_level: string | null
+          follow_ups: Json | null
         }
         Insert: {
           id?: string
@@ -31,6 +33,8 @@ export type Database = {
           created_at?: string | null
           sources?: Json | null
           complexity?: string | null
+          effort_level?: string | null
+          follow_ups?: Json | null
         }
         Update: {
           id?: string
@@ -42,6 +46,8 @@ export type Database = {
           created_at?: string | null
           sources?: Json | null
           complexity?: string | null
+          effort_level?: string | null
+          follow_ups?: Json | null
         }
         Relationships: [
           {
@@ -397,9 +403,6 @@ export type Database = {
           p_match_count?: number
           p_project_id?: string
           p_file_type?: string
-          p_full_text_weight?: number
-          p_semantic_weight?: number
-          p_rrf_k?: number
         }
         Returns: {
           chunk_id: string

@@ -11,6 +11,7 @@
 import { geminiAI } from './geminiAIService';
 import { openaiService } from './openaiService';
 import { legalKnowledge } from './legalKnowledgeService';
+import type { EffortLevel } from '@/types';
 
 // ============================================================
 // Types
@@ -18,6 +19,21 @@ import { legalKnowledge } from './legalKnowledgeService';
 
 export type QueryComplexity = 'simple' | 'moderate' | 'deep';
 export type ModelChoice = 'gemini' | 'gpt';
+
+// ============================================================
+// Effort Configuration
+// ============================================================
+
+export const EFFORT_CONFIG: Record<EffortLevel, {
+  reasoning: 'low' | 'medium' | 'high' | undefined;
+  maxTokens: number;
+  chunkLimit: number;
+}> = {
+  quick:    { reasoning: undefined, maxTokens: 1500, chunkLimit: 5 },
+  standard: { reasoning: 'low',    maxTokens: 2000, chunkLimit: 8 },
+  thorough: { reasoning: 'medium', maxTokens: 3000, chunkLimit: 12 },
+  deep:     { reasoning: 'high',   maxTokens: 4000, chunkLimit: 15 },
+};
 
 // Keywords/patterns that signal deep legal reasoning is needed
 const DEEP_REASONING_SIGNALS = [
@@ -88,9 +104,11 @@ class AIRouter {
 
   /**
    * Route a legal query to the best model with full context.
+   * Accepts an optional effort level to control reasoning depth and model selection.
    */
   async routeQuery(params: {
     query: string;
+    effortLevel?: EffortLevel;
     conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
     caseContext?: string;
     sources?: Array<{ sourceIndex: number; fileName: string; pageNumber: number | null; sectionHeading: string | null }>;
@@ -99,12 +117,24 @@ class AIRouter {
     model: ModelChoice;
     complexity: QueryComplexity;
     citations: string[];
+    effortLevel: EffortLevel;
   }> {
+    const effort = params.effortLevel ?? 'standard';
+    const effortCfg = EFFORT_CONFIG[effort];
     const complexity = this.classifyQuery(params.query);
-    const model = this.selectModel(complexity);
 
-    // Build legal knowledge context from the RAG pipeline
-    const legalContext = await legalKnowledge.buildLegalContext(params.query);
+    // Effort-based model override: quick → always Gemini, deep → always GPT
+    let model: ModelChoice;
+    if (effort === 'quick') {
+      model = geminiAI.isAvailable() ? 'gemini' : this.selectModel(complexity);
+    } else if (effort === 'deep') {
+      model = openaiService.isAvailable() ? 'gpt' : this.selectModel(complexity);
+    } else {
+      model = this.selectModel(complexity);
+    }
+
+    // Build legal knowledge context from the RAG pipeline (skip for quick)
+    const legalContext = effort === 'quick' ? '' : await legalKnowledge.buildLegalContext(params.query);
 
     // Build citation instruction if sources are available
     const citationInstruction = params.sources && params.sources.length > 0
@@ -117,6 +147,8 @@ class AIRouter {
         legalContext: legalContext + citationInstruction,
         caseContext: params.caseContext,
         conversationHistory: params.conversationHistory,
+        reasoningEffort: effortCfg.reasoning,
+        maxCompletionTokens: effortCfg.maxTokens,
       });
 
       return {
@@ -124,6 +156,7 @@ class AIRouter {
         model: 'gpt',
         complexity,
         citations: result.citations,
+        effortLevel: effort,
       };
     }
 
@@ -146,7 +179,33 @@ class AIRouter {
       model: 'gemini',
       complexity,
       citations: [],
+      effortLevel: effort,
     };
+  }
+
+  /**
+   * Generate follow-up question suggestions based on a Q&A exchange.
+   * Uses Gemini with low token count for speed.
+   */
+  async generateFollowUps(query: string, response: string): Promise<string[]> {
+    if (!geminiAI.isAvailable()) return [];
+
+    try {
+      const prompt = `Given this question and answer about a legal case, suggest 3 brief follow-up questions the user might ask next. Return only the 3 questions, one per line, no numbering or bullets.
+
+Question: ${query.slice(0, 500)}
+
+Answer: ${response.slice(0, 1000)}`;
+
+      const result = await geminiAI.chatWithContext(prompt, [], []);
+      return result
+        .split('\n')
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0 && l.length < 120)
+        .slice(0, 3);
+    } catch {
+      return [];
+    }
   }
 
   /**

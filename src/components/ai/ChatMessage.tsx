@@ -7,11 +7,14 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { cn } from '@/lib/utils';
 import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check } from 'lucide-react';
 import { ChatCitation, SourcesList } from './ChatCitation';
+import { FollowUpSuggestions } from './FollowUpSuggestions';
 import type { ChatMessage as ChatMessageType, ChatSource } from '@/types';
 
 interface ChatMessageProps {
   message: ChatMessageType;
   onRetry?: (messageId: string) => void;
+  isLatest?: boolean;
+  onFollowUpSelect?: (text: string) => void;
 }
 
 const MODEL_CONFIG = {
@@ -36,6 +39,13 @@ const COMPLEXITY_CONFIG: Record<string, { label: string; className: string }> = 
     label: 'Analysis',
     className: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
   },
+};
+
+const EFFORT_BADGE_CONFIG: Record<string, { label: string; className: string }> = {
+  quick:    { label: 'Quick',    className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
+  standard: { label: 'Standard', className: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' },
+  thorough: { label: 'Thorough', className: 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300' },
+  deep:     { label: 'Deep',     className: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300' },
 };
 
 /**
@@ -196,6 +206,8 @@ function processChildrenForCitations(children: ReactNode, sources: ChatSource[])
 export const ChatMessageComponent = memo(function ChatMessageComponent({
   message,
   onRetry,
+  isLatest,
+  onFollowUpSelect,
 }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const isDark = useIsDark();
@@ -260,8 +272,8 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          {/* Model + complexity badges */}
-          {(modelConfig || message.complexity) && !isError && (
+          {/* Model + complexity + effort badges */}
+          {(modelConfig || message.complexity || message.effortLevel) && !isError && (
             <div className="mb-1.5 flex items-center gap-1.5">
               {modelConfig && (
                 <span
@@ -286,6 +298,16 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                   )}
                 >
                   {COMPLEXITY_CONFIG[message.complexity].label}
+                </span>
+              )}
+              {message.effortLevel && EFFORT_BADGE_CONFIG[message.effortLevel] && (
+                <span
+                  className={cn(
+                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    EFFORT_BADGE_CONFIG[message.effortLevel].className
+                  )}
+                >
+                  {EFFORT_BADGE_CONFIG[message.effortLevel].label}
                 </span>
               )}
             </div>
@@ -454,6 +476,16 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
 
           {/* Timestamp */}
           <div className="mt-1 text-[10px] text-surface-400">{timestamp}</div>
+
+          {/* Follow-up suggestions on latest assistant message */}
+          {isLatest && !isError && message.followUps && message.followUps.length > 0 && onFollowUpSelect && (
+            <div className="mt-2">
+              <FollowUpSuggestions
+                suggestions={message.followUps}
+                onSelect={onFollowUpSelect}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

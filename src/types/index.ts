@@ -30,6 +30,9 @@ export interface ChatSource {
   timestampStart: number | null;
 }
 
+// AI effort level for reasoning depth control
+export type EffortLevel = 'quick' | 'standard' | 'thorough' | 'deep';
+
 // AI Chat types (UI representation)
 export interface ChatMessage {
   id: string;
@@ -40,6 +43,8 @@ export interface ChatMessage {
   fileContext?: string;
   sources?: ChatSource[];
   complexity?: string;
+  effortLevel?: EffortLevel;
+  followUps?: string[];
 }
 
 // Panel state

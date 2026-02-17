@@ -2,10 +2,10 @@ import { useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { aiRouter } from '@/services/aiRouter';
+import { aiRouter, EFFORT_CONFIG } from '@/services/aiRouter';
 import { downloadFile } from '@/services/storageService';
 import { searchDocuments, formatSearchContext, type SearchResult } from '@/services/documentSearchService';
-import type { ChatMessage, ChatSource } from '@/types';
+import type { ChatMessage, ChatSource, EffortLevel } from '@/types';
 import type { TablesInsert } from '@/types/database';
 
 const CHAT_KEY = 'chat-messages';
@@ -24,6 +24,8 @@ function rowToMessage(row: {
   created_at: string | null;
   sources?: unknown;
   complexity?: string | null;
+  effort_level?: string | null;
+  follow_ups?: unknown;
 }): ChatMessage {
   return {
     id: row.id,
@@ -34,6 +36,8 @@ function rowToMessage(row: {
     fileContext: row.file_context ?? undefined,
     sources: (row.sources as ChatSource[] | undefined) ?? undefined,
     complexity: row.complexity ?? undefined,
+    effortLevel: (row.effort_level as EffortLevel) ?? undefined,
+    followUps: (row.follow_ups as string[]) ?? undefined,
   };
 }
 
@@ -161,9 +165,11 @@ interface UseAIChatReturn {
   isFetchingMessages: boolean;
   sendMessage: (
     content: string,
-    fileContext?: { name: string; path: string; type: string | null }
+    fileContext?: { name: string; path: string; type: string | null },
+    effortLevel?: EffortLevel
   ) => Promise<void>;
   clearChat: () => void;
+  latestFollowUps: string[];
 }
 
 export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
@@ -212,7 +218,8 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
   const sendMessage = useCallback(
     async (
       content: string,
-      fileContext?: { name: string; path: string; type: string | null }
+      fileContext?: { name: string; path: string; type: string | null },
+      effortLevel?: EffortLevel
     ) => {
       if (!content.trim() || !projectId || !user || isLoadingRef.current) return;
 
@@ -265,12 +272,15 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
         ]);
 
         // Search processed documents for relevant context
+        const effort = effortLevel ?? 'standard';
+        const chunkLimit = EFFORT_CONFIG[effort].chunkLimit;
         let documentContext = '';
         let sources: ChatSource[] = [];
         try {
           const searchResults = await searchDocuments({
             query: content.trim(),
             projectId,
+            limit: chunkLimit,
           });
           if (searchResults.length > 0) {
             documentContext = formatSearchContext(searchResults);
@@ -293,12 +303,21 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
 
         const result = await aiRouter.routeQuery({
           query: content.trim(),
+          effortLevel: effort,
           conversationHistory,
           caseContext: fullContext || undefined,
           sources: sources.length > 0 ? sources : undefined,
         });
 
         if (abortRef.current) return;
+
+        // Generate follow-up suggestions (non-critical, wrapped in try/catch)
+        let followUps: string[] = [];
+        try {
+          followUps = await aiRouter.generateFollowUps(content.trim(), result.response);
+        } catch {
+          // Non-critical: proceed without follow-ups
+        }
 
         // 2. Insert assistant message into DB
         const assistantRow = await insertMessage.mutateAsync({
@@ -311,8 +330,12 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           complexity: result.complexity,
         });
 
-        // Remove loading indicator and add real response
-        const assistantMsg = rowToMessage(assistantRow);
+        // Remove loading indicator and add real response with effort + follow-ups
+        const assistantMsg: ChatMessage = {
+          ...rowToMessage(assistantRow),
+          effortLevel: effort,
+          followUps: followUps.length > 0 ? followUps : undefined,
+        };
         queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
           (old ?? []).filter((m) => m.id !== loadingId).concat(assistantMsg)
         );
@@ -369,6 +392,11 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
 
   // Derive isLoading from whether there's a loading placeholder in messages
   const isLoading = messages.some((m) => m.content === '__loading__');
+  const filteredMessages = messages.filter((m) => m.content !== '__loading__');
 
-  return { messages: messages.filter((m) => m.content !== '__loading__'), isLoading, isFetchingMessages, sendMessage, clearChat };
+  // Extract follow-ups from the most recent assistant message
+  const lastAssistant = [...filteredMessages].reverse().find((m) => m.role === 'assistant');
+  const latestFollowUps = lastAssistant?.followUps ?? [];
+
+  return { messages: filteredMessages, isLoading, isFetchingMessages, sendMessage, clearChat, latestFollowUps };
 }

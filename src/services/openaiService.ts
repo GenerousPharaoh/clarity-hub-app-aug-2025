@@ -50,6 +50,8 @@ class OpenAIService {
     legalContext: string;
     caseContext?: string;
     conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
+    reasoningEffort?: 'low' | 'medium' | 'high';
+    maxCompletionTokens?: number;
   }): Promise<DeepReasoningResponse> {
     if (!openai)
       throw new Error('OpenAI not configured. Set VITE_OPENAI_API_KEY.');
@@ -95,12 +97,17 @@ When analyzing legal issues:
 
     messages.push({ role: 'user', content: userContent });
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-5.2',
+    // Build request params, adding reasoning_effort if provided
+    const requestParams = {
+      model: 'gpt-5.2' as const,
       messages,
       temperature: 0.2, // Low temp for legal accuracy
-      max_completion_tokens: 16384,
-    });
+      max_completion_tokens: params.maxCompletionTokens ?? 16384,
+      ...(params.reasoningEffort ? { reasoning_effort: params.reasoningEffort } : {}),
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await openai.chat.completions.create(requestParams as any);
 
     const content = response.choices[0]?.message?.content ?? '';
 

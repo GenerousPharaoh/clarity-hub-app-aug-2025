@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X } from 'lucide-react';
+import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { useAIChat } from '@/hooks/useAIChat';
 import { ChatMessageComponent } from './ChatMessage';
 import { SuggestedPrompts } from './SuggestedPrompts';
+import { EffortSelector } from './EffortSelector';
+import { FollowUpSuggestions } from './FollowUpSuggestions';
 import useAppStore from '@/store';
+import type { EffortLevel } from '@/types';
 
 export function AIChatPanel() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
@@ -16,18 +19,46 @@ export function AIChatPanel() {
     ? files.find((f) => f.id === selectedFileId) ?? null
     : null;
 
-  const { messages, isLoading, isFetchingMessages, sendMessage, clearChat } =
+  const { messages, isLoading, isFetchingMessages, sendMessage, clearChat, latestFollowUps } =
     useAIChat({ projectId: selectedProjectId });
 
   const [input, setInput] = useState('');
+  const [effort, setEffort] = useState<EffortLevel>('standard');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const userHasScrolledRef = useRef(false);
+  const [showJumpToLatest, setShowJumpToLatest] = useState(false);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Smart auto-scroll: only scroll if user hasn't manually scrolled up
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!userHasScrolledRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      setShowJumpToLatest(true);
+    }
   }, [messages, isLoading]);
+
+  // Detect manual scroll
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 60;
+      if (isNearBottom) {
+        userHasScrolledRef.current = false;
+        setShowJumpToLatest(false);
+      } else {
+        userHasScrolledRef.current = true;
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -37,18 +68,27 @@ export function AIChatPanel() {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   }, [input]);
 
-  const handleSend = useCallback(async () => {
-    if (!input.trim() || isLoading) return;
+  const jumpToLatest = useCallback(() => {
+    userHasScrolledRef.current = false;
+    setShowJumpToLatest(false);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
-    const content = input.trim();
-    setInput('');
+  const handleSend = useCallback(async (messageContent?: string) => {
+    const content = (messageContent ?? input).trim();
+    if (!content || isLoading) return;
 
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+    // Reset scroll tracking on new message
+    userHasScrolledRef.current = false;
+    setShowJumpToLatest(false);
+
+    if (!messageContent) {
+      setInput('');
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
     }
 
-    // Build file context if a file is selected
     const fileContext = selectedFile
       ? {
           name: selectedFile.name,
@@ -57,8 +97,8 @@ export function AIChatPanel() {
         }
       : undefined;
 
-    await sendMessage(content, fileContext);
-  }, [input, isLoading, sendMessage, selectedFile]);
+    await sendMessage(content, fileContext, effort);
+  }, [input, isLoading, sendMessage, selectedFile, effort]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -78,29 +118,41 @@ export function AIChatPanel() {
     []
   );
 
+  const handleFollowUpSelect = useCallback(
+    (text: string) => {
+      handleSend(text);
+    },
+    [handleSend]
+  );
+
   // Retry a failed AI message by re-sending the previous user message
   const handleRetry = useCallback(
     (errorMessageId: string) => {
-      // Find the error message index, then look for the user message before it
       const idx = messages.findIndex((m) => m.id === errorMessageId);
       if (idx <= 0) return;
 
-      // Walk backwards to find the nearest user message
       for (let i = idx - 1; i >= 0; i--) {
         if (messages[i].role === 'user') {
           const userMsg = messages[i];
           const fileContext = userMsg.fileContext
             ? { name: userMsg.fileContext, path: '', type: null }
             : undefined;
-          sendMessage(userMsg.content, fileContext);
+          sendMessage(userMsg.content, fileContext, effort);
           break;
         }
       }
     },
-    [messages, sendMessage]
+    [messages, sendMessage, effort]
   );
 
   const isEmpty = messages.length === 0;
+
+  // Loading label based on effort
+  const loadingLabel = effort === 'deep'
+    ? 'Thinking with GPT-5.2...'
+    : effort === 'quick'
+      ? 'Generating with Gemini...'
+      : 'Generating...';
 
   if (!selectedProjectId) {
     return (
@@ -116,7 +168,13 @@ export function AIChatPanel() {
   return (
     <div className="flex h-full flex-col">
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto" role="log" aria-live="polite" aria-label="Chat messages">
+      <div
+        ref={messagesContainerRef}
+        className="relative flex-1 overflow-y-auto"
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages"
+      >
         {isFetchingMessages && isEmpty ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-surface-400" />
@@ -136,7 +194,7 @@ export function AIChatPanel() {
                 request help with legal research.
               </p>
 
-              {/* Suggested prompts — adapt to selected file */}
+              {/* Suggested prompts -- adapt to selected file */}
               <SuggestedPrompts
                 onSelectPrompt={handlePromptSelect}
                 selectedFileType={selectedFile?.file_type}
@@ -170,9 +228,25 @@ export function AIChatPanel() {
             </div>
 
             {/* Messages */}
-            {messages.map((msg) => (
-              <ChatMessageComponent key={msg.id} message={msg} onRetry={handleRetry} />
+            {messages.map((msg, idx) => (
+              <ChatMessageComponent
+                key={msg.id}
+                message={msg}
+                onRetry={handleRetry}
+                isLatest={idx === messages.length - 1}
+                onFollowUpSelect={handleFollowUpSelect}
+              />
             ))}
+
+            {/* Follow-up suggestions (below last message, only when not loading) */}
+            {!isLoading && latestFollowUps.length > 0 && (
+              <div className="px-4 pb-2 pl-[52px]">
+                <FollowUpSuggestions
+                  suggestions={latestFollowUps}
+                  onSelect={handleFollowUpSelect}
+                />
+              </div>
+            )}
 
             {/* Loading indicator */}
             {isLoading && (
@@ -182,10 +256,13 @@ export function AIChatPanel() {
                     <Sparkles className="h-3.5 w-3.5 text-accent-600 dark:text-accent-400" />
                   </div>
                   <div className="rounded-2xl rounded-tl-md bg-white px-4 py-3 shadow-sm ring-1 ring-surface-200/80 dark:bg-surface-800 dark:ring-surface-700/50">
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:0ms]" />
-                      <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:150ms]" />
-                      <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:300ms]" />
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:0ms]" />
+                        <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:150ms]" />
+                        <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:300ms]" />
+                      </div>
+                      <span className="text-[10px] text-surface-400">{loadingLabel}</span>
                     </div>
                   </div>
                 </div>
@@ -194,6 +271,17 @@ export function AIChatPanel() {
 
             <div ref={messagesEndRef} />
           </div>
+        )}
+
+        {/* Jump to latest pill */}
+        {showJumpToLatest && (
+          <button
+            onClick={jumpToLatest}
+            className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-[11px] font-medium text-surface-600 shadow-md transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+          >
+            <ArrowDown className="h-3 w-3" />
+            Jump to latest
+          </button>
         )}
       </div>
 
@@ -221,6 +309,11 @@ export function AIChatPanel() {
           </div>
         )}
 
+        {/* Effort selector */}
+        <div className="mb-2">
+          <EffortSelector value={effort} onChange={setEffort} variant="full" />
+        </div>
+
         <div
           className={cn(
             'flex items-end gap-2 rounded-xl border p-2 transition-all',
@@ -240,7 +333,7 @@ export function AIChatPanel() {
             style={{ minHeight: '24px', maxHeight: '120px' }}
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={!input.trim() || isLoading}
             className={cn(
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
@@ -294,7 +387,7 @@ export function AIChatPanel() {
   );
 }
 
-/* ── File context icon by type ───────────────────────── */
+/* -- File context icon by type -- */
 
 function FileContextIcon({ type }: { type: string | null }) {
   const iconClass = 'h-4 w-4';

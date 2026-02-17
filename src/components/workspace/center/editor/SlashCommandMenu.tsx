@@ -41,6 +41,8 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
+  // Track whether selection changed from keyboard (scroll into view) vs mouse (don't scroll)
+  const selectionSourceRef = useRef<'keyboard' | 'mouse'>('keyboard');
 
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
@@ -276,8 +278,10 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
       const key = (e as CustomEvent<{ key: string }>).detail.key;
 
       if (key === 'ArrowDown') {
+        selectionSourceRef.current = 'keyboard';
         setSelectedIndex((prev) => (prev + 1) % filtered.length);
       } else if (key === 'ArrowUp') {
+        selectionSourceRef.current = 'keyboard';
         setSelectedIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
       } else if (key === 'Enter') {
         executeCommand(selectedIndex);
@@ -289,9 +293,9 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
     return () => window.removeEventListener('slash-command-key', handleKey);
   }, [filtered.length, selectedIndex, executeCommand]);
 
-  // Scroll selected item into view
+  // Scroll selected item into view — only when navigating via keyboard
   useEffect(() => {
-    if (menuRef.current) {
+    if (selectionSourceRef.current === 'keyboard' && menuRef.current) {
       const selectedEl = menuRef.current.querySelector(`[data-index="${selectedIndex}"]`);
       selectedEl?.scrollIntoView({ block: 'nearest' });
     }
@@ -345,8 +349,15 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
             <button
               key={cmd.title}
               data-index={cmd.flatIndex}
-              onClick={() => executeCommand(cmd.flatIndex)}
-              onMouseEnter={() => setSelectedIndex(cmd.flatIndex)}
+              onMouseDown={(e) => {
+                e.preventDefault(); // prevent focus shift away from editor
+                e.stopPropagation(); // prevent outside-click handler
+                executeCommand(cmd.flatIndex);
+              }}
+              onMouseEnter={() => {
+                selectionSourceRef.current = 'mouse';
+                setSelectedIndex(cmd.flatIndex);
+              }}
               className={cn(
                 'flex w-full items-center gap-3 px-3 py-2 text-left transition-colors',
                 cmd.flatIndex === selectedIndex

@@ -173,7 +173,7 @@ export function WorkspacePage() {
           id="left"
           order={1}
           defaultSize={20}
-          minSize={3}
+          minSize={1}
           collapsible
           collapsedSize={0}
           onCollapse={() => {
@@ -201,7 +201,7 @@ export function WorkspacePage() {
           id="right"
           order={3}
           defaultSize={35}
-          minSize={3}
+          minSize={1}
           collapsible
           collapsedSize={0}
           onCollapse={() => {

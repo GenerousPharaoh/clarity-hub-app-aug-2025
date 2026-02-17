@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import { cn } from '@/lib/utils';
 import {
@@ -48,8 +48,6 @@ interface ToolbarItem {
 interface ToolbarGroup {
   id: string;
   label: string;
-  /** Approximate pixel width this group needs (buttons * 34 + divider) */
-  width: number;
   /** Priority: lower = shown first, hidden last. Groups are hidden highest priority first. */
   priority: number;
   items: ToolbarItem[];
@@ -60,7 +58,6 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
     {
       id: 'history',
       label: 'History',
-      width: 78,
       priority: 1,
       items: [
         {
@@ -84,7 +81,6 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
     {
       id: 'format',
       label: 'Formatting',
-      width: 214,
       priority: 2,
       items: [
         {
@@ -142,7 +138,6 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
     {
       id: 'headings',
       label: 'Headings',
-      width: 112,
       priority: 3,
       items: [
         {
@@ -171,7 +166,6 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
     {
       id: 'lists',
       label: 'Lists',
-      width: 112,
       priority: 4,
       items: [
         {
@@ -200,7 +194,6 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
     {
       id: 'blocks',
       label: 'Blocks',
-      width: 112,
       priority: 5,
       items: [
         {
@@ -230,7 +223,6 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
     {
       id: 'insert',
       label: 'Insert',
-      width: 112,
       priority: 6,
       items: [
         {
@@ -256,7 +248,6 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
     {
       id: 'align',
       label: 'Alignment',
-      width: 102,
       priority: 7,
       items: [
         {
@@ -285,15 +276,23 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
   ];
 }
 
-/* ── Main component ────────────────────────────────────── */
+/* ── Layout constants ──────────────────────────────────── */
 
-const MORE_BUTTON_WIDTH = 42; // 32px button + 10px divider
+const BTN = 32;          // w-8 button
+const GAP = 2;           // gap-0.5 (0.125rem)
+const DIV_W = 9;         // Divider: mx-1 (4+4) + w-px (1)
+// More section: [Divider + Button] inside a flex wrapper
+const MORE_W = DIV_W + BTN; // 41px
+
+/* ── Main component ────────────────────────────────────── */
 
 export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToolbarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(1000);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const overflowRef = useRef<HTMLDivElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
 
   const groups = buildGroups(onInsertLink, onInsertImage);
 
@@ -357,10 +356,20 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
 
       {/* Overflow "More" dropdown */}
       {overflowGroups.length > 0 && (
-        <div className="relative" ref={overflowRef}>
+        <div ref={overflowRef} className="flex items-center">
           {inlineGroups.length > 0 && <Divider />}
           <ToolbarButton
-            onClick={() => setOverflowOpen((prev) => !prev)}
+            ref={moreButtonRef}
+            onClick={() => {
+              if (!overflowOpen && moreButtonRef.current) {
+                const rect = moreButtonRef.current.getBoundingClientRect();
+                setDropdownPos({
+                  top: rect.bottom + 4,
+                  right: window.innerWidth - rect.right,
+                });
+              }
+              setOverflowOpen((prev) => !prev);
+            }}
             active={overflowOpen}
             label="More"
           >
@@ -368,7 +377,10 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
           </ToolbarButton>
 
           {overflowOpen && (
-            <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-700 dark:bg-surface-800">
+            <div
+              className="fixed z-[60] max-h-[70vh] w-56 overflow-y-auto rounded-xl border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-700 dark:bg-surface-800"
+              style={{ top: dropdownPos.top, right: dropdownPos.right }}
+            >
               {overflowGroups.map((group, gi) => (
                 <div key={group.id}>
                   <div className="px-3 pb-1 pt-2">
@@ -405,54 +417,68 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
 
 /* ── Split logic ───────────────────────────────────────── */
 
-function splitGroups(groups: ToolbarGroup[], availableWidth: number) {
-  // Sort by priority (lowest = most important, shown first)
-  const sorted = [...groups].sort((a, b) => a.priority - b.priority);
+/** Pixel width of a group's flex container (buttons + internal gaps + optional trailing divider) */
+function groupPx(itemCount: number, hasTrailingDivider: boolean): number {
+  if (hasTrailingDivider) {
+    // N buttons + 1 divider → N+1 items, N internal gaps
+    return itemCount * BTN + DIV_W + itemCount * GAP;
+  }
+  // N buttons → N-1 internal gaps
+  return itemCount * BTN + Math.max(0, itemCount - 1) * GAP;
+}
 
-  let usedWidth = 0;
+/** Total pixel width for a set of inline groups (including parent flex gaps) */
+function calcInlineWidth(groups: ToolbarGroup[]): number {
+  if (groups.length === 0) return 0;
+  let w = 0;
+  for (let i = 0; i < groups.length; i++) {
+    w += groupPx(groups[i].items.length, i < groups.length - 1);
+  }
+  // Parent flex gaps between group containers
+  w += (groups.length - 1) * GAP;
+  return w;
+}
+
+function splitGroups(groups: ToolbarGroup[], availableWidth: number) {
+  const sorted = [...groups].sort((a, b) => a.priority - b.priority);
   const inlineGroups: ToolbarGroup[] = [];
   const overflowGroups: ToolbarGroup[] = [];
 
-  // Reserve space for the More button if we'll need overflow
-  const totalNeeded = sorted.reduce((sum, g) => sum + g.width, 0);
-  const needsOverflow = totalNeeded > availableWidth;
-  const budget = needsOverflow ? availableWidth - MORE_BUTTON_WIDTH : availableWidth;
+  for (let i = 0; i < sorted.length; i++) {
+    const candidate = [...inlineGroups, sorted[i]];
+    const remainingCount = sorted.length - candidate.length;
+    const inlineW = calcInlineWidth(candidate);
+    // If remaining groups exist, reserve space for [gap + More section]
+    const moreW = remainingCount > 0 ? GAP + MORE_W : 0;
 
-  for (const group of sorted) {
-    if (usedWidth + group.width <= budget) {
-      inlineGroups.push(group);
-      usedWidth += group.width;
+    if (inlineW + moreW <= availableWidth) {
+      inlineGroups.push(sorted[i]);
     } else {
-      overflowGroups.push(group);
+      overflowGroups.push(sorted[i]);
     }
   }
 
-  // Re-sort by original priority order for display
   inlineGroups.sort((a, b) => a.priority - b.priority);
   overflowGroups.sort((a, b) => a.priority - b.priority);
-
   return { inlineGroups, overflowGroups };
 }
 
 /* ── Shared sub-components ─────────────────────────────── */
 
-function ToolbarButton({
-  onClick,
-  active,
-  disabled,
-  label,
-  shortcut,
-  children,
-}: {
-  onClick: () => void;
-  active?: boolean;
-  disabled?: boolean;
-  label?: string;
-  shortcut?: string;
-  children: React.ReactNode;
-}) {
+const ToolbarButton = forwardRef<
+  HTMLButtonElement,
+  {
+    onClick: () => void;
+    active?: boolean;
+    disabled?: boolean;
+    label?: string;
+    shortcut?: string;
+    children: React.ReactNode;
+  }
+>(function ToolbarButton({ onClick, active, disabled, label, shortcut, children }, ref) {
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onClick}
       disabled={disabled}
@@ -475,7 +501,7 @@ function ToolbarButton({
       )}
     </button>
   );
-}
+});
 
 function Divider() {
   return <div className="mx-1 h-5 w-px shrink-0 bg-surface-200 dark:bg-surface-700" />;

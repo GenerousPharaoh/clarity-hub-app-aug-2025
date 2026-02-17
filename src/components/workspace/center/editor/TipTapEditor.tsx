@@ -128,7 +128,7 @@ export function TipTapEditor({
   const readingTime = Math.max(1, Math.round(wordCount / 230));
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden bg-white dark:bg-surface-900">
+    <div className="relative flex h-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Fixed toolbar at top */}
       <EditorToolbar editor={editor} onInsertLink={handleInsertLink} onInsertImage={handleInsertImage} />
 
@@ -171,10 +171,10 @@ export function TipTapEditor({
       </div>
 
       {/* Persistent status bar */}
-      <div className="flex h-7 shrink-0 items-center justify-between border-t border-surface-200 bg-surface-50 px-3 dark:border-surface-800 dark:bg-surface-850">
-        <div className="flex items-center gap-3 text-[11px] tabular-nums text-surface-400 dark:text-surface-500">
-          <span>{wordCount.toLocaleString()} words</span>
-          <span>{readingTime} min read</span>
+      <div className="flex h-7 shrink-0 items-center justify-between overflow-hidden border-t border-surface-200 bg-surface-50 px-3 dark:border-surface-800 dark:bg-surface-850">
+        <div className="flex min-w-0 items-center gap-3 text-[11px] tabular-nums text-surface-400 dark:text-surface-500">
+          <span className="whitespace-nowrap">{wordCount.toLocaleString()} words</span>
+          <span className="whitespace-nowrap">{readingTime} min read</span>
         </div>
         <div
           className={cn(

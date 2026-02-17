@@ -173,7 +173,7 @@ export function WorkspacePage() {
           id="left"
           order={1}
           defaultSize={20}
-          minSize={10}
+          minSize={14}
           collapsible
           collapsedSize={0}
           onCollapse={() => {
@@ -185,12 +185,12 @@ export function WorkspacePage() {
               useAppStore.getState().setLeftPanel(true);
           }}
         >
-          {isLeftOpen && <LeftPanel />}
+          <LeftPanel />
         </Panel>
 
         <PanelGrip id="grip-left" />
 
-        <Panel id="center" order={2} defaultSize={45} minSize={20}>
+        <Panel id="center" order={2} defaultSize={45} minSize={25}>
           <CenterPanel />
         </Panel>
 
@@ -201,7 +201,7 @@ export function WorkspacePage() {
           id="right"
           order={3}
           defaultSize={35}
-          minSize={10}
+          minSize={15}
           collapsible
           collapsedSize={0}
           onCollapse={() => {
@@ -213,7 +213,7 @@ export function WorkspacePage() {
               useAppStore.getState().setRightPanel(true);
           }}
         >
-          {isRightOpen && <RightPanel />}
+          <RightPanel />
         </Panel>
       </PanelGroup>
 

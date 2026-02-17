@@ -37,7 +37,10 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
   };
 
   return (
-    <div className="flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-surface-200 bg-surface-50/50 px-3 py-1.5 dark:border-surface-800 dark:bg-surface-850/50">
+    <div
+      className="flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-surface-200 bg-surface-50/50 px-3 py-1.5 dark:border-surface-800 dark:bg-surface-850/50"
+      style={{ scrollbarWidth: 'none' }}
+    >
       {/* Undo / Redo */}
       <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}

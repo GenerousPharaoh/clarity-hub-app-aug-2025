@@ -213,7 +213,7 @@ function NotesTab() {
 
   if (!selectedProjectId) {
     return (
-      <div className="flex flex-1 items-center justify-center">
+      <div className="flex w-full flex-1 items-center justify-center">
         <p className="text-xs text-surface-400">Select a project first</p>
       </div>
     );
@@ -221,7 +221,7 @@ function NotesTab() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col">
+      <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
         <div className="flex h-12 shrink-0 items-center gap-2 border-b border-surface-200 px-3 dark:border-surface-800">
           <div className="h-5 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
           <div className="ml-auto h-6 w-20 animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
@@ -235,7 +235,7 @@ function NotesTab() {
 
   if (isError) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center px-8">
+      <div className="flex h-full w-full min-w-0 flex-1 flex-col items-center justify-center px-8">
         <AlertCircle className="h-6 w-6 text-red-400" />
         <p className="mt-3 text-sm font-medium text-surface-600 dark:text-surface-300">
           Failed to load notes
@@ -259,7 +259,7 @@ function NotesTab() {
   // ── Empty state — no notes yet ──────────────────────────
   if (!notes || notes.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center px-8">
+      <div className="flex h-full w-full min-w-0 flex-1 flex-col items-center justify-center px-8">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
           <PenLine className="h-6 w-6 text-surface-400 dark:text-surface-500" />
         </div>
@@ -292,7 +292,7 @@ function NotesTab() {
 
   // ── Editor-first layout — always visible ────────────────
   return (
-    <div className="flex h-full min-w-0 flex-col overflow-hidden">
+    <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Header bar: note selector dropdown + actions */}
       <div className="flex h-12 shrink-0 items-center gap-2 overflow-hidden border-b border-surface-200 bg-white px-3 dark:border-surface-800 dark:bg-surface-900">
         {/* Document icon */}

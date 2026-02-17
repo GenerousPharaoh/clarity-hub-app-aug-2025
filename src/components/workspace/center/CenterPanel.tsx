@@ -68,7 +68,7 @@ export function CenterPanel() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.1 }}
-            className="flex h-full w-full"
+            className="flex h-full w-full min-w-0"
           >
             {activeTab === 'overview' ? (
               <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as Tab)} />

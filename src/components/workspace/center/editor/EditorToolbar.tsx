@@ -296,14 +296,29 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
 
   const groups = buildGroups(onInsertLink, onInsertImage);
 
-  // Observe container width
+  // Observe container width — observe both the toolbar and its parent for robustness
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      setContainerWidth(entry.contentRect.width);
+
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      const style = getComputedStyle(el);
+      const pl = parseFloat(style.paddingLeft) || 0;
+      const pr = parseFloat(style.paddingRight) || 0;
+      setContainerWidth(Math.max(0, rect.width - pl - pr));
+    };
+
+    // Initial measurement
+    measure();
+
+    const ro = new ResizeObserver(() => {
+      requestAnimationFrame(measure);
     });
     ro.observe(el);
+    // Also observe parent — catches panel resizes that don't propagate immediately
+    if (el.parentElement) ro.observe(el.parentElement);
+
     return () => ro.disconnect();
   }, []);
 

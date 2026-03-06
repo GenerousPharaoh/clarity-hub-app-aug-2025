@@ -38,13 +38,18 @@ export async function processFile(
   projectId: string
 ): Promise<ProcessingResult> {
   const supabase = getSupabase();
+  let shouldCleanupChunks = false;
 
   try {
     // Mark as processing
-    await supabase
+    const { error: markProcessingError } = await supabase
       .from('files')
       .update({ processing_status: 'processing', processing_error: null })
       .eq('id', fileId);
+
+    if (markProcessingError) {
+      throw new Error(`Failed to mark file as processing: ${markProcessingError.message}`);
+    }
 
     // 1. Fetch file metadata
     const { data: file, error: fileError } = await supabase
@@ -76,7 +81,7 @@ export async function processFile(
     const extractedText = await extractText(fileData, fileType, file.name);
 
     if (!extractedText || extractedText.trim().length === 0) {
-      await supabase
+      const { error: emptyResultError } = await supabase
         .from('files')
         .update({
           processing_status: 'completed',
@@ -84,8 +89,13 @@ export async function processFile(
           extracted_text: '',
           ai_summary: 'No extractable text content found.',
           chunk_count: 0,
+          processing_error: null,
         })
         .eq('id', fileId);
+
+      if (emptyResultError) {
+        throw new Error(`Failed to save processing result: ${emptyResultError.message}`);
+      }
 
       return { status: 'completed', chunksCreated: 0, summary: 'No extractable text content found.' };
     }
@@ -101,10 +111,15 @@ export async function processFile(
     const embeddings = await embedBatch(chunkTexts);
 
     // 7. Delete any existing chunks for this file
-    await supabase
+    const { error: deleteChunksError } = await supabase
       .from('document_chunks')
       .delete()
       .eq('file_id', fileId);
+
+    if (deleteChunksError) {
+      throw new Error(`Failed to clear existing chunks: ${deleteChunksError.message}`);
+    }
+    shouldCleanupChunks = true;
 
     // 8. Insert parent chunks first (to get IDs for children)
     const parentChunks = chunks.filter((c) => c.chunkType === 'parent');
@@ -171,12 +186,12 @@ export async function processFile(
         .insert(childRows);
 
       if (childError) {
-        console.error('Failed to insert child chunks:', childError.message);
+        throw new Error(`Failed to insert child chunks: ${childError.message}`);
       }
     }
 
     // 9. Update file with processing results
-    await supabase
+    const { error: updateFileError } = await supabase
       .from('files')
       .update({
         processing_status: 'completed',
@@ -184,8 +199,15 @@ export async function processFile(
         ai_summary: summary,
         extracted_text: extractedText.slice(0, 50000), // Cap stored text
         chunk_count: chunks.length,
+        processing_error: null,
       })
       .eq('id', fileId);
+
+    if (updateFileError) {
+      throw new Error(`Failed to save processing output: ${updateFileError.message}`);
+    }
+
+    shouldCleanupChunks = false;
 
     return {
       status: 'completed',
@@ -195,11 +217,24 @@ export async function processFile(
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown processing error';
 
+    if (shouldCleanupChunks) {
+      const { error: cleanupError } = await supabase
+        .from('document_chunks')
+        .delete()
+        .eq('file_id', fileId);
+
+      if (cleanupError) {
+        console.error('Failed to clean up partial chunks:', cleanupError.message);
+      }
+    }
+
     await supabase
       .from('files')
       .update({
         processing_status: 'failed',
         processing_error: errorMsg,
+        processed_at: null,
+        chunk_count: 0,
       })
       .eq('id', fileId);
 
@@ -246,11 +281,17 @@ async function extractText(
  */
 async function extractPdfText(blob: Blob): Promise<string> {
   try {
-    // Dynamic import for pdf-parse (Node.js only)
-    const pdfParse = (await import('pdf-parse')).default;
-    const buffer = Buffer.from(await blob.arrayBuffer());
-    const result = await pdfParse(buffer);
-    return result.text || '';
+    // pdf-parse v2 exposes a parser class instead of a callable default export.
+    const { PDFParse } = await import('pdf-parse');
+    const data = new Uint8Array(await blob.arrayBuffer());
+    const parser = new PDFParse({ data });
+
+    try {
+      const result = await parser.getText();
+      return result.text || '';
+    } finally {
+      await parser.destroy();
+    }
   } catch (error) {
     console.error('PDF extraction failed:', error);
     // Fallback: use GPT-4.1 vision for OCR

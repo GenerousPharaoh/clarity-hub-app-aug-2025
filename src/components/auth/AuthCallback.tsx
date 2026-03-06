@@ -11,11 +11,17 @@ export function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     // Check URL for error params (OAuth errors come as query/hash params)
     const params = new URLSearchParams(window.location.search);
     const hashParams = new URLSearchParams(window.location.hash.replace('#', '?'));
     const urlError = params.get('error') || hashParams.get('error');
     const errorDesc = params.get('error_description') || hashParams.get('error_description');
+    const code = params.get('code');
+    const next = params.get('next');
+
+    const redirectTarget = next && next.startsWith('/') ? next : '/';
 
     if (urlError) {
       setError(errorDesc || urlError);
@@ -24,16 +30,56 @@ export function AuthCallback() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
-        navigate('/', { replace: true });
+        navigate(redirectTarget, { replace: true });
       }
     });
 
+    const resolveCallback = async () => {
+      try {
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) throw exchangeError;
+          if (!cancelled) {
+            navigate(redirectTarget, { replace: true });
+          }
+          return;
+        }
+
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError) throw sessionError;
+        if (cancelled) return;
+
+        if (session) {
+          navigate(redirectTarget, { replace: true });
+          return;
+        }
+
+        setError('Sign-in could not be completed. Please try again.');
+      } catch (err) {
+        if (cancelled) return;
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Sign-in could not be completed. Please try again.'
+        );
+      }
+    };
+
+    void resolveCallback();
+
     // Timeout — if callback doesn't complete, show error
     const timeout = setTimeout(() => {
-      setError('Sign-in is taking too long. Please try again.');
+      if (!cancelled) {
+        setError('Sign-in is taking too long. Please try again.');
+      }
     }, CALLBACK_TIMEOUT_MS);
 
     return () => {
+      cancelled = true;
       subscription.unsubscribe();
       clearTimeout(timeout);
     };

@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import useAppStore from '@/store';
 import { cn } from '@/lib/utils';
+import { saveWorkspaceView } from '@/lib/workspaceSession';
 import { ChevronRight, Eye, Sparkles } from 'lucide-react';
 import { FileViewer } from '@/components/viewers/FileViewer';
 import { AIChatPanel } from '@/components/ai/AIChatPanel';
@@ -11,6 +12,9 @@ export function RightPanel() {
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
   const activeTab = useAppStore((s) => s.rightTab);
   const setActiveTab = useAppStore((s) => s.setRightTab);
+  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const selectedFileId = useAppStore((s) => s.selectedFileId);
+  const files = useAppStore((s) => s.files);
   const isMobile = useIsMobile();
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelWidth, setPanelWidth] = useState(0);
@@ -27,14 +31,62 @@ export function RightPanel() {
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!selectedProjectId) return;
+    saveWorkspaceView({ projectId: selectedProjectId, rightTab: activeTab });
+  }, [activeTab, selectedProjectId]);
+
   const compact = panelWidth > 0 && panelWidth < 250;
   const ultraCompact = panelWidth > 0 && panelWidth < 210;
+  const selectedFile = selectedFileId
+    ? files.find((file) => file.id === selectedFileId) ?? null
+    : null;
+  const panelLabel = activeTab === 'viewer' ? 'Evidence dock' : 'AI copilot';
+  const panelDescription =
+    activeTab === 'viewer'
+      ? selectedFile?.name ?? 'Open a file to inspect the source record and jump back into the evidence.'
+      : 'Ask grounded questions, test theories, and draft against the matter record.';
 
   return (
-    <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50 dark:bg-surface-900">
+    <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900">
       {/* Header with tabs and collapse */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 bg-surface-50/80 dark:border-surface-800 dark:bg-surface-850/50">
-        <div className={cn('flex h-full items-center gap-0 px-1', ultraCompact && 'px-0.5')} role="tablist" aria-label="Right panel tabs">
+      <div className="shrink-0 border-b border-surface-200/80 bg-surface-50/80 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/60">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+              {panelLabel}
+            </p>
+            {!ultraCompact && (
+              <p className="mt-1 text-[11px] leading-5 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400">
+                {panelDescription}
+              </p>
+            )}
+          </div>
+          {!isMobile && !ultraCompact && (
+            <button
+              onClick={toggleRight}
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+                'text-surface-400 transition-all',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+              )}
+              title="Collapse panel"
+              aria-label="Collapse viewer panel"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div
+          className={cn(
+            'mt-3 flex items-center gap-1 rounded-2xl border border-surface-200/80 bg-white/85 p-1 shadow-sm dark:border-surface-700 dark:bg-surface-900/80',
+            ultraCompact && 'px-0.5'
+          )}
+          role="tablist"
+          aria-label="Right panel tabs"
+        >
           <TabButton
             active={activeTab === 'viewer'}
             onClick={() => setActiveTab('viewer')}
@@ -55,21 +107,6 @@ export function RightPanel() {
             compact={compact}
           />
         </div>
-        {!isMobile && !ultraCompact && (
-          <button
-            onClick={toggleRight}
-            className={cn(
-              'mr-2 flex h-6 w-6 items-center justify-center rounded-md',
-              'text-surface-400 transition-all',
-              'hover:bg-surface-100 hover:text-surface-600',
-              'dark:hover:bg-surface-800 dark:hover:text-surface-300'
-            )}
-            title="Collapse panel"
-            aria-label="Collapse viewer panel"
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
-        )}
       </div>
 
       {/* Content */}
@@ -114,10 +151,6 @@ function TabButton({
     ? 'text-accent-600 dark:text-accent-400'
     : 'text-primary-600 dark:text-primary-400';
 
-  const indicatorColor = accent
-    ? 'bg-accent-600 dark:bg-accent-400'
-    : 'bg-primary-600 dark:bg-primary-400';
-
   return (
     <button
       role="tab"
@@ -125,26 +158,23 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-full min-w-0 items-center gap-1.5 text-xs font-medium transition-colors',
+        'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all',
         compact ? 'px-2' : 'px-2.5',
         active
           ? activeColor
-          : 'text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200'
+          : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200'
       )}
       title={label}
     >
-      {icon}
-      {showLabel && <span className="truncate">{label}</span>}
       {active && (
         <motion.div
           layoutId="right-tab-indicator"
-          className={cn(
-            'absolute bottom-0 left-3 right-3 h-[2px] rounded-full',
-            indicatorColor
-          )}
+          className="absolute inset-0 -z-10 rounded-xl bg-white/92 shadow-sm ring-1 ring-surface-200/70 dark:bg-surface-800 dark:ring-surface-700/60"
           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}
+      {icon}
+      {showLabel && <span className="truncate">{label}</span>}
     </button>
   );
 }

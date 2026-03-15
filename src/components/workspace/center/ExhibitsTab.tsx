@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import {
   useExhibits,
   useCreateExhibit,
@@ -47,11 +48,16 @@ export function ExhibitsTab() {
 
   const handleCreate = useCallback(async () => {
     if (!selectedProjectId || !user) return;
-    const nextId = getNextExhibitId(exhibits ?? []);
-    await createExhibit.mutateAsync({
-      projectId: selectedProjectId,
-      exhibitId: nextId,
-    });
+    try {
+      const nextId = getNextExhibitId(exhibits ?? []);
+      await createExhibit.mutateAsync({
+        projectId: selectedProjectId,
+        exhibitId: nextId,
+      });
+    } catch (err) {
+      console.error('[ExhibitsTab] Failed to create exhibit:', err);
+      toast.error('Failed to create exhibit');
+    }
   }, [selectedProjectId, user, exhibits, createExhibit]);
 
   const handleDeleteRequest = useCallback((exhibit: ExhibitMarker) => {

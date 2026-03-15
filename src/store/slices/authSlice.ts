@@ -10,17 +10,9 @@ export interface AuthSlice {
   setUser: (user: AppUser | null) => void;
   toggleTheme: () => void;
   setTheme: (mode: ThemeMode) => void;
-  resolvedTheme: () => 'light' | 'dark';
 }
 
-function getSystemTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
-}
-
-export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
+export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
   user: null,
   themeMode: (localStorage.getItem(THEME_KEY) as ThemeMode) || 'system',
   setUser: (user) => set({ user }),
@@ -35,9 +27,5 @@ export const createAuthSlice: StateCreator<AuthSlice> = (set, get) => ({
   setTheme: (mode) => {
     localStorage.setItem(THEME_KEY, mode);
     set({ themeMode: mode });
-  },
-  resolvedTheme: () => {
-    const mode = get().themeMode;
-    return mode === 'system' ? getSystemTheme() : mode;
   },
 });

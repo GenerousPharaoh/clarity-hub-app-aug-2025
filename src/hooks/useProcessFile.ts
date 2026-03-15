@@ -1,7 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { checkProcessingBudget, reserveProcessingBudget } from '@/lib/processingBudget';
+import type { FileRecord } from '@/types';
+import { filesQueryKey } from './useFiles';
 
 interface ProcessFileState {
   isProcessing: boolean;
@@ -13,36 +15,83 @@ interface ProcessFileOptions {
   source?: 'manual' | 'auto';
 }
 
+interface ProcessFileResponse {
+  status?: 'completed' | 'failed';
+  chunksCreated?: number;
+  summary?: string | null;
+  error?: string;
+}
+
+const inFlightProcessingRequests = new Map<string, Promise<ProcessFileResponse>>();
+
+function updateCachedFile(
+  queryClient: ReturnType<typeof useQueryClient>,
+  projectId: string,
+  fileId: string,
+  updater: (file: FileRecord) => FileRecord
+) {
+  queryClient.setQueryData<FileRecord[]>(
+    filesQueryKey(projectId),
+    (current) => current?.map((file) => (file.id === fileId ? updater(file) : file)) ?? current
+  );
+}
+
+async function parseProcessFileResponse(response: Response): Promise<ProcessFileResponse> {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    return (await response.json()) as ProcessFileResponse;
+  }
+
+  const text = await response.text();
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text) as ProcessFileResponse;
+  } catch {
+    return { error: text };
+  }
+}
+
 /**
- * Hook for manually triggering file processing via the serverless endpoint.
- * Polls the file's processing_status until it completes.
+ * Hook for triggering the canonical server-side processing pipeline.
+ * Uses the shared files query cache so status changes are reflected across the app immediately.
  */
 export function useProcessFile() {
   const [states, setStates] = useState<Record<string, ProcessFileState>>({});
   const queryClient = useQueryClient();
-  const pollingRefs = useRef<Record<string, ReturnType<typeof setInterval>>>({});
 
   const processFile = useCallback(
     async (fileId: string, projectId: string, options?: ProcessFileOptions) => {
-      // Set processing state
-      setStates((prev) => ({
-        ...prev,
-        [fileId]: { isProcessing: true, error: null },
-      }));
+      const requestKey = `${projectId}:${fileId}`;
+      const inFlightRequest = inFlightProcessingRequests.get(requestKey);
+      if (inFlightRequest) {
+        return inFlightRequest;
+      }
 
-      try {
-        // Get the user's session token
+      const request = (async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) {
           throw new Error('Not authenticated');
         }
 
-        // Conservative local budget guardrails to prevent accidental API overuse.
         const budget = checkProcessingBudget(options?.fileSizeBytes);
         if (!budget.allowed) {
           throw new Error(budget.reason || 'Daily processing budget reached');
         }
-        // Call the serverless processing endpoint
+
+        setStates((prev) => ({
+          ...prev,
+          [fileId]: { isProcessing: true, error: null },
+        }));
+        updateCachedFile(queryClient, projectId, fileId, (file) => ({
+          ...file,
+          processing_status: 'processing',
+          processing_error: null,
+        }));
+
         const response = await fetch('/api/process-file', {
           method: 'POST',
           headers: {
@@ -52,16 +101,23 @@ export function useProcessFile() {
           body: JSON.stringify({ fileId, projectId }),
         });
 
-        const result = await response.json();
+        const result = await parseProcessFileResponse(response);
 
-        if (!response.ok) {
+        if (!response.ok || result.status !== 'completed') {
           throw new Error(result.error || 'Processing failed');
         }
 
         reserveProcessingBudget(options?.fileSizeBytes);
 
-        // Invalidate file queries to refresh UI
-        queryClient.invalidateQueries({ queryKey: ['files', projectId] });
+        updateCachedFile(queryClient, projectId, fileId, (file) => ({
+          ...file,
+          processing_status: 'completed',
+          processing_error: null,
+          processed_at: new Date().toISOString(),
+          ai_summary: result.summary ?? null,
+          chunk_count: result.chunksCreated ?? 0,
+        }));
+        void queryClient.invalidateQueries({ queryKey: filesQueryKey(projectId) });
 
         setStates((prev) => ({
           ...prev,
@@ -69,14 +125,27 @@ export function useProcessFile() {
         }));
 
         return result;
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Processing failed';
-        setStates((prev) => ({
-          ...prev,
-          [fileId]: { isProcessing: false, error: errorMsg },
-        }));
-        throw error;
-      }
+      })()
+        .catch((error) => {
+          const errorMsg = error instanceof Error ? error.message : 'Processing failed';
+          updateCachedFile(queryClient, projectId, fileId, (file) => ({
+            ...file,
+            processing_status: 'failed',
+            processing_error: errorMsg,
+          }));
+          setStates((prev) => ({
+            ...prev,
+            [fileId]: { isProcessing: false, error: errorMsg },
+          }));
+          void queryClient.invalidateQueries({ queryKey: filesQueryKey(projectId) });
+          throw error;
+        })
+        .finally(() => {
+          inFlightProcessingRequests.delete(requestKey);
+        });
+
+      inFlightProcessingRequests.set(requestKey, request);
+      return request;
     },
     [queryClient]
   );
@@ -88,11 +157,5 @@ export function useProcessFile() {
     [states]
   );
 
-  // Cleanup polling on unmount
-  const cleanup = useCallback(() => {
-    Object.values(pollingRefs.current).forEach(clearInterval);
-    pollingRefs.current = {};
-  }, []);
-
-  return { processFile, getState, cleanup };
+  return { processFile, getState };
 }

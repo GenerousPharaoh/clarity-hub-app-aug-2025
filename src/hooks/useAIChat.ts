@@ -7,6 +7,7 @@ import { downloadFile } from '@/services/storageService';
 import { searchDocuments, formatSearchContext, type SearchResult } from '@/services/documentSearchService';
 import type { ChatMessage, ChatSource, EffortLevel } from '@/types';
 import type { TablesInsert } from '@/types/database';
+import { getDemoFiles, getDemoProjects } from '@/lib/demo';
 
 const CHAT_KEY = 'chat-messages';
 
@@ -155,6 +156,69 @@ function formatAIError(error: unknown): string {
   return `AI error: ${error.message}`;
 }
 
+function buildDemoReply(params: {
+  projectId: string;
+  content: string;
+  effortLevel: EffortLevel;
+  fileContext?: { name: string; path: string; type: string | null };
+}): {
+  content: string;
+  followUps: string[];
+} {
+  const lower = params.content.toLowerCase();
+  const project = getDemoProjects().find((entry) => entry.id === params.projectId) ?? null;
+  const projectFiles = getDemoFiles(params.projectId);
+  const selectedFile = params.fileContext
+    ? projectFiles.find(
+        (file) =>
+          file.name === params.fileContext?.name ||
+          file.file_path === params.fileContext?.path
+      ) ?? null
+    : null;
+
+  if (selectedFile && /(summary|summari|explain|what is this|document)/.test(lower)) {
+    return {
+      content: `Demo review of "${selectedFile.name}": ${selectedFile.ai_summary ?? 'This file has already been pre-processed in the demo workspace.'}\n\nOpen the viewer tab to inspect the source directly, then ask a narrower question if you want to pressure-test a fact pattern or chronology.`,
+      followUps: [
+        'What is the strongest fact in this file?',
+        'How would you use this as an exhibit?',
+        'What follow-up evidence should I look for next?',
+      ],
+    };
+  }
+
+  if (project && /(strategy|next step|argument|claim|position|risk)/.test(lower)) {
+    return {
+      content: `Demo strategy pass for "${project.name}":\n\n1. Build a tight chronology from the seeded files and note edits.\n2. Promote the clearest documentary support into exhibits before drafting argument.\n3. Use the notes tab to isolate the two or three facts that change leverage.\n\nThis demo assistant is local-only, so treat it as a workflow guide rather than a legal opinion.`,
+      followUps: [
+        'Which seeded file should become Exhibit A?',
+        'What should the chronology highlight first?',
+        'How should I structure the demand or complaint theory?',
+      ],
+    };
+  }
+
+  if (project && /(timeline|chronology|dates|when|sequence)/.test(lower)) {
+    return {
+      content: `For "${project.name}", start with the dated documents in the viewer and the project note in the Documents tab. The goal is to reduce the file to a sequence of event, response, and consequence.\n\nIn demo mode, the best next move is to open the note and turn it into a short chronology with one bullet per date.`,
+      followUps: [
+        'Which document gives the cleanest opening date?',
+        'What dates are still missing from the record?',
+        'How should I rewrite the chronology note?',
+      ],
+    };
+  }
+
+  return {
+    content: `Demo mode is active, so this assistant stays local to the seeded workspace. You can still use it to explore the product flow: select a file, open the viewer, edit notes, add exhibits, and then ask for a summary, chronology, or strategy pass based on the sample matter.`,
+    followUps: [
+      'Summarize the selected file',
+      'Suggest the next workflow step',
+      'Help me organize this project into exhibits',
+    ],
+  };
+}
+
 interface UseAIChatOptions {
   projectId: string | null;
 }
@@ -173,7 +237,7 @@ interface UseAIChatReturn {
 }
 
 export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const queryClient = useQueryClient();
   const abortRef = useRef(false);
 
@@ -181,7 +245,11 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
   const { data: messages = [], isLoading: isFetchingMessages } = useQuery<ChatMessage[]>({
     queryKey: chatKey(projectId),
     queryFn: async () => {
-      if (!projectId || !user) return [];
+      if (!projectId) return [];
+      if (isDemoMode) {
+        return queryClient.getQueryData<ChatMessage[]>(chatKey(projectId)) ?? [];
+      }
+      if (!user) return [];
 
       const { data, error } = await supabase
         .from('chat_messages')
@@ -192,7 +260,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
       if (error) throw error;
       return (data ?? []).map(rowToMessage);
     },
-    enabled: !!projectId && !!user,
+    enabled: !!projectId && (isDemoMode || !!user),
   });
 
   // Mutation: insert a message row
@@ -225,13 +293,68 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
 
       abortRef.current = false;
       isLoadingRef.current = true;
+      const effort = effortLevel ?? 'standard';
+      const basicFileContext = fileContext
+        ? `File: "${fileContext.name}" (type: ${fileContext.type || 'unknown'})`
+        : undefined;
+
+      // Unique loading indicator ID
+      const loadingId = `loading_${++loadingIdCounter.current}`;
+
+      if (isDemoMode) {
+        const userMsg: ChatMessage = {
+          id: `demo_user_${Date.now()}`,
+          role: 'user',
+          content: content.trim(),
+          timestamp: new Date(),
+          fileContext: basicFileContext,
+        };
+
+        queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) => [
+          ...(old ?? []),
+          userMsg,
+          {
+            id: loadingId,
+            role: 'assistant',
+            content: '__loading__',
+            timestamp: new Date(),
+          },
+        ]);
+
+        try {
+          await new Promise((resolve) => window.setTimeout(resolve, 250));
+
+          const demoReply = buildDemoReply({
+            projectId,
+            content,
+            effortLevel: effort,
+            fileContext,
+          });
+
+          queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
+            (old ?? []).filter((message) => message.id !== loadingId).concat({
+              id: `demo_assistant_${Date.now()}`,
+              role: 'assistant',
+              content: demoReply.content,
+              model: 'gpt',
+              timestamp: new Date(),
+              effortLevel: effort,
+              followUps: demoReply.followUps,
+            })
+          );
+        } finally {
+          isLoadingRef.current = false;
+        }
+
+        return;
+      }
 
       // Build file context string
       let fileContextStr: string | undefined;
       let enrichedContext: string | undefined;
 
       if (fileContext) {
-        fileContextStr = `File: "${fileContext.name}" (type: ${fileContext.type || 'unknown'})`;
+        fileContextStr = basicFileContext;
         // Fetch actual file content for the AI
         const fileContent = await fetchFileContent(
           fileContext.path,
@@ -240,9 +363,6 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
         );
         enrichedContext = `${fileContextStr}\n\n--- FILE CONTENT ---\n${fileContent}\n--- END FILE CONTENT ---`;
       }
-
-      // Unique loading indicator ID
-      const loadingId = `loading_${++loadingIdCounter.current}`;
 
       try {
         // 1. Insert user message into DB
@@ -271,24 +391,28 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           },
         ]);
 
-        // Search processed documents for relevant context
-        const effort = effortLevel ?? 'standard';
+        // Run document search and legal context building in parallel
         const chunkLimit = EFFORT_CONFIG[effort].chunkLimit;
         let documentContext = '';
         let sources: ChatSource[] = [];
-        try {
-          const searchResults = await searchDocuments({
-            query: content.trim(),
-            projectId,
-            limit: chunkLimit,
-          });
-          if (searchResults.length > 0) {
-            documentContext = formatSearchContext(searchResults);
-            sources = searchResultsToSources(searchResults);
-          }
-        } catch {
-          // Non-critical: proceed without search context
+        let legalContext = '';
+
+        const docSearchPromise = searchDocuments({
+          query: content.trim(),
+          projectId,
+          limit: chunkLimit,
+        }).catch(() => [] as SearchResult[]);
+
+        const legalContextPromise = aiRouter.buildLegalContext(content.trim(), effort)
+          .catch(() => '');
+
+        const [searchResults, legalCtx] = await Promise.all([docSearchPromise, legalContextPromise]);
+
+        if (searchResults.length > 0) {
+          documentContext = formatSearchContext(searchResults);
+          sources = searchResultsToSources(searchResults);
         }
+        legalContext = legalCtx;
 
         // Build conversation history from cache (avoids stale closure)
         const currentMessages = queryClient.getQueryData<ChatMessage[]>(chatKey(projectId)) ?? [];
@@ -307,17 +431,13 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           conversationHistory,
           caseContext: fullContext || undefined,
           sources: sources.length > 0 ? sources : undefined,
+          legalContext,
         });
 
         if (abortRef.current) return;
 
-        // Generate follow-up suggestions (non-critical, wrapped in try/catch)
-        let followUps: string[] = [];
-        try {
-          followUps = await aiRouter.generateFollowUps(content.trim(), result.response);
-        } catch {
-          // Non-critical: proceed without follow-ups
-        }
+        // Follow-ups are now returned by the server-side /api/ai-chat endpoint
+        const followUps = result.followUps ?? [];
 
         // 2. Insert assistant message into DB
         const assistantRow = await insertMessage.mutateAsync({
@@ -376,7 +496,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
         queryClient.invalidateQueries({ queryKey: chatKey(projectId) });
       }
     },
-    [projectId, user, insertMessage, queryClient]
+    [projectId, user, insertMessage, isDemoMode, queryClient]
   );
 
   const clearChat = useCallback(async () => {
@@ -384,13 +504,22 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
     abortRef.current = true;
     isLoadingRef.current = false;
 
+    if (isDemoMode) {
+      queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), []);
+      return;
+    }
+
     // Delete all messages for this project
-    await supabase.from('chat_messages').delete().eq('project_id', projectId);
+    try {
+      await supabase.from('chat_messages').delete().eq('project_id', projectId);
+    } catch (err) {
+      console.error('Failed to delete chat messages:', err);
+    }
 
     // Clear cache
     queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), []);
     queryClient.invalidateQueries({ queryKey: chatKey(projectId) });
-  }, [projectId, queryClient]);
+  }, [projectId, isDemoMode, queryClient]);
 
   // Derive isLoading from whether there's a loading placeholder in messages
   const isLoading = messages.some((m) => m.content === '__loading__');

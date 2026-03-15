@@ -5,29 +5,31 @@
 
 /* ── Design Tokens ─────────────────────────────────────── */
 @theme {
-  /* Primary - Deep Indigo */
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
+  /* Primary - Ink blue */
+  --color-primary-50: #f3f6f8;
+  --color-primary-100: #e7edf2;
+  --color-primary-200: #d1dbe4;
+  --color-primary-300: #afbfcd;
+  --color-primary-400: #8498ab;
+  --color-primary-500: #62798f;
+  --color-primary-600: #4d6379;
+  --color-primary-700: #3b4f63;
+  --color-primary-800: #2c3d4f;
+  --color-primary-900: #1e2b39;
+  --color-primary-950: #111923;
 
-  /* Accent - Violet for AI features */
-  --color-accent-50: #f5f3ff;
-  --color-accent-100: #ede9fe;
-  --color-accent-200: #ddd6fe;
-  --color-accent-300: #c4b5fd;
-  --color-accent-400: #a78bfa;
-  --color-accent-500: #8b5cf6;
-  --color-accent-600: #7c3aed;
-  --color-accent-700: #6d28d9;
-  --color-accent-800: #5b21b6;
-  --color-accent-900: #4c1d95;
+  /* Accent - Burnished copper */
+  --color-accent-50: #fbf7f1;
+  --color-accent-100: #f4ecdf;
+  --color-accent-200: #e8d6bc;
+  --color-accent-300: #d7b88e;
+  --color-accent-400: #c1945c;
+  --color-accent-500: #a5743f;
+  --color-accent-600: #875f33;
+  --color-accent-700: #694a29;
+  --color-accent-800: #533a21;
+  --color-accent-900: #412f1c;
+  --color-accent-950: #261a10;
 
   /* Surfaces - Zinc-based for modern neutral feel */
   --color-surface-50: #fafafa;
@@ -47,7 +49,7 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-info: #6366f1;
+  --color-info: #4d6379;
 
   /* Radii */
   --radius-sm: 6px;
@@ -59,8 +61,8 @@
   --shadow-elevated: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
   --shadow-float: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
   --shadow-overlay: 0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.06);
-  --shadow-glow-primary: 0 0 20px rgb(79 70 229 / 0.15);
-  --shadow-glow-accent: 0 0 20px rgb(124 58 237 / 0.15);
+  --shadow-glow-primary: 0 0 24px rgb(77 99 121 / 0.18);
+  --shadow-glow-accent: 0 0 24px rgb(135 95 51 / 0.16);
 
   /* Motion */
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
@@ -219,7 +221,7 @@ button, [role="button"], a {
 }
 
 .dark .gradient-subtle {
-  background: linear-gradient(135deg, rgb(79 70 229 / 0.1), rgb(124 58 237 / 0.1));
+  background: linear-gradient(135deg, rgb(77 99 121 / 0.16), rgb(135 95 51 / 0.12));
 }
 
 /* ── Indeterminate Progress Bar ───────────────────────── */

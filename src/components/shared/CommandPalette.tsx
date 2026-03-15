@@ -13,9 +13,15 @@ import {
   Sun,
   Moon,
   Monitor,
+  PenLine,
+  Sparkles,
+  Layers3,
+  RotateCcw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
+import { useAuth } from '@/contexts/AuthContext';
+import { readWorkspaceSession } from '@/lib/workspaceSession';
 
 interface CommandItem {
   id: string;
@@ -38,12 +44,14 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDemoMode, resetDemoWorkspace } = useAuth();
 
   const projects = useAppStore((s) => s.projects);
   const files = useAppStore((s) => s.files);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const toggleLeft = useAppStore((s) => s.toggleLeftPanel);
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
+  const setCenterTab = useAppStore((s) => s.setCenterTab);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
@@ -51,8 +59,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const themeMode = useAppStore((s) => s.themeMode);
   const setShowKeyboardShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
+  const requestNewNote = useAppStore((s) => s.requestNewNote);
 
   const isInWorkspace = location.pathname.startsWith('/project/');
+  const lastSession = readWorkspaceSession();
 
   const commands = useMemo<CommandItem[]>(() => {
     const items: CommandItem[] = [];
@@ -74,6 +84,19 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       keywords: 'preferences account theme',
       action: () => { navigate('/settings'); onClose(); },
     });
+    if (lastSession?.projectId) {
+      items.push({
+        id: 'nav-resume-workspace',
+        label: `Resume ${lastSession.projectName ?? 'last workspace'}`,
+        group: 'Navigation',
+        icon: <Layers3 className="h-4 w-4" />,
+        keywords: `${lastSession.fileName ?? ''} ${lastSession.noteTitle ?? ''} continue recent`,
+        action: () => {
+          navigate(`/project/${lastSession.projectId}`);
+          onClose();
+        },
+      });
+    }
 
     // Projects
     for (const project of projects) {
@@ -107,6 +130,43 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     // Workspace actions (only if in workspace)
     if (isInWorkspace) {
       items.push({
+        id: 'action-overview-tab',
+        label: 'Open Overview',
+        group: 'Workspace',
+        icon: <Layers3 className="h-4 w-4" />,
+        keywords: 'summary overview project',
+        action: () => { setCenterTab('overview'); setMobileTab('content'); onClose(); },
+      });
+      items.push({
+        id: 'action-documents-tab',
+        label: 'Open Documents',
+        group: 'Workspace',
+        icon: <PenLine className="h-4 w-4" />,
+        keywords: 'notes documents editor draft',
+        action: () => { setCenterTab('editor'); setMobileTab('content'); onClose(); },
+      });
+      items.push({
+        id: 'action-exhibits-tab',
+        label: 'Open Exhibits',
+        group: 'Workspace',
+        icon: <FolderOpen className="h-4 w-4" />,
+        keywords: 'evidence exhibits markers',
+        action: () => { setCenterTab('exhibits'); setMobileTab('content'); onClose(); },
+      });
+      items.push({
+        id: 'action-new-document',
+        label: 'Create Document',
+        group: 'Workspace',
+        icon: <PenLine className="h-4 w-4" />,
+        keywords: 'new note document draft',
+        action: () => {
+          setCenterTab('editor');
+          setMobileTab('content');
+          requestNewNote();
+          onClose();
+        },
+      });
+      items.push({
         id: 'action-toggle-left',
         label: 'Toggle File Browser',
         group: 'Actions',
@@ -130,6 +190,14 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         keywords: 'help hotkeys',
         action: () => { setShowKeyboardShortcuts(true); onClose(); },
       });
+      items.push({
+        id: 'action-open-ai',
+        label: 'Open AI Chat',
+        group: 'Workspace',
+        icon: <Sparkles className="h-4 w-4" />,
+        keywords: 'assistant ai reasoning chat',
+        action: () => { setRightPanel(true); setRightTab('ai'); setMobileTab('viewer'); onClose(); },
+      });
     }
 
     // Theme
@@ -147,8 +215,43 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       action: () => { toggleTheme(); onClose(); },
     });
 
+    if (isDemoMode) {
+      items.push({
+        id: 'action-reset-demo',
+        label: 'Reset Demo Workspace',
+        group: 'Actions',
+        icon: <RotateCcw className="h-4 w-4" />,
+        keywords: 'demo restore sample data reset',
+        action: () => {
+          void resetDemoWorkspace();
+          onClose();
+        },
+      });
+    }
+
     return items;
-  }, [projects, files, selectedProjectId, isInWorkspace, themeMode, navigate, onClose, toggleLeft, toggleRight, setSelectedFile, setRightPanel, setRightTab, setMobileTab, toggleTheme, setShowKeyboardShortcuts]);
+  }, [
+    files,
+    isDemoMode,
+    isInWorkspace,
+    lastSession,
+    navigate,
+    onClose,
+    projects,
+    requestNewNote,
+    resetDemoWorkspace,
+    selectedProjectId,
+    setCenterTab,
+    setMobileTab,
+    setRightPanel,
+    setRightTab,
+    setSelectedFile,
+    setShowKeyboardShortcuts,
+    themeMode,
+    toggleLeft,
+    toggleRight,
+    toggleTheme,
+  ]);
 
   // Filter commands
   const filtered = useMemo(() => {

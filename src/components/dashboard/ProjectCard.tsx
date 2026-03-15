@@ -1,9 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MoreVertical, Trash2, Pencil, FolderOpen, Calendar, FileText } from 'lucide-react';
+import {
+  Calendar,
+  ChevronRight,
+  FileText,
+  FolderOpen,
+  MoreVertical,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import type { Project } from '@/types';
-import { cn, formatDate } from '@/lib/utils';
+import { cn, formatDate, formatRelativeDate } from '@/lib/utils';
 import { useUpdateProject } from '@/hooks/useProjects';
 
 interface ProjectCardProps {
@@ -11,6 +19,27 @@ interface ProjectCardProps {
   fileCount?: number;
   index: number;
   onDelete: (id: string) => void;
+}
+
+function getMatterStatus(fileCount?: number) {
+  if (!fileCount) {
+    return {
+      label: 'Intake',
+      chip: 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300',
+    };
+  }
+
+  if (fileCount >= 3) {
+    return {
+      label: 'Developed',
+      chip: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300',
+    };
+  }
+
+  return {
+    label: 'In review',
+    chip: 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-900/50 dark:bg-primary-950/30 dark:text-primary-300',
+  };
 }
 
 export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCardProps) {
@@ -23,21 +52,23 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
   const menuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
-  // Close menu on outside click or Escape
   useEffect(() => {
     if (!menuOpen) return;
+
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
         setConfirmDelete(false);
       }
     }
+
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         setMenuOpen(false);
         setConfirmDelete(false);
       }
     }
+
     document.addEventListener('mousedown', handleClick);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -47,7 +78,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
   }, [menuOpen]);
 
   const handleCardClick = () => {
-    if (renaming) return; // Don't navigate while renaming
+    if (renaming) return;
     navigate(`/project/${project.id}`);
   };
 
@@ -57,9 +88,9 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
       onDelete(project.id);
       setMenuOpen(false);
       setConfirmDelete(false);
-    } else {
-      setConfirmDelete(true);
+      return;
     }
+    setConfirmDelete(true);
   };
 
   const handleStartRename = (e: React.MouseEvent) => {
@@ -76,7 +107,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
       updateProject.mutate({ id: project.id, name: trimmed });
     }
     setRenaming(false);
-  }, [renameValue, project.id, project.name, updateProject]);
+  }, [project.id, project.name, renameValue, updateProject]);
 
   const handleRenameKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -84,28 +115,32 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
       handleRenameSubmit();
     }
     if (e.key === 'Escape') {
+      setRenameValue(project.name);
       setRenaming(false);
     }
   };
 
-  // Accent color stripe — gradient pairs for visual variety
   const accentGradients = [
-    'from-primary-500 to-primary-600',
-    'from-accent-500 to-accent-600',
-    'from-emerald-500 to-emerald-600',
-    'from-amber-500 to-amber-600',
-    'from-rose-500 to-rose-600',
-    'from-cyan-500 to-cyan-600',
+    'from-primary-700 via-primary-600 to-primary-500',
+    'from-primary-700 via-primary-600 to-accent-500',
+    'from-surface-800 via-primary-700 to-primary-500',
+    'from-accent-700 via-accent-600 to-primary-500',
+    'from-primary-800 via-primary-700 to-accent-600',
+    'from-surface-700 via-surface-600 to-primary-500',
   ];
+
   const accent = accentGradients[index % accentGradients.length];
+  const status = getMatterStatus(fileCount);
+  const updatedLabel = formatRelativeDate(project.updated_at ?? project.created_at);
+  const goalType = project.goal_type ?? 'General matter';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.35,
-        delay: index * 0.06,
+        duration: 0.36,
+        delay: index * 0.05,
         ease: [0.16, 1, 0.3, 1],
       }}
     >
@@ -113,67 +148,82 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
         role="link"
         tabIndex={0}
         onClick={handleCardClick}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick();
+          }
+        }}
         className={cn(
-          'group relative flex cursor-pointer flex-col overflow-hidden',
-          'rounded-xl border border-surface-200 bg-white',
-          'shadow-sm transition-all duration-200',
-          'hover:shadow-lg hover:shadow-primary-500/5 hover:border-surface-300 hover:-translate-y-0.5',
+          'group relative min-w-0 overflow-hidden rounded-[26px] border p-5',
+          'border-surface-200/80 bg-white/88 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.42)]',
+          'transition-all duration-200 hover:-translate-y-1 hover:border-surface-300 hover:shadow-[0_28px_80px_-42px_rgba(15,23,42,0.45)]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-950',
-          'dark:border-surface-800 dark:bg-surface-900',
-          'dark:hover:border-surface-700 dark:hover:shadow-lg dark:hover:shadow-primary-500/[0.08]'
+          'dark:border-surface-800 dark:bg-surface-900/78 dark:hover:border-surface-700'
         )}
       >
-        {/* Accent stripe — gradient */}
-        <div className={cn('h-1 w-full bg-gradient-to-r', accent)} />
+        <div className={cn('absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r', accent)} />
+        <div className="pointer-events-none absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl dark:bg-white/5" />
 
-        {/* Card body */}
-        <div className="flex flex-1 flex-col p-5">
-          {/* Header: icon + title + menu */}
-          <div className="mb-3 flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3 min-w-0">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+        <div className="relative">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 flex-1 items-start gap-3">
+              <div className={cn(
+                'mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
+                'bg-gradient-to-br text-white shadow-sm',
+                accent
+              )}>
                 <FolderOpen className="h-4.5 w-4.5" />
               </div>
+
               <div className="min-w-0">
-                {renaming ? (
-                  <input
-                    ref={renameInputRef}
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    onBlur={handleRenameSubmit}
-                    onKeyDown={handleRenameKeyDown}
-                    onClick={(e) => e.stopPropagation()}
-                    className={cn(
-                      'w-full rounded-md border border-primary-300 bg-white px-2 py-0.5',
-                      'font-heading text-[15px] font-semibold leading-snug text-surface-900',
-                      'outline-none focus:ring-2 focus:ring-primary-500/30',
-                      'dark:border-primary-600 dark:bg-surface-800 dark:text-surface-100'
-                    )}
-                  />
-                ) : (
-                  <h3 className="font-heading text-[15px] font-semibold leading-snug text-surface-900 dark:text-surface-100 truncate">
-                    {project.name}
-                  </h3>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                    {goalType}
+                  </span>
+                  <span className={cn('max-w-full rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] [overflow-wrap:anywhere]', status.chip)}>
+                    {status.label}
+                  </span>
+                </div>
+
+                <div className="mt-3">
+                  {renaming ? (
+                    <input
+                      ref={renameInputRef}
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onBlur={handleRenameSubmit}
+                      onKeyDown={handleRenameKeyDown}
+                      onClick={(e) => e.stopPropagation()}
+                      className={cn(
+                        'w-full rounded-xl border border-primary-300 bg-white px-3 py-2',
+                        'font-heading text-lg font-semibold tracking-tight text-surface-900',
+                        'outline-none focus:ring-2 focus:ring-primary-500/25',
+                        'dark:border-primary-700 dark:bg-surface-800 dark:text-surface-100'
+                      )}
+                    />
+                  ) : (
+                    <h3 className="line-clamp-2 font-heading text-xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50">
+                      {project.name}
+                    </h3>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Context menu */}
             <div ref={menuRef} className="relative shrink-0">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setMenuOpen(!menuOpen);
+                  setMenuOpen((prev) => !prev);
                   setConfirmDelete(false);
                 }}
                 className={cn(
-                  'flex h-7 w-7 items-center justify-center rounded-lg',
-                  'text-surface-400 transition-all',
-                  'hover:bg-surface-100 hover:text-surface-600',
+                  'flex h-8 w-8 items-center justify-center rounded-xl',
+                  'text-surface-400 transition-all hover:bg-surface-100 hover:text-surface-600',
                   'dark:hover:bg-surface-800 dark:hover:text-surface-300',
                   'max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100',
-                  menuOpen && 'opacity-100 bg-surface-100 dark:bg-surface-800'
+                  menuOpen && 'bg-surface-100 opacity-100 dark:bg-surface-800'
                 )}
                 aria-label="Project options"
                 aria-expanded={menuOpen}
@@ -185,8 +235,8 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
               {menuOpen && (
                 <div
                   className={cn(
-                    'absolute right-0 top-full z-50 mt-1 w-44',
-                    'rounded-xl border border-surface-200 bg-white py-1 shadow-lg',
+                    'absolute right-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-2xl',
+                    'border border-surface-200 bg-white py-1 shadow-lg',
                     'dark:border-surface-700 dark:bg-surface-800'
                   )}
                 >
@@ -195,50 +245,65 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700"
                   >
                     <Pencil className="h-3.5 w-3.5" />
-                    Rename project
+                    Rename matter
                   </button>
                   <button
                     onClick={handleDelete}
                     className={cn(
                       'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
                       confirmDelete
-                        ? 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30'
+                        ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
                         : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700'
                     )}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {confirmDelete ? 'Confirm — deletes all data' : 'Delete project'}
+                    {confirmDelete ? 'Confirm delete' : 'Delete matter'}
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Description */}
-          {project.description ? (
-            <p className="mb-4 text-sm leading-relaxed text-surface-500 dark:text-surface-400 line-clamp-2">
-              {project.description}
-            </p>
-          ) : (
-            <p className="mb-4 text-sm italic text-surface-400 dark:text-surface-500">
-              No description
-            </p>
-          )}
+          <p className="mt-4 line-clamp-3 text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
+            {project.description || 'Add a short matter summary to anchor the evidence, issues, and drafting strategy.'}
+          </p>
 
-          {/* Footer */}
-          <div className="mt-auto flex items-center gap-4 border-t border-surface-100 pt-3 dark:border-surface-800">
-            <div className="flex items-center gap-1.5 text-xs text-surface-400 dark:text-surface-500">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>{formatDate(project.created_at)}</span>
-            </div>
-            {typeof fileCount === 'number' && (
-              <div className="flex items-center gap-1.5 text-xs text-surface-400 dark:text-surface-500">
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-surface-200/80 bg-surface-50/80 px-3.5 py-3 dark:border-surface-800 dark:bg-surface-950/40">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
                 <FileText className="h-3.5 w-3.5" />
-                <span>
-                  {fileCount} {fileCount === 1 ? 'file' : 'files'}
-                </span>
+                Evidence
               </div>
-            )}
+              <p className="mt-2 font-heading text-2xl font-semibold text-surface-950 dark:text-surface-100">
+                {fileCount ?? 0}
+              </p>
+              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                {fileCount === 1 ? 'file attached' : 'files attached'}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-surface-200/80 bg-surface-50/80 px-3.5 py-3 dark:border-surface-800 dark:bg-surface-950/40">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
+                <Calendar className="h-3.5 w-3.5" />
+                Activity
+              </div>
+              <p className="mt-2 font-heading text-lg font-semibold text-surface-950 dark:text-surface-100">
+                {updatedLabel}
+              </p>
+              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                Opened {formatDate(project.created_at)}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 border-t border-surface-100 pt-4 dark:border-surface-800 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-surface-400 [overflow-wrap:anywhere] dark:text-surface-500">
+              Open the matter to review source files, drafting notes, and exhibits.
+            </p>
+            <span className="inline-flex items-center gap-1 self-start text-sm font-medium text-surface-700 transition-colors group-hover:text-primary-700 dark:text-surface-200 dark:group-hover:text-primary-300">
+              Open matter
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </span>
           </div>
         </div>
       </div>

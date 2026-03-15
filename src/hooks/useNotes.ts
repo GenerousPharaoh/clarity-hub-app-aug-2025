@@ -3,6 +3,12 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Note } from '@/types';
 import type { TablesInsert } from '@/types/database';
+import {
+  createDemoNote,
+  deleteDemoNote,
+  getDemoNotes,
+  updateDemoNote,
+} from '@/lib/demo';
 
 const NOTES_KEY = 'notes';
 
@@ -14,12 +20,20 @@ function notesKey(projectId: string | null) {
  * Fetches all notes for a given project, ordered by last_modified descending.
  */
 export function useNotes(projectId: string | null) {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
 
   return useQuery<Note[]>({
     queryKey: notesKey(projectId),
     queryFn: async () => {
-      if (!projectId || !user) return [];
+      if (!projectId) return [];
+      if (isDemoMode) {
+        return getDemoNotes(projectId).sort(
+          (a, b) =>
+            new Date(b.last_modified ?? 0).getTime() -
+            new Date(a.last_modified ?? 0).getTime()
+        );
+      }
+      if (!user) return [];
 
       const { data, error } = await supabase
         .from('notes')
@@ -30,7 +44,7 @@ export function useNotes(projectId: string | null) {
       if (error) throw error;
       return data ?? [];
     },
-    enabled: !!projectId && !!user,
+    enabled: !!projectId && (isDemoMode || !!user),
   });
 }
 
@@ -39,7 +53,7 @@ export function useNotes(projectId: string | null) {
  * Returns the inserted note row.
  */
 export function useCreateNote() {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -52,6 +66,14 @@ export function useCreateNote() {
       title?: string;
       content?: string;
     }) => {
+      if (isDemoMode) {
+        return createDemoNote({
+          projectId,
+          title,
+          content,
+          createdBy: user?.id ?? null,
+        });
+      }
       if (!user) throw new Error('Not authenticated');
 
       const insert: TablesInsert<'notes'> = {
@@ -81,6 +103,7 @@ export function useCreateNote() {
  * Uses optimistic updates so the UI feels instant.
  */
 export function useUpdateNote() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -94,6 +117,13 @@ export function useUpdateNote() {
       title?: string;
       content?: string;
     }) => {
+      if (isDemoMode) {
+        return updateDemoNote(id, {
+          ...(title !== undefined ? { title } : {}),
+          ...(content !== undefined ? { content } : {}),
+        });
+      }
+
       const updates: Record<string, unknown> = {
         last_modified: new Date().toISOString(),
       };
@@ -150,10 +180,15 @@ export function useUpdateNote() {
  * Deletes a note by id.
  */
 export function useDeleteNote() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, projectId }: { id: string; projectId: string }) => {
+      if (isDemoMode) {
+        return deleteDemoNote(id);
+      }
+
       const { error } = await supabase.from('notes').delete().eq('id', id);
       if (error) throw error;
       return { id, projectId };

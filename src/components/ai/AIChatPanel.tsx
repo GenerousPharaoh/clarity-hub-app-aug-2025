@@ -7,11 +7,23 @@ import { useAIChat } from '@/hooks/useAIChat';
 import { ChatMessageComponent } from './ChatMessage';
 import { SuggestedPrompts } from './SuggestedPrompts';
 import { EffortSelector } from './EffortSelector';
-import { FollowUpSuggestions } from './FollowUpSuggestions';
 import useAppStore from '@/store';
 import type { EffortLevel } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+
+/** Parse a stored fileContext string like 'File: "report.pdf" (type: pdf)' back into structured data. */
+function parseFileContext(fileContext: string): { name: string; path: string; type: string | null } | undefined {
+  const match = fileContext.match(/^File: "(.+?)" \(type: (.+?)\)$/);
+  if (match) {
+    const type = match[2] === 'unknown' ? null : match[2];
+    return { name: match[1], path: '', type };
+  }
+  // Could not parse — return undefined so the retry sends without file context
+  return undefined;
+}
 
 export function AIChatPanel() {
+  const { isDemoMode } = useAuth();
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const files = useAppStore((s) => s.files);
@@ -19,7 +31,7 @@ export function AIChatPanel() {
     ? files.find((f) => f.id === selectedFileId) ?? null
     : null;
 
-  const { messages, isLoading, isFetchingMessages, sendMessage, clearChat, latestFollowUps } =
+  const { messages, isLoading, isFetchingMessages, sendMessage, clearChat } =
     useAIChat({ projectId: selectedProjectId });
 
   const [input, setInput] = useState('');
@@ -150,7 +162,7 @@ export function AIChatPanel() {
         if (messages[i].role === 'user') {
           const userMsg = messages[i];
           const fileContext = userMsg.fileContext
-            ? { name: userMsg.fileContext, path: '', type: null }
+            ? parseFileContext(userMsg.fileContext)
             : undefined;
           sendMessage(userMsg.content, fileContext, effort);
           break;
@@ -297,6 +309,14 @@ export function AIChatPanel() {
 
       {/* Input area */}
       <div className={cn('shrink-0 border-t border-surface-200 dark:border-surface-700', compact ? 'p-2' : 'p-3')}>
+        {isDemoMode && (
+          <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800/50 dark:bg-amber-900/20">
+            <p className="text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
+              Demo mode keeps AI responses local to the seeded workspace. Use it to explore the flow, then sign in for live model-backed analysis.
+            </p>
+          </div>
+        )}
+
         {/* File context indicator */}
         {selectedFile && (
           <div className="mb-2 flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 dark:border-primary-800/50 dark:bg-primary-900/20">

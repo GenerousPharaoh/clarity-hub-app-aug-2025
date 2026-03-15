@@ -12,6 +12,14 @@ import { supabase } from '@/lib/supabase';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
+/**
+ * Sanitize a value before interpolating it into a PostgREST `.or()` filter
+ * string. Strips characters that could alter the filter semantics.
+ */
+function sanitizeFilterValue(value: string): string {
+  return value.replace(/[%_,.*()\\]/g, '');
+}
+
 // ============================================================
 // Types
 // ============================================================
@@ -95,97 +103,7 @@ export interface LegalSearchResult {
 // ============================================================
 
 class LegalKnowledgeService {
-  // ─── Topics ────────────────────────────────────────────────
-
-  async getTopics(): Promise<LegalTopic[]> {
-    const { data, error } = await db
-      .from('legal_topics')
-      .select('*')
-      .order('display_order');
-
-    if (error) throw error;
-    return this.buildTopicTree(data ?? []);
-  }
-
-  async getTopicBySlug(slug: string): Promise<LegalTopic | null> {
-    const { data, error } = await db
-      .from('legal_topics')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-
-    if (error) return null;
-    return data;
-  }
-
-  private buildTopicTree(topics: LegalTopic[]): LegalTopic[] {
-    const topLevel = topics.filter((t) => !t.parent_id);
-    const children = topics.filter((t) => t.parent_id);
-
-    return topLevel.map((parent) => ({
-      ...parent,
-      children: children
-        .filter((c) => c.parent_id === parent.id)
-        .sort((a, b) => a.display_order - b.display_order),
-    }));
-  }
-
   // ─── Legislation ───────────────────────────────────────────
-
-  async getLegislation(filters?: {
-    jurisdiction?: string;
-    type?: string;
-    inForce?: boolean;
-  }): Promise<LegalLegislation[]> {
-    let query = db
-      .from('legal_legislation')
-      .select('*')
-      .order('title');
-
-    if (filters?.jurisdiction) {
-      query = query.eq('jurisdiction', filters.jurisdiction);
-    }
-    if (filters?.type) {
-      query = query.eq('legislation_type', filters.type);
-    }
-    if (filters?.inForce !== undefined) {
-      query = query.eq('in_force', filters.inForce);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data ?? [];
-  }
-
-  async getLegislationById(id: string): Promise<LegalLegislation | null> {
-    const { data, error } = await db
-      .from('legal_legislation')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) return null;
-    return data;
-  }
-
-  async getLegislationSections(
-    legislationId: string,
-    keyword?: string
-  ): Promise<LegalLegislationSection[]> {
-    let query = db
-      .from('legal_legislation_sections')
-      .select('*')
-      .eq('legislation_id', legislationId)
-      .order('section_number');
-
-    if (keyword) {
-      query = query.contains('keywords', [keyword]);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data ?? [];
-  }
 
   async searchLegislationSections(
     keyword: string
@@ -201,63 +119,13 @@ class LegalKnowledgeService {
 
   // ─── Case Law ──────────────────────────────────────────────
 
-  async getCases(filters?: {
-    courtLevel?: string;
-    isLandmark?: boolean;
-    jurisdiction?: string;
-    limit?: number;
-  }): Promise<LegalCase[]> {
-    let query = db
-      .from('legal_cases')
-      .select('*')
-      .order('decision_date', { ascending: false });
-
-    if (filters?.courtLevel) {
-      query = query.eq('court_level', filters.courtLevel);
-    }
-    if (filters?.isLandmark !== undefined) {
-      query = query.eq('is_landmark', filters.isLandmark);
-    }
-    if (filters?.jurisdiction) {
-      query = query.eq('jurisdiction', filters.jurisdiction);
-    }
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data ?? [];
-  }
-
-  async getCaseById(id: string): Promise<LegalCase | null> {
-    const { data, error } = await db
-      .from('legal_cases')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) return null;
-    return data;
-  }
-
-  async getCaseByCitation(citation: string): Promise<LegalCase | null> {
-    const { data, error } = await db
-      .from('legal_cases')
-      .select('*')
-      .eq('citation', citation)
-      .single();
-
-    if (error) return null;
-    return data;
-  }
-
   async searchCases(searchTerm: string): Promise<LegalCase[]> {
+    const safe = sanitizeFilterValue(searchTerm);
     const { data, error } = await db
       .from('legal_cases')
       .select('*')
       .or(
-        `case_name.ilike.%${searchTerm}%,summary.ilike.%${searchTerm}%,ratio.ilike.%${searchTerm}%`
+        `case_name.ilike.%${safe}%,summary.ilike.%${safe}%,ratio.ilike.%${safe}%`
       )
       .order('is_landmark', { ascending: false })
       .limit(20);
@@ -268,94 +136,18 @@ class LegalKnowledgeService {
 
   // ─── Legal Principles ─────────────────────────────────────
 
-  async getPrinciples(filters?: {
-    category?: string;
-    status?: string;
-  }): Promise<LegalPrinciple[]> {
-    let query = db
-      .from('legal_principles')
-      .select('*')
-      .order('name');
-
-    if (filters?.category) {
-      query = query.eq('category', filters.category);
-    }
-    if (filters?.status) {
-      query = query.eq('current_status', filters.status);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data ?? [];
-  }
-
-  async getPrincipleByName(name: string): Promise<LegalPrinciple | null> {
-    const { data, error } = await db
-      .from('legal_principles')
-      .select('*')
-      .eq('name', name)
-      .single();
-
-    if (error) return null;
-    return data;
-  }
-
   async searchPrinciples(searchTerm: string): Promise<LegalPrinciple[]> {
+    const safe = sanitizeFilterValue(searchTerm);
     const { data, error } = await db
       .from('legal_principles')
       .select('*')
       .or(
-        `name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`
+        `name.ilike.%${safe}%,description.ilike.%${safe}%,category.ilike.%${safe}%`
       )
       .limit(10);
 
     if (error) throw error;
     return data ?? [];
-  }
-
-  // ─── RAG Search (Vector Similarity) ───────────────────────
-
-  async semanticSearch(
-    queryEmbedding: number[],
-    options?: {
-      threshold?: number;
-      limit?: number;
-      sourceType?: string;
-      topicIds?: string[];
-    }
-  ): Promise<LegalSearchResult[]> {
-    const { data, error } = await db.rpc('match_legal_knowledge', {
-      query_embedding: queryEmbedding,
-      match_threshold: options?.threshold ?? 0.7,
-      match_count: options?.limit ?? 10,
-      filter_source_type: options?.sourceType ?? null,
-      filter_topics: options?.topicIds ?? null,
-    });
-
-    if (error) throw error;
-    return data ?? [];
-  }
-
-  // ─── Full-Text Search ─────────────────────────────────────
-
-  async fullTextSearch(
-    query: string,
-    limit: number = 10
-  ): Promise<LegalSearchResult[]> {
-    const tsQuery = query
-      .split(/\s+/)
-      .filter((w) => w.length > 2)
-      .join(' & ');
-
-    const { data, error } = await db
-      .from('legal_knowledge_chunks')
-      .select('id, source_type, source_id, content, metadata, topics')
-      .textSearch('fts', tsQuery)
-      .limit(limit);
-
-    if (error) throw error;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (data ?? []).map((d: any) => ({ ...d, similarity: 1 }));
   }
 
   // ─── Context Building for AI ──────────────────────────────
@@ -421,41 +213,6 @@ class LegalKnowledgeService {
     }
 
     return sections.join('\n');
-  }
-
-  /**
-   * Get a concise summary of available knowledge for a topic.
-   */
-  async getTopicSummary(topicSlug: string): Promise<{
-    topic: LegalTopic | null;
-    caseCount: number;
-    principleCount: number;
-    legislationCount: number;
-  }> {
-    const topic = await this.getTopicBySlug(topicSlug);
-    if (!topic)
-      return { topic: null, caseCount: 0, principleCount: 0, legislationCount: 0 };
-
-    const [cases, principles, legislation] = await Promise.all([
-      db
-        .from('legal_cases')
-        .select('id', { count: 'exact', head: true })
-        .contains('topics', [topic.id]),
-      db
-        .from('legal_principles')
-        .select('id', { count: 'exact', head: true })
-        .contains('related_topics', [topic.id]),
-      db
-        .from('legal_legislation')
-        .select('id', { count: 'exact', head: true }),
-    ]);
-
-    return {
-      topic,
-      caseCount: cases.count ?? 0,
-      principleCount: principles.count ?? 0,
-      legislationCount: legislation.count ?? 0,
-    };
   }
 
   // ─── Helpers ──────────────────────────────────────────────

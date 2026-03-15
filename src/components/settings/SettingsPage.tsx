@@ -75,7 +75,7 @@ function getInitials(name: string): string {
 // ---------------------------------------------------------------------------
 export function SettingsPage() {
   useDocumentTitle('Settings');
-  const { user, signOut } = useAuth();
+  const { user, signOut, isDemoMode, resetDemoWorkspace, signInWithGoogle } = useAuth();
   const { themeMode, setTheme } = useAppStore();
   const processOnUpload = useAppStore((s) => s.processOnUpload);
   const setProcessOnUpload = useAppStore((s) => s.setProcessOnUpload);
@@ -93,6 +93,10 @@ export function SettingsPage() {
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
+  };
+
+  const handleResetDemo = async () => {
+    await resetDemoWorkspace();
   };
 
   const refreshUsage = () => setUsage(getProcessingUsage());
@@ -286,14 +290,45 @@ export function SettingsPage() {
           </div>
 
           <div className="flex flex-col gap-5 px-6 py-5">
+            {isDemoMode && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 dark:border-amber-900/60 dark:bg-amber-950/20">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                      Demo workspace
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/80">
+                      Reset the seeded sample data at any time, or jump straight into Google sign-in when you are ready to work with real matters.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={handleResetDemo}
+                      className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-900/30"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Reset sample data
+                    </button>
+                    <button
+                      onClick={() => void signInWithGoogle()}
+                      className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-500"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      Use Google instead
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Sign out */}
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
-                  Sign out
+                  {isDemoMode ? 'Exit demo mode' : 'Sign out'}
                 </p>
                 <p className="text-xs text-surface-400 dark:text-surface-500">
-                  End your current session
+                  {isDemoMode ? 'Return to the sign-in screen' : 'End your current session'}
                 </p>
               </div>
               <button
@@ -301,7 +336,7 @@ export function SettingsPage() {
                 className="inline-flex items-center gap-2 rounded-lg border border-surface-300 px-4 py-2 text-sm font-medium text-surface-700 transition-colors hover:bg-surface-100 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800"
               >
                 <LogOut className="h-4 w-4" />
-                Sign out
+                {isDemoMode ? 'Exit demo' : 'Sign out'}
               </button>
             </div>
 

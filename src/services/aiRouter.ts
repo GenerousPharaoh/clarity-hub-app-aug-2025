@@ -1,15 +1,14 @@
 /**
  * AI Router - Smart Model Selection
  *
- * Routes queries to the optimal AI model:
- * - Gemini 2.5 Flash: multimodal processing, general chat, document analysis
- * - GPT-5.2: deep legal reasoning, complex analysis, strategy questions
- * - OpenAI embeddings: RAG vector search (text-embedding-3-small)
+ * Routes queries to the optimal AI model via server-side API routes:
+ * - /api/ai-chat: Gemini 2.5 Flash or GPT-5.2 depending on query complexity
+ * - /api/ai-embeddings: OpenAI text-embedding-3-small for RAG vector search
  *
- * Falls back gracefully if a model isn't configured.
+ * API keys are stored server-side only. The client sends the Supabase JWT
+ * for authentication.
  */
-import { geminiAI } from './geminiAIService';
-import { openaiService } from './openaiService';
+import { supabase } from '@/lib/supabase';
 import { legalKnowledge } from './legalKnowledgeService';
 import type { EffortLevel } from '@/types';
 
@@ -54,57 +53,84 @@ const DEEP_REASONING_SIGNALS = [
 ];
 
 // ============================================================
+// Citation Extraction (shared across models)
+// ============================================================
+
+/**
+ * Extract Canadian legal citations from AI response text.
+ * Shared by both GPT and Gemini code paths.
+ */
+export function extractCitations(text: string): string[] {
+  const citations: string[] = [];
+
+  const patterns = [
+    /\d{4}\s+(?:SCC|ONCA|ONSC|BCCA|ABCA|CanLII)\s+\d+/g,
+    /\[\d{4}\]\s+\d+\s+(?:SCR|OR|OJ)\s+(?:No\s+)?\d+/g,
+    /(?:R\.S\.O\.|S\.O\.|R\.S\.C\.)\s+\d{4},\s+c\.\s+[\w.-]+/g,
+    /O\.\s*Reg\.\s*\d+\/\d+/g,
+  ];
+
+  for (const pattern of patterns) {
+    const matches = text.match(pattern);
+    if (matches) citations.push(...matches);
+  }
+
+  return [...new Set(citations)];
+}
+
+// ============================================================
+// Auth helper
+// ============================================================
+
+async function getAccessToken(): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    throw new Error('Not authenticated. Please sign in to use AI features.');
+  }
+  return session.access_token;
+}
+
+// ============================================================
 // Service
 // ============================================================
 
 class AIRouter {
   /**
    * Classify query complexity to pick the right model.
+   * Runs client-side for instant UX feedback (no API key needed).
    */
   classifyQuery(query: string): QueryComplexity {
     const lower = query.toLowerCase();
     const wordCount = query.split(/\s+/).length;
 
-    // Short simple questions -> simple
-    if (wordCount < 8 && !DEEP_REASONING_SIGNALS.some((s) => lower.includes(s))) {
-      return 'simple';
-    }
-
-    // Check for deep reasoning signals
+    // Check deep reasoning signals FIRST, regardless of word count
     const signalCount = DEEP_REASONING_SIGNALS.filter((s) => lower.includes(s)).length;
 
     if (signalCount >= 2) return 'deep';
     if (signalCount === 1 && wordCount > 15) return 'deep';
     if (signalCount === 1) return 'moderate';
 
-    // Long, detailed questions are likely moderate+
+    // No signals matched — use word count as a tiebreaker
     if (wordCount > 30) return 'moderate';
+    if (wordCount < 8) return 'simple';
 
     return 'simple';
   }
 
   /**
-   * Pick the best available model for the query.
+   * Build legal knowledge context from the RAG pipeline.
+   * Exposed so callers can run it in parallel with other async work.
+   * Queries Supabase directly (uses anon key with RLS) — no API key needed.
    */
-  selectModel(complexity: QueryComplexity): ModelChoice {
-    // If GPT is available and query is complex, use it
-    if (complexity === 'deep' && openaiService.isAvailable()) {
-      return 'gpt';
-    }
-
-    // Everything else goes to Gemini (or GPT as fallback)
-    if (geminiAI.isAvailable()) return 'gemini';
-    if (openaiService.isAvailable()) return 'gpt';
-
-    // Neither available
-    throw new Error(
-      'No AI model configured. Set VITE_GEMINI_API_KEY or VITE_OPENAI_API_KEY.'
-    );
+  async buildLegalContext(query: string, effort: EffortLevel): Promise<string> {
+    if (effort === 'quick') return '';
+    return legalKnowledge.buildLegalContext(query);
   }
 
   /**
-   * Route a legal query to the best model with full context.
+   * Route a legal query to the best model via the server-side /api/ai-chat endpoint.
    * Accepts an optional effort level to control reasoning depth and model selection.
+   * If `legalContext` is provided it is used directly; otherwise it is built internally.
    */
   async routeQuery(params: {
     query: string;
@@ -112,125 +138,124 @@ class AIRouter {
     conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
     caseContext?: string;
     sources?: Array<{ sourceIndex: number; fileName: string; pageNumber: number | null; sectionHeading: string | null }>;
+    legalContext?: string;
   }): Promise<{
     response: string;
     model: ModelChoice;
     complexity: QueryComplexity;
     citations: string[];
     effortLevel: EffortLevel;
+    followUps?: string[];
   }> {
     const effort = params.effortLevel ?? 'standard';
-    const effortCfg = EFFORT_CONFIG[effort];
     const complexity = this.classifyQuery(params.query);
 
-    // Effort-based model override: quick → always Gemini, deep → always GPT
-    let model: ModelChoice;
-    if (effort === 'quick') {
-      model = geminiAI.isAvailable() ? 'gemini' : this.selectModel(complexity);
-    } else if (effort === 'deep') {
-      model = openaiService.isAvailable() ? 'gpt' : this.selectModel(complexity);
-    } else {
-      model = this.selectModel(complexity);
-    }
+    // Use pre-built legal context if provided, otherwise build it now
+    const legalContext = params.legalContext ?? (effort === 'quick' ? '' : await legalKnowledge.buildLegalContext(params.query));
 
-    // Build legal knowledge context from the RAG pipeline (skip for quick)
-    const legalContext = effort === 'quick' ? '' : await legalKnowledge.buildLegalContext(params.query);
+    const token = await getAccessToken();
 
-    // Build citation instruction if sources are available
-    const citationInstruction = params.sources && params.sources.length > 0
-      ? '\n\nIMPORTANT: When referencing information from the provided document search results, cite them using [Source N] notation (e.g., [Source 1], [Source 2]). Each [Source N] corresponds to a specific document chunk provided in the context. Only cite sources that are actually relevant to your answer.'
-      : '';
-
-    if (model === 'gpt') {
-      const result = await openaiService.deepLegalReasoning({
+    const response = await fetch('/api/ai-chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
         query: params.query,
-        legalContext: legalContext + citationInstruction,
-        caseContext: params.caseContext,
         conversationHistory: params.conversationHistory,
-        reasoningEffort: effortCfg.reasoning,
-        maxCompletionTokens: effortCfg.maxTokens,
-      });
-
-      return {
-        response: result.content,
-        model: 'gpt',
-        complexity,
-        citations: result.citations,
+        legalContext,
+        caseContext: params.caseContext,
         effortLevel: effort,
-      };
+        documentSources: params.sources,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({ error: 'Unknown error' }));
+      throw new Error(errorBody.error || `AI request failed with status ${response.status}`);
     }
 
-    // Gemini path
-    const contextParts: string[] = [];
-    if (legalContext) contextParts.push(legalContext + citationInstruction);
-    if (params.caseContext) contextParts.push(params.caseContext);
-
-    const response = await geminiAI.chatWithContext(
-      params.query,
-      contextParts,
-      (params.conversationHistory ?? []).map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
-      { maxOutputTokens: effortCfg.maxTokens }
-    );
+    const result = await response.json();
 
     return {
-      response,
-      model: 'gemini',
+      response: result.response,
+      model: result.model || 'gemini',
       complexity,
-      citations: [],
-      effortLevel: effort,
+      citations: result.citations || [],
+      effortLevel: result.effortLevel || effort,
+      followUps: result.followUps,
     };
   }
 
   /**
-   * Generate follow-up question suggestions based on a Q&A exchange.
-   * Uses Gemini with low token count for speed.
+   * Generate follow-up question suggestions.
+   * Now handled server-side inside /api/ai-chat, so this is a no-op
+   * that returns empty. The follow-ups come back in routeQuery's result.
    */
-  async generateFollowUps(query: string, response: string): Promise<string[]> {
-    if (!geminiAI.isAvailable()) return [];
+  async generateFollowUps(_query: string, _response: string): Promise<string[]> {
+    // Follow-ups are now generated server-side in /api/ai-chat
+    return [];
+  }
 
+  /**
+   * Generate embeddings via the server-side /api/ai-embeddings endpoint.
+   */
+  async generateEmbedding(text: string): Promise<number[]> {
     try {
-      const prompt = `Given this question and answer about a legal case, suggest 3 brief follow-up questions the user might ask next. Return only the 3 questions, one per line, no numbering or bullets.
+      const token = await getAccessToken();
 
-Question: ${query.slice(0, 500)}
+      const response = await fetch('/api/ai-embeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text }),
+      });
 
-Answer: ${response.slice(0, 1000)}`;
+      if (!response.ok) {
+        console.error('Embedding request failed:', response.status);
+        return [];
+      }
 
-      const result = await geminiAI.chatWithContext(prompt, [], []);
-      return result
-        .split('\n')
-        .map((l) => l.trim())
-        .filter((l) => l.length > 0 && l.length < 120)
-        .slice(0, 3);
-    } catch {
+      const result = await response.json();
+      return result.embedding ?? [];
+    } catch (err) {
+      console.error('Embedding generation failed:', err);
       return [];
     }
   }
 
   /**
-   * Generate embeddings using the best available provider.
-   * Prefers OpenAI (1536-dim, cheaper, better for RAG) over Gemini (768-dim).
-   */
-  async generateEmbedding(text: string): Promise<number[]> {
-    if (openaiService.isAvailable()) {
-      return openaiService.generateEmbedding(text);
-    }
-    // Don't fall back to Gemini embeddings (768-dim) — they are incompatible
-    // with the document_chunks table which uses 1536-dim vectors.
-    return [];
-  }
-
-  /**
-   * Batch generate embeddings.
+   * Batch generate embeddings via the server-side /api/ai-embeddings endpoint.
    */
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
-    if (openaiService.isAvailable()) {
-      return openaiService.generateEmbeddings(texts);
+    if (texts.length === 0) return [];
+
+    try {
+      const token = await getAccessToken();
+
+      const response = await fetch('/api/ai-embeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ texts }),
+      });
+
+      if (!response.ok) {
+        console.error('Batch embedding request failed:', response.status);
+        return [];
+      }
+
+      const result = await response.json();
+      return result.embeddings ?? [];
+    } catch (err) {
+      console.error('Batch embedding generation failed:', err);
+      return [];
     }
-    // Don't fall back to Gemini embeddings (768-dim) — incompatible with 1536-dim storage.
-    return [];
   }
 }
 

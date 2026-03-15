@@ -4,6 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import useAppStore from '@/store';
 import type { Project } from '@/types';
 import type { TablesInsert } from '@/types/database';
+import {
+  createDemoProject,
+  deleteDemoProject,
+  getDemoProjectFileCounts,
+  getDemoProjects,
+  updateDemoProject,
+} from '@/lib/demo';
 
 const PROJECTS_KEY = ['projects'] as const;
 
@@ -12,12 +19,17 @@ const PROJECTS_KEY = ['projects'] as const;
  * Syncs results into Zustand store for cross-component access.
  */
 export function useProjects() {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const setProjects = useAppStore((s) => s.setProjects);
 
   return useQuery<Project[]>({
     queryKey: PROJECTS_KEY,
     queryFn: async () => {
+      if (isDemoMode) {
+        const projects = getDemoProjects();
+        setProjects(projects);
+        return projects;
+      }
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -32,7 +44,7 @@ export function useProjects() {
       setProjects(projects);
       return projects;
     },
-    enabled: !!user,
+    enabled: isDemoMode || !!user,
     staleTime: 60_000, // keep cached 1 min to avoid re-fetch flicker
   });
 }
@@ -42,13 +54,17 @@ export function useProjects() {
  * Returns a map of projectId -> fileCount.
  */
 export function useProjectFileCounts() {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const projects = useAppStore((s) => s.projects);
 
   return useQuery<Record<string, number>>({
     queryKey: ['project-file-counts', projects.map((p) => p.id)],
     queryFn: async () => {
-      if (!user || projects.length === 0) return {};
+      if (projects.length === 0) return {};
+      if (isDemoMode) {
+        return getDemoProjectFileCounts(projects.map((project) => project.id));
+      }
+      if (!user) return {};
 
       const projectIds = projects.map((p) => p.id);
 
@@ -66,7 +82,7 @@ export function useProjectFileCounts() {
       }
       return counts;
     },
-    enabled: !!user && projects.length > 0,
+    enabled: (isDemoMode || !!user) && projects.length > 0,
   });
 }
 
@@ -75,12 +91,19 @@ export function useProjectFileCounts() {
  * Invalidates the projects query cache and adds to Zustand store.
  */
 export function useCreateProject() {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const queryClient = useQueryClient();
   const addProject = useAppStore((s) => s.addProject);
 
   return useMutation({
     mutationFn: async (input: { name: string; description?: string }) => {
+      if (isDemoMode) {
+        return createDemoProject({
+          name: input.name,
+          description: input.description,
+          ownerId: user?.id ?? null,
+        });
+      }
       if (!user) throw new Error('Not authenticated');
 
       const insert: TablesInsert<'projects'> = {
@@ -110,6 +133,7 @@ export function useCreateProject() {
  * Uses optimistic updates for instant UI response.
  */
 export function useUpdateProject() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
   const setProjects = useAppStore((s) => s.setProjects);
   const projects = useAppStore((s) => s.projects);
@@ -124,6 +148,13 @@ export function useUpdateProject() {
       name?: string;
       description?: string;
     }) => {
+      if (isDemoMode) {
+        return updateDemoProject(id, {
+          ...(name !== undefined ? { name } : {}),
+          ...(description !== undefined ? { description: description.trim() || null } : {}),
+        });
+      }
+
       const updates: Record<string, unknown> = {
         updated_at: new Date().toISOString(),
       };
@@ -191,11 +222,17 @@ export function useUpdateProject() {
  * Invalidates the projects query cache and removes from Zustand store.
  */
 export function useDeleteProject() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
   const removeProject = useAppStore((s) => s.removeProject);
 
   return useMutation({
     mutationFn: async (projectId: string) => {
+      if (isDemoMode) {
+        deleteDemoProject(projectId);
+        return projectId;
+      }
+
       const { error } = await supabase
         .from('projects')
         .delete()

@@ -17,17 +17,18 @@ export function AppShell() {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
+        e.stopPropagation();
         setShowCommandPalette(!showCommandPalette);
       }
     }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
   }, [showCommandPalette, setShowCommandPalette]);
 
   return (
     <div className="flex h-screen flex-col bg-surface-50 dark:bg-surface-950">
       <Header />
-      <main className="flex-1 overflow-hidden">
+      <main id="main-content" className="flex-1 overflow-hidden">
         <Outlet />
       </main>
       <CommandPalette

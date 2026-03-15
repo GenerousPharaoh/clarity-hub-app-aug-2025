@@ -31,6 +31,8 @@ export interface UISlice {
   setShowCommandPalette: (show: boolean) => void;
   processOnUpload: boolean;
   setProcessOnUpload: (enabled: boolean) => void;
+  newNoteRequestNonce: number;
+  requestNewNote: () => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -47,4 +49,7 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
     saveProcessOnUpload(enabled);
     set({ processOnUpload: enabled });
   },
+  newNoteRequestNonce: 0,
+  requestNewNote: () =>
+    set((state) => ({ newNoteRequestNonce: state.newNoteRequestNonce + 1 })),
 });

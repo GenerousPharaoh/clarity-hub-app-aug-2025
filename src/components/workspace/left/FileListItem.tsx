@@ -12,6 +12,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
+  ArrowUpRight,
 } from 'lucide-react';
 import { cn, formatDate, getFileExtension, getFileTypeFromExtension } from '@/lib/utils';
 import { FILE_TYPE_COLORS } from '@/lib/constants';
@@ -40,6 +41,61 @@ const typeIconMap: Record<string, React.ElementType> = {
   other: File,
 };
 
+function getFileSummary(file: FileRecord) {
+  if (file.processing_status === 'failed' && file.processing_error) {
+    return file.processing_error;
+  }
+
+  if (file.ai_summary) {
+    return file.ai_summary;
+  }
+
+  if (file.content) {
+    return file.content.replace(/\s+/g, ' ').trim();
+  }
+
+  return 'Open the record in the viewer to inspect the source and connect it back to drafting or AI review.';
+}
+
+function getProcessingBadge(
+  file: FileRecord,
+  processingState?: { isProcessing: boolean; error: string | null }
+) {
+  if (processingState?.isProcessing || file.processing_status === 'processing') {
+    return {
+      label: 'Indexing',
+      className:
+        'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300',
+      icon: <Loader2 className="h-3 w-3 animate-spin" />,
+    };
+  }
+
+  if (file.processing_status === 'completed') {
+    return {
+      label: 'AI-ready',
+      className:
+        'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300',
+      icon: <CheckCircle2 className="h-3 w-3" />,
+    };
+  }
+
+  if (file.processing_status === 'failed') {
+    return {
+      label: 'Retry needed',
+      className:
+        'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300',
+      icon: <AlertTriangle className="h-3 w-3" />,
+    };
+  }
+
+  return {
+    label: 'Ready to index',
+    className:
+      'border-surface-200 bg-surface-50 text-surface-600 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300',
+    icon: <Zap className="h-3 w-3" />,
+  };
+}
+
 export function FileListItem({
   file,
   onProcess,
@@ -65,6 +121,8 @@ export function FileListItem({
     !file.processing_status ||
     file.processing_status === 'pending' ||
     file.processing_status === 'failed';
+  const statusBadge = getProcessingBadge(file, processingState);
+  const summary = getFileSummary(file);
 
   // Close menu when clicking outside or pressing Escape
   useEffect(() => {
@@ -135,16 +193,23 @@ export function FileListItem({
 
   return (
     <div className="relative">
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
         className={cn(
-          'group flex w-full items-center gap-2.5 px-3 py-2 text-left transition-all duration-150',
+          'group flex w-full items-start gap-3 rounded-[22px] border px-3 py-3 text-left shadow-sm transition-all duration-150',
           isSelected
-            ? 'border-l-2 border-l-primary-500 bg-primary-50 dark:bg-primary-900/20'
-            : 'border-l-2 border-l-transparent hover:bg-surface-50 dark:hover:bg-surface-800/50',
-          'focus-visible:outline-none focus-visible:bg-surface-100 dark:focus-visible:bg-surface-700'
+            ? 'border-primary-400 bg-white/94 shadow-[0_18px_38px_-26px_rgba(30,43,57,0.34)] ring-1 ring-primary-500/10 dark:border-primary-700 dark:bg-surface-900/88 dark:ring-primary-400/15'
+            : 'border-surface-200/80 bg-white/80 hover:-translate-y-0.5 hover:border-surface-300 hover:bg-white dark:border-surface-800 dark:bg-surface-900/70 dark:hover:border-surface-700 dark:hover:bg-surface-900',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900'
         )}
       >
         {/* Batch select checkbox */}
@@ -156,7 +221,7 @@ export function FileListItem({
               onToggleBatchSelection(file.id);
             }}
             className={cn(
-              'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+              'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
               isBatchSelected
                 ? 'border-primary-500 bg-primary-500 text-white'
                 : 'border-surface-300 bg-white text-transparent hover:border-primary-400 dark:border-surface-600 dark:bg-surface-800'
@@ -171,10 +236,10 @@ export function FileListItem({
         {/* File type icon */}
         <div
           className={cn(
-            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+            'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl',
             isSelected
-              ? 'bg-primary-100 dark:bg-primary-800/40'
-              : 'bg-surface-100 dark:bg-surface-700/60'
+              ? 'bg-primary-100/85 dark:bg-primary-900/35'
+              : 'bg-surface-100 dark:bg-surface-800/70'
           )}
         >
           <IconComponent className={cn('h-4 w-4', colorClass)} />
@@ -182,114 +247,125 @@ export function FileListItem({
 
         {/* File info */}
         <div className="min-w-0 flex-1">
-          <p
-            className={cn(
-              'truncate text-sm font-medium',
-              isSelected
-                ? 'text-primary-700 dark:text-primary-300'
-                : 'text-surface-700 dark:text-surface-200'
-            )}
-            title={file.name}
-          >
-            {file.name}
-          </p>
-          <div className="mt-0.5 flex items-center gap-2">
-            {/* Extension badge */}
-            {ext && (
-              <span
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p
                 className={cn(
-                  'inline-block rounded px-1 py-px text-[10px] font-semibold uppercase leading-tight',
+                  'text-sm font-semibold [overflow-wrap:anywhere]',
                   isSelected
-                    ? 'bg-primary-100 text-primary-600 dark:bg-primary-800/40 dark:text-primary-400'
-                    : 'bg-surface-100 text-surface-500 dark:bg-surface-700 dark:text-surface-400'
+                    ? 'text-primary-700 dark:text-primary-300'
+                    : 'text-surface-800 dark:text-surface-100'
                 )}
+                title={file.name}
               >
-                {ext}
-              </span>
-            )}
-            {/* Estimated token usage */}
-            {estimatedTokenLabel && canProcess && (
-              <span className="rounded px-1 py-px text-[10px] font-medium text-accent-600 dark:text-accent-400">
-                {estimatedTokenLabel}
-              </span>
-            )}
-            {/* Date */}
-            {file.added_at && (
-              <span className="text-[11px] text-surface-400 dark:text-surface-500">
-                {formatDate(file.added_at)}
-              </span>
-            )}
-            {/* Processing status badge */}
-            {file.processing_status === 'completed' && (
-              <span title={file.ai_summary || 'Processed'}>
-                <CheckCircle2 className="h-3 w-3 text-green-500" />
-              </span>
-            )}
-            {file.processing_status === 'failed' && (
-              <span title={file.processing_error || 'Processing failed'}>
-                <AlertTriangle className="h-3 w-3 text-red-400" />
-              </span>
-            )}
+                {file.name}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {ext && (
+                  <span
+                    className={cn(
+                      'inline-flex rounded-full px-2 py-1 text-[10px] font-semibold uppercase leading-none',
+                      isSelected
+                        ? 'bg-primary-100 text-primary-700 dark:bg-primary-800/40 dark:text-primary-300'
+                        : 'bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400'
+                    )}
+                  >
+                    {ext}
+                  </span>
+                )}
+                {file.added_at && (
+                  <span className="rounded-full bg-surface-100 px-2 py-1 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+                    {formatDate(file.added_at)}
+                  </span>
+                )}
+                {estimatedTokenLabel && canProcess && (
+                  <span className="rounded-full bg-accent-50 px-2 py-1 text-[10px] font-medium text-accent-700 dark:bg-accent-900/20 dark:text-accent-300">
+                    {estimatedTokenLabel}
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]',
+                    statusBadge.className
+                  )}
+                  title={file.ai_summary || file.processing_error || statusBadge.label}
+                >
+                  {statusBadge.icon}
+                  {statusBadge.label}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1">
+              {onProcess && canProcess && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onProcess(file.id);
+                  }}
+                  disabled={processingState?.isProcessing}
+                  className={cn(
+                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-medium transition-colors',
+                    processingState?.isProcessing
+                      ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
+                      : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300'
+                  )}
+                  title={file.processing_status === 'failed' ? 'Retry processing' : 'Process file for AI search'}
+                  aria-label={`Process ${file.name}`}
+                >
+                  {processingState?.isProcessing ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Zap className="h-3.5 w-3.5" />
+                  )}
+                  <span className="hidden sm:inline">{file.processing_status === 'failed' ? 'Retry' : 'Index'}</span>
+                </button>
+              )}
+              {file.processing_status === 'processing' && !processingState?.isProcessing && (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700 dark:bg-accent-900/20 dark:text-accent-300">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                </div>
+              )}
+
+              {/* Menu button (shows on hover or when menu is open) */}
+              <button
+                type="button"
+                onClick={handleMenuToggle}
+                aria-haspopup="true"
+                aria-expanded={showMenu}
+                className={cn(
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors',
+                  showMenu
+                    ? 'bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300'
+                    : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
+                  'focus-visible:opacity-100 focus-visible:outline-none'
+                )}
+                title="File actions"
+                aria-label={`Actions for ${file.name}`}
+              >
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <p className="mt-3 line-clamp-2 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
+            {summary}
+          </p>
+
+          <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-surface-400 dark:text-surface-500">
+            <span>Open in viewer</span>
+            <ArrowUpRight className="h-3 w-3" />
           </div>
         </div>
-
-        {/* Process button */}
-        {onProcess && canProcess && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onProcess(file.id);
-            }}
-            disabled={processingState?.isProcessing}
-            className={cn(
-              'flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors',
-              processingState?.isProcessing
-                ? 'text-accent-500'
-                : 'text-surface-400 hover:bg-accent-50 hover:text-accent-600 dark:hover:bg-accent-900/20 dark:hover:text-accent-400'
-            )}
-            title={file.processing_status === 'failed' ? 'Retry processing' : 'Process file for AI search'}
-            aria-label={`Process ${file.name}`}
-          >
-            {processingState?.isProcessing ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Zap className="h-3.5 w-3.5" />
-            )}
-          </button>
-        )}
-        {file.processing_status === 'processing' && !processingState?.isProcessing && (
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center">
-            <Loader2 className="h-3.5 w-3.5 animate-spin text-accent-500" />
-          </div>
-        )}
-
-        {/* Menu button (shows on hover or when menu is open) */}
-        <button
-          type="button"
-          onClick={handleMenuToggle}
-          aria-haspopup="true"
-          aria-expanded={showMenu}
-          className={cn(
-            'flex h-6 w-6 shrink-0 items-center justify-center rounded transition-colors',
-            showMenu
-              ? 'bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300'
-              : 'text-surface-400 max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-200 dark:hover:bg-surface-600',
-            'focus-visible:opacity-100 focus-visible:outline-none'
-          )}
-          title="File actions"
-          aria-label={`Actions for ${file.name}`}
-        >
-          <MoreVertical className="h-3.5 w-3.5" />
-        </button>
-      </button>
+      </div>
 
       {/* Context menu */}
       {showMenu && (
         <div
           ref={menuRef}
           className={cn(
-            'absolute right-2 top-full z-50 min-w-[140px] overflow-hidden rounded-lg',
+            'absolute right-3 top-[calc(100%-0.35rem)] z-50 min-w-[160px] overflow-hidden rounded-2xl',
             'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
             'dark:border-surface-700 dark:bg-surface-800 dark:shadow-surface-950/30',
             'animate-in fade-in-0 zoom-in-95 duration-100'

@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
-import { Scale, AlertCircle } from 'lucide-react';
+import { Scale, AlertCircle, PlayCircle, CheckCircle2, ShieldCheck, FolderSearch, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function LoginPage() {
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle, enterDemoMode } = useAuth();
   const [authError, setAuthError] = useState<string | null>(null);
   const [signingIn, setSigningIn] = useState(false);
+  const [enteringDemo, setEnteringDemo] = useState(false);
 
   const handleSignIn = async () => {
     try {
@@ -22,6 +23,21 @@ export function LoginPage() {
           : 'Sign-in failed. Please try again or check your browser popup settings.'
       );
       setSigningIn(false);
+    }
+  };
+
+  const handleEnterDemo = async () => {
+    try {
+      setAuthError(null);
+      setEnteringDemo(true);
+      await enterDemoMode();
+    } catch (err) {
+      setAuthError(
+        err instanceof Error
+          ? err.message
+          : 'Could not start demo mode. Please refresh and try again.'
+      );
+      setEnteringDemo(false);
     }
   };
 
@@ -63,6 +79,18 @@ export function LoginPage() {
             A professional workspace for managing legal documents,
             analyzing evidence, and preparing case strategy with AI assistance.
           </p>
+
+          <div className="mt-8 grid max-w-md gap-3">
+            <FeaturePill icon={<FolderSearch className="h-4 w-4" />}>
+              Structured workspace for files, notes, and exhibits
+            </FeaturePill>
+            <FeaturePill icon={<ShieldCheck className="h-4 w-4" />}>
+              AI-assisted review with stronger processing guardrails
+            </FeaturePill>
+            <FeaturePill icon={<Sparkles className="h-4 w-4" />}>
+              Demo workspace available immediately for product tours
+            </FeaturePill>
+          </div>
         </div>
 
         <p className="relative z-10 text-sm text-white/40">
@@ -99,7 +127,7 @@ export function LoginPage() {
 
           <button
             onClick={handleSignIn}
-            disabled={signingIn}
+            disabled={signingIn || enteringDemo}
             className={cn(
               'flex w-full items-center justify-center gap-3 rounded-xl',
               'border border-surface-200 bg-white px-4 py-3.5',
@@ -132,8 +160,76 @@ export function LoginPage() {
             </svg>
             Sign in with Google
           </button>
+
+          <button
+            onClick={handleEnterDemo}
+            disabled={signingIn || enteringDemo}
+            className={cn(
+              'mt-3 flex w-full items-center justify-center gap-3 rounded-xl',
+              'border border-primary-200 bg-primary-50 px-4 py-3.5',
+              'text-sm font-medium text-primary-700',
+              'transition-all duration-200',
+              'hover:border-primary-300 hover:bg-primary-100',
+              'active:scale-[0.98]',
+              'disabled:cursor-not-allowed disabled:opacity-60',
+              'dark:border-primary-800/60 dark:bg-primary-900/20 dark:text-primary-300',
+              'dark:hover:border-primary-700 dark:hover:bg-primary-900/35'
+            )}
+          >
+            {enteringDemo ? (
+              <>
+                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" className="opacity-20" stroke="currentColor" strokeWidth="3" />
+                  <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                </svg>
+                Loading demo workspace...
+              </>
+            ) : (
+              <>
+                <PlayCircle className="h-5 w-5" />
+                Skip Login (Demo Mode)
+              </>
+            )}
+          </button>
+
+          <div className="mt-4 rounded-xl border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/60">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+              Demo Includes
+            </p>
+            <div className="mt-3 space-y-2">
+              <DemoChecklistItem>Two seeded legal matters with notes and exhibits</DemoChecklistItem>
+              <DemoChecklistItem>Browsable file viewer with processed summaries</DemoChecklistItem>
+              <DemoChecklistItem>Editable project, document, and exhibit flows</DemoChecklistItem>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function FeaturePill({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl bg-white/8 px-4 py-3 backdrop-blur-sm ring-1 ring-white/10">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white">
+        {icon}
+      </div>
+      <p className="text-sm text-primary-100/90">{children}</p>
+    </div>
+  );
+}
+
+function DemoChecklistItem({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2">
+      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-500 dark:text-primary-400" />
+      <p className="text-xs leading-relaxed text-surface-600 dark:text-surface-300">{children}</p>
     </div>
   );
 }

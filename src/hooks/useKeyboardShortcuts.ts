@@ -48,6 +48,13 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
         return;
       }
 
+      // Cmd+Shift+N — Create a new document
+      if (isMod && e.shiftKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        handlers.onNewNote?.();
+        return;
+      }
+
       // Cmd+/ — Show keyboard shortcuts help
       if (isMod && e.key === '/') {
         e.preventDefault();
@@ -69,6 +76,7 @@ export const SHORTCUTS = [
   { keys: ['Cmd', '\\'], description: 'Toggle file browser' },
   { keys: ['Cmd', 'Shift', '\\'], description: 'Toggle viewer panel' },
   { keys: ['Cmd', 'J'], description: 'Toggle AI chat' },
+  { keys: ['Cmd', 'Shift', 'N'], description: 'Create document' },
   { keys: ['Cmd', 'K'], description: 'Command palette' },
   { keys: ['Cmd', '/'], description: 'Show keyboard shortcuts' },
 ] as const;

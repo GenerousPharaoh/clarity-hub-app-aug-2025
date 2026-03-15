@@ -32,13 +32,15 @@ export async function searchDocuments(params: {
 
   if (!query.trim()) return [];
 
+  const fallbackSearch = () => textOnlySearch(query, projectId, fileType, limit);
+
   try {
     // Generate query embedding client-side
     const embedding = await aiRouter.generateEmbedding(query);
 
     if (!embedding || embedding.length === 0) {
       // Fall back to text-only search if embedding fails
-      return textOnlySearch(query, projectId, fileType, limit);
+      return fallbackSearch();
     }
 
     // Call the hybrid search RPC
@@ -52,7 +54,7 @@ export async function searchDocuments(params: {
 
     if (error) {
       console.error('search_documents RPC error:', error);
-      return [];
+      return fallbackSearch();
     }
 
     return (data || []).map((row: {
@@ -78,7 +80,7 @@ export async function searchDocuments(params: {
     }));
   } catch (err) {
     console.error('Document search failed:', err);
-    return [];
+    return fallbackSearch();
   }
 }
 

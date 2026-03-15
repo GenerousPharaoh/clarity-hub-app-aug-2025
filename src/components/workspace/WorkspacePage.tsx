@@ -17,6 +17,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
+import { readWorkspaceSession, saveWorkspaceProject } from '@/lib/workspaceSession';
 import { FolderOpen, Eye, Sparkles, LayoutList, PanelRight } from 'lucide-react';
 
 const COLLAPSE_THRESHOLD = 8; // percent — auto-collapse when shrunk below this
@@ -30,10 +31,13 @@ export function WorkspacePage() {
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
   const setLeftPanel = useAppStore((s) => s.setLeftPanel);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
+  const setCenterTab = useAppStore((s) => s.setCenterTab);
   const rightTab = useAppStore((s) => s.rightTab);
   const setRightTab = useAppStore((s) => s.setRightTab);
   const mobileTab = useAppStore((s) => s.mobileTab);
   const setMobileTab = useAppStore((s) => s.setMobileTab);
+  const setSelectedFile = useAppStore((s) => s.setSelectedFile);
+  const requestNewNote = useAppStore((s) => s.requestNewNote);
 
   const projects = useAppStore((s) => s.projects);
   const projectName = projects.find((p) => p.id === projectId)?.name;
@@ -77,6 +81,34 @@ export function WorkspacePage() {
     return () => setSelectedProject(null);
   }, [projectId, setSelectedProject]);
 
+  useEffect(() => {
+    if (!projectId) return;
+
+    const session = readWorkspaceSession();
+    if (session?.projectId === projectId) {
+      setCenterTab(session.centerTab);
+      setRightTab(session.rightTab);
+      setSelectedFile(session.fileId);
+      if (session.fileId || session.rightTab === 'ai') {
+        setRightPanel(true);
+        if (isMobile) setMobileTab('viewer');
+      } else if (isMobile) {
+        setMobileTab('content');
+      }
+      return;
+    }
+
+    setCenterTab('editor');
+    setRightTab('viewer');
+    setSelectedFile(null);
+    if (isMobile) setMobileTab('content');
+  }, [projectId, isMobile, setCenterTab, setMobileTab, setRightPanel, setRightTab, setSelectedFile]);
+
+  useEffect(() => {
+    if (!projectId || !projectName) return;
+    saveWorkspaceProject({ id: projectId, name: projectName });
+  }, [projectId, projectName]);
+
   // Sync Zustand → panel imperative API (desktop only)
   useEffect(() => {
     if (isMobile) return;
@@ -115,9 +147,23 @@ export function WorkspacePage() {
       onToggleLeftPanel: isMobile ? () => setMobileTab('files') : toggleLeft,
       onToggleRightPanel: isMobile ? () => setMobileTab('viewer') : toggleRight,
       onToggleAIChat: handleToggleAIChat,
+      onNewNote: () => {
+        setCenterTab('editor');
+        setMobileTab('content');
+        requestNewNote();
+      },
       onShowHelp: () => setShowShortcuts(true),
     }),
-    [isMobile, toggleLeft, toggleRight, handleToggleAIChat, setShowShortcuts, setMobileTab]
+    [
+      isMobile,
+      toggleLeft,
+      toggleRight,
+      handleToggleAIChat,
+      setCenterTab,
+      setShowShortcuts,
+      setMobileTab,
+      requestNewNote,
+    ]
   );
 
   useKeyboardShortcuts(shortcutHandlers);

@@ -15,8 +15,9 @@ import {
 import { cn } from '@/lib/utils';
 
 export function Header() {
-  const { user, signOut } = useAuth();
-  const { themeMode, toggleTheme } = useAppStore();
+  const { user, signOut, isDemoMode } = useAuth();
+  const themeMode = useAppStore((s) => s.themeMode);
+  const toggleTheme = useAppStore((s) => s.toggleTheme);
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams<{ projectId: string }>();
@@ -35,43 +36,58 @@ export function Header() {
   return (
     <header
       className={cn(
-        'glass flex h-12 shrink-0 items-center justify-between px-4',
+        'glass flex h-12 shrink-0 items-center justify-between gap-2 px-2 sm:px-4',
         'border-b border-surface-200/60 dark:border-surface-800/60',
         'shadow-[0_1px_3px_0_rgb(0_0_0/0.04)]',
         'dark:shadow-[0_1px_3px_0_rgb(0_0_0/0.3)]'
       )}
     >
       {/* Left */}
-      <div className="flex items-center gap-3">
-        <Link to="/" className="flex items-center gap-2.5 group">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <Link to="/" className="group flex shrink-0 items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 shadow-sm transition-all group-hover:shadow-md group-hover:shadow-primary-500/25">
             <Scale className="h-3.5 w-3.5 text-white" />
           </div>
           {!isWorkspace && (
-            <span className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
-              Clarity Hub
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+                Clarity Hub
+              </span>
+              {isDemoMode && (
+                <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-700 dark:border-amber-800/60 dark:bg-amber-900/20 dark:text-amber-300">
+                  Demo
+                </span>
+              )}
+            </div>
           )}
         </Link>
 
         {isWorkspace && (
-          <nav className="flex items-center gap-1 text-xs" aria-label="Breadcrumb">
+          <nav className="flex min-w-0 items-center gap-1 overflow-hidden text-xs" aria-label="Breadcrumb">
             <Link
               to="/"
               className={cn(
-                'flex items-center gap-1 rounded-md px-1.5 py-1',
+                'flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1',
                 'font-medium text-surface-400',
                 'transition-all hover:bg-surface-100 hover:text-surface-600',
                 'dark:hover:bg-surface-800 dark:hover:text-surface-300'
               )}
             >
               <LayoutDashboard className="h-3 w-3" />
-              <span>Dashboard</span>
+              <span className="hidden sm:inline">Dashboard</span>
             </Link>
             {projectName && (
               <>
-                <ChevronRight className="h-3 w-3 text-surface-300 dark:text-surface-600" />
-                <span className="max-w-[180px] truncate font-medium text-surface-700 dark:text-surface-200">
+                <ChevronRight className="h-3 w-3 shrink-0 text-surface-300 dark:text-surface-600" />
+                {isDemoMode && (
+                  <>
+                    <span className="hidden shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700 dark:border-amber-800/60 dark:bg-amber-900/20 dark:text-amber-300 sm:inline-flex">
+                      Demo
+                    </span>
+                    <ChevronRight className="hidden h-3 w-3 shrink-0 text-surface-300 dark:text-surface-600 sm:block" />
+                  </>
+                )}
+                <span className="min-w-0 max-w-[7.5rem] truncate font-medium text-surface-700 sm:max-w-[180px] dark:text-surface-200">
                   {projectName}
                 </span>
               </>
@@ -81,7 +97,7 @@ export function Header() {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex shrink-0 items-center gap-0.5">
         {isWorkspace && (
           <HeaderButton
             onClick={() => useAppStore.getState().setShowKeyboardShortcuts(true)}

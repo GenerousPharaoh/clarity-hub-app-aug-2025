@@ -3,6 +3,12 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ExhibitMarker } from '@/types';
 import type { TablesInsert } from '@/types/database';
+import {
+  createDemoExhibit,
+  deleteDemoExhibit,
+  getDemoExhibits,
+  updateDemoExhibit,
+} from '@/lib/demo';
 
 const EXHIBITS_KEY = 'exhibits';
 
@@ -14,12 +20,16 @@ function exhibitsKey(projectId: string | null) {
  * Fetches all exhibit markers for a project, ordered by exhibit_id.
  */
 export function useExhibits(projectId: string | null) {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
 
   return useQuery<ExhibitMarker[]>({
     queryKey: exhibitsKey(projectId),
     queryFn: async () => {
-      if (!projectId || !user) return [];
+      if (!projectId) return [];
+      if (isDemoMode) {
+        return getDemoExhibits(projectId).sort((a, b) => a.exhibit_id.localeCompare(b.exhibit_id));
+      }
+      if (!user) return [];
 
       const { data, error } = await supabase
         .from('exhibit_markers')
@@ -30,7 +40,7 @@ export function useExhibits(projectId: string | null) {
       if (error) throw error;
       return data ?? [];
     },
-    enabled: !!projectId && !!user,
+    enabled: !!projectId && (isDemoMode || !!user),
   });
 }
 
@@ -38,6 +48,7 @@ export function useExhibits(projectId: string | null) {
  * Creates a new exhibit marker.
  */
 export function useCreateExhibit() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -52,6 +63,15 @@ export function useCreateExhibit() {
       description?: string;
       fileId?: string;
     }) => {
+      if (isDemoMode) {
+        return createDemoExhibit({
+          projectId,
+          exhibitId,
+          description,
+          fileId,
+        });
+      }
+
       const insert: TablesInsert<'exhibit_markers'> = {
         project_id: projectId,
         exhibit_id: exhibitId,
@@ -80,6 +100,7 @@ export function useCreateExhibit() {
  * Updates an exhibit marker's description or linked file.
  */
 export function useUpdateExhibit() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -95,6 +116,14 @@ export function useUpdateExhibit() {
       fileId?: string | null;
       exhibitId?: string;
     }) => {
+      if (isDemoMode) {
+        return updateDemoExhibit(id, {
+          ...(description !== undefined ? { description } : {}),
+          ...(fileId !== undefined ? { fileId } : {}),
+          ...(exhibitId !== undefined ? { exhibitId } : {}),
+        });
+      }
+
       const updates: Record<string, unknown> = {};
       if (description !== undefined) updates.description = description.trim() || null;
       if (fileId !== undefined) updates.file_id = fileId || null;
@@ -159,6 +188,7 @@ export function useUpdateExhibit() {
  * Deletes an exhibit marker.
  */
 export function useDeleteExhibit() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -169,6 +199,10 @@ export function useDeleteExhibit() {
       id: string;
       projectId: string;
     }) => {
+      if (isDemoMode) {
+        return deleteDemoExhibit(id);
+      }
+
       const { error } = await supabase
         .from('exhibit_markers')
         .delete()

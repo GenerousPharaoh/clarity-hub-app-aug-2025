@@ -24,11 +24,59 @@ function getServiceClient() {
   });
 }
 
+function getProcessingErrorStatusCode(message?: string): number {
+  if (!message) return 500;
+
+  const normalized = message.toLowerCase();
+  if (normalized.includes('not found')) return 404;
+  if (normalized.includes('not authorized') || normalized.includes('forbidden')) return 403;
+  if (normalized.includes('specified project') || normalized.includes('invalid')) return 400;
+
+  return 500;
+}
+
+/**
+ * Check whether an Origin header is on the allowed list.
+ * Allowed: *.vercel.app, localhost (any port), and the production domain.
+ */
+function isAllowedOrigin(origin: string | undefined): string | null {
+  if (!origin) return null;
+
+  try {
+    const url = new URL(origin);
+    const hostname = url.hostname;
+
+    // localhost with any port (dev)
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return origin;
+    }
+
+    // Vercel preview deployments
+    if (hostname.endsWith('.vercel.app')) {
+      return origin;
+    }
+
+    // Production domain (clarity-hub)
+    if (hostname === 'clarity-hub-app.vercel.app') {
+      return origin;
+    }
+  } catch {
+    // Malformed origin — reject
+  }
+
+  return null;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS headers — restrict to allowed origins
+  const allowedOrigin = isAllowedOrigin(req.headers.origin as string | undefined);
+  if (allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -94,6 +142,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Process the file (uses service role key internally)
     const result = await processFile(fileId, projectId);
+    if (result.status === 'failed') {
+      return res
+        .status(getProcessingErrorStatusCode(result.error))
+        .json(result);
+    }
 
     return res.status(200).json(result);
   } catch (error) {

@@ -4,10 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import useAppStore from '@/store';
 import type { FileRecord } from '@/types';
 import { uploadFile as uploadToStorage, deleteFile as deleteFromStorage } from '@/services/storageService';
+import { deleteDemoFile, getDemoFiles } from '@/lib/demo';
 
-const FILES_KEY = 'files';
+export const FILES_KEY = 'files';
 
-function filesQueryKey(projectId: string | null) {
+export function filesQueryKey(projectId: string | null) {
   return [FILES_KEY, projectId] as const;
 }
 
@@ -16,12 +17,18 @@ function filesQueryKey(projectId: string | null) {
  * Results are synced into the Zustand store for cross-component access.
  */
 export function useFiles(projectId: string | null) {
+  const { user, isDemoMode } = useAuth();
   const setFiles = useAppStore((s) => s.setFiles);
 
   return useQuery<FileRecord[]>({
     queryKey: filesQueryKey(projectId),
     queryFn: async () => {
       if (!projectId) return [];
+      if (isDemoMode) {
+        const files = getDemoFiles(projectId);
+        setFiles(files);
+        return files;
+      }
 
       const { data, error } = await supabase
         .from('files')
@@ -36,7 +43,7 @@ export function useFiles(projectId: string | null) {
       setFiles(files);
       return files;
     },
-    enabled: !!projectId,
+    enabled: !!projectId && (isDemoMode || !!user),
   });
 }
 
@@ -47,7 +54,7 @@ export function useFiles(projectId: string | null) {
  * After success, adds the new file to Zustand and invalidates the query cache.
  */
 export function useUploadFile() {
-  const { user } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const queryClient = useQueryClient();
   const addFile = useAppStore((s) => s.addFile);
 
@@ -59,6 +66,9 @@ export function useUploadFile() {
       file: File;
       projectId: string;
     }) => {
+      if (isDemoMode) {
+        throw new Error('Uploads are disabled in demo mode. Use the seeded demo files to explore the workspace.');
+      }
       if (!user) throw new Error('Not authenticated');
 
       // Build a unique storage path
@@ -115,12 +125,17 @@ export function useUploadFile() {
  * marks the DB record as deleted, and removes from Zustand.
  */
 export function useDeleteFile() {
+  const { isDemoMode } = useAuth();
   const queryClient = useQueryClient();
   const removeFile = useAppStore((s) => s.removeFile);
   const addFile = useAppStore((s) => s.addFile);
 
   return useMutation({
     mutationFn: async (file: FileRecord) => {
+      if (isDemoMode) {
+        return deleteDemoFile(file.id);
+      }
+
       // 1. Delete from storage (best-effort; record still marked deleted)
       try {
         await deleteFromStorage(file.file_path);

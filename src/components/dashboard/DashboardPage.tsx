@@ -157,11 +157,8 @@ export function DashboardPage() {
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 max-w-2xl">
                   <h1 className="font-heading text-2xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-3xl">
-                    {firstName ? `${firstName}, your matters are under control.` : 'Your matters are under control.'}
+                    {firstName ? `${firstName}'s matters` : 'Your matters'}
                   </h1>
-                  <p className="mt-1.5 max-w-xl text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-300">
-                    Review evidence, resume strategy work, and move from intake to draft.
-                  </p>
                 </div>
 
                 <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -170,7 +167,7 @@ export function DashboardPage() {
                       onClick={() => navigate(`/project/${resumeProject.id}`)}
                       className="focus-accent inline-flex items-center justify-center gap-2 rounded-xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
                     >
-                      Continue workspace
+                      Resume
                       <ArrowRight className="h-4 w-4" />
                     </button>
                   )}
@@ -239,7 +236,7 @@ export function DashboardPage() {
                   <input
                     value={projectQuery}
                     onChange={(e) => setProjectQuery(e.target.value)}
-                    placeholder="Search matters by name, type, or description"
+                    placeholder="Search matters..."
                     className="w-full rounded-2xl border border-surface-200 bg-white/90 py-3 pl-10 pr-3 text-sm text-surface-700 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 dark:border-surface-700 dark:bg-surface-950/80 dark:text-surface-100 dark:focus:border-primary-400 dark:focus:ring-primary-400/20"
                   />
                 </div>
@@ -298,14 +295,14 @@ export function DashboardPage() {
               <EmptyState
                 icon={<Scale className="h-6 w-6" />}
                 title="No matters yet"
-                description="Create your first matter to start organizing evidence, building arguments, and preparing exhibits in a more deliberate workspace."
+                description="Create a matter to get started."
                 action={
                   <button
                     onClick={() => setDialogOpen(true)}
                     className="inline-flex items-center gap-2 rounded-2xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
                   >
                     <Plus className="h-4 w-4" />
-                    Create your first matter
+                    New matter
                   </button>
                 }
               />
@@ -323,7 +320,7 @@ export function DashboardPage() {
                     No matters match that search
                   </h3>
                   <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-                    Try a party name, issue type, or clear the filter to reopen the whole portfolio.
+                    Try different keywords.
                   </p>
                   <button
                     onClick={() => setProjectQuery('')}
@@ -354,7 +351,7 @@ export function DashboardPage() {
             <div className="mt-4 flex items-center gap-2 text-xs text-surface-400 dark:text-surface-500">
               <Briefcase className="h-3.5 w-3.5" />
               <span>
-                {projects?.length ?? 0} {projects?.length === 1 ? 'matter' : 'matters'} in the current portfolio
+                {projects?.length ?? 0} {projects?.length === 1 ? 'matter' : 'matters'}
               </span>
             </div>
           </FadeIn>

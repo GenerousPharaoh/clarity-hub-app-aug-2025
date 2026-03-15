@@ -245,7 +245,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700"
                   >
                     <Pencil className="h-3.5 w-3.5" />
-                    Rename matter
+                    Rename
                   </button>
                   <button
                     onClick={handleDelete}
@@ -257,7 +257,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                     )}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {confirmDelete ? 'Confirm delete' : 'Delete matter'}
+                    {confirmDelete ? 'Confirm' : 'Delete'}
                   </button>
                 </div>
               )}
@@ -265,7 +265,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           </div>
 
           <p className="mt-4 line-clamp-3 text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
-            {project.description || 'Add a short matter summary to anchor the evidence, issues, and drafting strategy.'}
+            {project.description || 'No summary'}
           </p>
 
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -278,7 +278,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                 {fileCount ?? 0}
               </p>
               <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-                {fileCount === 1 ? 'file attached' : 'files attached'}
+                {fileCount === 1 ? 'file' : 'files'}
               </p>
             </div>
 
@@ -296,12 +296,9 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 border-t border-surface-100 pt-4 dark:border-surface-800 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-surface-400 [overflow-wrap:anywhere] dark:text-surface-500">
-              Open the matter to review source files, drafting notes, and exhibits.
-            </p>
+          <div className="mt-5 flex flex-col gap-3 border-t border-surface-100 pt-4 dark:border-surface-800 sm:flex-row sm:items-center sm:justify-end">
             <span className="inline-flex items-center gap-1 self-start text-sm font-medium text-surface-700 opacity-0 transition-all group-hover:opacity-100 group-hover:text-primary-700 dark:text-surface-200 dark:group-hover:text-primary-300">
-              Open matter
+              Open
               <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>

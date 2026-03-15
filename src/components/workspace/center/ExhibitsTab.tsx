@@ -222,7 +222,7 @@ function EmptyState({
         No Exhibits Yet
       </h3>
       <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-        Create exhibit markers to organize and reference your evidence files.
+        Mark key evidence as exhibits.
       </p>
       <button
         onClick={onCreateFirst}
@@ -235,7 +235,7 @@ function EmptyState({
         )}
       >
         <Plus className="h-3.5 w-3.5" />
-        Create First Exhibit
+        New Exhibit
       </button>
     </div>
   );
@@ -300,7 +300,7 @@ function ExhibitCard({
               onChange={(e) => setEditDesc(e.target.value)}
               autoFocus
               rows={2}
-              placeholder="Describe this exhibit..."
+              placeholder="Description..."
               className={cn(
                 'w-full resize-none rounded-lg border px-2 py-1.5 text-xs transition-colors',
                 'border-surface-200 bg-white text-surface-600',
@@ -341,7 +341,7 @@ function ExhibitCard({
               </p>
             ) : (
               <p className="text-xs italic text-surface-400 dark:text-surface-500">
-                No description — click to add
+                Add description
               </p>
             )}
             <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 text-surface-300 max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100" />
@@ -375,7 +375,7 @@ function ExhibitCard({
               className="flex items-center gap-1 text-[10px] text-surface-400 transition-colors hover:text-surface-600 dark:hover:text-surface-300"
             >
               <Link2 className="h-3 w-3" />
-              Link a file
+              Link file
             </button>
 
             {showFilePicker && (

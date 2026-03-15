@@ -52,7 +52,7 @@ function getFileSummary(file: FileRecord) {
     return file.content.replace(/\s+/g, ' ').trim();
   }
 
-  return 'Open the record in the viewer to inspect the source and connect it back to drafting or AI review.';
+  return 'No summary available';
 }
 
 function getProcessingBadge(
@@ -87,7 +87,7 @@ function getProcessingBadge(
   }
 
   return {
-    label: 'Ready to index',
+    label: 'Pending',
     className:
       'border-surface-200 bg-surface-50 text-surface-600 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300',
     icon: <Zap className="h-3 w-3" />,
@@ -292,7 +292,7 @@ export function FileListItem({
                       : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',
                     !processingState?.isProcessing && 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
                   )}
-                  title={file.processing_status === 'failed' ? 'Retry processing' : 'Process file for AI search'}
+                  title={file.processing_status === 'failed' ? 'Retry processing' : 'Index'}
                   aria-label={`Process ${file.name}`}
                 >
                   {processingState?.isProcessing ? (

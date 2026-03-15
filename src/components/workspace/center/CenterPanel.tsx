@@ -358,10 +358,10 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
           <PenLine className="h-6 w-6 text-surface-400 dark:text-surface-500" />
         </div>
         <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-          Start Building Your Case
+          No Documents
         </h3>
         <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-          Create your first document to organize arguments, draft submissions, and build your case.
+          Create a document to begin.
         </p>
         <button
           onClick={handleCreate}
@@ -378,7 +378,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
           ) : (
             <Plus className="h-3.5 w-3.5" />
           )}
-          Create Document
+          New Document
         </button>
       </div>
     );
@@ -397,7 +397,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
               </h2>
               <div className="flex flex-nowrap gap-2 overflow-hidden">
                 <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
-                  {noteCount} {noteCount === 1 ? 'document' : 'documents'}
+                  {noteCount} {noteCount === 1 ? 'doc' : 'docs'}
                 </span>
                 {activeNote && (
                   <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-[10px] font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">

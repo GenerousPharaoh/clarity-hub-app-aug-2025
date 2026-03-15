@@ -59,7 +59,7 @@ function getMatterStage({
   if (fileCount === 0) {
     return {
       label: 'Build the record',
-      description: 'Start by attaching the core evidence that anchors the matter.',
+      description: 'Attach core evidence.',
       tone: 'amber',
     };
   }
@@ -67,7 +67,7 @@ function getMatterStage({
   if (noteCount === 0) {
     return {
       label: 'Draft the theory',
-      description: 'Evidence is present. Capture issues, leverage points, and your working position.',
+      description: 'Capture issues and leverage.',
       tone: 'primary',
     };
   }
@@ -75,7 +75,7 @@ function getMatterStage({
   if (exhibitCount === 0) {
     return {
       label: 'Curate exhibits',
-      description: 'Tag the strongest records so the file is ready for briefing and drafting.',
+      description: 'Tag key records.',
       tone: 'primary',
     };
   }
@@ -83,14 +83,14 @@ function getMatterStage({
   if (processedCount < fileCount) {
     return {
       label: 'Finish AI prep',
-      description: 'A few records still need processing before the AI lane is fully ready.',
+      description: 'Process remaining files.',
       tone: 'amber',
     };
   }
 
   return {
     label: 'Ready for briefing',
-    description: 'The matter has evidence, working drafts, exhibits, and processed material in place.',
+    description: 'All materials ready.',
     tone: 'emerald',
   };
 }
@@ -145,26 +145,26 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
     if (fileCount === 0) {
       items.push({
         title: 'Attach source evidence',
-        detail: 'Upload the key records that define the matter before drafting against assumptions.',
+        detail: 'Upload key records first.',
       });
     } else if (processedCount < fileCount) {
       items.push({
         title: 'Finish AI preparation',
-        detail: `${fileCount - processedCount} file${fileCount - processedCount === 1 ? '' : 's'} still need processing for stronger search and reasoning coverage.`,
+        detail: `${fileCount - processedCount} file${fileCount - processedCount === 1 ? '' : 's'} still need processing.`,
       });
     }
 
     if (noteCount === 0) {
       items.push({
         title: 'Create a strategy note',
-        detail: 'Open the documents lane and write the issues, leverage points, and draft position.',
+        detail: 'Write issues and draft position.',
         actionLabel: 'Open documents',
         action: onSwitchTab ? () => onSwitchTab('editor') : undefined,
       });
     } else {
       items.push({
         title: 'Refine the working draft',
-        detail: `${noteCount} document${noteCount === 1 ? '' : 's'} already exist. Tighten the lead note into a clear briefing or demand structure.`,
+        detail: `${noteCount} doc${noteCount === 1 ? '' : 's'} exist. Tighten into briefing.`,
         actionLabel: 'Review documents',
         action: onSwitchTab ? () => onSwitchTab('editor') : undefined,
       });
@@ -173,14 +173,14 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
     if (exhibitCount === 0) {
       items.push({
         title: 'Promote the best records to exhibits',
-        detail: 'Mark the strongest records so they stay visible when you move into briefing and drafting.',
+        detail: 'Mark strongest records as exhibits.',
         actionLabel: 'Open exhibits',
         action: onSwitchTab ? () => onSwitchTab('exhibits') : undefined,
       });
     } else {
       items.push({
         title: 'Stress-test exhibit coverage',
-        detail: `${exhibitCount} exhibit${exhibitCount === 1 ? '' : 's'} already marked. Check whether the key timeline and damages records are represented.`,
+        detail: `${exhibitCount} exhibit${exhibitCount === 1 ? '' : 's'} marked. Check coverage.`,
         actionLabel: 'Review exhibits',
         action: onSwitchTab ? () => onSwitchTab('exhibits') : undefined,
       });
@@ -225,20 +225,20 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                   icon={<FileText className="h-4 w-4" />}
                   label="Files"
                   value={fileCount}
-                  detail={fileCount === 1 ? 'record attached' : 'records attached'}
+                  detail={fileCount === 1 ? 'record' : 'records'}
                 />
                 <OverviewMetricCard
                   icon={<NotebookPen className="h-4 w-4" />}
                   label="Documents"
                   value={noteCount}
-                  detail={noteCount === 1 ? 'working draft' : 'working drafts'}
+                  detail={noteCount === 1 ? 'draft' : 'drafts'}
                   onClick={onSwitchTab ? () => onSwitchTab('editor') : undefined}
                 />
                 <OverviewMetricCard
                   icon={<Tag className="h-4 w-4" />}
                   label="Exhibits"
                   value={exhibitCount}
-                  detail={exhibitCount === 1 ? 'marked exhibit' : 'marked exhibits'}
+                  detail={exhibitCount === 1 ? 'marked' : 'marked'}
                   onClick={onSwitchTab ? () => onSwitchTab('exhibits') : undefined}
                 />
                 <OverviewMetricCard
@@ -256,7 +256,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                   detail={
                     latestFile
                       ? `Added ${formatRelativeDate(latestFile.added_at ?? latestFile.last_modified)}`
-                      : 'Attach the first source record to anchor the matter.'
+                      : 'Upload first file.'
                   }
                   icon={<Upload className="h-4 w-4" />}
                   onClick={
@@ -275,7 +275,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                   detail={
                     latestNote
                       ? `Edited ${formatRelativeDate(latestNote.last_modified ?? latestNote.created_at)}`
-                      : 'Open the documents tab to capture issues, risks, and next moves.'
+                      : 'Start drafting.'
                   }
                   icon={<NotebookPen className="h-4 w-4" />}
                   onClick={onSwitchTab ? () => onSwitchTab('editor') : undefined}
@@ -316,7 +316,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           ) : (
             <SignalEmptyState
               title="No evidence profile yet"
-              description="Once source files are attached, Clarity Hub will show the evidence mix and processing coverage here."
+              description="Upload files to see breakdown."
             />
           )}
           <MatterDetailsCard
@@ -489,7 +489,7 @@ function EditableProjectHeader({
               onClick={() => setIsEditingDesc(true)}
               className="text-sm text-surface-400 transition-colors hover:text-surface-600 dark:hover:text-surface-300"
             >
-              + Add a short matter summary
+              + Add summary
             </button>
           )}
         </div>
@@ -936,7 +936,7 @@ function QuickActions() {
         Keep the matter moving.
       </h3>
       <p className="mt-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
-        Bring in evidence when the record is still thin, or use the existing drafts and exhibits to push deeper into briefing.
+        Upload evidence or continue drafting.
       </p>
 
       <button
@@ -957,8 +957,8 @@ function QuickActions() {
 
       <div className="mt-4 rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 text-sm text-surface-500 dark:border-surface-800 dark:bg-surface-950/35 dark:text-surface-400">
         {isDemoMode
-          ? 'Demo mode is read-only for ingestion. The seeded record still supports viewing, drafting, and exhibit management.'
-          : 'Accepted formats include PDFs, documents, images, audio, video, and plain text.'}
+          ? 'Demo: view, draft, and manage exhibits.'
+          : ''}
       </div>
     </div>
   );

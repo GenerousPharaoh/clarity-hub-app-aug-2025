@@ -166,8 +166,7 @@ export function SettingsPage() {
 
           <div className="px-6 py-5">
             <p className="text-sm text-surface-600 dark:text-surface-400">
-              Choose how Clarity Hub looks to you. Select a single theme or sync
-              with your operating system.
+              Choose your theme.
             </p>
 
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -235,10 +234,10 @@ export function SettingsPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
-                  Process files automatically after upload
+                  Auto-process uploads
                 </p>
                 <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-                  Default is off to prevent accidental API usage spikes.
+                  Off by default.
                 </p>
               </div>
               <button
@@ -298,7 +297,7 @@ export function SettingsPage() {
                       Demo workspace
                     </p>
                     <p className="mt-1 text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/80">
-                      Reset the seeded sample data at any time, or jump straight into Google sign-in when you are ready to work with real matters.
+                      Reset sample data or sign in.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -307,7 +306,7 @@ export function SettingsPage() {
                       className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-900/30"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
-                      Reset sample data
+                      Reset Demo
                     </button>
                     <button
                       onClick={() => void signInWithGoogle()}
@@ -367,8 +366,7 @@ export function SettingsPage() {
             </div>
 
             <p className="mt-4 text-xs leading-relaxed text-surface-500 dark:text-surface-400">
-              Built with AI assistance. Clarity Hub helps legal professionals
-              organize evidence, build arguments, and manage exhibits.
+              Organize evidence, build arguments, manage exhibits.
             </p>
 
             <div className="mt-4 rounded-lg bg-surface-50 p-3 dark:bg-surface-800/50">

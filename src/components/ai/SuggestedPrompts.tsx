@@ -18,32 +18,32 @@ const GENERAL_PROMPTS: Prompt[] = [
   {
     icon: <Scale className="h-3.5 w-3.5" />,
     label: 'Analyze legal position',
-    text: 'Analyze the strengths and weaknesses of my legal position based on the uploaded documents.',
+    text: 'Analyze strengths and weaknesses of my position.',
   },
   {
     icon: <Search className="h-3.5 w-3.5" />,
     label: 'Find relevant case law',
-    text: 'What relevant case law applies to the issues in my case?',
+    text: 'Find relevant case law for my issues.',
   },
   {
     icon: <BookOpen className="h-3.5 w-3.5" />,
     label: 'Explain a legal concept',
-    text: 'Explain the legal test for constructive dismissal in Ontario.',
+    text: 'Explain constructive dismissal in Ontario.',
   },
   {
     icon: <ShieldCheck className="h-3.5 w-3.5" />,
     label: 'Review for risks',
-    text: 'Review the evidence and identify any potential risks or weaknesses in my arguments.',
+    text: 'Identify risks and weaknesses.',
   },
   {
     icon: <Lightbulb className="h-3.5 w-3.5" />,
     label: 'Suggest strategy',
-    text: 'Based on the facts of my case, what legal strategy would you recommend?',
+    text: 'Recommend a legal strategy.',
   },
   {
     icon: <FileText className="h-3.5 w-3.5" />,
     label: 'Draft an argument',
-    text: 'Help me draft a legal argument based on the evidence in this case.',
+    text: 'Draft a legal argument.',
   },
 ];
 

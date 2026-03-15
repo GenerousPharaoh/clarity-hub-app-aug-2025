@@ -76,8 +76,7 @@ export function LoginPage() {
             Build stronger arguments.
           </h1>
           <p className="text-lg text-primary-200/80 max-w-md leading-relaxed">
-            A professional workspace for managing legal documents,
-            analyzing evidence, and preparing case strategy with AI assistance.
+            Organize evidence and prepare strategy with AI.
           </p>
 
           <div className="mt-8 grid max-w-md gap-3">
@@ -85,10 +84,10 @@ export function LoginPage() {
               Structured workspace for files, notes, and exhibits
             </FeaturePill>
             <FeaturePill icon={<ShieldCheck className="h-4 w-4" />}>
-              AI-assisted review with stronger processing guardrails
+              AI-powered evidence analysis
             </FeaturePill>
             <FeaturePill icon={<Sparkles className="h-4 w-4" />}>
-              Demo workspace available immediately for product tours
+              Try the demo instantly
             </FeaturePill>
           </div>
         </div>
@@ -182,12 +181,12 @@ export function LoginPage() {
                   <circle cx="12" cy="12" r="9" className="opacity-20" stroke="currentColor" strokeWidth="3" />
                   <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                 </svg>
-                Loading demo workspace...
+                Loading...
               </>
             ) : (
               <>
                 <PlayCircle className="h-5 w-5" />
-                Skip Login (Demo Mode)
+                Try Demo
               </>
             )}
           </button>
@@ -197,9 +196,9 @@ export function LoginPage() {
               Demo Includes
             </p>
             <div className="mt-3 space-y-2">
-              <DemoChecklistItem>Two seeded legal matters with notes and exhibits</DemoChecklistItem>
-              <DemoChecklistItem>Browsable file viewer with processed summaries</DemoChecklistItem>
-              <DemoChecklistItem>Editable project, document, and exhibit flows</DemoChecklistItem>
+              <DemoChecklistItem>Sample cases with notes</DemoChecklistItem>
+              <DemoChecklistItem>File viewer with AI summaries</DemoChecklistItem>
+              <DemoChecklistItem>Full editing capabilities</DemoChecklistItem>
             </div>
           </div>
         </div>

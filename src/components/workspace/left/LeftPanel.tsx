@@ -290,7 +290,7 @@ export function LeftPanel() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by file name or type"
+              placeholder="Search files..."
               className="h-full w-full bg-transparent text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:text-surface-200 dark:placeholder:text-surface-500"
             />
             <AnimatePresence>
@@ -426,13 +426,8 @@ export function LeftPanel() {
             <p className="mt-3 text-center text-xs font-semibold text-surface-700 dark:text-surface-200">
               {searchQuery
                 ? 'No files match your search'
-                : 'Upload files to get started'}
+                : 'No files yet'}
             </p>
-            {!searchQuery && (
-              <p className="mt-1 text-center text-[11px] leading-snug text-surface-500 dark:text-surface-400">
-                PDFs, images, documents, audio, and video files are supported
-              </p>
-            )}
           </div>
         ) : (
           // File list
@@ -479,10 +474,10 @@ export function LeftPanel() {
 
       <ConfirmDialog
         open={!!fileToProcess}
-        title="Process File for AI Search?"
+        title="Index this file?"
         message={
           fileToProcess && singleEstimate
-            ? `This will analyze "${fileToProcess.name}" and generate embeddings. Estimated usage: ~${singleEstimate.totalTokens.toLocaleString()} tokens across ~${singleEstimate.embeddingChunks} chunks (${formatFileSize(singleEstimate.bytes)} input size estimate). Safety limits: ${PROCESSING_DAILY_FILE_LIMIT} files/day and ${Math.round(PROCESSING_DAILY_MB_LIMIT_BYTES / (1024 * 1024))}MB/day (tracked locally).`
+            ? `Index "${fileToProcess.name}"? Estimated: ~${singleEstimate.totalTokens.toLocaleString()} tokens.`
             : ''
         }
         confirmLabel="Process"

@@ -188,7 +188,7 @@ export function AIChatPanel() {
       <div className="flex h-full flex-col items-center justify-center px-6">
         <Sparkles className="h-6 w-6 text-surface-300 dark:text-surface-500" />
         <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
-          Select a project to start chatting with AI.
+          Select a project.
         </p>
       </div>
     );
@@ -216,11 +216,10 @@ export function AIChatPanel() {
                 <Sparkles className="h-6 w-6 text-accent-500 dark:text-accent-400" />
               </div>
               <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-                AI Legal Assistant
+                AI Assistant
               </h3>
               <p className={cn('mt-1.5 mb-6 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
-                Ask questions about your documents, get case analysis, or
-                request help with legal research.
+                Ask about your case or documents.
               </p>
 
               {/* Suggested prompts -- adapt to selected file */}
@@ -326,7 +325,7 @@ export function AIChatPanel() {
                 {selectedFile.name}
               </p>
               <p className="text-[10px] text-primary-500/70 dark:text-primary-400/60">
-                AI responses will reference this file
+                Using this file
               </p>
             </div>
             <button
@@ -410,7 +409,7 @@ export function AIChatPanel() {
       <ConfirmDialog
         open={showClearConfirm}
         title="Clear Conversation"
-        message="This will permanently delete all messages in this conversation. This action cannot be undone."
+        message="Delete all messages?"
         confirmLabel="Clear All"
         variant="danger"
         onConfirm={() => {

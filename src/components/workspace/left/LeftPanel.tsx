@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { ChevronLeft, FolderOpen, Search, X, FileText, AlertCircle, RefreshCw, Loader2, Zap } from 'lucide-react';
+import { ChevronLeft, Search, X, FileText, AlertCircle, RefreshCw, Loader2, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn, formatFileSize } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -28,33 +28,12 @@ function isProcessable(file: FileRecord): boolean {
   );
 }
 
-function formatTokenEstimate(tokens: number): string {
-  if (tokens >= 10_000) return `~${Math.round(tokens / 1000)}k tok`;
-  if (tokens >= 1000) return `~${(tokens / 1000).toFixed(1)}k tok`;
-  return `~${tokens} tok`;
-}
-
 export function LeftPanel() {
   const toggleLeft = useAppStore((s) => s.toggleLeftPanel);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const isMobile = useIsMobile();
   const searchQuery = useAppStore((s) => s.searchQuery);
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
-
-  // Track panel width for responsive layout
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [panelWidth, setPanelWidth] = useState(0);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setPanelWidth(entry.contentRect.width));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const compact = panelWidth > 0 && panelWidth < 280;
-  const ultraCompact = panelWidth > 0 && panelWidth < 220;
 
   const { data: files = [], isLoading, isError, refetch } = useFiles(selectedProjectId);
   const { processFile, getState: getProcessState } = useProcessFile();
@@ -270,181 +249,140 @@ export function LeftPanel() {
   }, [setSearchQuery]);
 
   return (
-    <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900 surface-grain">
+    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900 surface-grain">
       <div className="shrink-0 border-b border-surface-200/80 px-3 py-3 dark:border-surface-800">
-        <div className="rounded-[26px] border border-translucent bg-white/90 p-3 shadow-sm dark:bg-surface-900/80">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="inline-flex min-w-0 max-w-full items-center gap-2 overflow-hidden rounded-full border border-surface-200/80 bg-surface-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-500 dark:border-surface-700 dark:bg-surface-800/80 dark:text-surface-400">
-                <FolderOpen className="h-3.5 w-3.5 shrink-0 text-primary-500 dark:text-primary-400" />
-                <span className="truncate">Evidence lane</span>
-              </div>
-              {!ultraCompact && (
-                <p className="mt-3 text-sm font-semibold text-surface-900 dark:text-surface-100">
-                  Source records and AI indexing
-                </p>
-              )}
-              {!compact && (
-                <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
-                  Review the incoming record, queue files for search, and keep the evidence set tight.
-                </p>
-              )}
-            </div>
-            {!isMobile && (
-              <button
-                onClick={toggleLeft}
-                className={cn(
-                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
-                  'text-surface-400 transition-all',
-                  'hover:bg-surface-100 hover:text-surface-600',
-                  'dark:hover:bg-surface-800 dark:hover:text-surface-300'
-                )}
-                title="Collapse panel"
-                aria-label="Collapse file browser"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-
-          {!compact && (
-            <div className="mt-4 flex min-w-0 flex-wrap gap-2 overflow-hidden">
-              <RailChip label={`${files.length} ${files.length === 1 ? 'record' : 'records'}`} />
-              <RailChip label={`${processedCount} AI-ready`} tone="primary" />
-              {processingCount > 0 && <RailChip label={`${processingCount} indexing`} tone="accent" />}
-            </div>
-          )}
-
-          <div className="mt-4">
-            <div
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-surface-900 dark:text-surface-100">Files</p>
+          {!isMobile && (
+            <button
+              onClick={toggleLeft}
               className={cn(
-                'flex h-10 items-center gap-2 rounded-2xl border px-3',
-                'border-surface-200 bg-surface-50/80 shadow-sm transition-all',
-                'focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/15',
-                'dark:border-surface-700 dark:bg-surface-950/40',
-                'dark:focus-within:border-primary-400 dark:focus-within:ring-primary-400/20'
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+                'text-surface-400 transition-all',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-800 dark:hover:text-surface-300'
               )}
+              title="Collapse panel"
+              aria-label="Collapse file browser"
             >
-              <Search className="h-3.5 w-3.5 shrink-0 text-surface-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by file name or type"
-                className="h-full w-full bg-transparent text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:text-surface-200 dark:placeholder:text-surface-500"
-              />
-              <AnimatePresence>
-                {searchQuery && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.1 }}
-                    type="button"
-                    onClick={clearSearch}
-                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-200 text-surface-500 transition-colors hover:bg-surface-300 dark:bg-surface-700 dark:text-surface-400 dark:hover:bg-surface-600"
-                    title="Clear search"
-                  >
-                    <X className="h-2.5 w-2.5" />
-                  </motion.button>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {selectedProjectId && (
-            <div className="mt-4">
-              <FileUploadZone projectId={selectedProjectId} />
-            </div>
+              <ChevronLeft className="h-4 w-4" />
+            </button>
           )}
+        </div>
+        {files.length > 0 && (
+          <p className="mt-0.5 text-xs text-surface-400 dark:text-surface-500">
+            {files.length} file{files.length !== 1 ? 's' : ''} · {processedCount} indexed
+          </p>
+        )}
 
-          {selectedProjectId && processableFiles.length > 1 && (
-            <div className="mt-4 rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-3 dark:border-surface-800 dark:bg-surface-950/35">
-              {!batchSelectionMode ? (
-                <button
-                  onClick={() => setBatchSelectionMode(true)}
-                  className="flex w-full items-center justify-between gap-3 rounded-2xl px-2 py-1.5 text-left transition-colors hover:bg-white/70 dark:hover:bg-surface-900/70"
+        <div className="mt-3">
+          <div
+            className={cn(
+              'flex h-10 items-center gap-2 rounded-2xl border px-3',
+              'border-surface-200 bg-surface-50/80 shadow-sm transition-all',
+              'focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/15',
+              'dark:border-surface-700 dark:bg-surface-950/40',
+              'dark:focus-within:border-primary-400 dark:focus-within:ring-primary-400/20'
+            )}
+          >
+            <Search className="h-3.5 w-3.5 shrink-0 text-surface-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by file name or type"
+              className="h-full w-full bg-transparent text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:text-surface-200 dark:placeholder:text-surface-500"
+            />
+            <AnimatePresence>
+              {searchQuery && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.1 }}
+                  type="button"
+                  onClick={clearSearch}
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface-200 text-surface-500 transition-colors hover:bg-surface-300 dark:bg-surface-700 dark:text-surface-400 dark:hover:bg-surface-600"
+                  title="Clear search"
                 >
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-surface-700 dark:text-surface-200">
-                      {compact ? 'Batch index' : 'Batch index records'}
-                    </p>
-                    {!compact && (
-                      <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
-                        Queue multiple files for AI search in one pass.
-                      </p>
-                    )}
-                  </div>
-                  <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 shadow-sm dark:bg-surface-900 dark:text-surface-400">
-                    {processableFiles.length} ready
-                  </span>
-                </button>
-              ) : (
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold text-surface-700 dark:text-surface-200">
-                        {selectedBatchFiles.length} selected
-                      </p>
-                      {!compact && (
-                        <p className="mt-1 max-w-full break-words text-[11px] leading-5 text-surface-500 dark:text-surface-400">
-                          ~{batchEstimate.totalTokens.toLocaleString()} tokens across ~{batchEstimate.totalChunks} chunks ({formatFileSize(batchEstimate.totalBytes)}).
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setSelectedBatchIds(processableFiles.map((f) => f.id))}
-                        className="rounded-full bg-white px-2 py-1 text-[10px] font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:hover:bg-surface-800"
-                      >
-                        All
-                      </button>
-                      <button
-                        onClick={() => setSelectedBatchIds([])}
-                        className="rounded-full bg-white px-2 py-1 text-[10px] font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:bg-surface-900 dark:text-surface-400 dark:hover:bg-surface-800"
-                      >
-                        None
-                      </button>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-end gap-2">
+                  <X className="h-2.5 w-2.5" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {selectedProjectId && (
+          <div className="mt-3">
+            <FileUploadZone projectId={selectedProjectId} />
+          </div>
+        )}
+
+        {selectedProjectId && processableFiles.length > 1 && (
+          <div className="mt-3">
+            {!batchSelectionMode ? (
+              <button
+                onClick={() => setBatchSelectionMode(true)}
+                className="flex w-full items-center justify-between gap-3 rounded-xl px-2 py-1.5 text-left transition-colors hover:bg-surface-100 dark:hover:bg-surface-800"
+              >
+                <p className="text-xs font-medium text-surface-600 dark:text-surface-300">
+                  Batch index
+                </p>
+                <span className="text-xs text-surface-400 dark:text-surface-500">
+                  {processableFiles.length} ready
+                </span>
+              </button>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
+                    {selectedBatchFiles.length} selected
+                  </p>
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => {
-                        setBatchSelectionMode(false);
-                        setSelectedBatchIds([]);
-                      }}
-                      className="rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-surface-500 transition-colors hover:bg-white dark:text-surface-400 dark:hover:bg-surface-900"
-                      title="Cancel selection"
+                      onClick={() => setSelectedBatchIds(processableFiles.map((f) => f.id))}
+                      className="text-[11px] font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
                     >
-                      {compact ? <X className="h-3.5 w-3.5" /> : 'Cancel'}
+                      All
                     </button>
                     <button
-                      onClick={handleOpenBatchConfirm}
-                      disabled={selectedBatchFiles.length === 0}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-medium transition-colors',
-                        selectedBatchFiles.length === 0
-                          ? 'cursor-not-allowed bg-surface-200 text-surface-400 dark:bg-surface-800 dark:text-surface-500'
-                          : 'bg-surface-950 text-white hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100'
-                      )}
-                      title="Process selected files"
+                      onClick={() => setSelectedBatchIds([])}
+                      className="text-[11px] font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
                     >
-                      {processingCount > 0 && <Loader2 className="h-3 w-3 animate-spin" />}
-                      {compact ? (
-                        <>
-                          <Zap className="h-3 w-3" />
-                          {selectedBatchFiles.length}
-                        </>
-                      ) : (
-                        'Process selected'
-                      )}
+                      None
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+                <div className="mt-2 flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => {
+                      setBatchSelectionMode(false);
+                      setSelectedBatchIds([]);
+                    }}
+                    className="rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
+                    title="Cancel selection"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleOpenBatchConfirm}
+                    disabled={selectedBatchFiles.length === 0}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-medium transition-colors',
+                      selectedBatchFiles.length === 0
+                        ? 'cursor-not-allowed bg-surface-200 text-surface-400 dark:bg-surface-800 dark:text-surface-500'
+                        : 'bg-surface-950 text-white hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100'
+                    )}
+                    title="Process selected files"
+                  >
+                    {processingCount > 0 && <Loader2 className="h-3 w-3 animate-spin" />}
+                    Process selected
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── File list ─────────────────────────────────────── */}
@@ -500,9 +438,7 @@ export function LeftPanel() {
           // File list
           <div className="space-y-2">
             <AnimatePresence initial={false}>
-              {filteredFiles.map((file) => {
-                const estimate = perFileEstimates.get(file.id);
-                return (
+              {filteredFiles.map((file) => (
                   <motion.div
                     key={file.id}
                     initial={{ opacity: 0, height: 0 }}
@@ -517,11 +453,9 @@ export function LeftPanel() {
                       showBatchSelector={batchSelectionMode && isProcessable(file)}
                       isBatchSelected={selectedBatchIdSet.has(file.id)}
                       onToggleBatchSelection={handleToggleBatchSelection}
-                      estimatedTokenLabel={estimate ? formatTokenEstimate(estimate.totalTokens) : undefined}
                     />
                   </motion.div>
-                );
-              })}
+                ))}
             </AnimatePresence>
           </div>
         )}
@@ -572,23 +506,3 @@ export function LeftPanel() {
   );
 }
 
-function RailChip({
-  label,
-  tone = 'neutral',
-}: {
-  label: string;
-  tone?: 'neutral' | 'primary' | 'accent';
-}) {
-  const toneClass =
-    tone === 'primary'
-      ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-900/40 dark:bg-primary-900/20 dark:text-primary-300'
-      : tone === 'accent'
-        ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
-        : 'border-surface-200 bg-white text-surface-600 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300';
-
-  return (
-    <span className={cn('inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]', toneClass)}>
-      {label}
-    </span>
-  );
-}

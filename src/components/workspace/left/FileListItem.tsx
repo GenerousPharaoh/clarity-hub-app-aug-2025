@@ -12,7 +12,6 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
-  ArrowUpRight,
 } from 'lucide-react';
 import { cn, formatDate, getFileExtension, getFileTypeFromExtension } from '@/lib/utils';
 import { FILE_TYPE_COLORS } from '@/lib/constants';
@@ -27,7 +26,6 @@ interface FileListItemProps {
   showBatchSelector?: boolean;
   isBatchSelected?: boolean;
   onToggleBatchSelection?: (fileId: string) => void;
-  estimatedTokenLabel?: string;
 }
 
 const typeIconMap: Record<string, React.ElementType> = {
@@ -103,7 +101,6 @@ export function FileListItem({
   showBatchSelector = false,
   isBatchSelected = false,
   onToggleBatchSelection,
-  estimatedTokenLabel,
 }: FileListItemProps) {
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
@@ -261,26 +258,9 @@ export function FileListItem({
                 {file.name}
               </p>
               <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5 overflow-hidden max-h-7">
-                {ext && (
-                  <span
-                    className={cn(
-                      'inline-flex rounded-full px-2 py-1 text-[10px] font-semibold uppercase leading-none',
-                      isSelected
-                        ? 'bg-primary-100 text-primary-700 dark:bg-primary-800/40 dark:text-primary-300'
-                        : 'bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400'
-                    )}
-                  >
-                    {ext}
-                  </span>
-                )}
                 {file.added_at && (
                   <span className="rounded-full bg-surface-100 px-2 py-1 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
                     {formatDate(file.added_at)}
-                  </span>
-                )}
-                {estimatedTokenLabel && canProcess && (
-                  <span className="rounded-full bg-accent-50 px-2 py-1 text-[10px] font-medium text-accent-700 dark:bg-accent-900/20 dark:text-accent-300">
-                    {estimatedTokenLabel}
                   </span>
                 )}
                 <span
@@ -353,11 +333,6 @@ export function FileListItem({
           <p className="mt-3 line-clamp-2 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
             {summary}
           </p>
-
-          <div className="mt-3 flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-surface-400 dark:text-surface-500">
-            <span className="truncate">Open in viewer</span>
-            <ArrowUpRight className="h-3 w-3 shrink-0" />
-          </div>
         </div>
       </div>
 

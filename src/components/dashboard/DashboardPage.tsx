@@ -26,7 +26,7 @@ import {
 } from '@/hooks/useProjects';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { cn, formatRelativeDate } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { readWorkspaceSession } from '@/lib/workspaceSession';
 
 function getFirstName(user: { user_metadata?: Record<string, unknown>; email?: string } | null): string {
@@ -144,11 +144,6 @@ export function DashboardPage() {
 
   return (
     <div className="surface-grain relative min-h-full overflow-hidden bg-surface-50 dark:bg-surface-950">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 left-1/2 h-[28rem] w-[28rem] -translate-x-[58%] rounded-full bg-primary-400/14 blur-[120px] dark:bg-primary-500/12" />
-        <div className="absolute right-0 top-40 h-[22rem] w-[22rem] rounded-full bg-accent-300/12 blur-[120px] dark:bg-accent-500/10" />
-        <div className="absolute bottom-0 left-0 h-[18rem] w-[18rem] rounded-full bg-surface-300/25 blur-[100px] dark:bg-surface-700/14" />
-      </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
         <FadeIn>
@@ -158,17 +153,10 @@ export function DashboardPage() {
               'border-translucent bg-white/88 dark:bg-surface-900/80'
             )}
           >
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(77,99,121,0.12),rgba(255,255,255,0)_44%,rgba(135,95,51,0.08))] dark:bg-[linear-gradient(135deg,rgba(77,99,121,0.22),rgba(9,9,11,0)_44%,rgba(165,116,63,0.08))]" />
-            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-white/70 blur-3xl dark:bg-primary-400/8" />
-
             <div className="relative min-w-0">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 max-w-2xl">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-surface-200/80 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-surface-500 dark:border-surface-700 dark:bg-surface-900/70 dark:text-surface-400">
-                    <Scale className="h-3.5 w-3.5 text-primary-500" />
-                    Matter Desk
-                  </div>
-                  <h1 className="mt-3 font-heading text-2xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-3xl">
+                  <h1 className="font-heading text-2xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-3xl">
                     {firstName ? `${firstName}, your matters are under control.` : 'Your matters are under control.'}
                   </h1>
                   <p className="mt-1.5 max-w-xl text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-300">
@@ -196,28 +184,6 @@ export function DashboardPage() {
                 </div>
               </div>
 
-              {resumeProject && (
-                <div className="mt-4 flex items-center gap-3 rounded-xl border border-surface-200/80 bg-white/80 px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-950/50">
-                  <Clock3 className="h-4 w-4 shrink-0 text-surface-400 dark:text-surface-500" />
-                  <div className="min-w-0 flex-1">
-                    <span className="text-sm font-medium text-surface-900 dark:text-surface-100">
-                      {resumeProject.name}
-                    </span>
-                    <span className="ml-2 text-sm text-surface-500 dark:text-surface-400">
-                      {workspaceSession?.noteTitle
-                        ? `Resume "${workspaceSession.noteTitle}"`
-                        : workspaceSession?.fileName
-                          ? `Continue "${workspaceSession.fileName}"`
-                          : 'Last active workspace'}
-                    </span>
-                  </div>
-                  {workspaceSession?.visitedAt && (
-                    <span className="shrink-0 rounded-full bg-surface-100 px-2.5 py-0.5 text-xs text-surface-500 dark:bg-surface-800 dark:text-surface-400">
-                      {formatRelativeDate(workspaceSession.visitedAt)}
-                    </span>
-                  )}
-                </div>
-              )}
             </div>
           </section>
 
@@ -257,10 +223,7 @@ export function DashboardPage() {
             <div className="mt-5 rounded-2xl border border-surface-200/80 bg-white/82 p-4 shadow-sm backdrop-blur-sm dark:border-surface-800 dark:bg-surface-900/65">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
-                  Active matters
-                </p>
-                <div className="mt-2 flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <h2 className="font-heading text-xl font-semibold text-surface-900 dark:text-surface-100">
                     Portfolio
                   </h2>
@@ -268,9 +231,6 @@ export function DashboardPage() {
                     <Loader2 className="h-4 w-4 animate-spin text-surface-400 dark:text-surface-500" />
                   )}
                 </div>
-                <p className="mt-1 text-sm text-surface-500 dark:text-surface-400">
-                  Search by party, matter type, or description, then open the strongest next workspace.
-                </p>
               </div>
 
               <div className="flex max-w-full flex-col gap-3 lg:w-[30rem]">
@@ -432,7 +392,7 @@ function MetricCard({
         : 'border-surface-200/80 bg-white/85 text-surface-700 dark:border-surface-800 dark:bg-surface-900/70 dark:text-surface-200';
 
   return (
-    <div className={cn('interactive-lift min-w-0 rounded-2xl border p-4 shadow-sm backdrop-blur-sm', toneClasses)}>
+    <div className={cn('min-w-0 rounded-2xl border p-4 shadow-sm', toneClasses)}>
       <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
         {icon}
         <span>{label}</span>

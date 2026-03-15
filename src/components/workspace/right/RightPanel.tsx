@@ -41,27 +41,16 @@ export function RightPanel() {
   const selectedFile = selectedFileId
     ? files.find((file) => file.id === selectedFileId) ?? null
     : null;
-  const panelLabel = activeTab === 'viewer' ? 'Evidence dock' : 'AI copilot';
-  const panelDescription =
-    activeTab === 'viewer'
-      ? selectedFile?.name ?? 'Open a file to inspect the source record and jump back into the evidence.'
-      : 'Ask grounded questions, test theories, and draft against the matter record.';
+  const panelLabel = activeTab === 'viewer' ? 'Viewer' : 'AI Chat';
 
   return (
     <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900 surface-grain">
       {/* Header with tabs and collapse */}
       <div className="shrink-0 border-b border-surface-200/80 bg-surface-50/80 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/60">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
-              {panelLabel}
-            </p>
-            {!ultraCompact && (
-              <p className="mt-1 break-words text-[11px] leading-5 text-surface-500 dark:text-surface-400">
-                {panelDescription}
-              </p>
-            )}
-          </div>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="min-w-0 truncate text-sm font-semibold text-surface-700 dark:text-surface-200">
+            {panelLabel}
+          </h2>
           {!isMobile && !ultraCompact && (
             <button
               onClick={toggleRight}

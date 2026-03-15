@@ -246,14 +246,14 @@ export function AIChatPanel() {
                   model: m.model,
                   timestamp: m.timestamp,
                 }))}
-                className="text-[10px] py-1 px-2"
+                className="p-1.5 [&_span]:hidden"
               />
               <button
                 onClick={() => setShowClearConfirm(true)}
-                className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+                className="flex items-center justify-center rounded-md p-1.5 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+                title="Clear conversation"
               >
-                <Trash2 className="h-3 w-3" />
-                Clear
+                <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
 
@@ -389,16 +389,20 @@ export function AIChatPanel() {
               <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Shift+Enter</kbd> new line
             </span>
           )}
-          <span className={cn(
-            'text-[10px] whitespace-nowrap',
-            input.length > 3600
-              ? 'text-red-500 dark:text-red-400'
-              : input.length > 3200
-                ? 'text-amber-500 dark:text-amber-400'
-                : 'text-surface-400 dark:text-surface-500'
-          )}>
-            {input.length > 0 ? `${input.length.toLocaleString()} / 4,000` : 'Not legal advice'}
-          </span>
+          {input.length > 2000 ? (
+            <span className={cn(
+              'text-[10px] whitespace-nowrap',
+              input.length > 3600
+                ? 'text-red-500 dark:text-red-400'
+                : input.length > 3200
+                  ? 'text-amber-500 dark:text-amber-400'
+                  : 'text-surface-400 dark:text-surface-500'
+            )}>
+              {input.length.toLocaleString()} / 4,000
+            </span>
+          ) : (
+            <span className="text-[10px] text-surface-400 dark:text-surface-500">Not legal advice</span>
+          )}
         </div>
       </div>
 

@@ -1,9 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   ArrowRight,
-  Calendar,
   Check,
-  CheckCircle2,
   Clock,
   File,
   FileAudio,
@@ -211,13 +209,9 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
     <FadeIn className="flex-1 overflow-y-auto bg-surface-50/60 dark:bg-surface-950/30">
       <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6">
         <div className="grid gap-5 2xl:grid-cols-[1.6fr_0.85fr]">
-          <section className="relative min-w-0 overflow-hidden rounded-[28px] border border-surface-200/80 bg-white/90 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/78 md:p-7">
-            <div className="absolute inset-0 bg-[linear-gradient(140deg,rgba(77,99,121,0.11),rgba(255,255,255,0)_44%,rgba(135,95,51,0.07))] dark:bg-[linear-gradient(140deg,rgba(77,99,121,0.2),rgba(9,9,11,0)_44%,rgba(165,116,63,0.08))]" />
-            <div className="absolute right-0 top-0 h-36 w-36 rounded-full bg-white/80 blur-3xl dark:bg-primary-400/8" />
-
-            <div className="relative min-w-0">
+          <section className="min-w-0 overflow-hidden rounded-[28px] border border-surface-200/80 bg-white/90 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/78 md:p-7">
+            <div className="min-w-0">
               <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
-                <OverviewBadge tone="neutral">{project.goal_type ?? 'Matter overview'}</OverviewBadge>
                 <OverviewBadge tone={stage.tone}>{stage.label}</OverviewBadge>
                 <OverviewBadge tone="neutral">{readinessPercent}% AI-ready</OverviewBadge>
               </div>
@@ -565,16 +559,14 @@ function OverviewMetricCard({
 }
 
 function AnchorCard({
-  eyebrow,
   title,
   detail,
-  icon,
   onClick,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   detail: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   onClick?: () => void;
 }) {
   const Component = onClick ? 'button' : 'div';
@@ -583,18 +575,14 @@ function AnchorCard({
     <Component
       onClick={onClick}
       className={cn(
-        'min-w-0 rounded-[22px] border border-surface-200/80 bg-white/76 p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/45',
-        onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
+        'min-w-0 rounded-[22px] border border-surface-200/80 bg-white/76 px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/45',
+        onClick && 'transition-colors hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
-        <span className="shrink-0 text-primary-500 dark:text-primary-400">{icon}</span>
-        <span>{eyebrow}</span>
-      </div>
-      <p className="mt-3 font-heading text-lg font-semibold tracking-tight text-surface-950 dark:text-surface-50">
+      <p className="truncate text-sm font-medium text-surface-900 dark:text-surface-100">
         {title}
       </p>
-      <p className="mt-2 line-clamp-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
+      <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
         {detail}
       </p>
     </Component>
@@ -649,16 +637,6 @@ function MatterStageCard({
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-200 dark:bg-surface-800">
           <div className={cn('h-full rounded-full transition-all', barClass)} style={{ width: `${readinessPercent}%` }} />
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-3 text-xs text-surface-500 dark:text-surface-400 sm:grid-cols-2">
-          <div className="rounded-2xl bg-surface-100/80 px-3 py-3 dark:bg-surface-900/60">
-            <p className="font-medium text-surface-700 dark:text-surface-200">{processedCount}/{fileCount || 0}</p>
-            <p className="mt-1">processed records</p>
-          </div>
-          <div className="rounded-2xl bg-surface-100/80 px-3 py-3 dark:bg-surface-900/60">
-            <p className="font-medium text-surface-700 dark:text-surface-200">{exhibitCount}</p>
-            <p className="mt-1">marked exhibits</p>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -683,26 +661,21 @@ function NextStepsCard({
       <div className="mt-4 space-y-3">
         {actions.map((action) => (
           <div key={action.title} className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400" />
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
-                  {action.title}
-                </h3>
-                <p className="mt-1 text-sm leading-6 text-surface-500 dark:text-surface-400">
-                  {action.detail}
-                </p>
-                {action.action && action.actionLabel && (
-                  <button
-                    onClick={action.action}
-                    className="mt-3 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
-                  >
-                    {action.actionLabel}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
+            <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
+              {action.title}
+            </h3>
+            <p className="mt-1 text-sm leading-6 text-surface-500 dark:text-surface-400">
+              {action.detail}
+            </p>
+            {action.action && action.actionLabel && (
+              <button
+                onClick={action.action}
+                className="mt-3 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
+              >
+                {action.actionLabel}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -857,10 +830,6 @@ function RecentActivity({
 
 function MatterDetailsCard({
   project,
-  processedCount,
-  fileCount,
-  noteCount,
-  exhibitCount,
 }: {
   project: {
     created_at: string | null;
@@ -878,70 +847,23 @@ function MatterDetailsCard({
         <FolderOpen className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Matter details
       </div>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <DetailCard label="Created" value={formatDate(project.created_at)} icon={<Calendar className="h-4 w-4" />} />
-        <DetailCard
-          label="Last updated"
-          value={formatRelativeDate(project.updated_at ?? project.created_at)}
-          icon={<Clock className="h-4 w-4" />}
-        />
-        <DetailCard label="Type" value={project.goal_type ?? 'General matter'} icon={<ShieldCheck className="h-4 w-4" />} />
-        <DetailCard
-          label="Coverage"
-          value={`${processedCount}/${fileCount || 0} processed`}
-          icon={<Sparkles className="h-4 w-4" />}
-        />
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <MiniSignal label="Files" value={fileCount} />
-        <MiniSignal label="Drafts" value={noteCount} />
-        <MiniSignal label="Exhibits" value={exhibitCount} />
+      <div className="mt-4 space-y-2 text-sm text-surface-600 dark:text-surface-300">
+        <p>
+          <span className="font-medium text-surface-500 dark:text-surface-400">Created:</span>{' '}
+          {formatDate(project.created_at)}
+          <span className="mx-2 text-surface-300 dark:text-surface-600">&middot;</span>
+          <span className="font-medium text-surface-500 dark:text-surface-400">Updated:</span>{' '}
+          {formatRelativeDate(project.updated_at ?? project.created_at)}
+        </p>
+        <p>
+          <span className="font-medium text-surface-500 dark:text-surface-400">Type:</span>{' '}
+          {project.goal_type ?? 'General matter'}
+        </p>
       </div>
     </div>
   );
 }
 
-function DetailCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
-        <span className="shrink-0">{icon}</span>
-        <span>{label}</span>
-      </div>
-      <p className="mt-3 text-sm font-medium text-surface-800 dark:text-surface-100">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function MiniSignal({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <div className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 text-center dark:border-surface-800 dark:bg-surface-950/35">
-      <p className="font-heading text-2xl font-semibold text-surface-950 dark:text-surface-50">
-        {value}
-      </p>
-      <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-        {label}
-      </p>
-    </div>
-  );
-}
 
 function SignalEmptyState({
   title,

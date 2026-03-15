@@ -24,7 +24,6 @@ import {
   RefreshCw,
   ChevronDown,
   Check,
-  NotebookPen,
 } from 'lucide-react';
 import type { Note } from '@/types';
 
@@ -55,17 +54,7 @@ export function CenterPanel() {
   return (
     <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Tab bar */}
-      <div className="flex shrink-0 flex-col gap-3 border-b border-surface-200/80 bg-surface-50/70 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/70 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
-            Workspace content
-          </p>
-          {!compact && (
-            <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-              Move between briefing, drafting, and exhibit prep without losing context.
-            </p>
-          )}
-        </div>
+      <div className="flex shrink-0 items-center justify-end border-b border-surface-200/80 bg-surface-50/70 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/70 sm:px-4">
         <div
           className={cn(
             'flex items-center gap-1 rounded-2xl border border-surface-200/80 bg-white/85 p-1 shadow-sm dark:border-surface-700 dark:bg-surface-900/80',
@@ -401,28 +390,20 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
       {/* Header bar: note selector dropdown + actions */}
       <div className="shrink-0 border-b border-surface-200/80 bg-white/90 px-3 py-3 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90 sm:px-4">
         <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
-                <NotebookPen className="h-4.5 w-4.5 text-surface-500 dark:text-surface-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
-                  Drafting lane
-                </p>
-                <p className="mt-1 text-sm font-semibold text-surface-900 dark:text-surface-100">
-                  Documents and working theories
-                </p>
-                <div className="mt-2 flex flex-nowrap gap-2 overflow-hidden">
-                  <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
-                    {noteCount} {noteCount === 1 ? 'document' : 'documents'}
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <h2 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
+                Documents
+              </h2>
+              <div className="flex flex-nowrap gap-2 overflow-hidden">
+                <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                  {noteCount} {noteCount === 1 ? 'document' : 'documents'}
+                </span>
+                {activeNote && (
+                  <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-[10px] font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
+                    Edited {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
                   </span>
-                  {activeNote && (
-                    <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-[10px] font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
-                      Edited {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
             </div>
 

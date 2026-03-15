@@ -550,14 +550,14 @@ function OverviewMetricCard({
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <div className="flex flex-nowrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
         {icon}
-        <span className="truncate">{label}</span>
+        <span>{label}</span>
       </div>
-      <p className="mt-3 truncate font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
+      <p className="mt-3 font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {value}
       </p>
-      <p className="mt-2 truncate text-xs text-surface-500 dark:text-surface-400">
+      <p className="mt-2 text-xs text-surface-500 dark:text-surface-400">
         {detail}
       </p>
     </Component>
@@ -587,11 +587,11 @@ function AnchorCard({
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <div className="flex flex-nowrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
         <span className="shrink-0 text-primary-500 dark:text-primary-400">{icon}</span>
-        <span className="truncate">{eyebrow}</span>
+        <span>{eyebrow}</span>
       </div>
-      <p className="mt-3 truncate font-heading text-lg font-semibold tracking-tight text-surface-950 dark:text-surface-50">
+      <p className="mt-3 font-heading text-lg font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {title}
       </p>
       <p className="mt-2 line-clamp-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
@@ -686,7 +686,7 @@ function NextStepsCard({
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400" />
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-sm font-semibold text-surface-900 dark:text-surface-100">
+                <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
                   {action.title}
                 </h3>
                 <p className="mt-1 text-sm leading-6 text-surface-500 dark:text-surface-400">
@@ -913,11 +913,11 @@ function DetailCard({
 }) {
   return (
     <div className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
-      <div className="flex flex-nowrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
         <span className="shrink-0">{icon}</span>
-        <span className="truncate">{label}</span>
+        <span>{label}</span>
       </div>
-      <p className="mt-3 truncate text-sm font-medium text-surface-800 dark:text-surface-100">
+      <p className="mt-3 text-sm font-medium text-surface-800 dark:text-surface-100">
         {value}
       </p>
     </div>

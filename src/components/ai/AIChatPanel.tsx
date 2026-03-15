@@ -218,7 +218,7 @@ export function AIChatPanel() {
               <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
                 AI Legal Assistant
               </h3>
-              <p className={cn('mt-1.5 mb-6 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[12rem]' : 'max-w-xs')}>
+              <p className={cn('mt-1.5 mb-6 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
                 Ask questions about your documents, get case analysis, or
                 request help with legal research.
               </p>
@@ -340,7 +340,7 @@ export function AIChatPanel() {
         )}
 
         {/* Effort selector */}
-        <div className="mb-2">
+        <div className="mb-2 overflow-hidden">
           <EffortSelector value={effort} onChange={setEffort} variant={narrow ? 'compact' : 'full'} wrap={!narrow} />
         </div>
 
@@ -381,8 +381,8 @@ export function AIChatPanel() {
           </button>
         </div>
 
-        <div className={cn('mt-2 flex flex-wrap items-center gap-1 px-1', compact ? 'justify-end' : 'justify-between')}>
-          {!compact && (
+        <div className={cn('mt-2 flex items-center gap-1 px-1', compact ? 'justify-end' : 'justify-between')}>
+          {!compact && !narrow && (
             <span className="text-[10px] text-surface-400 dark:text-surface-500">
               <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
               <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>
@@ -390,7 +390,7 @@ export function AIChatPanel() {
             </span>
           )}
           <span className={cn(
-            'text-[10px]',
+            'text-[10px] whitespace-nowrap',
             input.length > 3600
               ? 'text-red-500 dark:text-red-400'
               : input.length > 3200

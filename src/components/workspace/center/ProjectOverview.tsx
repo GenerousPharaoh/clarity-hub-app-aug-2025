@@ -216,7 +216,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
             <div className="absolute right-0 top-0 h-36 w-36 rounded-full bg-white/80 blur-3xl dark:bg-primary-400/8" />
 
             <div className="relative min-w-0">
-              <div className="flex flex-wrap items-start gap-2">
+              <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
                 <OverviewBadge tone="neutral">{project.goal_type ?? 'Matter overview'}</OverviewBadge>
                 <OverviewBadge tone={stage.tone}>{stage.label}</OverviewBadge>
                 <OverviewBadge tone="neutral">{readinessPercent}% AI-ready</OverviewBadge>
@@ -550,9 +550,9 @@ function OverviewMetricCard({
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
+      <div className="flex flex-nowrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
         {icon}
-        <span>{label}</span>
+        <span className="truncate">{label}</span>
       </div>
       <p className="mt-3 truncate font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {value}
@@ -587,9 +587,9 @@ function AnchorCard({
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
-        <span className="text-primary-500 dark:text-primary-400">{icon}</span>
-        <span>{eyebrow}</span>
+      <div className="flex flex-nowrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
+        <span className="shrink-0 text-primary-500 dark:text-primary-400">{icon}</span>
+        <span className="truncate">{eyebrow}</span>
       </div>
       <p className="mt-3 truncate font-heading text-lg font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {title}
@@ -686,7 +686,7 @@ function NextStepsCard({
             <div className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary-500 dark:text-primary-400" />
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
+                <h3 className="truncate text-sm font-semibold text-surface-900 dark:text-surface-100">
                   {action.title}
                 </h3>
                 <p className="mt-1 text-sm leading-6 text-surface-500 dark:text-surface-400">
@@ -837,7 +837,7 @@ function RecentActivity({
             <span className="flex min-w-0 flex-1 items-start gap-3">
               <span className="mt-0.5 shrink-0">{item.icon}</span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
+                <span className="block truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
                   {item.kind}
                 </span>
                 <span className="mt-1 block truncate text-sm font-medium text-surface-800 dark:text-surface-100">
@@ -913,9 +913,9 @@ function DetailCard({
 }) {
   return (
     <div className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
-        {icon}
-        {label}
+      <div className="flex flex-nowrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
+        <span className="shrink-0">{icon}</span>
+        <span className="truncate">{label}</span>
       </div>
       <p className="mt-3 truncate text-sm font-medium text-surface-800 dark:text-surface-100">
         {value}
@@ -1030,7 +1030,7 @@ function QuickActions() {
         disabled={isDemoMode}
       >
         <Upload className="h-4 w-4" />
-        {isDemoMode ? 'Uploads require sign-in' : 'Upload files'}
+        <span className="hidden sm:inline">{isDemoMode ? 'Uploads require sign-in' : 'Upload files'}</span>
       </button>
 
       <div className="mt-4 rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 text-sm text-surface-500 dark:border-surface-800 dark:bg-surface-950/35 dark:text-surface-400">

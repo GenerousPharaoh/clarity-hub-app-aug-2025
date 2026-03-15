@@ -275,9 +275,9 @@ export function LeftPanel() {
         <div className="rounded-[26px] border border-translucent bg-white/90 p-3 shadow-sm dark:bg-surface-900/80">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-2 rounded-full border border-surface-200/80 bg-surface-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-500 dark:border-surface-700 dark:bg-surface-800/80 dark:text-surface-400">
-                <FolderOpen className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
-                Evidence lane
+              <div className="inline-flex min-w-0 max-w-full items-center gap-2 overflow-hidden rounded-full border border-surface-200/80 bg-surface-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-500 dark:border-surface-700 dark:bg-surface-800/80 dark:text-surface-400">
+                <FolderOpen className="h-3.5 w-3.5 shrink-0 text-primary-500 dark:text-primary-400" />
+                <span className="truncate">Evidence lane</span>
               </div>
               {!ultraCompact && (
                 <p className="mt-3 text-sm font-semibold text-surface-900 dark:text-surface-100">
@@ -308,7 +308,7 @@ export function LeftPanel() {
           </div>
 
           {!compact && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex min-w-0 flex-wrap gap-2 overflow-hidden">
               <RailChip label={`${files.length} ${files.length === 1 ? 'record' : 'records'}`} />
               <RailChip label={`${processedCount} AI-ready`} tone="primary" />
               {processingCount > 0 && <RailChip label={`${processingCount} indexing`} tone="accent" />}
@@ -387,7 +387,7 @@ export function LeftPanel() {
                         {selectedBatchFiles.length} selected
                       </p>
                       {!compact && (
-                        <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
+                        <p className="mt-1 max-w-full break-words text-[11px] leading-5 text-surface-500 dark:text-surface-400">
                           ~{batchEstimate.totalTokens.toLocaleString()} tokens across ~{batchEstimate.totalChunks} chunks ({formatFileSize(batchEstimate.totalBytes)}).
                         </p>
                       )}

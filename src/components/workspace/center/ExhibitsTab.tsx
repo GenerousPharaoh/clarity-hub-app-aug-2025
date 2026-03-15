@@ -137,7 +137,7 @@ export function ExhibitsTab() {
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between border-b border-surface-100 px-4 py-3 dark:border-surface-800">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+        <h2 className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
           Exhibit Markers ({exhibits?.length ?? 0})
         </h2>
         <button
@@ -358,7 +358,7 @@ function ExhibitCard({
               className="flex items-center gap-1.5 rounded-md bg-surface-50 px-2 py-1 text-xs text-primary-600 transition-colors hover:bg-primary-50 dark:bg-surface-700 dark:text-primary-400 dark:hover:bg-primary-900/20"
             >
               <FileText className="h-3 w-3" />
-              <span className="max-w-[180px] truncate">{linkedFile.name}</span>
+              <span className="max-w-[60%] truncate">{linkedFile.name}</span>
             </button>
             <button
               onClick={() => onUpdate({ fileId: null })}
@@ -417,7 +417,7 @@ function FilePicker({
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
       <div
-        className="absolute left-0 top-full z-50 mt-1 w-64 rounded-lg border border-surface-200 bg-white p-2 shadow-lg dark:border-surface-700 dark:bg-surface-800"
+        className="absolute left-0 top-full z-50 mt-1 w-full max-w-64 rounded-lg border border-surface-200 bg-white p-2 shadow-lg dark:border-surface-700 dark:bg-surface-800"
         role="listbox"
         aria-label="Select a file"
       >

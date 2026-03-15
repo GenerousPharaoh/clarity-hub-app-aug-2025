@@ -234,9 +234,9 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   if (isUser) {
     return (
       <div className="flex justify-end px-4 py-2">
-        <div className="flex max-w-[85%] items-end gap-2">
+        <div className="flex max-w-[88%] items-end gap-2">
           <div>
-            <div className="rounded-2xl rounded-br-md bg-primary-600 px-3.5 py-2.5 text-[13px] leading-relaxed text-white shadow-elevated break-words">
+            <div className="rounded-2xl rounded-br-md bg-primary-600 px-3 py-2 text-[13px] leading-relaxed text-white shadow-elevated break-words">
               {message.content}
             </div>
             <div className="mt-1 text-right text-[10px] text-surface-400">
@@ -274,7 +274,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
         <div className="min-w-0 flex-1">
           {/* Model + complexity + effort badges */}
           {(modelConfig || message.complexity || message.effortLevel) && !isError && (
-            <div className="mb-1.5 flex items-center gap-1.5">
+            <div className="mb-1.5 flex flex-nowrap items-center gap-1.5 overflow-hidden">
               {modelConfig && (
                 <span
                   className={cn(
@@ -316,7 +316,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           {/* Message content */}
           <div
             className={cn(
-              'group/msg relative rounded-2xl rounded-tl-md px-3.5 py-2.5 shadow-sm',
+              'group/msg relative rounded-2xl rounded-tl-md px-3 py-2 shadow-sm',
               isError
                 ? 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-900/20 dark:ring-red-800/50'
                 : 'bg-white border border-translucent border-l-2 border-l-accent-400/30 dark:bg-surface-800'
@@ -344,7 +344,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
             )}
             <div
               className={cn(
-                'prose-chat text-[13px] leading-relaxed break-words',
+                'prose-chat min-w-0 text-[13px] leading-relaxed break-words',
                 isError
                   ? 'text-red-700 dark:text-red-300'
                   : 'text-surface-700 dark:text-surface-200'

@@ -156,7 +156,7 @@ function TabButton({
       onClick={onClick}
       className={cn(
         'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all',
-        compact ? 'px-2' : 'px-3.5',
+        compact ? 'px-1.5' : 'px-3.5',
         active
           ? 'text-primary-700 dark:text-primary-300'
           : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200'
@@ -413,12 +413,12 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                 <p className="mt-1 text-sm font-semibold text-surface-900 dark:text-surface-100">
                   Documents and working theories
                 </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                <div className="mt-2 flex flex-nowrap gap-2 overflow-hidden">
+                  <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                     {noteCount} {noteCount === 1 ? 'document' : 'documents'}
                   </span>
                   {activeNote && (
-                    <span className="rounded-full border border-surface-200 bg-white px-3 py-1 text-[10px] font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
+                    <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-[10px] font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
                       Edited {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
                     </span>
                   )}
@@ -472,7 +472,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
           </div>
 
           {/* Note selector dropdown */}
-          <div className="relative min-w-0 max-w-[42rem] flex-1" ref={dropdownRef}>
+          <div className="relative min-w-0 max-w-full flex-1" ref={dropdownRef}>
             <div
               className={cn(
                 'flex h-11 w-full items-center rounded-2xl border',

@@ -36,7 +36,7 @@ export function RightPanel() {
     saveWorkspaceView({ projectId: selectedProjectId, rightTab: activeTab });
   }, [activeTab, selectedProjectId]);
 
-  const compact = panelWidth > 0 && panelWidth < 250;
+  const compact = panelWidth > 0 && panelWidth < 240;
   const ultraCompact = panelWidth > 0 && panelWidth < 210;
   const selectedFile = selectedFileId
     ? files.find((file) => file.id === selectedFileId) ?? null
@@ -53,11 +53,11 @@ export function RightPanel() {
       <div className="shrink-0 border-b border-surface-200/80 bg-surface-50/80 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/60">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
               {panelLabel}
             </p>
             {!ultraCompact && (
-              <p className="mt-1 text-[11px] leading-5 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400">
+              <p className="mt-1 break-words text-[11px] leading-5 text-surface-500 dark:text-surface-400">
                 {panelDescription}
               </p>
             )}

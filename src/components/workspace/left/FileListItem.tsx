@@ -260,7 +260,7 @@ export function FileListItem({
               >
                 {file.name}
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-1.5 overflow-hidden max-h-6">
+              <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5 overflow-hidden max-h-7">
                 {ext && (
                   <span
                     className={cn(
@@ -296,7 +296,7 @@ export function FileListItem({
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="flex min-w-0 shrink-0 items-center gap-1">
               {onProcess && canProcess && (
                 <button
                   type="button"
@@ -354,9 +354,9 @@ export function FileListItem({
             {summary}
           </p>
 
-          <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-surface-400 dark:text-surface-500">
-            <span>Open in viewer</span>
-            <ArrowUpRight className="h-3 w-3" />
+          <div className="mt-3 flex min-w-0 items-center gap-1.5 text-[11px] font-medium text-surface-400 dark:text-surface-500">
+            <span className="truncate">Open in viewer</span>
+            <ArrowUpRight className="h-3 w-3 shrink-0" />
           </div>
         </div>
       </div>

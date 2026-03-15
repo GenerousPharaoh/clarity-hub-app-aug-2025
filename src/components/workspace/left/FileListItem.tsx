@@ -251,7 +251,7 @@ export function FileListItem({
             <div className="min-w-0 flex-1">
               <p
                 className={cn(
-                  'text-sm font-semibold [overflow-wrap:anywhere]',
+                  'text-sm font-semibold truncate',
                   isSelected
                     ? 'text-primary-700 dark:text-primary-300'
                     : 'text-surface-800 dark:text-surface-100'
@@ -260,7 +260,7 @@ export function FileListItem({
               >
                 {file.name}
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 overflow-hidden max-h-6">
                 {ext && (
                   <span
                     className={cn(

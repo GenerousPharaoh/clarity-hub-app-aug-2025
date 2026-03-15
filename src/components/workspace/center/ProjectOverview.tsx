@@ -426,7 +426,7 @@ function EditableProjectHeader({
         </div>
       ) : (
         <div className="group flex min-w-0 items-start gap-2">
-          <h1 className="min-w-0 font-heading text-3xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50">
+          <h1 className="min-w-0 truncate font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
             {project.name}
           </h1>
           <button
@@ -486,7 +486,7 @@ function EditableProjectHeader({
           {project.description ? (
             <p
               onClick={() => setIsEditingDesc(true)}
-              className="cursor-pointer text-sm leading-7 text-surface-600 transition-colors [overflow-wrap:anywhere] hover:text-surface-800 dark:text-surface-300 dark:hover:text-surface-100"
+              className="cursor-pointer break-words text-sm leading-7 text-surface-600 transition-colors hover:text-surface-800 dark:text-surface-300 dark:hover:text-surface-100"
             >
               {project.description}
             </p>
@@ -521,7 +521,7 @@ function OverviewBadge({
           : 'border-surface-200 bg-white/80 text-surface-500 dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400';
 
   return (
-    <span className={cn('max-w-full rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] [overflow-wrap:anywhere]', toneClasses)}>
+    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]', toneClasses)}>
       {children}
     </span>
   );
@@ -554,10 +554,10 @@ function OverviewMetricCard({
         {icon}
         <span>{label}</span>
       </div>
-      <p className="mt-3 font-heading text-3xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50">
+      <p className="mt-3 truncate font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {value}
       </p>
-      <p className="mt-2 text-xs text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400">
+      <p className="mt-2 truncate text-xs text-surface-500 dark:text-surface-400">
         {detail}
       </p>
     </Component>
@@ -591,10 +591,10 @@ function AnchorCard({
         <span className="text-primary-500 dark:text-primary-400">{icon}</span>
         <span>{eyebrow}</span>
       </div>
-      <p className="mt-3 font-heading text-lg font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50">
+      <p className="mt-3 truncate font-heading text-lg font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {title}
       </p>
-      <p className="mt-2 text-sm leading-6 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400">
+      <p className="mt-2 line-clamp-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
         {detail}
       </p>
     </Component>
@@ -758,7 +758,7 @@ function FileTypeBreakdown({
           <div key={type} className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
             <div className="flex items-center gap-2">
               {iconMap[type] || iconMap.other}
-              <span className="min-w-0 flex-1 text-sm font-medium capitalize text-surface-700 [overflow-wrap:anywhere] dark:text-surface-200">
+              <span className="min-w-0 flex-1 truncate text-sm font-medium capitalize text-surface-700 dark:text-surface-200">
                 {type}
               </span>
               <span className="text-xs text-surface-400 dark:text-surface-500">
@@ -840,7 +840,7 @@ function RecentActivity({
                 <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
                   {item.kind}
                 </span>
-                <span className="mt-1 block text-sm font-medium text-surface-800 [overflow-wrap:anywhere] dark:text-surface-100">
+                <span className="mt-1 block truncate text-sm font-medium text-surface-800 dark:text-surface-100">
                   {item.label}
                 </span>
               </span>
@@ -917,7 +917,7 @@ function DetailCard({
         {icon}
         {label}
       </div>
-      <p className="mt-3 text-sm font-medium text-surface-800 [overflow-wrap:anywhere] dark:text-surface-100">
+      <p className="mt-3 truncate text-sm font-medium text-surface-800 dark:text-surface-100">
         {value}
       </p>
     </div>
@@ -958,7 +958,7 @@ function SignalEmptyState({
       <h3 className="mt-4 font-heading text-lg font-semibold text-surface-900 dark:text-surface-100">
         {title}
       </h3>
-      <p className="mt-2 text-sm leading-6 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400">
+      <p className="mt-2 break-words text-sm leading-6 text-surface-500 dark:text-surface-400">
         {description}
       </p>
     </div>

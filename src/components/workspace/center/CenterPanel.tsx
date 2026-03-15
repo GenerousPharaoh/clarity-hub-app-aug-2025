@@ -33,25 +33,44 @@ export function CenterPanel() {
   const setActiveTab = useAppStore((s) => s.setCenterTab);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [panelWidth, setPanelWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setPanelWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const compact = panelWidth > 0 && panelWidth < 400;
+  const ultraCompact = panelWidth > 0 && panelWidth < 300;
+
   useEffect(() => {
     if (!selectedProjectId) return;
     saveWorkspaceView({ projectId: selectedProjectId, centerTab: activeTab });
   }, [activeTab, selectedProjectId]);
 
   return (
-    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
+    <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Tab bar */}
       <div className="flex shrink-0 flex-col gap-3 border-b border-surface-200/80 bg-surface-50/70 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/70 sm:flex-row sm:items-center sm:justify-between sm:px-4">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
             Workspace content
           </p>
-          <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-            Move between briefing, drafting, and exhibit prep without losing context.
-          </p>
+          {!compact && (
+            <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+              Move between briefing, drafting, and exhibit prep without losing context.
+            </p>
+          )}
         </div>
         <div
-          className="flex items-center gap-1 rounded-2xl border border-surface-200/80 bg-white/85 p-1 shadow-sm dark:border-surface-700 dark:bg-surface-900/80"
+          className={cn(
+            'flex items-center gap-1 rounded-2xl border border-surface-200/80 bg-white/85 p-1 shadow-sm dark:border-surface-700 dark:bg-surface-900/80',
+            ultraCompact && 'px-0.5'
+          )}
           role="tablist"
           aria-label="Content tabs"
         >
@@ -61,6 +80,8 @@ export function CenterPanel() {
             icon={<LayoutList className="h-3.5 w-3.5" />}
             label="Overview"
             controls="panel-overview"
+            showLabel={!ultraCompact}
+            compact={ultraCompact}
           />
           <TabButton
             active={activeTab === 'editor'}
@@ -68,6 +89,8 @@ export function CenterPanel() {
             icon={<PenLine className="h-3.5 w-3.5" />}
             label="Documents"
             controls="panel-editor"
+            showLabel={!ultraCompact}
+            compact={ultraCompact}
           />
           <TabButton
             active={activeTab === 'exhibits'}
@@ -75,6 +98,8 @@ export function CenterPanel() {
             icon={<Tag className="h-3.5 w-3.5" />}
             label="Exhibits"
             controls="panel-exhibits"
+            showLabel={!ultraCompact}
+            compact={ultraCompact}
           />
         </div>
       </div>
@@ -93,7 +118,7 @@ export function CenterPanel() {
             {activeTab === 'overview' ? (
               <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as CenterTab)} />
             ) : activeTab === 'editor' ? (
-              <NotesTab />
+              <NotesTab compact={compact} />
             ) : (
               <ExhibitsTab />
             )}
@@ -112,12 +137,16 @@ function TabButton({
   icon,
   label,
   controls,
+  showLabel = true,
+  compact = false,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
   controls?: string;
+  showLabel?: boolean;
+  compact?: boolean;
 }) {
   return (
     <button
@@ -126,11 +155,13 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-9 items-center gap-1.5 rounded-xl px-3.5 text-xs font-medium transition-all',
+        'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all',
+        compact ? 'px-2' : 'px-3.5',
         active
           ? 'text-primary-700 dark:text-primary-300'
           : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200'
       )}
+      title={label}
     >
       {active && (
         <motion.span
@@ -139,14 +170,14 @@ function TabButton({
         />
       )}
       {icon}
-      {label}
+      {showLabel && <span className="truncate">{label}</span>}
     </button>
   );
 }
 
 /* ── Notes Tab — editor-first with note dropdown ───────── */
 
-function NotesTab() {
+function NotesTab({ compact = false }: { compact?: boolean }) {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const newNoteRequestNonce = useAppStore((s) => s.newNoteRequestNonce);
   const { user } = useAuth();
@@ -412,7 +443,7 @@ function NotesTab() {
                 ) : (
                   <Plus className="h-3.5 w-3.5" />
                 )}
-                New document
+                {!compact && 'New document'}
               </button>
 
               {activeNote && (

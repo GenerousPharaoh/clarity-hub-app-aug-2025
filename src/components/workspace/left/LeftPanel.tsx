@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { ChevronLeft, FolderOpen, Search, X, FileText, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
+import { ChevronLeft, FolderOpen, Search, X, FileText, AlertCircle, RefreshCw, Loader2, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn, formatFileSize } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -40,6 +40,21 @@ export function LeftPanel() {
   const isMobile = useIsMobile();
   const searchQuery = useAppStore((s) => s.searchQuery);
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
+
+  // Track panel width for responsive layout
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [panelWidth, setPanelWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setPanelWidth(entry.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const compact = panelWidth > 0 && panelWidth < 280;
+  const ultraCompact = panelWidth > 0 && panelWidth < 220;
 
   const { data: files = [], isLoading, isError, refetch } = useFiles(selectedProjectId);
   const { processFile, getState: getProcessState } = useProcessFile();
@@ -255,7 +270,7 @@ export function LeftPanel() {
   }, [setSearchQuery]);
 
   return (
-    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900">
+    <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900">
       <div className="shrink-0 border-b border-surface-200/80 px-3 py-3 dark:border-surface-800">
         <div className="rounded-[26px] border border-surface-200/80 bg-white/90 p-3 shadow-sm dark:border-surface-800 dark:bg-surface-900/80">
           <div className="flex items-start justify-between gap-3">
@@ -264,12 +279,16 @@ export function LeftPanel() {
                 <FolderOpen className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
                 Evidence lane
               </div>
-              <p className="mt-3 text-sm font-semibold text-surface-900 dark:text-surface-100">
-                Source records and AI indexing
-              </p>
-              <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
-                Review the incoming record, queue files for search, and keep the evidence set tight.
-              </p>
+              {!ultraCompact && (
+                <p className="mt-3 text-sm font-semibold text-surface-900 dark:text-surface-100">
+                  Source records and AI indexing
+                </p>
+              )}
+              {!compact && (
+                <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
+                  Review the incoming record, queue files for search, and keep the evidence set tight.
+                </p>
+              )}
             </div>
             {!isMobile && (
               <button
@@ -288,11 +307,13 @@ export function LeftPanel() {
             )}
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <RailChip label={`${files.length} ${files.length === 1 ? 'record' : 'records'}`} />
-            <RailChip label={`${processedCount} AI-ready`} tone="primary" />
-            {processingCount > 0 && <RailChip label={`${processingCount} indexing`} tone="accent" />}
-          </div>
+          {!compact && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <RailChip label={`${files.length} ${files.length === 1 ? 'record' : 'records'}`} />
+              <RailChip label={`${processedCount} AI-ready`} tone="primary" />
+              {processingCount > 0 && <RailChip label={`${processingCount} indexing`} tone="accent" />}
+            </div>
+          )}
 
           <div className="mt-4">
             <div
@@ -346,11 +367,13 @@ export function LeftPanel() {
                 >
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-surface-700 dark:text-surface-200">
-                      Batch index records
+                      {compact ? 'Batch index' : 'Batch index records'}
                     </p>
-                    <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
-                      Queue multiple files for AI search in one pass.
-                    </p>
+                    {!compact && (
+                      <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
+                        Queue multiple files for AI search in one pass.
+                      </p>
+                    )}
                   </div>
                   <span className="shrink-0 rounded-full bg-white px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 shadow-sm dark:bg-surface-900 dark:text-surface-400">
                     {processableFiles.length} ready
@@ -363,9 +386,11 @@ export function LeftPanel() {
                       <p className="text-xs font-semibold text-surface-700 dark:text-surface-200">
                         {selectedBatchFiles.length} selected
                       </p>
-                      <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
-                        ~{batchEstimate.totalTokens.toLocaleString()} tokens across ~{batchEstimate.totalChunks} chunks ({formatFileSize(batchEstimate.totalBytes)}).
-                      </p>
+                      {!compact && (
+                        <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
+                          ~{batchEstimate.totalTokens.toLocaleString()} tokens across ~{batchEstimate.totalChunks} chunks ({formatFileSize(batchEstimate.totalBytes)}).
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -389,8 +414,9 @@ export function LeftPanel() {
                         setSelectedBatchIds([]);
                       }}
                       className="rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-surface-500 transition-colors hover:bg-white dark:text-surface-400 dark:hover:bg-surface-900"
+                      title="Cancel selection"
                     >
-                      Cancel
+                      {compact ? <X className="h-3.5 w-3.5" /> : 'Cancel'}
                     </button>
                     <button
                       onClick={handleOpenBatchConfirm}
@@ -401,9 +427,17 @@ export function LeftPanel() {
                           ? 'cursor-not-allowed bg-surface-200 text-surface-400 dark:bg-surface-800 dark:text-surface-500'
                           : 'bg-surface-950 text-white hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100'
                       )}
+                      title="Process selected files"
                     >
                       {processingCount > 0 && <Loader2 className="h-3 w-3 animate-spin" />}
-                      Process selected
+                      {compact ? (
+                        <>
+                          <Zap className="h-3 w-3" />
+                          {selectedBatchFiles.length}
+                        </>
+                      ) : (
+                        'Process selected'
+                      )}
                     </button>
                   </div>
                 </div>

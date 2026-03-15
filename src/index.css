@@ -82,6 +82,25 @@
   border-color: var(--color-surface-200);
 }
 
+button,
+[role="button"],
+a,
+summary,
+select,
+label[for],
+input[type="checkbox"],
+input[type="radio"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 html {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;

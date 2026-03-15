@@ -48,7 +48,7 @@ export function RightPanel() {
       : 'Ask grounded questions, test theories, and draft against the matter record.';
 
   return (
-    <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900">
+    <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900 surface-grain">
       {/* Header with tabs and collapse */}
       <div className="shrink-0 border-b border-surface-200/80 bg-surface-50/80 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/60">
         <div className="flex items-start justify-between gap-3">
@@ -169,7 +169,7 @@ function TabButton({
       {active && (
         <motion.div
           layoutId="right-tab-indicator"
-          className="absolute inset-0 -z-10 rounded-xl bg-white/92 shadow-sm ring-1 ring-surface-200/70 dark:bg-surface-800 dark:ring-surface-700/60"
+          className="absolute inset-0 -z-10 rounded-xl bg-white/92 shadow-elevated ring-1 ring-surface-200/70 dark:bg-surface-800 dark:ring-surface-700/60"
           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}

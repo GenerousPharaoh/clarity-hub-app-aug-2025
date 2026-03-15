@@ -156,10 +156,10 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
         }}
         className={cn(
           'group relative min-w-0 overflow-hidden rounded-[26px] border p-5',
-          'border-surface-200/80 bg-white/88 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.42)]',
-          'transition-all duration-200 hover:-translate-y-1 hover:border-surface-300 hover:shadow-[0_28px_80px_-42px_rgba(15,23,42,0.45)]',
+          'border-translucent bg-white/88 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.42)]',
+          'interactive-lift surface-grain',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-950',
-          'dark:border-surface-800 dark:bg-surface-900/78 dark:hover:border-surface-700'
+          'dark:bg-surface-900/78'
         )}
       >
         <div className={cn('absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r', accent)} />
@@ -300,7 +300,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
             <p className="text-xs text-surface-400 [overflow-wrap:anywhere] dark:text-surface-500">
               Open the matter to review source files, drafting notes, and exhibits.
             </p>
-            <span className="inline-flex items-center gap-1 self-start text-sm font-medium text-surface-700 transition-colors group-hover:text-primary-700 dark:text-surface-200 dark:group-hover:text-primary-300">
+            <span className="inline-flex items-center gap-1 self-start text-sm font-medium text-surface-700 opacity-0 transition-all group-hover:opacity-100 group-hover:text-primary-700 dark:text-surface-200 dark:group-hover:text-primary-300">
               Open matter
               <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </span>

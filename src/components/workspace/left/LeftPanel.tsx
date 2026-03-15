@@ -270,9 +270,9 @@ export function LeftPanel() {
   }, [setSearchQuery]);
 
   return (
-    <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900">
+    <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900 surface-grain">
       <div className="shrink-0 border-b border-surface-200/80 px-3 py-3 dark:border-surface-800">
-        <div className="rounded-[26px] border border-surface-200/80 bg-white/90 p-3 shadow-sm dark:border-surface-800 dark:bg-surface-900/80">
+        <div className="rounded-[26px] border border-translucent bg-white/90 p-3 shadow-sm dark:bg-surface-900/80">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="inline-flex items-center gap-2 rounded-full border border-surface-200/80 bg-surface-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-500 dark:border-surface-700 dark:bg-surface-800/80 dark:text-surface-400">

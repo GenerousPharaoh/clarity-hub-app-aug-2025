@@ -143,7 +143,7 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="relative min-h-full overflow-hidden bg-surface-50 dark:bg-surface-950">
+    <div className="surface-grain relative min-h-full overflow-hidden bg-surface-50 dark:bg-surface-950">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 left-1/2 h-[28rem] w-[28rem] -translate-x-[58%] rounded-full bg-primary-400/14 blur-[120px] dark:bg-primary-500/12" />
         <div className="absolute right-0 top-40 h-[22rem] w-[22rem] rounded-full bg-accent-300/12 blur-[120px] dark:bg-accent-500/10" />
@@ -155,7 +155,7 @@ export function DashboardPage() {
           <section
             className={cn(
               'relative overflow-hidden rounded-2xl border p-5 shadow-[0_28px_80px_-48px_rgba(15,23,42,0.45)] sm:p-6',
-              'border-surface-200/80 bg-white/88 dark:border-surface-800/80 dark:bg-surface-900/80'
+              'border-translucent bg-white/88 dark:bg-surface-900/80'
             )}
           >
             <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(77,99,121,0.12),rgba(255,255,255,0)_44%,rgba(135,95,51,0.08))] dark:bg-[linear-gradient(135deg,rgba(77,99,121,0.22),rgba(9,9,11,0)_44%,rgba(165,116,63,0.08))]" />
@@ -180,7 +180,7 @@ export function DashboardPage() {
                   {resumeProject && (
                     <button
                       onClick={() => navigate(`/project/${resumeProject.id}`)}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
+                      className="focus-accent inline-flex items-center justify-center gap-2 rounded-xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
                     >
                       Continue workspace
                       <ArrowRight className="h-4 w-4" />
@@ -432,7 +432,7 @@ function MetricCard({
         : 'border-surface-200/80 bg-white/85 text-surface-700 dark:border-surface-800 dark:bg-surface-900/70 dark:text-surface-200';
 
   return (
-    <div className={cn('min-w-0 rounded-2xl border p-4 shadow-sm backdrop-blur-sm', toneClasses)}>
+    <div className={cn('interactive-lift min-w-0 rounded-2xl border p-4 shadow-sm backdrop-blur-sm', toneClasses)}>
       <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
         {icon}
         <span>{label}</span>

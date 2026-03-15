@@ -30,7 +30,7 @@ export function FollowUpSuggestions({
           <button
             key={i}
             onClick={() => onSelect(text)}
-            className="flex items-center gap-1 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs text-surface-600 transition-colors hover:border-primary-300 hover:bg-primary-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400 dark:hover:border-primary-600 dark:hover:bg-primary-900/20"
+            className="interactive-lift flex items-center gap-1 rounded-full border border-translucent bg-white px-3 py-1.5 text-xs text-surface-600 hover:border-primary-300 hover:bg-primary-50 dark:bg-surface-800 dark:text-surface-400 dark:hover:border-primary-600 dark:hover:bg-primary-900/20"
           >
             <ArrowRight className="h-3 w-3 shrink-0" />
             <span className="truncate">{truncated}</span>

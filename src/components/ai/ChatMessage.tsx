@@ -21,12 +21,12 @@ const MODEL_CONFIG = {
   gemini: {
     label: 'Gemini',
     className:
-      'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+      'bg-primary-100 text-primary-700 ring-1 ring-primary-200/60 dark:bg-primary-900/40 dark:text-primary-300 dark:ring-primary-700/40',
   },
   gpt: {
     label: 'GPT-5.2',
     className:
-      'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+      'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200/60 dark:bg-emerald-900/40 dark:text-emerald-300 dark:ring-emerald-700/40',
   },
 } as const;
 
@@ -236,7 +236,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
       <div className="flex justify-end px-4 py-2">
         <div className="flex max-w-[85%] items-end gap-2">
           <div>
-            <div className="rounded-2xl rounded-br-md bg-primary-600 px-3.5 py-2.5 text-[13px] leading-relaxed text-white break-words">
+            <div className="rounded-2xl rounded-br-md bg-primary-600 px-3.5 py-2.5 text-[13px] leading-relaxed text-white shadow-elevated break-words">
               {message.content}
             </div>
             <div className="mt-1 text-right text-[10px] text-surface-400">
@@ -256,7 +256,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
 
   return (
     <div className="flex justify-start px-4 py-2">
-      <div className="flex max-w-[90%] items-start gap-2">
+      <div className="group flex max-w-[90%] items-start gap-2">
         <div
           className={cn(
             'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
@@ -319,7 +319,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               'group/msg relative rounded-2xl rounded-tl-md px-3.5 py-2.5 shadow-sm',
               isError
                 ? 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-900/20 dark:ring-red-800/50'
-                : 'bg-white ring-1 ring-surface-200/80 dark:bg-surface-800 dark:ring-surface-700/50'
+                : 'bg-white border border-translucent border-l-2 border-l-accent-400/30 dark:bg-surface-800'
             )}
           >
             {/* Copy button — visible on hover */}

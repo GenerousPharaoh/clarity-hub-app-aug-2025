@@ -195,7 +195,7 @@ export function AIChatPanel() {
   }
 
   return (
-    <div ref={panelRef} className="flex h-full min-w-0 flex-col">
+    <div ref={panelRef} className="flex h-full min-w-0 flex-col surface-grain">
       {/* Messages area */}
       <div
         ref={messagesContainerRef}
@@ -347,7 +347,7 @@ export function AIChatPanel() {
         <div
           className={cn(
             'flex items-end gap-2 rounded-xl border p-2 transition-all',
-            'border-surface-200 bg-white shadow-sm dark:border-surface-700 dark:bg-surface-800',
+            'border border-translucent bg-white shadow-sm dark:bg-surface-800',
             'focus-within:border-accent-300 focus-within:ring-2 focus-within:ring-accent-100 focus-within:shadow-md dark:focus-within:border-accent-600 dark:focus-within:ring-accent-900/30'
           )}
         >
@@ -368,7 +368,7 @@ export function AIChatPanel() {
             className={cn(
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
               input.trim() && !isLoading
-                ? 'bg-accent-600 text-white shadow-sm shadow-accent-500/25 hover:bg-accent-700 hover:shadow-md hover:shadow-accent-500/30 active:scale-95'
+                ? 'bg-accent-600 text-white shadow-sm shadow-accent-500/25 hover:bg-accent-700 hover:shadow-md hover:shadow-accent-500/40 hover:shadow-[0_0_12px_rgba(165,116,63,0.3)] active:scale-95'
                 : 'bg-surface-200 text-surface-400 dark:bg-surface-700 dark:text-surface-500'
             )}
             title="Send message"

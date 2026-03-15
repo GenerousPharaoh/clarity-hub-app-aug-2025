@@ -208,7 +208,7 @@ export function FileListItem({
           'group flex w-full items-start gap-3 rounded-[22px] border px-3 py-3 text-left shadow-sm transition-all duration-150',
           isSelected
             ? 'border-primary-400 bg-white/94 shadow-[0_18px_38px_-26px_rgba(30,43,57,0.34)] ring-1 ring-primary-500/10 dark:border-primary-700 dark:bg-surface-900/88 dark:ring-primary-400/15'
-            : 'border-surface-200/80 bg-white/80 hover:-translate-y-0.5 hover:border-surface-300 hover:bg-white dark:border-surface-800 dark:bg-surface-900/70 dark:hover:border-surface-700 dark:hover:bg-surface-900',
+            : 'border-translucent bg-white/80 interactive-lift hover:bg-white dark:bg-surface-900/70 dark:hover:bg-surface-900',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900'
         )}
       >
@@ -306,10 +306,11 @@ export function FileListItem({
                   }}
                   disabled={processingState?.isProcessing}
                   className={cn(
-                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-medium transition-colors',
+                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-medium transition-all',
                     processingState?.isProcessing
                       ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
-                      : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300'
+                      : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',
+                    !processingState?.isProcessing && 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
                   )}
                   title={file.processing_status === 'failed' ? 'Retry processing' : 'Process file for AI search'}
                   aria-label={`Process ${file.name}`}

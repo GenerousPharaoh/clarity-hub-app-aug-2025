@@ -28,7 +28,7 @@ export function AppShell() {
   return (
     <div className="flex h-screen flex-col bg-surface-50 dark:bg-surface-950">
       <Header />
-      <main id="main-content" className="flex-1 overflow-hidden">
+      <main id="main-content" className="flex-1 overflow-auto">
         <Outlet />
       </main>
       <CommandPalette

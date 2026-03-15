@@ -42,7 +42,7 @@ function getFirstName(user: { user_metadata?: Record<string, unknown>; email?: s
 
 function SkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-[24px] border border-surface-200/80 bg-white/85 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/70">
+    <div className="overflow-hidden rounded-2xl border border-surface-200/80 bg-white/85 p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900/70">
       <div className="h-1.5 w-24 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
       <div className="mt-5 flex items-start gap-3">
         <div className="h-11 w-11 animate-pulse rounded-2xl bg-surface-100 dark:bg-surface-800" />
@@ -158,12 +158,12 @@ export function DashboardPage() {
         <div className="absolute bottom-0 left-0 h-[18rem] w-[18rem] rounded-full bg-surface-300/25 blur-[100px] dark:bg-surface-700/14" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
         <FadeIn>
           <div className="grid gap-5 xl:grid-cols-[1.7fr_1fr]">
             <section
               className={cn(
-                'relative overflow-hidden rounded-[28px] border p-6 shadow-[0_28px_80px_-48px_rgba(15,23,42,0.45)] sm:p-8',
+                'relative overflow-hidden rounded-2xl border p-5 shadow-[0_28px_80px_-48px_rgba(15,23,42,0.45)] sm:p-6',
                 'border-surface-200/80 bg-white/88 dark:border-surface-800/80 dark:bg-surface-900/80'
               )}
             >
@@ -176,19 +176,19 @@ export function DashboardPage() {
                   Matter Desk
                 </div>
 
-                <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                   <div className="min-w-0 max-w-2xl">
-                    <h1 className="font-heading text-3xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-[2.6rem]">
+                    <h1 className="font-heading text-2xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-3xl">
                       {firstName ? `${firstName}, your matters are under control.` : 'Your matters are under control.'}
                     </h1>
-                    <p className="mt-3 max-w-xl text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-300">
-                      A more composed starting point for reviewing evidence, resuming active strategy work, and moving from intake to draft without hunting through the interface.
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-300">
+                      Review evidence, resume strategy work, and move from intake to draft.
                     </p>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <HeroPill label={`${projects?.length ?? 0} active matters`} />
                       <HeroPill label={`${totalFiles} source files`} />
-                      <HeroPill label={`${mattersWithEvidence} matters with evidence`} />
+                      <HeroPill label={`${mattersWithEvidence} with evidence`} />
                     </div>
                   </div>
 
@@ -212,47 +212,42 @@ export function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-3 lg:grid-cols-[1.25fr_0.75fr]">
-                  <div className="rounded-[24px] border border-surface-200/80 bg-white/80 p-4 shadow-sm dark:border-surface-800 dark:bg-surface-950/50">
-                    <div className="flex items-start justify-between gap-4">
+                <div className="mt-4 grid gap-3 lg:grid-cols-[1.25fr_0.75fr]">
+                  <div className="rounded-2xl border border-surface-200/80 bg-white/80 p-3.5 shadow-sm dark:border-surface-800 dark:bg-surface-950/50">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
                           Last working session
                         </p>
-                        <h2 className="mt-2 font-heading text-xl font-semibold text-surface-900 [overflow-wrap:anywhere] dark:text-surface-100">
+                        <h2 className="mt-1.5 font-heading text-lg font-semibold text-surface-900 [overflow-wrap:anywhere] dark:text-surface-100">
                           {resumeProject?.name ?? 'No matter selected yet'}
                         </h2>
-                        <p className="mt-2 text-sm leading-6 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400">
+                        <p className="mt-1 text-sm leading-5 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400">
                           {resumeProject
                             ? workspaceSession?.noteTitle
-                              ? `Resume the draft "${workspaceSession.noteTitle}" and keep your reasoning context intact.`
+                              ? `Resume "${workspaceSession.noteTitle}"`
                               : workspaceSession?.fileName
-                                ? `Pick back up from "${workspaceSession.fileName}" and continue reviewing source evidence.`
+                                ? `Continue reviewing "${workspaceSession.fileName}"`
                                 : 'Jump back into your last active workspace.'
-                            : 'Create or open a matter to start assembling evidence, strategy, and exhibits in one place.'}
+                            : 'Open a matter to start assembling evidence and strategy.'}
                         </p>
                       </div>
-                      <Clock3 className="mt-1 h-5 w-5 shrink-0 text-surface-300 dark:text-surface-600" />
+                      <Clock3 className="mt-1 h-4 w-4 shrink-0 text-surface-300 dark:text-surface-600" />
                     </div>
-                    <div className="mt-4 flex flex-wrap gap-3 text-xs text-surface-500 dark:text-surface-400">
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-surface-500 dark:text-surface-400">
                       {workspaceSession?.visitedAt && (
-                        <span className="rounded-full bg-surface-100 px-3 py-1 dark:bg-surface-800">
+                        <span className="rounded-full bg-surface-100 px-2.5 py-0.5 dark:bg-surface-800">
                           Updated {formatRelativeDate(workspaceSession.visitedAt)}
-                        </span>
-                      )}
-                      {!resumeProject && (
-                        <span className="rounded-full bg-surface-100 px-3 py-1 dark:bg-surface-800">
-                          Start with a matter name, short summary, and evidence drop
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="rounded-[24px] border border-surface-200/80 bg-surface-950 p-4 text-white shadow-sm dark:border-surface-800 dark:bg-surface-900">
+                  <div className="rounded-2xl border border-surface-200/80 bg-surface-950 p-3.5 text-white shadow-sm dark:border-surface-800 dark:bg-surface-900">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400">
-                      Premium flow
+                      Overview
                     </p>
-                    <div className="mt-4 space-y-3">
+                    <div className="mt-2.5 space-y-2">
                       <SignalRow
                         icon={<Workflow className="h-4 w-4" />}
                         label="Structured review"
@@ -274,7 +269,7 @@ export function DashboardPage() {
               </div>
             </section>
 
-            <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
+            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
               <MetricCard
                 icon={<Briefcase className="h-4 w-4" />}
                 label="Active matters"
@@ -308,8 +303,8 @@ export function DashboardPage() {
         </FadeIn>
 
         <FadeIn delay={0.06}>
-            <div className="mt-8 rounded-[26px] border border-surface-200/80 bg-white/82 p-4 shadow-sm backdrop-blur-sm dark:border-surface-800 dark:bg-surface-900/65">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="mt-5 rounded-2xl border border-surface-200/80 bg-white/82 p-4 shadow-sm backdrop-blur-sm dark:border-surface-800 dark:bg-surface-900/65">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
                   Active matters
@@ -379,7 +374,7 @@ export function DashboardPage() {
         )}
 
         {isLoading && (
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
@@ -388,7 +383,7 @@ export function DashboardPage() {
 
         {!isLoading && !error && !hasProjects && (
           <FadeIn delay={0.1}>
-            <div className="mt-5 rounded-[28px] border border-dashed border-surface-300 bg-white/85 py-8 shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
+            <div className="mt-4 rounded-2xl border border-dashed border-surface-300 bg-white/85 py-6 shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
               <EmptyState
                 icon={<Scale className="h-6 w-6" />}
                 title="No matters yet"
@@ -408,10 +403,10 @@ export function DashboardPage() {
         )}
 
         {!isLoading && !error && hasProjects && (
-          <div className="mt-5">
+          <div className="mt-4">
             {visibleProjects.length === 0 ? (
               <FadeIn delay={0.1}>
-                <div className="rounded-[28px] border border-dashed border-surface-300 bg-white/80 px-6 py-12 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
+                <div className="rounded-2xl border border-dashed border-surface-300 bg-white/80 px-6 py-10 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
                   <Search className="mx-auto h-5 w-5 text-surface-400 dark:text-surface-500" />
                   <h3 className="mt-3 text-sm font-semibold text-surface-700 dark:text-surface-200">
                     No matters match that search
@@ -428,7 +423,7 @@ export function DashboardPage() {
                 </div>
               </FadeIn>
             ) : (
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleProjects.map((project, index) => (
                   <ProjectCard
                     key={project.id}
@@ -445,7 +440,7 @@ export function DashboardPage() {
 
         {!isLoading && hasProjects && (
           <FadeIn delay={0.14}>
-            <div className="mt-8 flex items-center gap-2 text-xs text-surface-400 dark:text-surface-500">
+            <div className="mt-4 flex items-center gap-2 text-xs text-surface-400 dark:text-surface-500">
               <Briefcase className="h-3.5 w-3.5" />
               <span>
                 {projects?.length ?? 0} {projects?.length === 1 ? 'matter' : 'matters'} in the current portfolio
@@ -494,15 +489,15 @@ function MetricCard({
         : 'border-surface-200/80 bg-white/85 text-surface-700 dark:border-surface-800 dark:bg-surface-900/70 dark:text-surface-200';
 
   return (
-    <div className={cn('min-w-0 rounded-[24px] border p-5 shadow-sm backdrop-blur-sm', toneClasses)}>
+    <div className={cn('min-w-0 rounded-2xl border p-4 shadow-sm backdrop-blur-sm', toneClasses)}>
       <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
         {icon}
         <span>{label}</span>
       </div>
-      <p className="mt-4 font-heading text-3xl font-semibold tracking-tight [overflow-wrap:anywhere]">
+      <p className="mt-2 font-heading text-2xl font-semibold tracking-tight [overflow-wrap:anywhere]">
         {value}
       </p>
-      <p className="mt-2 text-xs leading-5 text-current/70 [overflow-wrap:anywhere]">
+      <p className="mt-1 text-xs leading-5 text-current/70 [overflow-wrap:anywhere]">
         {detail}
       </p>
     </div>
@@ -519,7 +514,7 @@ function SignalRow({
   value: string;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-white/8 bg-white/5 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-1.5 rounded-xl border border-white/8 bg-white/5 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-center gap-2 text-sm text-surface-200">
         <span className="text-primary-300">{icon}</span>
         <span className="[overflow-wrap:anywhere]">{label}</span>

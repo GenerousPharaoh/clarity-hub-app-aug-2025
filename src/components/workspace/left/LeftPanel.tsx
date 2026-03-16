@@ -41,6 +41,7 @@ export function LeftPanel() {
   const [batchSelectionMode, setBatchSelectionMode] = useState(false);
   const [selectedBatchIds, setSelectedBatchIds] = useState<string[]>([]);
   const [batchConfirmOpen, setBatchConfirmOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
   const processableFiles = useMemo(() => files.filter(isProcessable), [files]);
   const processedCount = useMemo(
@@ -232,16 +233,33 @@ export function LeftPanel() {
     };
   }, [searchQuery]);
 
-  // Client-side filtering uses debounced query
+  // Client-side filtering uses debounced query + document type filter
   const filteredFiles = useMemo(() => {
-    if (!debouncedQuery.trim()) return files;
-    const q = debouncedQuery.toLowerCase();
-    return files.filter(
-      (f) =>
-        f.name.toLowerCase().includes(q) ||
-        (f.file_type && f.file_type.toLowerCase().includes(q))
-    );
-  }, [files, debouncedQuery]);
+    let result = files;
+
+    // Apply document type filter
+    if (typeFilter) {
+      result = result.filter((f) => {
+        const docType = (f as any).document_type as string | undefined;
+        if (typeFilter === 'other') {
+          return !docType || docType === 'other';
+        }
+        return docType === typeFilter;
+      });
+    }
+
+    // Apply search query filter
+    if (debouncedQuery.trim()) {
+      const q = debouncedQuery.toLowerCase();
+      result = result.filter(
+        (f) =>
+          f.name.toLowerCase().includes(q) ||
+          (f.file_type && f.file_type.toLowerCase().includes(q))
+      );
+    }
+
+    return result;
+  }, [files, debouncedQuery, typeFilter]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
@@ -311,6 +329,33 @@ export function LeftPanel() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Document type filter chips */}
+        {files.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1">
+            {([
+              { key: null, label: 'All' },
+              { key: 'court', label: 'Court' },
+              { key: 'employment', label: 'Employment' },
+              { key: 'financial', label: 'Financial' },
+              { key: 'correspondence', label: 'Correspondence' },
+              { key: 'other', label: 'Other' },
+            ] as const).map(({ key, label }) => (
+              <button
+                key={label}
+                onClick={() => setTypeFilter(key)}
+                className={cn(
+                  'rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors',
+                  typeFilter === key
+                    ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-700'
+                    : 'bg-surface-100 text-surface-500 hover:bg-surface-200 hover:text-surface-700 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300'
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {selectedProjectId && (
           <div className="mt-3">

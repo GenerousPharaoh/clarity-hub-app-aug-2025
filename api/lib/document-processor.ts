@@ -8,6 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { chunkText } from './chunker.js';
 import { embedBatch } from './embeddings.js';
+import { extractTimelineEvents } from './timeline-extractor.js';
 
 // Initialize clients
 function getSupabase() {
@@ -28,6 +29,75 @@ export interface ProcessingResult {
   chunksCreated: number;
   summary: string | null;
   error?: string;
+}
+
+export interface ClassificationResult {
+  documentType: string;
+  confidence: number;
+  metadata: Record<string, unknown>;
+}
+
+/**
+ * Classify a legal document using GPT-4.1-mini.
+ * Identifies document type, extracts key metadata (dates, parties, amounts),
+ * and assigns a confidence score.
+ */
+export async function classifyDocument(
+  extractedText: string,
+  fileName: string
+): Promise<ClassificationResult> {
+  const openai = getOpenAI();
+
+  // Filename hints for common patterns
+  const lower = fileName.toLowerCase();
+  let hint = '';
+  if (lower.includes('statement of claim')) hint = 'This filename suggests a Statement of Claim.';
+  else if (lower.includes('statement of defence')) hint = 'This filename suggests a Statement of Defence.';
+  else if (lower.includes('affidavit')) hint = 'This filename suggests an Affidavit.';
+  else if (lower.includes('termination')) hint = 'This filename suggests a Termination Letter.';
+  else if (lower.includes('offer to settle')) hint = 'This filename suggests an Offer to Settle.';
+  else if (lower.includes('demand letter')) hint = 'This filename suggests a Demand Letter.';
+  else if (lower.includes('employment contract') || lower.includes('employment agreement')) hint = 'This filename suggests an Employment Contract.';
+  else if (lower.includes('notice of motion')) hint = 'This filename suggests a Notice of Motion.';
+  else if (lower.includes('factum')) hint = 'This filename suggests a Factum.';
+  else if (lower.includes('endorsement')) hint = 'This filename suggests a Court Endorsement.';
+  else if (lower.includes('hrto') || lower.includes('human rights')) hint = 'This filename suggests an HRTO application or response.';
+  else if (lower.includes('medical') || lower.includes('clinical')) hint = 'This filename suggests a Medical Record or Report.';
+  else if (lower.includes('pay stub') || lower.includes('paystub')) hint = 'This filename suggests a Pay Stub.';
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4.1-mini',
+    messages: [
+      {
+        role: 'user',
+        content: `You are a legal document classifier for Ontario litigation. ${hint}
+
+Classify this document and extract metadata. Return JSON only.
+
+FILENAME: "${fileName}"
+TEXT (first 6000 chars):
+${extractedText.slice(0, 6000)}
+
+Return: { "document_type": "<type_key>", "confidence": <0-1>, "document_date": "<YYYY-MM-DD or null>", "parties_mentioned": ["..."], "key_dates": [{"date":"...","description":"..."}], "monetary_amounts": [{"amount":<n>,"currency":"CAD","description":"..."}], "court_file_number": "<or null>", "summary_tags": ["..."] }
+
+document_type must be one of: statement_of_claim, statement_of_defence, reply, counterclaim, notice_of_motion, factum, book_of_authorities, court_order, endorsement, reasons_for_decision, judgment, affidavit, statutory_declaration, examination_transcript, expert_report, witness_statement, offer_to_settle, demand_letter, settlement_agreement, mediation_brief, employment_contract, termination_letter, resignation_letter, performance_review, offer_letter, severance_package, financial_statement, tax_return, pay_stub, t4_slip, roe, bank_statement, hrto_application, hrto_response, professional_complaint, investigation_report, legal_correspondence, email, text_message, internal_memo, medical_record, medical_report, disability_claim, ime_report, legislation, case_law, photograph, other`,
+      },
+    ],
+    max_tokens: 800,
+    temperature: 0.1,
+    response_format: { type: 'json_object' },
+  });
+
+  try {
+    const result = JSON.parse(response.choices[0]?.message?.content || '{}');
+    return {
+      documentType: result.document_type || 'other',
+      confidence: Math.min(Math.max(result.confidence || 0, 0), 1),
+      metadata: result,
+    };
+  } catch {
+    return { documentType: 'other', confidence: 0, metadata: {} };
+  }
 }
 
 /**
@@ -100,17 +170,78 @@ export async function processFile(
       return { status: 'completed', chunksCreated: 0, summary: 'No extractable text content found.' };
     }
 
-    // 4. Generate AI summary
-    const summary = await generateSummary(extractedText, file.name);
+    // 4. Classify document (before summary for better context)
+    let classification: ClassificationResult = { documentType: 'other', confidence: 0, metadata: {} };
+    try {
+      classification = await classifyDocument(extractedText, file.name);
+    } catch (classifyError) {
+      console.error('Document classification failed (non-fatal):', classifyError);
+    }
 
-    // 5. Chunk text hierarchically
+    // 5. Generate AI summary (with classification context)
+    const summary = await generateSummary(
+      extractedText,
+      file.name,
+      classification.documentType !== 'other' ? classification.documentType : undefined
+    );
+
+    // 6. Extract timeline events (non-blocking — failures do not fail the pipeline)
+    let timelineEventsInserted = 0;
+    try {
+      const openai = getOpenAI();
+      const timelineEvents = await extractTimelineEvents(extractedText, file.name, fileId, openai);
+
+      if (timelineEvents.length > 0) {
+        // Delete existing AI-extracted events for this file (idempotent)
+        await supabase
+          .from('timeline_events')
+          .delete()
+          .eq('source_file_id', fileId)
+          .eq('extraction_source', 'ai');
+
+        // Insert new events
+        const eventRows = timelineEvents.map((event) => ({
+          file_id: fileId,
+          source_file_id: fileId,
+          project_id: projectId,
+          event_date: event.date,
+          event_date_end: event.date_end || null,
+          date_precision: event.date_precision,
+          date_text: event.date_text || null,
+          title: event.title,
+          description: event.description || null,
+          category: event.category,
+          event_type: event.event_type,
+          significance: event.significance,
+          parties: event.parties || [],
+          source_quote: event.source_quote || null,
+          page_reference: event.page_reference || null,
+          extraction_source: 'ai',
+          extracted_at: new Date().toISOString(),
+        }));
+
+        const { error: timelineError } = await supabase
+          .from('timeline_events')
+          .insert(eventRows);
+
+        if (timelineError) {
+          console.error('Timeline event insertion failed (non-fatal):', timelineError.message);
+        } else {
+          timelineEventsInserted = eventRows.length;
+        }
+      }
+    } catch (timelineError) {
+      console.error('Timeline extraction failed (non-fatal):', timelineError);
+    }
+
+    // 7. Chunk text hierarchically
     const chunks = chunkText(extractedText);
 
-    // 6. Generate embeddings in batches
+    // 8. Generate embeddings in batches
     const chunkTexts = chunks.map((c) => c.content);
     const embeddings = await embedBatch(chunkTexts);
 
-    // 7. Delete any existing chunks for this file
+    // 9. Delete any existing chunks for this file
     const { error: deleteChunksError } = await supabase
       .from('document_chunks')
       .delete()
@@ -121,7 +252,7 @@ export async function processFile(
     }
     shouldCleanupChunks = true;
 
-    // 8. Insert parent chunks first (to get IDs for children)
+    // 10. Insert parent chunks first (to get IDs for children)
     const parentChunks = chunks.filter((c) => c.chunkType === 'parent');
     const childChunks = chunks.filter((c) => c.chunkType === 'child');
 
@@ -190,7 +321,7 @@ export async function processFile(
       }
     }
 
-    // 9. Update file with processing results
+    // 11. Update file with processing results (including classification)
     const { error: updateFileError } = await supabase
       .from('files')
       .update({
@@ -200,6 +331,14 @@ export async function processFile(
         extracted_text: extractedText.slice(0, 50000), // Cap stored text
         chunk_count: chunks.length,
         processing_error: null,
+        // Classification fields
+        document_type: classification.documentType,
+        classification_confidence: classification.confidence,
+        classification_metadata: classification.metadata,
+        classification_source: 'ai',
+        classified_at: new Date().toISOString(),
+        // Timeline count
+        timeline_events_count: timelineEventsInserted,
       })
       .eq('id', fileId);
 
@@ -353,19 +492,28 @@ async function transcribeAudio(blob: Blob, fileName: string): Promise<string> {
 
 /**
  * Generate an AI summary of extracted text.
+ * Optionally uses document type classification for better context.
  */
-async function generateSummary(text: string, fileName: string): Promise<string> {
+async function generateSummary(
+  text: string,
+  fileName: string,
+  documentType?: string
+): Promise<string> {
   const openai = getOpenAI();
 
   // Truncate for summary generation
   const truncated = text.slice(0, 12000);
+
+  const typeContext = documentType
+    ? ` This document has been classified as a "${documentType.replace(/_/g, ' ')}".`
+    : '';
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4.1-mini',
     messages: [
       {
         role: 'system',
-        content: 'You are a legal document analyst. Provide a concise 2-3 sentence summary of the document content. Focus on key facts, dates, parties, and legal significance.',
+        content: `You are a legal document analyst.${typeContext} Provide a concise 2-3 sentence summary of the document content. Focus on key facts, dates, parties, and legal significance.`,
       },
       {
         role: 'user',

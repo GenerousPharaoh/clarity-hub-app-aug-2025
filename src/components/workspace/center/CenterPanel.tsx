@@ -12,6 +12,11 @@ import { ExhibitsTab } from './ExhibitsTab';
 const TipTapEditor = lazy(() =>
   import('./editor/TipTapEditor').then((m) => ({ default: m.TipTapEditor }))
 );
+
+// Lazy-load Timeline tab — only loaded when user opens it
+const TimelineTab = lazy(() =>
+  import('./TimelineTab').then((m) => ({ default: m.TimelineTab }))
+);
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { readWorkspaceSession, saveWorkspaceNote, saveWorkspaceView } from '@/lib/workspaceSession';
@@ -21,6 +26,7 @@ import {
   LayoutList,
   PenLine,
   Tag,
+  Clock,
   Plus,
   Trash2,
   Loader2,
@@ -94,6 +100,15 @@ export function CenterPanel() {
             showLabel={!ultraCompact}
             compact={ultraCompact}
           />
+          <TabButton
+            active={activeTab === 'timeline'}
+            onClick={() => setActiveTab('timeline')}
+            icon={<Clock className="h-3.5 w-3.5" />}
+            label="Timeline"
+            controls="panel-timeline"
+            showLabel={!ultraCompact}
+            compact={ultraCompact}
+          />
         </div>
       </div>
 
@@ -112,6 +127,16 @@ export function CenterPanel() {
               <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as CenterTab)} />
             ) : activeTab === 'editor' ? (
               <NotesTab compact={compact} />
+            ) : activeTab === 'timeline' ? (
+              <Suspense
+                fallback={
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
+                  </div>
+                }
+              >
+                <TimelineTab />
+              </Suspense>
             ) : (
               <ExhibitsTab />
             )}

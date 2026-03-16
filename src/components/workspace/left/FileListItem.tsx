@@ -19,6 +19,60 @@ import useAppStore from '@/store';
 import { useDeleteFile } from '@/hooks/useFiles';
 import type { FileRecord } from '@/types';
 
+// Document type badge color mapping
+const DOC_TYPE_BADGE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  court: {
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    text: 'text-blue-700 dark:text-blue-300',
+    border: 'border-blue-200 dark:border-blue-900/40',
+  },
+  employment: {
+    bg: 'bg-amber-50 dark:bg-amber-900/20',
+    text: 'text-amber-700 dark:text-amber-300',
+    border: 'border-amber-200 dark:border-amber-900/40',
+  },
+  financial: {
+    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+    text: 'text-emerald-700 dark:text-emerald-300',
+    border: 'border-emerald-200 dark:border-emerald-900/40',
+  },
+  regulatory: {
+    bg: 'bg-purple-50 dark:bg-purple-900/20',
+    text: 'text-purple-700 dark:text-purple-300',
+    border: 'border-purple-200 dark:border-purple-900/40',
+  },
+  correspondence: {
+    bg: 'bg-gray-50 dark:bg-gray-800/40',
+    text: 'text-gray-600 dark:text-gray-300',
+    border: 'border-gray-200 dark:border-gray-700',
+  },
+  medical: {
+    bg: 'bg-rose-50 dark:bg-rose-900/20',
+    text: 'text-rose-700 dark:text-rose-300',
+    border: 'border-rose-200 dark:border-rose-900/40',
+  },
+};
+
+function getDocTypeBadgeStyle(docType: string) {
+  return DOC_TYPE_BADGE_COLORS[docType] || DOC_TYPE_BADGE_COLORS.correspondence;
+}
+
+// Label formatter for document types
+// Once the other agent's documentTypes.ts is available, replace this with:
+//   import { getDocumentTypeLabel } from '@/lib/documentTypes';
+const DOC_TYPE_LABELS: Record<string, string> = {
+  court: 'Court',
+  employment: 'Employment',
+  financial: 'Financial',
+  regulatory: 'Regulatory',
+  correspondence: 'Correspondence',
+  medical: 'Medical',
+};
+
+function formatDocTypeLabel(docType: string): string {
+  return DOC_TYPE_LABELS[docType] || docType.charAt(0).toUpperCase() + docType.slice(1);
+}
+
 interface FileListItemProps {
   file: FileRecord;
   onProcess?: (fileId: string) => void;
@@ -258,6 +312,33 @@ export function FileListItem({
                 {file.name}
               </p>
               <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5 overflow-hidden max-h-7">
+                {/* Document type badge — shown when classification exists */}
+                {(() => {
+                  const docType = (file as any).document_type as string | undefined;
+                  const confidence = (file as any).classification_confidence as number | undefined;
+                  if (docType && docType !== 'other') {
+                    const style = getDocTypeBadgeStyle(docType);
+                    const isUncertain = typeof confidence === 'number' && confidence < 0.7;
+                    return (
+                      <span
+                        className={cn(
+                          'rounded-full px-2 py-0.5 text-[10px] font-medium',
+                          style.bg,
+                          style.text,
+                          isUncertain && `border ${style.border} border-dashed`
+                        )}
+                        title={
+                          isUncertain
+                            ? `${formatDocTypeLabel(docType)} (low confidence: ${Math.round((confidence ?? 0) * 100)}%)`
+                            : formatDocTypeLabel(docType)
+                        }
+                      >
+                        {formatDocTypeLabel(docType)}
+                      </span>
+                    );
+                  }
+                  return null;
+                })()}
                 {file.added_at && (
                   <span className="rounded-full bg-surface-100 px-2 py-1 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
                     {formatDate(file.added_at)}

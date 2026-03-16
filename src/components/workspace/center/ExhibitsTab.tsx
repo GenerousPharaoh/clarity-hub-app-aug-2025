@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, lazy, Suspense, useMemo } from 'react';
 import {
   Tag,
   Plus,
@@ -12,6 +12,7 @@ import {
   X,
   AlertCircle,
   RefreshCw,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -27,6 +28,10 @@ import {
 } from '@/hooks/useExhibits';
 import type { ExhibitMarker, FileRecord } from '@/types';
 
+const CompendiumBuilderModal = lazy(() =>
+  import('./CompendiumBuilderModal').then((m) => ({ default: m.CompendiumBuilderModal }))
+);
+
 export function ExhibitsTab() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const files = useAppStore((s) => s.files);
@@ -41,6 +46,7 @@ export function ExhibitsTab() {
   const updateExhibit = useUpdateExhibit();
   const deleteExhibit = useDeleteExhibit();
   const [exhibitToDelete, setExhibitToDelete] = useState<ExhibitMarker | null>(null);
+  const [showCompendiumBuilder, setShowCompendiumBuilder] = useState(false);
 
   const projectFiles = files.filter(
     (f) => f.project_id === selectedProjectId && !f.is_deleted
@@ -73,6 +79,12 @@ export function ExhibitsTab() {
   const handleDeleteCancel = useCallback(() => {
     setExhibitToDelete(null);
   }, []);
+
+  // Show "Build Book" only when at least 1 exhibit has a linked file
+  const hasLinkedFiles = useMemo(
+    () => (exhibits ?? []).some((e) => e.file_id),
+    [exhibits]
+  );
 
   if (!selectedProjectId) {
     return (
@@ -146,23 +158,38 @@ export function ExhibitsTab() {
         <h2 className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
           Exhibit Markers ({exhibits?.length ?? 0})
         </h2>
-        <button
-          onClick={handleCreate}
-          disabled={createExhibit.isPending}
-          className={cn(
-            'flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
-            'text-xs font-medium text-primary-600 dark:text-primary-400',
-            'transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20',
-            'disabled:opacity-50'
+        <div className="flex items-center gap-1">
+          {hasLinkedFiles && (
+            <button
+              onClick={() => setShowCompendiumBuilder(true)}
+              className={cn(
+                'flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
+                'text-xs font-medium text-surface-600 dark:text-surface-300',
+                'transition-colors hover:bg-surface-100 dark:hover:bg-surface-700'
+              )}
+            >
+              <BookOpen className="h-3 w-3" />
+              Build Book
+            </button>
           )}
-        >
-          {createExhibit.isPending ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            <Plus className="h-3 w-3" />
-          )}
-          Add Exhibit
-        </button>
+          <button
+            onClick={handleCreate}
+            disabled={createExhibit.isPending}
+            className={cn(
+              'flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
+              'text-xs font-medium text-primary-600 dark:text-primary-400',
+              'transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20',
+              'disabled:opacity-50'
+            )}
+          >
+            {createExhibit.isPending ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Plus className="h-3 w-3" />
+            )}
+            Add Exhibit
+          </button>
+        </div>
       </div>
 
       {/* Exhibit list */}
@@ -206,6 +233,19 @@ export function ExhibitsTab() {
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
       />
+
+      {/* Compendium Builder Modal (lazy-loaded) */}
+      {showCompendiumBuilder && selectedProjectId && (
+        <Suspense fallback={null}>
+          <CompendiumBuilderModal
+            open={showCompendiumBuilder}
+            onClose={() => setShowCompendiumBuilder(false)}
+            exhibits={exhibits ?? []}
+            files={projectFiles}
+            projectId={selectedProjectId}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

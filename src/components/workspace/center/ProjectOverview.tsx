@@ -18,6 +18,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import useAppStore from '@/store';
 import { useNotes } from '@/hooks/useNotes';
@@ -189,6 +190,8 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
     return items.slice(0, 3);
   }, [exhibitCount, fileCount, noteCount, onSwitchTab, processedCount]);
 
+  const navigate = useNavigate();
+
   if (!project) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-8">
@@ -201,6 +204,12 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
         <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
           Select a project from the dashboard to view its overview.
         </p>
+        <button
+          onClick={() => navigate('/')}
+          className="mt-4 text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+        >
+          &larr; Back to dashboard
+        </button>
       </div>
     );
   }

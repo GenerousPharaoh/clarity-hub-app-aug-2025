@@ -185,11 +185,24 @@ export function AIChatPanel() {
 
   if (!selectedProjectId) {
     return (
-      <div className="flex h-full flex-col items-center justify-center px-6">
-        <Sparkles className="h-6 w-6 text-surface-300 dark:text-surface-500" />
-        <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
-          Select a project.
-        </p>
+      <div className="flex h-full flex-col">
+        <div className="flex flex-1 flex-col items-center justify-center px-6">
+          <Sparkles className="h-6 w-6 text-surface-300 dark:text-surface-500" />
+          <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
+            Select a project to start chatting.
+          </p>
+        </div>
+        {/* Disabled input area for visual context */}
+        <div className="shrink-0 border-t border-surface-200 p-3 opacity-50 pointer-events-none dark:border-surface-700">
+          <div className="flex items-end gap-2 rounded-xl border border-translucent bg-white p-2 dark:bg-surface-800">
+            <div className="flex-1 py-1 text-sm text-surface-400 dark:text-surface-500">
+              Ask about your case...
+            </div>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-200 text-surface-400 dark:bg-surface-700 dark:text-surface-500">
+              <Send className="h-4 w-4" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -218,8 +231,11 @@ export function AIChatPanel() {
               <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
                 Legal Research Assistant
               </h3>
-              <p className={cn('mt-1.5 mb-6 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
+              <p className={cn('mt-1.5 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
                 Ask about Ontario employment law, case analysis, or your documents.
+              </p>
+              <p className={cn('mt-1 mb-6 text-center text-xs text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
+                Tip: Select a file in the sidebar to ask questions about it.
               </p>
 
               {/* Suggested prompts -- adapt to selected file */}
@@ -325,7 +341,7 @@ export function AIChatPanel() {
                 {selectedFile.name}
               </p>
               <p className="text-xs text-primary-500/70 dark:text-primary-400/60">
-                Using this file
+                Using {selectedFile.file_type ? `${selectedFile.file_type.toUpperCase()} file` : 'this file'}
               </p>
             </div>
             <button

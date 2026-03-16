@@ -16,8 +16,9 @@ import { KeyboardShortcutsHelp } from '@/components/shared/KeyboardShortcutsHelp
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useNotes } from '@/hooks/useNotes';
 import { cn } from '@/lib/utils';
-import { readWorkspaceSession, saveWorkspaceProject } from '@/lib/workspaceSession';
+import { readWorkspaceSession, clearWorkspaceSession, saveWorkspaceProject } from '@/lib/workspaceSession';
 import { FolderOpen, Eye, Sparkles, LayoutList, PanelRight } from 'lucide-react';
 
 const COLLAPSE_THRESHOLD = 8; // percent — auto-collapse when shrunk below this
@@ -40,8 +41,27 @@ export function WorkspacePage() {
   const requestNewNote = useAppStore((s) => s.requestNewNote);
 
   const projects = useAppStore((s) => s.projects);
+  const files = useAppStore((s) => s.files);
   const projectName = projects.find((p) => p.id === projectId)?.name;
   useDocumentTitle(projectName ?? 'Project');
+
+  const { data: notes } = useNotes(projectId ?? null);
+
+  // File count for current project (non-deleted)
+  const fileCount = useMemo(
+    () => files.filter((f) => f.project_id === projectId && !f.is_deleted).length,
+    [files, projectId]
+  );
+  const noteCount = notes?.length ?? 0;
+
+  // Validate workspace session: clear if the stored project no longer exists
+  useEffect(() => {
+    if (projects.length === 0) return; // still loading
+    const session = readWorkspaceSession();
+    if (session && !projects.some((p) => p.id === session.projectId)) {
+      clearWorkspaceSession();
+    }
+  }, [projects]);
 
   const showShortcuts = useAppStore((s) => s.showKeyboardShortcuts);
   const setShowShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
@@ -196,12 +216,14 @@ export function WorkspacePage() {
             active={mobileTab === 'files'}
             icon={<FolderOpen className="h-5 w-5" />}
             label="Files"
+            badge={fileCount > 0 ? fileCount : undefined}
             onClick={() => setMobileTab('files')}
           />
           <MobileTabButton
             active={mobileTab === 'content'}
             icon={<LayoutList className="h-5 w-5" />}
             label="Content"
+            badge={noteCount > 0 ? noteCount : undefined}
             onClick={() => setMobileTab('content')}
           />
           <MobileTabButton
@@ -340,11 +362,13 @@ function MobileTabButton({
   active,
   icon,
   label,
+  badge,
   onClick,
 }: {
   active: boolean;
   icon: React.ReactNode;
   label: string;
+  badge?: number;
   onClick: () => void;
 }) {
   return (
@@ -360,7 +384,14 @@ function MobileTabButton({
       {active && (
         <div className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary-600 dark:bg-primary-400" />
       )}
-      {icon}
+      <div className="relative">
+        {icon}
+        {badge !== undefined && (
+          <span className="absolute -right-3 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary-600 px-1 text-[10px] font-semibold leading-none text-white dark:bg-primary-500">
+            {badge}
+          </span>
+        )}
+      </div>
       <span className="text-xs font-medium">{label}</span>
     </button>
   );

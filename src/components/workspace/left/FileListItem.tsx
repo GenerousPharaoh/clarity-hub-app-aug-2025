@@ -102,7 +102,7 @@ function getProcessingBadge(
     return {
       label: 'Indexing',
       className:
-        'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300',
+        'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-900/40 dark:bg-primary-950/30 dark:text-primary-300',
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
     };
   }
@@ -111,7 +111,7 @@ function getProcessingBadge(
     return {
       label: 'AI-ready',
       className:
-        'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-300',
+        'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300',
       icon: <CheckCircle2 className="h-3 w-3" />,
     };
   }
@@ -120,7 +120,7 @@ function getProcessingBadge(
     return {
       label: 'Retry needed',
       className:
-        'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300',
+        'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300',
       icon: <AlertTriangle className="h-3 w-3" />,
     };
   }
@@ -128,7 +128,7 @@ function getProcessingBadge(
   return {
     label: 'Pending',
     className:
-      'border-surface-200 bg-surface-50 text-surface-600 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300',
+      'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300',
     icon: <Zap className="h-3 w-3" />,
   };
 }

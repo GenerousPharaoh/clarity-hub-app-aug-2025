@@ -308,13 +308,16 @@ export function DashboardPage() {
                 title="No matters yet"
                 description="Create a matter to get started."
                 action={
-                  <button
-                    onClick={() => setDialogOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
-                  >
-                    <Plus className="h-4 w-4" />
-                    New matter
-                  </button>
+                  <>
+                    <p className="text-xs text-surface-400 mt-1 mb-3">A matter is a case or legal issue you&apos;re working on.</p>
+                    <button
+                      onClick={() => setDialogOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
+                    >
+                      <Plus className="h-4 w-4" />
+                      New matter
+                    </button>
+                  </>
                 }
               />
             </div>

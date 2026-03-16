@@ -292,6 +292,12 @@ export function LeftPanel() {
             {files.length} file{files.length !== 1 ? 's' : ''} · {processedCount} indexed
           </p>
         )}
+        {processingCount > 0 && (
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-primary-500">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            Processing {processingCount} file{processingCount !== 1 ? 's' : ''}...
+          </p>
+        )}
 
         <div className="mt-3">
           <div
@@ -363,7 +369,7 @@ export function LeftPanel() {
           </div>
         )}
 
-        {selectedProjectId && processableFiles.length > 1 && (
+        {selectedProjectId && processableFiles.length > 0 && (
           <div className="mt-3">
             {!batchSelectionMode ? (
               <button

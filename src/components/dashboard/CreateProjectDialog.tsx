@@ -124,7 +124,7 @@ export function CreateProjectDialog({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   onBlur={() => setNameTouched(true)}
-                  placeholder="e.g. Employment Dispute 2026"
+                  placeholder="e.g., Smith v. Jones"
                   disabled={isLoading}
                   aria-invalid={nameError}
                   className={cn(
@@ -177,7 +177,7 @@ export function CreateProjectDialog({
                   id="project-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Brief summary of the case or project"
+                  placeholder="Brief summary of the case..."
                   disabled={isLoading}
                   rows={3}
                   className={cn(

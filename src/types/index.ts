@@ -8,6 +8,7 @@ export type Profile = Tables<'profiles'>;
 export type ExhibitMarker = Tables<'exhibit_markers'>;
 export type DocumentChunk = Tables<'document_chunks'>;
 export type ChatMessageRow = Tables<'chat_messages'>;
+export type TimelineEvent = Tables<'timeline_events'>;
 
 // App-level user type (derived from Supabase Auth + profile)
 export interface AppUser {

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import type { TimelineEvent } from '@/types';
+import type { TablesInsert } from '@/types/database';
 
 const TIMELINE_KEY = 'timeline-events';
 
@@ -8,23 +10,8 @@ function timelineKey(projectId: string | null) {
   return [TIMELINE_KEY, projectId] as const;
 }
 
-export interface TimelineEvent {
-  id: string;
-  project_id: string;
-  date: string;
-  title: string;
-  description: string | null;
-  category: string | null;
-  confidence: string | null;
-  source_file_id: string | null;
-  source_file_name: string | null;
-  source_page: number | null;
-  excerpt: string | null;
-  is_verified: boolean;
-  is_hidden: boolean;
-  created_at: string | null;
-  updated_at: string | null;
-}
+// Re-export for consumers that import from this module
+export type { TimelineEvent };
 
 /**
  * Fetches all visible timeline events for a project, ordered by date.
@@ -40,14 +27,14 @@ export function useTimelineEvents(projectId: string | null) {
       if (!user) return [];
 
       const { data, error } = await supabase
-        .from('timeline_events' as any)
+        .from('timeline_events')
         .select('*')
         .eq('project_id', projectId)
         .eq('is_hidden', false)
         .order('date', { ascending: true });
 
       if (error) throw error;
-      return (data ?? []) as unknown as TimelineEvent[];
+      return data ?? [];
     },
     enabled: !!projectId && (isDemoMode || !!user),
   });
@@ -81,31 +68,33 @@ export function useCreateTimelineEvent() {
       sourcePage?: number;
       excerpt?: string;
     }) => {
+      const insert: TablesInsert<'timeline_events'> = {
+        project_id: projectId,
+        date,
+        title,
+        description: description?.trim() || null,
+        category: category || null,
+        confidence: 'medium',
+        source_file_id: sourceFileId || null,
+        source_file_name: sourceFileName || null,
+        source_page: sourcePage ?? null,
+        excerpt: excerpt?.trim() || null,
+        is_verified: false,
+        is_hidden: false,
+      };
+
       const { data, error } = await supabase
-        .from('timeline_events' as any)
-        .insert({
-          project_id: projectId,
-          date,
-          title,
-          description: description?.trim() || null,
-          category: category || null,
-          confidence: 'medium',
-          source_file_id: sourceFileId || null,
-          source_file_name: sourceFileName || null,
-          source_page: sourcePage ?? null,
-          excerpt: excerpt?.trim() || null,
-          is_verified: false,
-          is_hidden: false,
-        })
+        .from('timeline_events')
+        .insert(insert)
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as TimelineEvent;
+      return data;
     },
     onSuccess: (event) => {
       queryClient.invalidateQueries({
-        queryKey: timelineKey((event as TimelineEvent).project_id),
+        queryKey: timelineKey(event.project_id),
       });
     },
   });
@@ -142,14 +131,14 @@ export function useUpdateTimelineEvent() {
       if (updates.is_hidden !== undefined) updatePayload.is_hidden = updates.is_hidden;
 
       const { data, error } = await supabase
-        .from('timeline_events' as any)
+        .from('timeline_events')
         .update(updatePayload)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as TimelineEvent;
+      return data;
     },
 
     onMutate: async ({ id, projectId, ...updates }) => {
@@ -190,7 +179,7 @@ export function useDeleteTimelineEvent() {
   return useMutation({
     mutationFn: async ({ id, projectId }: { id: string; projectId: string }) => {
       const { error } = await supabase
-        .from('timeline_events' as any)
+        .from('timeline_events')
         .delete()
         .eq('id', id);
       if (error) throw error;

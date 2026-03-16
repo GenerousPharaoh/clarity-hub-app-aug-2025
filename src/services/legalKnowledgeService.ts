@@ -6,11 +6,7 @@
  */
 import { supabase } from '@/lib/supabase';
 
-// The legal knowledge tables exist in the database but aren't in the
-// auto-generated types (they were created outside the type generation).
-// We use an untyped helper to query them.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const db = supabase as any;
+// Legal knowledge tables are now included in the Database type definitions.
 
 /**
  * Sanitize a value before interpolating it into a PostgREST `.or()` filter
@@ -108,20 +104,20 @@ class LegalKnowledgeService {
   async searchLegislationSections(
     keyword: string
   ): Promise<LegalLegislationSection[]> {
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from('legal_legislation_sections')
       .select('*, legislation:legal_legislation(*)')
       .contains('keywords', [keyword]);
 
     if (error) throw error;
-    return data ?? [];
+    return (data ?? []) as unknown as LegalLegislationSection[];
   }
 
   // ─── Case Law ──────────────────────────────────────────────
 
   async searchCases(searchTerm: string): Promise<LegalCase[]> {
     const safe = sanitizeFilterValue(searchTerm);
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from('legal_cases')
       .select('*')
       .or(
@@ -131,14 +127,14 @@ class LegalKnowledgeService {
       .limit(20);
 
     if (error) throw error;
-    return data ?? [];
+    return (data ?? []) as unknown as LegalCase[];
   }
 
   // ─── Legal Principles ─────────────────────────────────────
 
   async searchPrinciples(searchTerm: string): Promise<LegalPrinciple[]> {
     const safe = sanitizeFilterValue(searchTerm);
-    const { data, error } = await db
+    const { data, error } = await supabase
       .from('legal_principles')
       .select('*')
       .or(
@@ -147,7 +143,7 @@ class LegalKnowledgeService {
       .limit(10);
 
     if (error) throw error;
-    return data ?? [];
+    return (data ?? []) as unknown as LegalPrinciple[];
   }
 
   // ─── Context Building for AI ──────────────────────────────

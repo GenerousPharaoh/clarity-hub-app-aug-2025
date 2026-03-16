@@ -216,7 +216,7 @@ export function TimelineTab() {
   if (isLoading) {
     return (
       <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="flex shrink-0 items-center gap-3 border-b border-surface-200/80 px-3 py-3 dark:border-surface-800 sm:px-4">
+        <div className="flex shrink-0 items-center gap-3 border-b border-translucent px-3 py-3 sm:px-4">
           <div className="h-4 w-20 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
           <div className="ml-auto flex gap-1.5">
             <div className="h-8 w-28 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" />
@@ -227,7 +227,7 @@ export function TimelineTab() {
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="rounded-[22px] border border-surface-200/80 bg-white/80 p-4 dark:border-surface-800 dark:bg-surface-900/70"
+              className="rounded-[22px] border border-translucent bg-white/88 p-4 dark:bg-surface-900/78"
             >
               <div className="space-y-2">
                 <div className="h-3 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
@@ -271,10 +271,10 @@ export function TimelineTab() {
   return (
     <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Header */}
-      <div className="shrink-0 border-b border-surface-200/80 bg-white/90 px-3 py-3 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90 sm:px-4">
+      <div className="shrink-0 border-b border-translucent bg-white/90 px-3 py-3 backdrop-blur dark:bg-surface-900/90 sm:px-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <h2 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
+            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
               Timeline
             </h2>
             <div className="flex flex-nowrap gap-2 overflow-hidden">
@@ -338,7 +338,7 @@ export function TimelineTab() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="shrink-0 overflow-hidden border-b border-surface-200/80 dark:border-surface-800"
+            className="shrink-0 overflow-hidden border-b border-translucent"
           >
             <div className="space-y-3 px-3 py-4 sm:px-4">
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -446,15 +446,15 @@ export function TimelineTab() {
       {/* Timeline events list */}
       <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
         {eventCount === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-dashed border-surface-300 bg-white/80 px-4 py-12 text-center dark:border-surface-700 dark:bg-surface-900/60">
+          <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-dashed border-surface-300 bg-white/80 px-4 py-12 text-center surface-grain dark:border-surface-700 dark:bg-surface-900/60">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
               <Calendar className="h-5 w-5 text-surface-400 dark:text-surface-500" />
             </div>
-            <h3 className="mt-3 text-center text-xs font-semibold text-surface-700 dark:text-surface-200">
+            <h3 className="mt-3 text-center font-heading text-xs font-semibold text-surface-700 dark:text-surface-200">
               No timeline events
             </h3>
             <p className="mt-1 max-w-xs text-center text-[11px] text-surface-400 dark:text-surface-500">
-              Add events manually or use AI extraction to build a timeline from your files.
+              Add events manually or extract from files with AI.
             </p>
           </div>
         ) : (
@@ -531,10 +531,10 @@ function TimelineEventCard({
       {/* Card */}
       <div
         className={cn(
-          'mb-2 min-w-0 flex-1 rounded-[18px] border px-4 py-3 transition-all',
-          'border-surface-200/80 bg-white/90 shadow-sm',
+          'mb-2 min-w-0 flex-1 rounded-[22px] border px-4 py-3 transition-all',
+          'border-translucent bg-white/88 shadow-sm',
           'hover:shadow-md',
-          'dark:border-surface-700/80 dark:bg-surface-900/80'
+          'dark:bg-surface-900/78'
         )}
       >
         {/* Date + title row */}
@@ -543,7 +543,7 @@ function TimelineEventCard({
             <p className="text-[11px] font-medium text-surface-400 dark:text-surface-500">
               {formatEventDate(event.date)}
             </p>
-            <h4 className="mt-0.5 text-sm font-semibold text-surface-800 dark:text-surface-100">
+            <h4 className="mt-0.5 font-heading text-sm font-semibold text-surface-800 dark:text-surface-100">
               {event.title}
             </h4>
           </div>
@@ -602,7 +602,7 @@ function TimelineEventCard({
           {event.source_file_name ? (
             <button
               onClick={() => event.source_file_id && onSourceClick(event.source_file_id)}
-              className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+              className="interactive-lift inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
               title={`Open ${event.source_file_name}`}
             >
               <FileText className="h-2.5 w-2.5" />

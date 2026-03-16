@@ -136,6 +136,7 @@ export type Database = {
           file_id: string | null
           id: string
           project_id: string
+          sort_order: number
         }
         Insert: {
           created_at?: string | null
@@ -144,6 +145,7 @@ export type Database = {
           file_id?: string | null
           id?: string
           project_id: string
+          sort_order?: number
         }
         Update: {
           created_at?: string | null
@@ -152,6 +154,7 @@ export type Database = {
           file_id?: string | null
           id?: string
           project_id?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -173,6 +176,11 @@ export type Database = {
           extracted_text: string | null
           chunk_count: number | null
           processing_error: string | null
+          document_type: string | null
+          classification_metadata: Json | null
+          classification_confidence: number | null
+          classification_source: string | null
+          classified_at: string | null
         }
         Insert: {
           added_at?: string | null
@@ -191,6 +199,11 @@ export type Database = {
           extracted_text?: string | null
           chunk_count?: number | null
           processing_error?: string | null
+          document_type?: string | null
+          classification_metadata?: Json | null
+          classification_confidence?: number | null
+          classification_source?: string | null
+          classified_at?: string | null
         }
         Update: {
           added_at?: string | null
@@ -209,6 +222,11 @@ export type Database = {
           extracted_text?: string | null
           chunk_count?: number | null
           processing_error?: string | null
+          document_type?: string | null
+          classification_metadata?: Json | null
+          classification_confidence?: number | null
+          classification_source?: string | null
+          classified_at?: string | null
         }
         Relationships: [
           {
@@ -372,6 +390,274 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      legal_cases: {
+        Row: {
+          id: string
+          case_name: string
+          citation: string
+          neutral_citation: string | null
+          court: string
+          court_level: string
+          decision_date: string
+          jurisdiction: string
+          judges: string[]
+          summary: string | null
+          ratio: string | null
+          key_holdings: string[]
+          facts_summary: string | null
+          canli_url: string | null
+          is_landmark: boolean
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          case_name: string
+          citation: string
+          neutral_citation?: string | null
+          court: string
+          court_level: string
+          decision_date: string
+          jurisdiction: string
+          judges?: string[]
+          summary?: string | null
+          ratio?: string | null
+          key_holdings?: string[]
+          facts_summary?: string | null
+          canli_url?: string | null
+          is_landmark?: boolean
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          case_name?: string
+          citation?: string
+          neutral_citation?: string | null
+          court?: string
+          court_level?: string
+          decision_date?: string
+          jurisdiction?: string
+          judges?: string[]
+          summary?: string | null
+          ratio?: string | null
+          key_holdings?: string[]
+          facts_summary?: string | null
+          canli_url?: string | null
+          is_landmark?: boolean
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      legal_legislation: {
+        Row: {
+          id: string
+          title: string
+          short_title: string | null
+          jurisdiction: string
+          legislation_type: string
+          citation: string
+          url: string | null
+          in_force: boolean
+          summary: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          short_title?: string | null
+          jurisdiction: string
+          legislation_type: string
+          citation: string
+          url?: string | null
+          in_force?: boolean
+          summary?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          short_title?: string | null
+          jurisdiction?: string
+          legislation_type?: string
+          citation?: string
+          url?: string | null
+          in_force?: boolean
+          summary?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      legal_legislation_sections: {
+        Row: {
+          id: string
+          legislation_id: string
+          section_number: string
+          title: string | null
+          content: string
+          summary: string | null
+          keywords: string[]
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          legislation_id: string
+          section_number: string
+          title?: string | null
+          content: string
+          summary?: string | null
+          keywords?: string[]
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          legislation_id?: string
+          section_number?: string
+          title?: string | null
+          content?: string
+          summary?: string | null
+          keywords?: string[]
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_legislation_sections_legislation_id_fkey"
+            columns: ["legislation_id"]
+            isOneToOne: false
+            referencedRelation: "legal_legislation"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      legal_principles: {
+        Row: {
+          id: string
+          name: string
+          category: string
+          description: string
+          elements: string[]
+          source_case_id: string | null
+          source_legislation_id: string | null
+          current_status: string
+          notes: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          category: string
+          description: string
+          elements?: string[]
+          source_case_id?: string | null
+          source_legislation_id?: string | null
+          current_status?: string
+          notes?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          category?: string
+          description?: string
+          elements?: string[]
+          source_case_id?: string | null
+          source_legislation_id?: string | null
+          current_status?: string
+          notes?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      legal_topics: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          parent_id: string | null
+          description: string | null
+          display_order: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          parent_id?: string | null
+          description?: string | null
+          display_order?: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          parent_id?: string | null
+          description?: string | null
+          display_order?: number
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      timeline_events: {
+        Row: {
+          id: string
+          project_id: string
+          date: string
+          title: string
+          description: string | null
+          category: string | null
+          confidence: string | null
+          source_file_id: string | null
+          source_file_name: string | null
+          source_page: number | null
+          excerpt: string | null
+          is_verified: boolean
+          is_hidden: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          date: string
+          title: string
+          description?: string | null
+          category?: string | null
+          confidence?: string | null
+          source_file_id?: string | null
+          source_file_name?: string | null
+          source_page?: number | null
+          excerpt?: string | null
+          is_verified?: boolean
+          is_hidden?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          date?: string
+          title?: string
+          description?: string | null
+          category?: string | null
+          confidence?: string | null
+          source_file_id?: string | null
+          source_file_name?: string | null
+          source_page?: number | null
+          excerpt?: string | null
+          is_verified?: boolean
+          is_hidden?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

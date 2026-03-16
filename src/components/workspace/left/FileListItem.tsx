@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn, formatDate, getFileExtension, getFileTypeFromExtension } from '@/lib/utils';
 import { FILE_TYPE_COLORS } from '@/lib/constants';
+import { getDocumentTypeLabel } from '@/lib/documentTypes';
 import useAppStore from '@/store';
 import { useDeleteFile } from '@/hooks/useFiles';
 import type { FileRecord } from '@/types';
@@ -55,22 +56,6 @@ const DOC_TYPE_BADGE_COLORS: Record<string, { bg: string; text: string; border: 
 
 function getDocTypeBadgeStyle(docType: string) {
   return DOC_TYPE_BADGE_COLORS[docType] || DOC_TYPE_BADGE_COLORS.correspondence;
-}
-
-// Label formatter for document types
-// Once the other agent's documentTypes.ts is available, replace this with:
-//   import { getDocumentTypeLabel } from '@/lib/documentTypes';
-const DOC_TYPE_LABELS: Record<string, string> = {
-  court: 'Court',
-  employment: 'Employment',
-  financial: 'Financial',
-  regulatory: 'Regulatory',
-  correspondence: 'Correspondence',
-  medical: 'Medical',
-};
-
-function formatDocTypeLabel(docType: string): string {
-  return DOC_TYPE_LABELS[docType] || docType.charAt(0).toUpperCase() + docType.slice(1);
 }
 
 interface FileListItemProps {
@@ -314,8 +299,8 @@ export function FileListItem({
               <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5 overflow-hidden max-h-7">
                 {/* Document type badge — shown when classification exists */}
                 {(() => {
-                  const docType = (file as any).document_type as string | undefined;
-                  const confidence = (file as any).classification_confidence as number | undefined;
+                  const docType = file.document_type;
+                  const confidence = file.classification_confidence;
                   if (docType && docType !== 'other') {
                     const style = getDocTypeBadgeStyle(docType);
                     const isUncertain = typeof confidence === 'number' && confidence < 0.7;
@@ -329,11 +314,11 @@ export function FileListItem({
                         )}
                         title={
                           isUncertain
-                            ? `${formatDocTypeLabel(docType)} (low confidence: ${Math.round((confidence ?? 0) * 100)}%)`
-                            : formatDocTypeLabel(docType)
+                            ? `${getDocumentTypeLabel(docType)} (low confidence: ${Math.round((confidence ?? 0) * 100)}%)`
+                            : getDocumentTypeLabel(docType)
                         }
                       >
-                        {formatDocTypeLabel(docType)}
+                        {getDocumentTypeLabel(docType)}
                       </span>
                     );
                   }

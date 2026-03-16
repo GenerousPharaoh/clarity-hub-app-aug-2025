@@ -104,6 +104,11 @@ function createSeedState(): DemoState {
           'Termination without cause with four weeks of pay, immediate cutoff of systems access, and no mention of bonus treatment or benefits continuation.',
         chunk_count: 3,
         processing_error: null,
+        document_type: null,
+        classification_metadata: null,
+        classification_confidence: null,
+        classification_source: null,
+        classified_at: null,
       },
       {
         id: 'demo-file-manager-email',
@@ -124,6 +129,11 @@ function createSeedState(): DemoState {
           'Internal email frames the departure as a quick leadership reset and suggests limiting transition messaging, which may be relevant to bad-faith conduct.',
         chunk_count: 2,
         processing_error: null,
+        document_type: null,
+        classification_metadata: null,
+        classification_confidence: null,
+        classification_source: null,
+        classified_at: null,
       },
       {
         id: 'demo-file-accommodation-timeline',
@@ -144,6 +154,11 @@ function createSeedState(): DemoState {
           'Chronology of accommodation requests, physician restrictions, and employer responses showing repeated delay before a structured return-to-work plan.',
         chunk_count: 4,
         processing_error: null,
+        document_type: null,
+        classification_metadata: null,
+        classification_confidence: null,
+        classification_source: null,
+        classified_at: null,
       },
       {
         id: 'demo-file-performance-review',
@@ -164,6 +179,11 @@ function createSeedState(): DemoState {
           'Review praises quality of work but raises concerns about consistency during the period when medical restrictions were being discussed.',
         chunk_count: 2,
         processing_error: null,
+        document_type: null,
+        classification_metadata: null,
+        classification_confidence: null,
+        classification_source: null,
+        classified_at: null,
       },
     ],
     notes: [
@@ -196,6 +216,7 @@ function createSeedState(): DemoState {
         file_id: 'demo-file-termination-letter',
         description: 'Termination letter delivered on March 1, 2026.',
         created_at: '2026-03-01T09:30:00.000Z',
+        sort_order: 0,
       },
       {
         id: 'demo-exhibit-raven-b',
@@ -204,6 +225,7 @@ function createSeedState(): DemoState {
         file_id: 'demo-file-manager-email',
         description: 'Manager email discussing the optics of the departure.',
         created_at: '2026-03-02T13:20:00.000Z',
+        sort_order: 1,
       },
       {
         id: 'demo-exhibit-north-shore-a',
@@ -212,6 +234,7 @@ function createSeedState(): DemoState {
         file_id: 'demo-file-accommodation-timeline',
         description: 'Chronology of accommodation requests and responses.',
         created_at: '2026-02-27T09:00:00.000Z',
+        sort_order: 0,
       },
     ],
   };
@@ -480,6 +503,10 @@ export function createDemoExhibit(input: {
   fileId?: string | null;
 }): ExhibitMarker {
   return updateDemoState((state) => {
+    const maxOrder = state.exhibits
+      .filter((e) => e.project_id === input.projectId)
+      .reduce((max, e) => Math.max(max, e.sort_order), -1);
+
     const exhibit: ExhibitMarker = {
       id: createId('demo-exhibit'),
       project_id: input.projectId,
@@ -487,6 +514,7 @@ export function createDemoExhibit(input: {
       description: input.description?.trim() || null,
       file_id: input.fileId || null,
       created_at: new Date().toISOString(),
+      sort_order: maxOrder + 1,
     };
 
     state.exhibits.push(exhibit);

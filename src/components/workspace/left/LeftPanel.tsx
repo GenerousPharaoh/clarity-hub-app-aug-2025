@@ -240,7 +240,7 @@ export function LeftPanel() {
     // Apply document type filter
     if (typeFilter) {
       result = result.filter((f) => {
-        const docType = (f as any).document_type as string | undefined;
+        const docType = f.document_type;
         if (typeFilter === 'other') {
           return !docType || docType === 'other';
         }

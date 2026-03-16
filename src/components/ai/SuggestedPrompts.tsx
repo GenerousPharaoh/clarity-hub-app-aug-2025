@@ -1,4 +1,4 @@
-import { Scale, FileText, Search, BookOpen, ShieldCheck, Lightbulb, Image, Headphones, Video } from 'lucide-react';
+import { Scale, FileText, Search, BookOpen, ShieldCheck, Lightbulb, Image, Headphones, Video, DollarSign, PenTool } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface SuggestedPromptsProps {
@@ -17,33 +17,33 @@ interface Prompt {
 const GENERAL_PROMPTS: Prompt[] = [
   {
     icon: <Scale className="h-3.5 w-3.5" />,
-    label: 'Analyze legal position',
-    text: 'Analyze strengths and weaknesses of my position.',
+    label: 'Bardal Factors',
+    text: 'Calculate reasonable notice using Bardal factors for this employee.',
   },
   {
     icon: <Search className="h-3.5 w-3.5" />,
-    label: 'Find relevant case law',
-    text: 'Find relevant case law for my issues.',
-  },
-  {
-    icon: <BookOpen className="h-3.5 w-3.5" />,
-    label: 'Explain a legal concept',
-    text: 'Explain constructive dismissal in Ontario.',
+    label: 'Constructive Dismissal',
+    text: 'Is this a constructive dismissal? Analyze the changes to employment terms.',
   },
   {
     icon: <ShieldCheck className="h-3.5 w-3.5" />,
-    label: 'Review for risks',
-    text: 'Identify risks and weaknesses.',
+    label: 'Mitigation',
+    text: 'What are the employee\'s mitigation obligations and how long should they search?',
   },
   {
-    icon: <Lightbulb className="h-3.5 w-3.5" />,
-    label: 'Suggest strategy',
-    text: 'Recommend a legal strategy.',
+    icon: <DollarSign className="h-3.5 w-3.5" />,
+    label: 'Costs Exposure',
+    text: 'Estimate costs exposure under the Ontario Rules of Civil Procedure.',
   },
   {
-    icon: <FileText className="h-3.5 w-3.5" />,
-    label: 'Draft an argument',
-    text: 'Draft a legal argument.',
+    icon: <PenTool className="h-3.5 w-3.5" />,
+    label: 'Demand Letter',
+    text: 'Draft a demand letter based on the facts of this case.',
+  },
+  {
+    icon: <BookOpen className="h-3.5 w-3.5" />,
+    label: 'ESA Entitlements',
+    text: 'Calculate minimum ESA entitlements for termination and severance pay.',
   },
 ];
 
@@ -57,92 +57,62 @@ function getFilePrompts(fileType: string | null, fileName: string | null): Promp
       return [
         {
           icon: <FileText className="h-3.5 w-3.5" />,
-          label: 'Summarize this document',
-          text: `Summarize the key points from ${name}.`,
-        },
-        {
-          icon: <Search className="h-3.5 w-3.5" />,
-          label: 'Extract key facts',
-          text: `Extract all key facts, dates, and names from ${name}.`,
+          label: 'Summarize',
+          text: `Summarize the key facts, dates, and parties in ${name}.`,
         },
         {
           icon: <Scale className="h-3.5 w-3.5" />,
-          label: 'Legal significance',
-          text: `What is the legal significance of ${name}? How does it support or weaken my position?`,
+          label: 'Legal Issues',
+          text: `Identify the legal issues raised by ${name}.`,
+        },
+        {
+          icon: <Search className="h-3.5 w-3.5" />,
+          label: 'Timeline',
+          text: `Extract a chronology of events from ${name}.`,
         },
         {
           icon: <ShieldCheck className="h-3.5 w-3.5" />,
-          label: 'Identify contradictions',
-          text: `Are there any contradictions or inconsistencies in ${name}?`,
+          label: 'Contradictions',
+          text: `Find contradictions or inconsistencies in ${name}.`,
         },
       ];
     case 'image':
       return [
         {
           icon: <Image className="h-3.5 w-3.5" />,
-          label: 'Describe this image',
-          text: `Describe what you see in ${name} and its potential relevance as evidence.`,
+          label: 'Describe',
+          text: `Describe this image and its relevance as evidence.`,
         },
         {
           icon: <Search className="h-3.5 w-3.5" />,
-          label: 'Extract text from image',
-          text: `Extract any visible text, dates, or identifiable information from ${name}.`,
-        },
-        {
-          icon: <Scale className="h-3.5 w-3.5" />,
-          label: 'Evidentiary value',
-          text: `What is the evidentiary value of ${name}? What does it prove or demonstrate?`,
-        },
-        {
-          icon: <ShieldCheck className="h-3.5 w-3.5" />,
-          label: 'Authenticity concerns',
-          text: `Are there any concerns about the authenticity or admissibility of ${name}?`,
+          label: 'Extract Text',
+          text: `Extract any visible text from this image.`,
         },
       ];
     case 'audio':
       return [
         {
           icon: <Headphones className="h-3.5 w-3.5" />,
-          label: 'Transcribe audio',
-          text: `Transcribe and summarize the contents of ${name}.`,
+          label: 'Transcribe',
+          text: `Transcribe the key statements in ${name}.`,
         },
         {
           icon: <Search className="h-3.5 w-3.5" />,
-          label: 'Key statements',
-          text: `Identify the key statements or admissions made in ${name}.`,
-        },
-        {
-          icon: <Scale className="h-3.5 w-3.5" />,
-          label: 'Legal relevance',
-          text: `What is the legal relevance of the statements in ${name}?`,
-        },
-        {
-          icon: <ShieldCheck className="h-3.5 w-3.5" />,
-          label: 'Admissibility issues',
-          text: `Are there any admissibility concerns with ${name} as evidence?`,
+          label: 'Key Admissions',
+          text: `Identify any admissions or significant statements.`,
         },
       ];
     case 'video':
       return [
         {
           icon: <Video className="h-3.5 w-3.5" />,
-          label: 'Analyze video content',
-          text: `Describe and analyze the content of ${name}.`,
+          label: 'Transcribe',
+          text: `Transcribe the key statements in ${name}.`,
         },
         {
           icon: <Search className="h-3.5 w-3.5" />,
-          label: 'Key moments',
-          text: `Identify the key moments and statements in ${name}.`,
-        },
-        {
-          icon: <Scale className="h-3.5 w-3.5" />,
-          label: 'Evidentiary value',
-          text: `What is the evidentiary value of ${name}? What does it prove?`,
-        },
-        {
-          icon: <ShieldCheck className="h-3.5 w-3.5" />,
-          label: 'Admissibility concerns',
-          text: `Are there any admissibility or authenticity concerns with ${name}?`,
+          label: 'Key Admissions',
+          text: `Identify any admissions or significant statements.`,
         },
       ];
     default:

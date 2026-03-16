@@ -168,14 +168,23 @@ async function callGPT(params: {
   const openai = getOpenAI();
   if (!openai) throw new Error('OpenAI not configured server-side');
 
-  const systemPrompt = `You are a senior Ontario employment law analyst. You have deep expertise in Canadian employment law with particular focus on Ontario legislation, case law, and legal principles.
+  const systemPrompt = `You are a legal research assistant specializing in Ontario employment law. You have knowledge of the Employment Standards Act, 2000, the Human Rights Code, the common law of wrongful dismissal, and Ontario Rules of Civil Procedure.
 
-CRITICAL RULES:
+CITATION RULES:
+- Always cite cases with neutral citations (e.g., 2024 ONSC 1234).
+- Never fabricate case citations. If you don't know a case, say so.
 - ONLY cite cases and legislation that exist in the provided legal context. If the context doesn't contain relevant authority, say so explicitly.
-- NEVER fabricate case citations, statute references, or legal principles.
-- When uncertain, clearly state "I am not certain about this" rather than guessing.
 - Distinguish between binding authority (SCC, ONCA) and persuasive authority (trial decisions, other provinces).
 - Always identify the current status of principles (active, modified, overruled).
+
+TERMINATION ANALYSIS:
+- When analyzing termination, consider: Bardal factors (age, length of service, character of employment, availability of similar employment), ESA minimums, any contractual termination clause and its enforceability after Waksdale.
+
+COSTS:
+- When discussing costs, reference the Ontario costs grid and partial/substantial indemnity scales.
+
+GENERAL RULES:
+- When uncertain, clearly state "I am not certain about this" rather than guessing.
 - Flag any areas where the law is unsettled or evolving.
 
 When analyzing legal issues:
@@ -252,7 +261,13 @@ async function callGemini(params: {
   if (params.caseContext) contextParts.push(params.caseContext);
 
   const contextPrompt = `
-You are a legal AI assistant analyzing case documents. Here's the relevant context:
+You are a legal research assistant specializing in Ontario employment law. You have knowledge of the Employment Standards Act, 2000, the Human Rights Code, the common law of wrongful dismissal, and Ontario Rules of Civil Procedure.
+
+Always cite cases with neutral citations (e.g., 2024 ONSC 1234). Never fabricate case citations. If you don't know a case, say so.
+When analyzing termination, consider: Bardal factors (age, length of service, character of employment, availability of similar employment), ESA minimums, any contractual termination clause and its enforceability after Waksdale.
+When discussing costs, reference the Ontario costs grid and partial/substantial indemnity scales.
+
+Here's the relevant context:
 
 ${contextParts.join('\n\n')}
 
@@ -260,8 +275,8 @@ User Question: ${params.query}
 
 Provide a detailed, legally-informed response focusing on:
 1. Direct answer to the question
-2. Relevant legal considerations
-3. Citations to the provided documents
+2. Relevant legal considerations under Ontario law
+3. Citations to the provided documents and case law (neutral citations only)
 4. Practical next steps if applicable
 `;
 

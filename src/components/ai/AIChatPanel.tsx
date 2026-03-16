@@ -216,10 +216,10 @@ export function AIChatPanel() {
                 <Sparkles className="h-6 w-6 text-accent-500 dark:text-accent-400" />
               </div>
               <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-                AI Assistant
+                Legal Research Assistant
               </h3>
               <p className={cn('mt-1.5 mb-6 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
-                Ask about your case or documents.
+                Ask about Ontario employment law, case analysis, or your documents.
               </p>
 
               {/* Suggested prompts -- adapt to selected file */}

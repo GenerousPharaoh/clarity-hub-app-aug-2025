@@ -189,7 +189,7 @@ export function CompendiumBuilderModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-surface-950/30 dark:bg-surface-950/60"
+        className="fixed inset-0 z-40 bg-surface-950/30 backdrop-blur-sm dark:bg-surface-950/60"
         onClick={onClose}
       />
 
@@ -200,15 +200,15 @@ export function CompendiumBuilderModal({
         className={cn(
           'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
           'w-[90vw] max-w-2xl max-h-[85vh] flex flex-col',
-          'rounded-xl border border-surface-200 bg-white shadow-overlay',
-          'dark:border-surface-700 dark:bg-surface-800',
+          'rounded-2xl border border-translucent bg-white shadow-overlay',
+          'dark:bg-surface-800',
           'animate-in fade-in-0 zoom-in-95 duration-150'
         )}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-surface-200/80 px-5 py-4 dark:border-surface-700">
+        <div className="flex shrink-0 items-center justify-between border-b border-translucent px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30">
               <BookOpen className="h-4 w-4 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
@@ -225,7 +225,7 @@ export function CompendiumBuilderModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700"
+            className="flex h-7 w-7 items-center justify-center rounded-xl text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -233,7 +233,7 @@ export function CompendiumBuilderModal({
         </div>
 
         {/* Step indicator */}
-        <div className="flex shrink-0 items-center gap-1 border-b border-surface-100 px-5 py-2 dark:border-surface-700/50">
+        <div className="flex shrink-0 items-center gap-1 border-b border-translucent px-5 py-2">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-1">
               <div
@@ -257,7 +257,7 @@ export function CompendiumBuilderModal({
                 {s === 1 ? 'Select' : s === 2 ? 'Configure' : 'Generate'}
               </span>
               {s < 3 && (
-                <div className="mx-1 h-px w-6 bg-surface-200 dark:bg-surface-700" />
+                <div className="border-translucent mx-1 h-px w-6 border-t" />
               )}
             </div>
           ))}
@@ -294,13 +294,13 @@ export function CompendiumBuilderModal({
         </div>
 
         {/* Footer navigation */}
-        <div className="flex shrink-0 items-center justify-between border-t border-surface-200/80 px-5 py-3 dark:border-surface-700">
+        <div className="flex shrink-0 items-center justify-between border-t border-translucent px-5 py-3">
           <button
             onClick={() => {
               if (step === 1) onClose();
               else setStep((s) => (s - 1) as 1 | 2 | 3);
             }}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
+            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
           >
             {step === 1 ? (
               'Cancel'
@@ -316,7 +316,7 @@ export function CompendiumBuilderModal({
               onClick={() => setStep((s) => (s + 1) as 1 | 2 | 3)}
               disabled={step === 1 && selectedCount === 0}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-colors',
+                'flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-xs font-medium text-white transition-colors',
                 'bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed'
               )}
             >
@@ -325,7 +325,7 @@ export function CompendiumBuilderModal({
           ) : (
             <button
               onClick={onClose}
-              className="rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
+              className="rounded-xl px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
             >
               Done
             </button>
@@ -362,7 +362,7 @@ function StepSelect({
         <p className="text-xs font-medium text-surface-600 dark:text-surface-300">
           {items.filter((i) => i.selected).length} of {items.length} exhibits selected
         </p>
-        <div className="flex items-center gap-1 rounded-lg border border-surface-200 p-0.5 dark:border-surface-700">
+        <div className="flex items-center gap-1 rounded-xl border border-translucent p-0.5">
           <button
             onClick={() => onTabStyleChange('letter')}
             className={cn(
@@ -390,9 +390,16 @@ function StepSelect({
 
       {/* Item list */}
       {items.length === 0 ? (
-        <div className="py-8 text-center">
-          <FileText className="mx-auto h-8 w-8 text-surface-300 dark:text-surface-600" />
-          <p className="mt-2 text-xs text-surface-400">No exhibits with linked files found.</p>
+        <div className="flex flex-col items-center justify-center rounded-[24px] border border-dashed border-surface-300 bg-white/80 px-4 py-10 text-center dark:border-surface-700 dark:bg-surface-900/60">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+            <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+          </div>
+          <h3 className="mt-3 font-heading text-xs font-semibold text-surface-700 dark:text-surface-200">
+            No exhibits found
+          </h3>
+          <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500">
+            Link files to exhibits first.
+          </p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -400,10 +407,10 @@ function StepSelect({
             <div
               key={item.exhibitDbId}
               className={cn(
-                'flex items-center gap-2 rounded-lg border p-2.5 transition-colors',
+                'flex items-center gap-2 rounded-xl border p-2.5 transition-colors',
                 item.selected
                   ? 'border-primary-200 bg-primary-50/50 dark:border-primary-800/40 dark:bg-primary-900/10'
-                  : 'border-surface-200 bg-surface-50 opacity-60 dark:border-surface-700 dark:bg-surface-800/50'
+                  : 'border-translucent bg-surface-50 opacity-60 dark:bg-surface-800/50'
               )}
             >
               {/* Checkbox */}
@@ -421,7 +428,7 @@ function StepSelect({
 
               {/* Tab label badge */}
               {item.selected && (
-                <span className="flex h-6 min-w-[32px] shrink-0 items-center justify-center rounded-md bg-primary-100 px-1.5 text-[10px] font-bold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                <span className="flex h-6 min-w-[32px] shrink-0 items-center justify-center rounded-lg bg-primary-100 px-1.5 text-[10px] font-bold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
                   {item.tabLabel}
                 </span>
               )}
@@ -439,9 +446,9 @@ function StepSelect({
                     }}
                     autoFocus
                     className={cn(
-                      'w-full rounded border px-1.5 py-0.5 text-xs',
+                      'w-full rounded-lg border px-2 py-1 text-xs',
                       'border-primary-300 bg-white text-surface-700 outline-none',
-                      'focus:ring-2 focus:ring-primary-500/20',
+                      'focus:ring-2 focus:ring-primary-500/15',
                       'dark:border-primary-700 dark:bg-surface-900 dark:text-surface-200'
                     )}
                   />
@@ -505,7 +512,7 @@ function StepConfigure({
     <div className="space-y-5">
       {/* Document info */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+        <h3 className="font-heading text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
           Document Information
         </h3>
 
@@ -549,7 +556,7 @@ function StepConfigure({
 
       {/* Options */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+        <h3 className="font-heading text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
           Options
         </h3>
 
@@ -608,7 +615,7 @@ function StepGenerate({
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100 dark:bg-primary-900/30">
             <BookOpen className="h-7 w-7 text-primary-600 dark:text-primary-400" />
           </div>
-          <h3 className="mt-4 text-sm font-semibold text-surface-700 dark:text-surface-200">
+          <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
             Ready to Generate
           </h3>
           <p className="mt-1 text-center text-xs text-surface-400">
@@ -633,7 +640,7 @@ function StepGenerate({
       {isGenerating && progress && (
         <>
           <Loader2 className="h-10 w-10 animate-spin text-primary-500" />
-          <h3 className="mt-4 text-sm font-semibold text-surface-700 dark:text-surface-200">
+          <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
             {progress.stage}...
           </h3>
           <p className="mt-1 text-xs text-surface-400">
@@ -656,7 +663,7 @@ function StepGenerate({
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-green-100 dark:bg-green-900/30">
             <Check className="h-7 w-7 text-green-600 dark:text-green-400" />
           </div>
-          <h3 className="mt-4 text-sm font-semibold text-surface-700 dark:text-surface-200">
+          <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
             Compendium Ready
           </h3>
           <div className="mt-2 flex items-center gap-3 text-xs text-surface-400">
@@ -684,7 +691,7 @@ function StepGenerate({
                 'flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-medium transition-colors',
                 isSaved
                   ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800/50 dark:bg-green-900/20 dark:text-green-400'
-                  : 'border-surface-200 text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-700',
+                  : 'border-translucent text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700',
                 'disabled:opacity-70 disabled:cursor-not-allowed'
               )}
             >
@@ -728,10 +735,10 @@ function InputField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={cn(
-          'w-full rounded-lg border px-2.5 py-1.5 text-xs transition-colors',
-          'border-surface-200 bg-white text-surface-700 placeholder-surface-300',
-          'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
-          'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200 dark:placeholder-surface-600',
+          'w-full rounded-xl border px-3 py-2 text-xs transition-colors',
+          'border-surface-200 bg-surface-50/80 text-surface-700 placeholder-surface-300',
+          'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15',
+          'dark:border-surface-700 dark:bg-surface-800/70 dark:text-surface-200 dark:placeholder-surface-600',
           'dark:focus:border-primary-400 dark:focus:ring-primary-400/20'
         )}
       />

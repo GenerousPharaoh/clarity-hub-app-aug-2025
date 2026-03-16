@@ -169,7 +169,7 @@ export function SettingsPage() {
               Choose your theme.
             </p>
 
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mt-4 grid items-stretch grid-cols-1 gap-3 sm:grid-cols-3">
               {themeOptions.map((opt) => {
                 const active = themeMode === opt.value;
                 const Icon = opt.icon;
@@ -178,7 +178,7 @@ export function SettingsPage() {
                     key={opt.value}
                     onClick={() => setTheme(opt.value)}
                     aria-pressed={active}
-                    className={`group relative flex flex-col items-center gap-2 rounded-lg border-2 px-3 py-4 text-center transition-all
+                    className={`group relative flex h-full flex-col items-center gap-2 rounded-lg border-2 px-3 py-4 text-center transition-all
                       ${
                         active
                           ? 'border-primary-600 bg-primary-50 dark:border-primary-500 dark:bg-primary-950/30'

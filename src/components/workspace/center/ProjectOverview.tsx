@@ -220,7 +220,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 <EditableProjectHeader project={project} />
               </div>
 
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+              <div className="mt-6 grid items-stretch gap-3 sm:grid-cols-2 2xl:grid-cols-4">
                 <OverviewMetricCard
                   icon={<FileText className="h-4 w-4" />}
                   label="Files"
@@ -249,7 +249,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 />
               </div>
 
-              <div className="mt-6 grid gap-3 2xl:grid-cols-2">
+              <div className="mt-6 grid items-stretch gap-3 2xl:grid-cols-2">
                 <AnchorCard
                   eyebrow="Latest evidence"
                   title={latestFile?.name ?? 'No files yet'}
@@ -296,7 +296,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           </div>
         </div>
 
-        <div className="grid gap-5 2xl:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid items-stretch gap-5 2xl:grid-cols-[1.05fr_0.95fr]">
           <NextStepsCard actions={nextSteps} />
           <RecentActivity
             files={projectFiles}
@@ -310,7 +310,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           />
         </div>
 
-        <div className="grid gap-5 2xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid items-stretch gap-5 2xl:grid-cols-[0.95fr_1.05fr]">
           {fileCount > 0 ? (
             <FileTypeBreakdown files={projectFiles} />
           ) : (
@@ -540,7 +540,7 @@ function OverviewMetricCard({
     <Component
       onClick={onClick}
       className={cn(
-        'min-w-0 rounded-[22px] border border-surface-200/80 bg-white/78 p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/45',
+        'flex h-full min-w-0 flex-col rounded-[22px] border border-surface-200/80 bg-white/78 p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/45',
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
@@ -551,7 +551,7 @@ function OverviewMetricCard({
       <p className="mt-3 font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {value}
       </p>
-      <p className="mt-2 text-xs text-surface-500 dark:text-surface-400">
+      <p className="mt-2 line-clamp-1 text-xs text-surface-500 dark:text-surface-400">
         {detail}
       </p>
     </Component>
@@ -575,14 +575,14 @@ function AnchorCard({
     <Component
       onClick={onClick}
       className={cn(
-        'min-w-0 rounded-[22px] border border-surface-200/80 bg-white/76 px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/45',
+        'flex h-full min-w-0 flex-col rounded-[22px] border border-surface-200/80 bg-white/76 px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/45',
         onClick && 'transition-colors hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
       <p className="truncate text-sm font-medium text-surface-900 dark:text-surface-100">
         {title}
       </p>
-      <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+      <p className="mt-1 line-clamp-1 text-xs text-surface-500 dark:text-surface-400">
         {detail}
       </p>
     </Component>
@@ -653,14 +653,14 @@ function NextStepsCard({
   }>;
 }) {
   return (
-    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
         <Sparkles className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Next steps
       </div>
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 flex flex-1 flex-col space-y-3">
         {actions.map((action) => (
-          <div key={action.title} className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
+          <div key={action.title} className="flex flex-col rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
             <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
               {action.title}
             </h3>
@@ -670,7 +670,7 @@ function NextStepsCard({
             {action.action && action.actionLabel && (
               <button
                 onClick={action.action}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
+                className="mt-auto inline-flex items-center gap-1.5 self-start rounded-xl px-3 py-2 pt-3 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
               >
                 {action.actionLabel}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -721,12 +721,12 @@ function FileTypeBreakdown({
   };
 
   return (
-    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
         <FileText className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Evidence profile
       </div>
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 flex-1 space-y-3">
         {entries.map(([type, count]) => (
           <div key={type} className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
             <div className="flex items-center gap-2">
@@ -795,12 +795,12 @@ function RecentActivity({
   }
 
   return (
-    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
         <Clock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Recent activity
       </div>
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 flex-1 space-y-3">
         {items.map((item) => (
           <button
             key={item.id}
@@ -842,7 +842,7 @@ function MatterDetailsCard({
   exhibitCount: number;
 }) {
   return (
-    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
         <FolderOpen className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Matter details
@@ -873,7 +873,7 @@ function SignalEmptyState({
   description: string;
 }) {
   return (
-    <div className="rounded-[28px] border border-dashed border-surface-300 bg-white/82 p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/60">
+    <div className="flex h-full flex-col rounded-[28px] border border-dashed border-surface-300 bg-white/82 p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/60">
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
         <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
       </div>

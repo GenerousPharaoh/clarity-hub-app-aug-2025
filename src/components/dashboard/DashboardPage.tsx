@@ -185,7 +185,7 @@ export function DashboardPage() {
             </div>
           </section>
 
-          <div className="mt-3 grid gap-3 grid-cols-1 sm:grid-cols-3">
+          <div className="mt-3 grid items-stretch gap-3 grid-cols-1 sm:grid-cols-3">
             <MetricCard
               icon={<Briefcase className="h-4 w-4" />}
               label="Active matters"
@@ -342,7 +342,7 @@ export function DashboardPage() {
                 </div>
               </FadeIn>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleProjects.map((project, index) => (
                   <ProjectCard
                     key={project.id}
@@ -400,7 +400,7 @@ function MetricCard({
         : 'border-surface-200/80 bg-white/85 text-surface-700 dark:border-surface-800 dark:bg-surface-900/70 dark:text-surface-200';
 
   return (
-    <div className={cn('min-w-0 rounded-2xl border p-4 shadow-sm', toneClasses)}>
+    <div className={cn('flex min-w-0 flex-col rounded-2xl border p-4 shadow-sm', toneClasses)}>
       <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
         {icon}
         <span>{label}</span>
@@ -408,7 +408,7 @@ function MetricCard({
       <p className="mt-2 font-heading text-2xl font-semibold tracking-tight [overflow-wrap:anywhere]">
         {value}
       </p>
-      <p className="mt-1 text-xs leading-5 text-current/70 [overflow-wrap:anywhere]">
+      <p className="mt-auto text-xs leading-5 text-current/70 [overflow-wrap:anywhere]">
         {detail}
       </p>
     </div>

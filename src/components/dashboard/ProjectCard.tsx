@@ -143,6 +143,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
         delay: index * 0.05,
         ease: [0.16, 1, 0.3, 1],
       }}
+      className="h-full"
     >
       <div
         role="link"
@@ -155,7 +156,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           }
         }}
         className={cn(
-          'group relative min-w-0 overflow-hidden rounded-[26px] border p-5',
+          'group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[26px] border p-5',
           'border-translucent bg-white/88 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.42)]',
           'interactive-lift surface-grain',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-950',
@@ -165,7 +166,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
         <div className={cn('absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r', accent)} />
         <div className="pointer-events-none absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl dark:bg-surface-700/20" />
 
-        <div className="relative">
+        <div className="relative flex flex-1 flex-col">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 items-start gap-3">
               <div className={cn(
@@ -264,11 +265,11 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
             </div>
           </div>
 
-          <p className="mt-4 line-clamp-3 text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
+          <p className="mt-4 line-clamp-2 text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
             {project.description || 'No summary'}
           </p>
 
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-auto grid grid-cols-1 gap-3 pt-5 sm:grid-cols-2">
             <div className="rounded-2xl border border-surface-200/80 bg-surface-50/80 px-3.5 py-3 dark:border-surface-800 dark:bg-surface-950/40">
               <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
                 <FileText className="h-3.5 w-3.5" />

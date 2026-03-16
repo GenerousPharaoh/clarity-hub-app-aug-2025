@@ -139,23 +139,23 @@ export function SuggestedPrompts({
       )}
       <div
         className={compact
-          ? 'grid grid-cols-1 gap-2 px-3'
-          : 'grid grid-cols-[repeat(auto-fit,minmax(164px,1fr))] gap-2 px-4'}
+          ? 'grid items-stretch grid-cols-1 gap-2 px-3'
+          : 'grid items-stretch grid-cols-[repeat(auto-fit,minmax(164px,1fr))] gap-2 px-4'}
       >
         {visiblePrompts.map((prompt) => (
           <button
             key={prompt.label}
             onClick={() => onSelectPrompt(prompt.text)}
             className={compact
-              ? 'group interactive-lift flex items-start gap-2 rounded-lg border border-translucent bg-white px-2.5 py-2 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'
-              : 'group interactive-lift flex min-h-20 items-start gap-2.5 rounded-lg border border-translucent bg-white p-3 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'}
+              ? 'group interactive-lift flex h-full items-start gap-2 rounded-lg border border-translucent bg-white px-2.5 py-2 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'
+              : 'group interactive-lift flex h-full min-h-20 items-start gap-2.5 rounded-lg border border-translucent bg-white p-3 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'}
           >
             <div className="mt-0.5 shrink-0 text-surface-400 transition-colors group-hover:text-accent-500 dark:text-surface-500 dark:group-hover:text-accent-400">
               {prompt.icon}
             </div>
             <span className={compact
-              ? 'text-[11px] leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'
-              : 'text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'}
+              ? 'line-clamp-2 text-[11px] leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'
+              : 'line-clamp-2 text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'}
             >
               {prompt.label}
             </span>

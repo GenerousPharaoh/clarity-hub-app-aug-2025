@@ -1,122 +1,168 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working on the Clarity Hub app.
 
-## Development Commands
+## Commands
 
-### Basic Commands
-- `npm run dev` - Start Vite development server
-- `npm run build` - Build for production (runs typecheck first)
-- `npm run lint` - Run ESLint
-- `npm run preview` - Preview production build locally
-- `npm run typecheck` - Run TypeScript type checking
+```bash
+npm run dev          # Vite dev server
+npm run build        # Production build (typecheck + bundle)
+npm run lint         # ESLint
+npm run typecheck    # TypeScript only
+```
 
-## Application Architecture
+## Architecture
 
-### Core Architecture
-1. **Client Application:** React + Vite app with Material UI
-2. **Backend:** Supabase for authentication, storage, and database
-3. **Edge Functions:** Supabase Edge Functions for AI integration
-4. **Deployment:** Vercel with automatic GitHub integration
+**Stack:** React 19 + Vite + TypeScript + Tailwind CSS 4 + Supabase + TanStack Query + Zustand + Framer Motion
 
-### Supabase Integration
-- Full database schema with projects, documents, files, and citations
-- File upload pipeline with SHA256 hashing and storage
-- Row Level Security (RLS) policies for data protection
-- Real-time subscriptions for collaborative features
-- Complete environment variables configured in Vercel
+**Deployment:** Vercel auto-deploy on push to `main`. API routes in `api/` directory as Vercel serverless functions.
 
-### Key Components
+**Layout:** Three resizable panels — Left (files), Center (overview/documents/exhibits/timeline), Right (viewer/AI chat). Each panel has ResizeObserver-based compact/ultraCompact modes.
 
-#### Layout System
-- **ResizablePanels:** The app uses a three-panel layout with resizable panels:
-  - Left Panel: Project/file navigation
-  - Center Panel: Content display and editing
-  - Right Panel: File viewer and AI tools
-- State management via Zustand for panel sizes and collapsed state
+### Authentication
+- Google OAuth only (PKCE flow via Supabase Auth)
+- Demo mode with seeded data (no real auth)
+- Auth context: `useAuth()` → `{ user, loading, signInWithGoogle, signOut, isDemoMode }`
 
-#### File Management
-- File uploads through Supabase Storage with fallback to IndexedDB
-- File viewers for various file types (PDF, images, audio, video, documents)
-- Versioning support for uploaded files
+### AI Architecture (Server-Side)
+All AI calls go through Vercel serverless functions — API keys are NOT in the client bundle.
 
-#### File Viewers
-- `UniversalFileViewer`: Main container that detects file type and delegates to appropriate viewer
-- Specialized viewers for different file types (PDFViewer, ImageViewer, etc.)
-- Enhanced viewers with additional capabilities (zoom, annotations, etc.)
+| Route | Purpose |
+|-------|---------|
+| `api/ai-chat.ts` | Main AI chat — routes to Gemini (quick/standard) or GPT (deep) based on query complexity. Rate limited (30/min). |
+| `api/ai-embeddings.ts` | OpenAI text-embedding-3-small for RAG |
+| `api/process-file.ts` | File processing: text extraction → classification → summary → timeline extraction → chunking → embedding |
+| `api/classify-file.ts` | Standalone classification for already-processed files |
+| `api/extract-timeline.ts` | Bulk timeline extraction across all project files (5-min timeout) |
 
-#### Authentication
-- Supabase Auth for user management
-- Protected routes with AuthContext
+**Client services** (`src/services/`):
+- `aiRouter.ts` — classifies queries, calls `/api/ai-chat`, extracts citations
+- `geminiAIService.ts` / `openaiService.ts` — stubs (SDKs removed from client bundle)
+- `legalKnowledgeService.ts` — searches legal_cases, legal_principles, legal_legislation (typed Supabase queries, no `as any`)
+- `documentSearchService.ts` — RAG vector + full-text search over project files
+- `compendiumGenerator.ts` — PDF compilation using pdf-lib
 
-#### AI Architecture (Multi-Model Legal Reasoning)
+**System prompt focus:** Ontario employment law specialist — ESA 2000, Human Rights Code, Waksdale, Bardal factors, costs grid.
 
-The app uses a dual-model AI architecture optimized for Ontario employment law:
+### Environment Variables
 
-**Model Routing (`src/services/aiRouter.ts`):**
-- Smart query classification: simple → moderate → deep complexity
-- Routes to optimal model based on query complexity and availability
-- Graceful fallback: if one model is unavailable, uses the other
+| Variable | Scope | Used By |
+|----------|-------|---------|
+| `VITE_SUPABASE_URL` | Client | Supabase client |
+| `VITE_SUPABASE_ANON_KEY` | Client | Supabase client |
+| `OPENAI_API_KEY` | Server | ai-chat, ai-embeddings, process-file, classify-file, extract-timeline |
+| `GEMINI_API_KEY` | Server | ai-chat (optional, falls back to OpenAI) |
+| `SUPABASE_URL` | Server | All API routes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server | All API routes |
 
-**Gemini 3.0 Pro (`src/services/geminiAIService.ts`):**
-- Primary model for multimodal processing (text, images, audio, video, documents)
-- Handles general legal chat, document analysis, file understanding
-- Used for simple and moderate complexity queries
-- API Key env var: `VITE_GEMINI_API_KEY`
+### Database (Supabase)
 
-**GPT-5.2 Deep Reasoning (`src/services/openaiService.ts`):**
-- Activated for deep legal reasoning tasks (strategy, case analysis, complex legal tests)
-- Extended thinking mode with temperature 0.2 for legal accuracy
-- System prompt enforces: only cite from provided context, never fabricate citations
-- Also provides text-embedding-3-small for RAG embeddings (1536-dim, $0.02/1M tokens)
-- API Key env var: `VITE_OPENAI_API_KEY`
+**Project:** `wfxpkjjvjmmjvampvetb` (ca-central-1)
 
-**Adaptive AI Service (`src/services/adaptiveAIService.ts`):**
-- Wraps Gemini for contextual chat with user preferences and case context
-- Ontario employment law specialist system prompt
+**Core tables:** `profiles`, `projects`, `projects_users`, `files`, `document_chunks`, `notes`, `exhibit_markers`, `chat_messages`
 
-**RAG Pipeline:**
-- Legal knowledge chunks stored with tsvector (full-text) and vector embeddings (pgvector)
-- `legalKnowledgeService.buildLegalContext(query)` searches cases, principles, legislation
-- Context is injected into AI prompts alongside user's case file data
-- HNSW index on embeddings for fast approximate nearest neighbor search
+**Legal knowledge:** `legal_topics` (34), `legal_legislation` (11), `legal_legislation_sections` (12), `legal_cases` (23), `legal_principles` (12), `legal_knowledge_chunks` (81)
 
-**Query Classification Signals (triggers GPT-5.2):**
-- Legal strategy: "strategy", "advise", "recommend", "pros and cons", "risks"
-- Complex analysis: "analyze", "factors", "elements", "standard", "legal test"
-- Case reasoning: "reasonable notice", "constructive dismissal", "just cause", "damages"
-- Multi-step: "how would a court", "precedent", "argue", "counter-argument"
+**New feature tables:**
+- `timeline_events` — AI-extracted chronological events per project
+- `compendiums` + `compendium_entries` — Exhibit book builder configuration
+- `files` extended with: `document_type`, `classification_metadata` (JSONB), `classification_confidence`, `classification_source`, `classified_at`
+- `exhibit_markers` extended with: `sort_order`
 
-**UI Integration (`src/components/ai/AdaptiveLegalAIChat.tsx`):**
-- Model indicator chip on each AI response (shows "GPT-5.2" or "Gemini")
-- Conversation history maintained for context continuity
-- Legal knowledge context fetched in parallel with user context
+**RLS:** All tables have row-level security scoped through project ownership or `projects_users` membership.
 
-#### Legal Knowledge Base (Ontario Employment Law MVP)
-- **Service:** `src/services/legalKnowledgeService.ts` - Full CRUD + search for legal data
-- **AI Integration:** Legal context is fetched in parallel with user context in `AdaptiveLegalAIChat.tsx`
-- **Database Tables:**
-  - `legal_topics` (34 rows) - Hierarchical topic taxonomy with parent/child relationships
-  - `legal_legislation` (11 rows) - Statutes and regulations (ESA, OHRC, OHSA, WSIA, LRA, etc.)
-  - `legal_legislation_sections` (12 rows) - Key statutory provisions with keyword arrays
-  - `legal_cases` (23 rows) - Landmark case law with citations, holdings, and ratios
-  - `legal_principles` (12 rows) - Legal doctrines (Bardal factors, Waksdale, Honda/Keays, etc.)
-  - `legal_knowledge_chunks` (81 rows) - RAG search table with full-text search (tsvector) and vector embeddings (pgvector HNSW)
-- **Search:** `match_legal_knowledge()` RPC for vector similarity; `fts` tsvector column for full-text search
-- **RLS:** All legal tables are read-only for authenticated users
+**Storage:** Single `files` bucket (private, 100MB limit, signed URLs).
 
-### Common Issues and Fixes
+## Key Features
 
-1. **Storage Permission Errors:**
-   - If encountering "violates row-level security policy" errors, run `npm run fix:storage`
+### Smart Document Classification
+- 65 Ontario legal document types across 11 categories (`src/lib/documentTypes.ts`)
+- Auto-classifies during file processing via `classifyDocument()` in `document-processor.ts`
+- Standalone `/api/classify-file` endpoint for retroactive classification
+- UI: color-coded badges on file cards, category filter chips in left panel
 
-2. **Projects Not Displaying:**
-   - If projects aren't showing in the left panel, run `npm run fix:projects`
+### Timeline Extraction
+- AI extracts dated events during file processing via `api/lib/timeline-extractor.ts`
+- Bulk extraction via `/api/extract-timeline` endpoint
+- Timeline tab in center panel with chronological event list
+- Manual event creation, verification toggle, source file linking
 
-3. **WebSocket Connection Issues:**
-   - Check port configuration in vite.config.ts
-   - Ensure server port and HMR port match
+### Exhibit Book / Compendium Builder
+- PDF compilation using pdf-lib (`src/services/compendiumGenerator.ts`)
+- Cover page, table of contents, tab dividers, sequential page numbering
+- 3-step wizard modal from ExhibitsTab: Select & Arrange → Configure → Generate
+- Supports PDF merging and image embedding
 
-4. **CORS Issues with Edge Functions:**
-   - Edge Functions should include proper CORS headers for OPTIONS requests
-   - Relevant utility: `src/utils/edgeFunctions.ts`
+### Responsive Panel Design
+- All 3 panels use ResizeObserver with compact/ultraCompact breakpoints
+- Text truncates, labels hide, buttons become icon-only at narrow widths
+- `min-w-0` on all flex children, `items-stretch` on all multi-column grids
+- Global `cursor: pointer !important` on all interactive elements
+
+## Design System
+
+**Fonts:** Space Grotesk (headings), Inter (body), JetBrains Mono (code)
+
+**Colors:** Primary = ink blue (#62798f), Accent = burnished copper (#a5743f), Surfaces = zinc-based neutrals
+
+**Design tokens** (all in `src/index.css` `@theme` block):
+- Layered multi-stop shadows (not flat)
+- `.surface-grain` — barely-visible noise texture
+- `.border-translucent` — semi-transparent borders (Linear-style)
+- `.interactive-lift` — hover lift + shadow bloom + active press
+- `.focus-accent` — copper-gold focus ring on primary CTAs
+
+**Patterns:**
+- `border-translucent` instead of hard gray borders
+- `font-heading` on all headings
+- Equal-height cards via `items-stretch` + `flex flex-col h-full`
+- Progressive disclosure: secondary actions appear on hover (visible on mobile)
+- Concise text throughout — no marketing language or obvious labels
+
+## File Structure
+
+```
+api/                          # Vercel serverless functions
+  ai-chat.ts                  # Main AI endpoint
+  ai-embeddings.ts            # Embedding generation
+  process-file.ts             # File processing pipeline
+  classify-file.ts            # Standalone classification
+  extract-timeline.ts         # Bulk timeline extraction
+  lib/
+    document-processor.ts     # Processing pipeline logic
+    timeline-extractor.ts     # Timeline extraction prompts
+src/
+  components/
+    ai/                       # AI chat panel, messages, prompts
+    auth/                     # Login, callback, protected route
+    dashboard/                # Dashboard, project cards
+    layout/                   # Header, AppShell
+    shared/                   # ErrorBoundary, PanelErrorBoundary, EmptyState, etc.
+    viewers/                  # PDF, image, audio, video, document viewers
+    workspace/
+      left/                   # LeftPanel, FileListItem, FileUploadZone
+      center/                 # CenterPanel, ProjectOverview, ExhibitsTab, TimelineTab, CompendiumBuilderModal, editor/
+      right/                  # RightPanel
+  hooks/                      # TanStack Query hooks (useFiles, useNotes, useExhibits, useTimeline, useCompendiums, useAIChat)
+  services/                   # AI router, legal knowledge, document search, compendium generator, storage
+  store/                      # Zustand slices (auth, panel, file, ui)
+  lib/                        # Utilities, document types taxonomy, processing budget
+  types/                      # database.ts (Supabase types), index.ts (app types)
+```
+
+## Code Quality
+
+- Zero `as any` casts in the codebase
+- Zero `@ts-ignore` / `@ts-expect-error` directives
+- All Supabase queries fully typed
+- ESLint: 0 errors in `src/` (edge function lint errors are non-blocking)
+- Build: `tsc -b && vite build` — must pass before committing
+
+## Important Notes
+
+- **No MUI** — removed. UI is pure Tailwind CSS + Lucide icons.
+- **AI keys are server-side only** — never use `VITE_` prefix for API keys.
+- `openaiService.ts` and `geminiAIService.ts` are stubs — all AI calls go through `api/` routes.
+- The `adaptiveAIService.ts` and `AdaptiveLegalAIChat.tsx` files referenced in old docs **do not exist** — removed/replaced.
+- Free-tier Supabase projects pause after inactivity. If the app won't load, restore the project in Supabase dashboard.
+- Feature roadmap at `FEATURE-ROADMAP.md` — CanLII integration and brief drafting assistant are next.

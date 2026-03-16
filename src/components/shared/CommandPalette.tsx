@@ -351,7 +351,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           >
             {/* Search input */}
             <div className="flex items-center gap-3 border-b border-surface-100 px-4 dark:border-surface-700">
-              <Search className="h-4 w-4 shrink-0 text-surface-400" />
+              <Search className="h-4 w-4 shrink-0 text-surface-400 dark:text-surface-500" />
               <input
                 ref={inputRef}
                 type="text"

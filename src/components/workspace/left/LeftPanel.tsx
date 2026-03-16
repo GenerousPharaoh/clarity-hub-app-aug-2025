@@ -285,7 +285,7 @@ export function LeftPanel() {
               'dark:focus-within:border-primary-400 dark:focus-within:ring-primary-400/20'
             )}
           >
-            <Search className="h-3.5 w-3.5 shrink-0 text-surface-400" />
+            <Search className="h-3.5 w-3.5 shrink-0 text-surface-400 dark:text-surface-500" />
             <input
               type="text"
               value={searchQuery}
@@ -405,13 +405,18 @@ export function LeftPanel() {
           </div>
         ) : isError ? (
           <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-red-200/80 bg-red-50/70 px-4 py-12 dark:border-red-900/40 dark:bg-red-950/20">
-            <AlertCircle className="h-5 w-5 text-red-400" />
-            <p className="mt-2 text-center text-xs font-medium text-red-700 dark:text-red-300">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-950/40">
+              <AlertCircle className="h-5 w-5 text-red-400" />
+            </div>
+            <h3 className="mt-3 text-center text-xs font-semibold text-red-700 dark:text-red-300">
               Failed to load files
+            </h3>
+            <p className="mt-1 text-center text-[11px] text-red-600/80 dark:text-red-400/70">
+              Check your connection and try again.
             </p>
             <button
               onClick={() => refetch()}
-              className="mt-2 flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-red-600 transition-colors hover:bg-white/80 dark:text-red-300 dark:hover:bg-red-950/30"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
             >
               <RefreshCw className="h-3 w-3" />
               Retry
@@ -420,13 +425,18 @@ export function LeftPanel() {
         ) : filteredFiles.length === 0 ? (
           // Empty state
           <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-dashed border-surface-300 bg-white/80 px-4 py-12 text-center dark:border-surface-700 dark:bg-surface-900/60">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
               <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
             </div>
-            <p className="mt-3 text-center text-xs font-semibold text-surface-700 dark:text-surface-200">
+            <h3 className="mt-3 text-center text-xs font-semibold text-surface-700 dark:text-surface-200">
               {searchQuery
                 ? 'No files match your search'
                 : 'No files yet'}
+            </h3>
+            <p className="mt-1 text-center text-[11px] text-surface-400 dark:text-surface-500">
+              {searchQuery
+                ? 'Try a different search term.'
+                : 'Upload files to get started.'}
             </p>
           </div>
         ) : (

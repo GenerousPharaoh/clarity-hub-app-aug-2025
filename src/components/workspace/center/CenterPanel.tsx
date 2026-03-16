@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { formatRelativeDate } from '@/lib/utils';
@@ -6,8 +6,12 @@ import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNotes, useCreateNote, useDeleteNote, useUpdateNote } from '@/hooks/useNotes';
 import { ProjectOverview } from './ProjectOverview';
-import { TipTapEditor } from './editor/TipTapEditor';
 import { ExhibitsTab } from './ExhibitsTab';
+
+// Lazy-load TipTap editor (~467KB) — only loaded when user opens the editor tab
+const TipTapEditor = lazy(() =>
+  import('./editor/TipTapEditor').then((m) => ({ default: m.TipTapEditor }))
+);
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { readWorkspaceSession, saveWorkspaceNote, saveWorkspaceView } from '@/lib/workspaceSession';
@@ -307,8 +311,16 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
 
   if (!selectedProjectId) {
     return (
-      <div className="flex w-full flex-1 items-center justify-center">
-        <p className="text-xs text-surface-400">Select a project first</p>
+      <div className="flex w-full flex-1 flex-col items-center justify-center px-8">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+          <PenLine className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+        </div>
+        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+          No Project Selected
+        </h3>
+        <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+          Select a project to view its documents.
+        </p>
       </div>
     );
   }
@@ -316,12 +328,28 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
   if (isLoading) {
     return (
       <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-surface-200 px-3 dark:border-surface-800">
-          <div className="h-5 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="ml-auto h-6 w-20 animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
+        {/* Skeleton header bar */}
+        <div className="flex shrink-0 items-center gap-3 border-b border-surface-200/80 px-3 py-3 dark:border-surface-800 sm:px-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-5 w-14 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
+          <div className="ml-auto flex gap-1.5">
+            <div className="h-8 w-24 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" />
+            <div className="h-8 w-8 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" />
+          </div>
         </div>
-        <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-surface-300" />
+        {/* Skeleton title bar */}
+        <div className="shrink-0 px-3 py-3 sm:px-4">
+          <div className="h-11 w-full animate-pulse rounded-2xl bg-surface-100 dark:bg-surface-800" />
+        </div>
+        {/* Skeleton editor body */}
+        <div className="flex-1 space-y-3 px-4 py-4">
+          <div className="h-4 w-5/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-4 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-4 w-4/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="mt-6 h-4 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-4 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-4 w-5/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
         </div>
       </div>
     );
@@ -330,18 +358,18 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
   if (isError) {
     return (
       <div className="flex h-full w-full min-w-0 flex-1 flex-col items-center justify-center px-8">
-        <AlertCircle className="h-6 w-6 text-red-400" />
-        <p className="mt-3 text-sm font-medium text-surface-600 dark:text-surface-300">
-          Failed to load notes
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
+          <AlertCircle className="h-5 w-5 text-red-400" />
+        </div>
+        <h3 className="mt-3 font-heading text-sm font-semibold text-red-700 dark:text-red-300">
+          Failed to load documents
+        </h3>
+        <p className="mt-1 max-w-xs text-center text-xs leading-relaxed text-red-600/80 dark:text-red-400/80">
+          Check your connection and try again.
         </p>
         <button
           onClick={() => refetch()}
-          className={cn(
-            'mt-3 flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-            'text-xs font-medium text-primary-600',
-            'transition-colors hover:bg-primary-50',
-            'dark:text-primary-400 dark:hover:bg-primary-900/20'
-          )}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -350,24 +378,24 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
     );
   }
 
-  // ── Empty state — no notes yet ──────────────────────────
+  // ── Empty state -- no notes yet ──────────────────────────
   if (!notes || notes.length === 0) {
     return (
       <div className="flex h-full w-full min-w-0 flex-1 flex-col items-center justify-center px-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
-          <PenLine className="h-6 w-6 text-surface-400 dark:text-surface-500" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+          <PenLine className="h-5 w-5 text-surface-400 dark:text-surface-500" />
         </div>
         <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
           No Documents
         </h3>
         <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-          Create a document to begin.
+          Create a document to begin drafting.
         </p>
         <button
           onClick={handleCreate}
           disabled={createNote.isPending}
           className={cn(
-            'mt-4 flex items-center gap-1.5 rounded-lg px-4 py-2',
+            'mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2',
             'bg-primary-600 text-xs font-medium text-white',
             'transition-colors hover:bg-primary-700 active:bg-primary-700',
             'disabled:opacity-50'
@@ -536,7 +564,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                       </button>
                     ))}
                   </div>
-                  <div className="border-t border-surface-100 p-2 dark:border-surface-700">
+                  <div className="border-t border-surface-200 p-2 dark:border-surface-700">
                     <button
                       onClick={handleCreate}
                       disabled={createNote.isPending}
@@ -565,16 +593,24 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
       {/* Full-width editor — takes all remaining space */}
       {activeNote ? (
         <div className="flex-1 overflow-hidden">
-          <TipTapEditor
-            key={activeNote.id}
-            noteId={activeNote.id}
-            projectId={activeNote.project_id}
-            initialContent={activeNote.content || ''}
-          />
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center">
+                <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
+              </div>
+            }
+          >
+            <TipTapEditor
+              key={activeNote.id}
+              noteId={activeNote.id}
+              projectId={activeNote.project_id}
+              initialContent={activeNote.content || ''}
+            />
+          </Suspense>
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-5 w-5 animate-spin text-surface-300" />
+          <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
         </div>
       )}
 

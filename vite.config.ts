@@ -29,20 +29,14 @@ export default defineConfig({
               id.includes('node_modules/react-router')) {
             return 'react-vendor';
           }
-          // TipTap editor
+          // TipTap editor (lazy-loaded with editor tab)
           if (id.includes('node_modules/@tiptap/') ||
               id.includes('node_modules/prosemirror') ||
               id.includes('node_modules/@prosemirror')) {
             return 'tiptap-vendor';
           }
-          // AI service SDKs
-          if (id.includes('node_modules/openai') ||
-              id.includes('node_modules/@google/generative-ai')) {
-            return 'ai-vendor';
-          }
-          // Markdown rendering
+          // Markdown rendering (lazy-loaded with AI chat)
           if (id.includes('node_modules/react-markdown') ||
-              id.includes('node_modules/react-syntax-highlighter') ||
               id.includes('node_modules/remark') ||
               id.includes('node_modules/rehype') ||
               id.includes('node_modules/unified') ||
@@ -50,6 +44,29 @@ export default defineConfig({
               id.includes('node_modules/micromark') ||
               id.includes('node_modules/hast')) {
             return 'markdown-vendor';
+          }
+          // Syntax highlighting (separated from markdown for better caching)
+          if (id.includes('node_modules/react-syntax-highlighter') ||
+              id.includes('node_modules/refractor') ||
+              id.includes('node_modules/prismjs')) {
+            return 'syntax-vendor';
+          }
+          // PDF export (dynamically imported, only loaded on export)
+          if (id.includes('node_modules/jspdf') ||
+              id.includes('node_modules/html2canvas')) {
+            return 'pdf-export';
+          }
+          // DOCX export (dynamically imported)
+          if (id.includes('node_modules/docx')) {
+            return 'docx-export';
+          }
+          // Supabase client
+          if (id.includes('node_modules/@supabase')) {
+            return 'supabase-vendor';
+          }
+          // TanStack Query
+          if (id.includes('node_modules/@tanstack')) {
+            return 'query-vendor';
           }
           // UI libraries
           if (id.includes('node_modules/framer-motion')) {

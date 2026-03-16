@@ -67,7 +67,7 @@ export function Header() {
             <Link
               to="/"
               className={cn(
-                'flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1',
+                'flex shrink-0 items-center gap-1 rounded-md px-2 py-2 sm:px-1.5 sm:py-1',
                 'font-medium text-surface-400',
                 'transition-all hover:bg-surface-100 hover:text-surface-600',
                 'dark:hover:bg-surface-800 dark:hover:text-surface-300'
@@ -129,7 +129,7 @@ export function Header() {
         <Link
           to="/settings"
           className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-lg',
+            'flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-lg',
             'text-surface-400 transition-all',
             'hover:bg-surface-100 hover:text-surface-600',
             'dark:hover:bg-surface-800 dark:hover:text-surface-300'
@@ -168,7 +168,7 @@ function HeaderButton({
     <button
       onClick={onClick}
       className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-lg',
+        'flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-lg',
         'text-surface-400 transition-all',
         'hover:bg-surface-100 hover:text-surface-600',
         'dark:hover:bg-surface-800 dark:hover:text-surface-300'

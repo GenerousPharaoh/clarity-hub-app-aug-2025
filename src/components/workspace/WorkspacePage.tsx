@@ -194,19 +194,19 @@ export function WorkspacePage() {
         <nav className="flex shrink-0 border-t border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
           <MobileTabButton
             active={mobileTab === 'files'}
-            icon={<FolderOpen className="h-4 w-4" />}
+            icon={<FolderOpen className="h-5 w-5" />}
             label="Files"
             onClick={() => setMobileTab('files')}
           />
           <MobileTabButton
             active={mobileTab === 'content'}
-            icon={<LayoutList className="h-4 w-4" />}
+            icon={<LayoutList className="h-5 w-5" />}
             label="Content"
             onClick={() => setMobileTab('content')}
           />
           <MobileTabButton
             active={mobileTab === 'viewer'}
-            icon={<PanelRight className="h-4 w-4" />}
+            icon={<PanelRight className="h-5 w-5" />}
             label="Viewer"
             onClick={() => setMobileTab('viewer')}
           />
@@ -351,7 +351,7 @@ function MobileTabButton({
     <button
       onClick={onClick}
       className={cn(
-        'relative flex flex-1 flex-col items-center gap-0.5 py-2 transition-colors',
+        'relative flex flex-1 flex-col items-center gap-1 py-3 min-h-[48px] transition-colors',
         active
           ? 'text-primary-600 dark:text-primary-400'
           : 'text-surface-400 dark:text-surface-500'
@@ -361,7 +361,7 @@ function MobileTabButton({
         <div className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary-600 dark:bg-primary-400" />
       )}
       {icon}
-      <span className="text-[10px] font-medium">{label}</span>
+      <span className="text-xs font-medium">{label}</span>
     </button>
   );
 }

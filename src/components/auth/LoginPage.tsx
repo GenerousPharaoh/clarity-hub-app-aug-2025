@@ -45,7 +45,7 @@ export function LoginPage() {
   if (user) return <Navigate to="/" replace />;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen dark:bg-surface-950">
       {/* Left: Branding — gradient hero */}
       <div className="relative hidden lg:flex lg:w-1/2 flex-col justify-between overflow-hidden p-12 text-white">
         {/* Gradient background */}

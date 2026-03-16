@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  AlertCircle,
   ArrowRight,
   ArrowUpDown,
   Briefcase,
@@ -150,7 +151,7 @@ export function DashboardPage() {
           <section
             className={cn(
               'relative overflow-hidden rounded-2xl border p-5 shadow-[0_28px_80px_-48px_rgba(15,23,42,0.45)] sm:p-6',
-              'border-translucent bg-white/88 dark:bg-surface-900/80'
+              'border-translucent bg-white/88 dark:bg-surface-900/80 dark:shadow-[0_28px_80px_-48px_rgba(0,0,0,0.7)]'
             )}
           >
             <div className="relative min-w-0">
@@ -165,7 +166,7 @@ export function DashboardPage() {
                   {resumeProject && (
                     <button
                       onClick={() => navigate(`/project/${resumeProject.id}`)}
-                      className="focus-accent inline-flex items-center justify-center gap-2 rounded-xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
+                      className="focus-accent inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-surface-950 px-4 py-3 sm:py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
                     >
                       Resume
                       <ArrowRight className="h-4 w-4" />
@@ -173,7 +174,7 @@ export function DashboardPage() {
                   )}
                   <button
                     onClick={() => setDialogOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-surface-200 bg-white/85 px-4 py-2.5 text-sm font-medium text-surface-700 transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 dark:border-surface-700 dark:bg-surface-900/70 dark:text-surface-200 dark:hover:border-primary-700 dark:hover:text-primary-300"
+                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-surface-200 bg-white/85 px-4 py-3 sm:py-2.5 text-sm font-medium text-surface-700 transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:text-primary-700 dark:border-surface-700 dark:bg-surface-900/70 dark:text-surface-200 dark:hover:border-primary-700 dark:hover:text-primary-300"
                   >
                     <Plus className="h-4 w-4" />
                     New matter
@@ -184,7 +185,7 @@ export function DashboardPage() {
             </div>
           </section>
 
-          <div className="mt-3 grid gap-3 grid-cols-3">
+          <div className="mt-3 grid gap-3 grid-cols-1 sm:grid-cols-3">
             <MetricCard
               icon={<Briefcase className="h-4 w-4" />}
               label="Active matters"
@@ -247,7 +248,7 @@ export function DashboardPage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as 'recent' | 'name' | 'files')}
-                      className="bg-transparent font-medium outline-none"
+                      className="bg-transparent font-medium outline-none dark:text-surface-300 [&_option]:dark:bg-surface-800 [&_option]:dark:text-surface-200"
                     >
                       <option value="recent">Recently updated</option>
                       <option value="name">Name</option>
@@ -266,15 +267,25 @@ export function DashboardPage() {
 
         {error && (
           <FadeIn>
-            <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-800/50 dark:bg-red-950/30 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-red-700 [overflow-wrap:anywhere] dark:text-red-400">
-                Failed to load matters.
-              </p>
+            <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50/80 p-5 dark:border-red-800/50 dark:bg-red-950/30 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-950/50">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                    Failed to load matters
+                  </p>
+                  <p className="mt-0.5 text-xs text-red-600/80 dark:text-red-400/70">
+                    Check your connection and try again.
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400 dark:hover:bg-red-950"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
               >
-                <RefreshCw className="h-3 w-3" />
+                <RefreshCw className="h-3.5 w-3.5" />
                 Retry
               </button>
             </div>

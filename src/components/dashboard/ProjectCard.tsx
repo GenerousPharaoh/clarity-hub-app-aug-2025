@@ -159,11 +159,11 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           'border-translucent bg-white/88 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.42)]',
           'interactive-lift surface-grain',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-950',
-          'dark:bg-surface-900/78'
+          'dark:bg-surface-900/78 dark:shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)]'
         )}
       >
         <div className={cn('absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r', accent)} />
-        <div className="pointer-events-none absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl dark:bg-white/5" />
+        <div className="pointer-events-none absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl dark:bg-surface-700/20" />
 
         <div className="relative">
           <div className="flex items-start justify-between gap-3">
@@ -178,10 +178,10 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                     {goalType}
                   </span>
-                  <span className={cn('max-w-full rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] [overflow-wrap:anywhere]', status.chip)}>
+                  <span className={cn('max-w-full rounded-full border px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] [overflow-wrap:anywhere]', status.chip)}>
                     {status.label}
                   </span>
                 </div>
@@ -219,11 +219,11 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                   setConfirmDelete(false);
                 }}
                 className={cn(
-                  'flex h-8 w-8 items-center justify-center rounded-xl',
+                  'flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-xl',
                   'text-surface-400 transition-all hover:bg-surface-100 hover:text-surface-600',
                   'dark:hover:bg-surface-800 dark:hover:text-surface-300',
-                  'max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100',
-                  menuOpen && 'bg-surface-100 opacity-100 dark:bg-surface-800'
+                  'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100',
+                  menuOpen && 'bg-surface-100 !opacity-100 dark:bg-surface-800'
                 )}
                 aria-label="Project options"
                 aria-expanded={menuOpen}
@@ -297,7 +297,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           </div>
 
           <div className="mt-5 flex flex-col gap-3 border-t border-surface-100 pt-4 dark:border-surface-800 sm:flex-row sm:items-center sm:justify-end">
-            <span className="inline-flex items-center gap-1 self-start text-sm font-medium text-surface-700 opacity-0 transition-all group-hover:opacity-100 group-hover:text-primary-700 dark:text-surface-200 dark:group-hover:text-primary-300">
+            <span className="inline-flex items-center gap-1 self-start text-sm font-medium text-primary-700 transition-all sm:text-surface-700 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover:text-primary-700 dark:text-primary-300 sm:dark:text-surface-200 sm:dark:group-hover:text-primary-300">
               Open
               <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </span>

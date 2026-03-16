@@ -1,9 +1,31 @@
 import { memo, useMemo, useCallback, useState, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+// Register only the languages we actually need (saves ~600KB vs full Prism)
+import javascript from 'react-syntax-highlighter/dist/esm/languages/prism/javascript';
+import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+import python from 'react-syntax-highlighter/dist/esm/languages/prism/python';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
+import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
+import sql from 'react-syntax-highlighter/dist/esm/languages/prism/sql';
+import markdown from 'react-syntax-highlighter/dist/esm/languages/prism/markdown';
+
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('js', javascript);
+SyntaxHighlighter.registerLanguage('typescript', typescript);
+SyntaxHighlighter.registerLanguage('ts', typescript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('bash', bash);
+SyntaxHighlighter.registerLanguage('shell', bash);
+SyntaxHighlighter.registerLanguage('json', json);
+SyntaxHighlighter.registerLanguage('css', css);
+SyntaxHighlighter.registerLanguage('sql', sql);
+SyntaxHighlighter.registerLanguage('markdown', markdown);
 import { cn } from '@/lib/utils';
 import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check } from 'lucide-react';
 import { ChatCitation, SourcesList } from './ChatCitation';
@@ -239,7 +261,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
             <div className="rounded-2xl rounded-br-md bg-primary-600 px-3 py-2 text-[13px] leading-relaxed text-white shadow-elevated break-words">
               {message.content}
             </div>
-            <div className="mt-1 text-right text-[10px] text-surface-400">
+            <div className="mt-1 text-right text-[10px] text-surface-400 dark:text-surface-500">
               {timestamp}
             </div>
           </div>
@@ -319,7 +341,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               'group/msg relative rounded-2xl rounded-tl-md px-3 py-2 shadow-sm',
               isError
                 ? 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-900/20 dark:ring-red-800/50'
-                : 'bg-white border border-translucent border-l-2 border-l-accent-400/30 dark:bg-surface-800'
+                : 'bg-white border border-translucent border-l-2 border-l-accent-400/30 dark:bg-surface-800 dark:border-l-accent-500/25'
             )}
           >
             {/* Copy button — visible on hover */}
@@ -475,7 +497,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           )}
 
           {/* Timestamp */}
-          <div className="mt-1 text-[10px] text-surface-400">{timestamp}</div>
+          <div className="mt-1 text-[10px] text-surface-400 dark:text-surface-500">{timestamp}</div>
 
           {/* Follow-up suggestions on latest assistant message */}
           {isLatest && !isError && message.followUps && message.followUps.length > 0 && onFollowUpSelect && (

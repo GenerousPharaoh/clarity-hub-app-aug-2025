@@ -5,6 +5,7 @@ interface LoadingScreenProps {
   message?: string;
 }
 
+/** Full-page loading screen for route transitions and initial app load */
 export function LoadingScreen({ message = 'Loading...' }: LoadingScreenProps) {
   return (
     <motion.div
@@ -22,5 +23,19 @@ export function LoadingScreen({ message = 'Loading...' }: LoadingScreenProps) {
         </p>
       </div>
     </motion.div>
+  );
+}
+
+/** Inline loading indicator for panels/sections -- centered spinner with optional message */
+export function InlineLoading({ message }: { message?: string }) {
+  return (
+    <div className="flex flex-1 items-center justify-center py-12" role="status" aria-live="polite">
+      <div className="text-center">
+        <Loader2 className="mx-auto h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
+        {message && (
+          <p className="mt-2 text-xs text-surface-400 dark:text-surface-500">{message}</p>
+        )}
+      </div>
+    </div>
   );
 }

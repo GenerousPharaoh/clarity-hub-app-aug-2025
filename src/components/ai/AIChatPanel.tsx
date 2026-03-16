@@ -206,7 +206,7 @@ export function AIChatPanel() {
       >
         {isFetchingMessages && isEmpty ? (
           <div className="flex h-full items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-surface-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-surface-400 dark:text-surface-500" />
           </div>
         ) : isEmpty ? (
           <div className="flex h-full flex-col">
@@ -249,7 +249,7 @@ export function AIChatPanel() {
               />
               <button
                 onClick={() => setShowClearConfirm(true)}
-                className="flex items-center justify-center rounded-md p-1.5 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+                className="flex items-center justify-center rounded-md p-1.5 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:text-surface-500 dark:hover:bg-surface-700 dark:hover:text-surface-300"
                 title="Clear conversation"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -283,7 +283,7 @@ export function AIChatPanel() {
                         <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:150ms]" />
                         <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent-400 [animation-delay:300ms]" />
                       </div>
-                      <span className="text-[10px] text-surface-400">{loadingLabel}</span>
+                      <span className="text-xs text-surface-400 dark:text-surface-500">{loadingLabel}</span>
                     </div>
                   </div>
                 </div>
@@ -324,7 +324,7 @@ export function AIChatPanel() {
               <p className="truncate text-xs font-medium text-primary-700 dark:text-primary-300">
                 {selectedFile.name}
               </p>
-              <p className="text-[10px] text-primary-500/70 dark:text-primary-400/60">
+              <p className="text-xs text-primary-500/70 dark:text-primary-400/60">
                 Using this file
               </p>
             </div>
@@ -358,14 +358,14 @@ export function AIChatPanel() {
             rows={1}
             placeholder={compact ? 'Ask...' : 'Ask about your case...'}
             disabled={isLoading}
-            className="flex-1 resize-none bg-transparent text-[13px] text-surface-700 placeholder:text-surface-400 focus:outline-none disabled:opacity-50 dark:text-surface-200 dark:placeholder:text-surface-500"
+            className="flex-1 resize-none bg-transparent text-sm text-surface-700 placeholder:text-surface-400 focus:outline-none disabled:opacity-50 dark:text-surface-200 dark:placeholder:text-surface-500"
             style={{ minHeight: '24px', maxHeight: '120px' }}
           />
           <button
             onClick={() => handleSend()}
             disabled={!input.trim() || isLoading}
             className={cn(
-              'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all',
+              'flex h-10 w-10 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg transition-all',
               input.trim() && !isLoading
                 ? 'bg-accent-600 text-white shadow-sm shadow-accent-500/25 hover:bg-accent-700 hover:shadow-md hover:shadow-accent-500/40 hover:shadow-[0_0_12px_rgba(165,116,63,0.3)] active:scale-95'
                 : 'bg-surface-200 text-surface-400 dark:bg-surface-700 dark:text-surface-500'
@@ -373,9 +373,9 @@ export function AIChatPanel() {
             title="Send message"
           >
             {isLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-4 w-4" />
             )}
           </button>
         </div>

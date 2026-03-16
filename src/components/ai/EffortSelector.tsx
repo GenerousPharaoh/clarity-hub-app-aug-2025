@@ -50,11 +50,11 @@ export function EffortSelector({
             title={description}
             onClick={() => onChange(level)}
             className={cn(
-              'flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-1 text-[11px] font-medium transition-all',
+              'flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-2 text-xs font-medium transition-all sm:px-2 sm:py-1 sm:text-[11px]',
               selected
                 ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700',
-              variant === 'compact' && 'px-1.5 py-0.5'
+              variant === 'compact' && 'px-2 py-1.5 sm:px-1.5 sm:py-0.5'
             )}
           >
             <Icon className={cn('h-3 w-3', variant === 'compact' && 'h-3.5 w-3.5')} />

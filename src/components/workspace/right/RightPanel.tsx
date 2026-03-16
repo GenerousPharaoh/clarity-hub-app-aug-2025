@@ -1,12 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import useAppStore from '@/store';
 import { cn } from '@/lib/utils';
 import { saveWorkspaceView } from '@/lib/workspaceSession';
-import { ChevronRight, Eye, Sparkles } from 'lucide-react';
+import { ChevronRight, Eye, Sparkles, Loader2 } from 'lucide-react';
 import { FileViewer } from '@/components/viewers/FileViewer';
-import { AIChatPanel } from '@/components/ai/AIChatPanel';
 import { useIsMobile } from '@/hooks/useMediaQuery';
+
+// Lazy-load AI chat panel (pulls in react-markdown + syntax-highlighter)
+const AIChatPanel = lazy(() =>
+  import('@/components/ai/AIChatPanel').then((m) => ({ default: m.AIChatPanel }))
+);
 
 export function RightPanel() {
   const toggleRight = useAppStore((s) => s.toggleRightPanel);
@@ -109,7 +113,19 @@ export function RightPanel() {
             transition={{ duration: 0.1 }}
             className="flex h-full flex-col"
           >
-            {activeTab === 'viewer' ? <FileViewer /> : <AIChatPanel />}
+            {activeTab === 'viewer' ? (
+              <FileViewer />
+            ) : (
+              <Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
+                  </div>
+                }
+              >
+                <AIChatPanel />
+              </Suspense>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

@@ -192,8 +192,8 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   if (!project) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
-          <FolderOpen className="h-6 w-6 text-surface-400 dark:text-surface-500" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+          <FolderOpen className="h-5 w-5 text-surface-400 dark:text-surface-500" />
         </div>
         <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
           No Project Selected
@@ -874,13 +874,13 @@ function SignalEmptyState({
 }) {
   return (
     <div className="rounded-[28px] border border-dashed border-surface-300 bg-white/82 p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/60">
-      <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
         <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
       </div>
-      <h3 className="mt-4 font-heading text-lg font-semibold text-surface-900 dark:text-surface-100">
+      <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
         {title}
       </h3>
-      <p className="mt-2 break-words text-sm leading-6 text-surface-500 dark:text-surface-400">
+      <p className="mt-1.5 break-words text-xs leading-relaxed text-surface-500 dark:text-surface-400">
         {description}
       </p>
     </div>

@@ -76,8 +76,16 @@ export function ExhibitsTab() {
 
   if (!selectedProjectId) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-xs text-surface-400">Select a project first</p>
+      <div className="flex flex-1 flex-col items-center justify-center px-8">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+          <Tag className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+        </div>
+        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+          No Project Selected
+        </h3>
+        <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+          Select a project to manage exhibits.
+        </p>
       </div>
     );
   }
@@ -85,15 +93,16 @@ export function ExhibitsTab() {
   if (isLoading) {
     return (
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex shrink-0 items-center justify-between border-b border-surface-100 px-4 py-3 dark:border-surface-800">
+        <div className="flex shrink-0 items-center justify-between border-b border-surface-200/80 px-4 py-3 dark:border-surface-800">
           <div className="h-3 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-6 w-24 animate-pulse rounded-md bg-surface-100 dark:bg-surface-800" />
+          <div className="h-7 w-24 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" />
         </div>
         <div className="space-y-3 p-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="rounded-lg border border-surface-200 p-4 dark:border-surface-700">
-              <div className="flex items-center gap-2">
+            <div key={i} className="rounded-xl border border-surface-200/80 bg-white p-4 dark:border-surface-700 dark:bg-surface-800">
+              <div className="flex items-center justify-between">
                 <div className="h-5 w-16 animate-pulse rounded-md bg-primary-100 dark:bg-primary-900/30" />
+                <div className="h-5 w-5 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
               </div>
               <div className="mt-3 h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
               <div className="mt-1.5 h-3 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
@@ -110,21 +119,18 @@ export function ExhibitsTab() {
   if (isError) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-8">
-        <AlertCircle className="h-6 w-6 text-red-400" />
-        <p className="mt-3 text-sm font-medium text-surface-600 dark:text-surface-300">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
+          <AlertCircle className="h-5 w-5 text-red-400" />
+        </div>
+        <h3 className="mt-3 font-heading text-sm font-semibold text-red-700 dark:text-red-300">
           Failed to load exhibits
-        </p>
-        <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
+        </h3>
+        <p className="mt-1 max-w-xs text-center text-xs leading-relaxed text-red-600/80 dark:text-red-400/80">
           Check your connection and try again.
         </p>
         <button
           onClick={() => refetch()}
-          className={cn(
-            'mt-3 flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-            'text-xs font-medium text-primary-600',
-            'transition-colors hover:bg-primary-50',
-            'dark:text-primary-400 dark:hover:bg-primary-900/20'
-          )}
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -136,7 +142,7 @@ export function ExhibitsTab() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-surface-100 px-4 py-3 dark:border-surface-800">
+      <div className="flex shrink-0 items-center justify-between border-b border-surface-200/80 px-4 py-3 dark:border-surface-800">
         <h2 className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
           Exhibit Markers ({exhibits?.length ?? 0})
         </h2>
@@ -215,8 +221,8 @@ function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center px-8 py-12">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-700">
-        <Tag className="h-6 w-6 text-surface-400 dark:text-surface-500" />
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+        <Tag className="h-5 w-5 text-surface-400 dark:text-surface-500" />
       </div>
       <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
         No Exhibits Yet
@@ -228,13 +234,17 @@ function EmptyState({
         onClick={onCreateFirst}
         disabled={isCreating}
         className={cn(
-          'mt-4 flex items-center gap-1.5 rounded-lg px-4 py-2',
+          'mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2',
           'bg-primary-600 text-xs font-medium text-white',
           'transition-colors hover:bg-primary-700',
           'disabled:opacity-50'
         )}
       >
-        <Plus className="h-3.5 w-3.5" />
+        {isCreating ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Plus className="h-3.5 w-3.5" />
+        )}
         New Exhibit
       </button>
     </div>
@@ -344,7 +354,7 @@ function ExhibitCard({
                 Add description
               </p>
             )}
-            <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 text-surface-300 max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100" />
+            <Pencil className="mt-0.5 h-2.5 w-2.5 shrink-0 text-surface-300 dark:text-surface-600 max-md:opacity-60 md:opacity-0 md:group-hover:opacity-100" />
           </div>
         )}
       </div>

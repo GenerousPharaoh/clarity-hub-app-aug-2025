@@ -12,6 +12,20 @@
   max-width: 800px;
   margin: 0 auto;
   caret-color: var(--color-primary-600);
+  cursor: text !important;
+}
+
+/* Ensure all editable content within TipTap uses text cursor */
+.tiptap * {
+  cursor: text !important;
+}
+
+/* But keep pointer cursor on interactive elements inside the editor */
+.tiptap a,
+.tiptap button,
+.tiptap [role="button"],
+.tiptap .ProseMirror-selectednode {
+  cursor: pointer !important;
 }
 
 @media (min-width: 768px) {

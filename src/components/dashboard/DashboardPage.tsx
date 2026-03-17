@@ -218,48 +218,40 @@ export function DashboardPage() {
         </FadeIn>
 
         <FadeIn delay={0.06}>
-            <div className="mt-5 rounded-2xl border border-surface-200/80 bg-white/82 p-4 shadow-sm backdrop-blur-sm dark:border-surface-800 dark:bg-surface-900/65">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h2 className="font-heading text-xl font-semibold text-surface-900 dark:text-surface-100">
-                    Portfolio
-                  </h2>
-                  {isFetching && !isLoading && (
-                    <Loader2 className="h-4 w-4 animate-spin text-surface-400 dark:text-surface-500" />
-                  )}
-                </div>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="font-heading text-lg font-semibold text-surface-900 dark:text-surface-100">
+                Portfolio
+              </h2>
+              {isFetching && !isLoading && (
+                <Loader2 className="h-4 w-4 animate-spin text-surface-400 dark:text-surface-500" />
+              )}
+              <span className="text-xs text-surface-400 dark:text-surface-500">
+                {visibleProjects.length} of {projects?.length ?? 0}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-400 dark:text-surface-500" />
+                <input
+                  value={projectQuery}
+                  onChange={(e) => setProjectQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="w-44 rounded-xl border border-surface-200 bg-white/90 py-2 pl-9 pr-3 text-sm text-surface-700 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 dark:border-surface-700 dark:bg-surface-950/80 dark:text-surface-100 dark:focus:border-primary-400 dark:focus:ring-primary-400/20"
+                />
               </div>
-
-              <div className="flex max-w-full flex-col gap-3 lg:w-[30rem]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-400 dark:text-surface-500" />
-                  <input
-                    value={projectQuery}
-                    onChange={(e) => setProjectQuery(e.target.value)}
-                    placeholder="Search matters..."
-                    className="w-full rounded-2xl border border-surface-200 bg-white/90 py-3 pl-10 pr-3 text-sm text-surface-700 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 dark:border-surface-700 dark:bg-surface-950/80 dark:text-surface-100 dark:focus:border-primary-400 dark:focus:ring-primary-400/20"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="inline-flex items-center gap-2 rounded-2xl border border-surface-200 bg-surface-50 px-3 py-2 text-xs text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
-                    <ArrowUpDown className="h-3.5 w-3.5" />
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as 'recent' | 'name' | 'files')}
-                      className="bg-transparent font-medium outline-none dark:text-surface-300 [&_option]:dark:bg-surface-800 [&_option]:dark:text-surface-200"
-                    >
-                      <option value="recent">Recently updated</option>
-                      <option value="name">Name</option>
-                      <option value="files">Most files</option>
-                    </select>
-                  </div>
-
-                  <div className="self-end text-xs text-surface-400 dark:text-surface-500 sm:self-auto">
-                    {visibleProjects.length} of {projects?.length ?? 0}
-                  </div>
-                </div>
+              <div className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-surface-50 px-2.5 py-2 text-xs text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'recent' | 'name' | 'files')}
+                  className="bg-transparent font-medium outline-none dark:text-surface-300 [&_option]:dark:bg-surface-800 [&_option]:dark:text-surface-200"
+                >
+                  <option value="recent">Recent</option>
+                  <option value="name">Name</option>
+                  <option value="files">Files</option>
+                </select>
               </div>
             </div>
           </div>
@@ -360,16 +352,6 @@ export function DashboardPage() {
           </div>
         )}
 
-        {!isLoading && hasProjects && (
-          <FadeIn delay={0.14}>
-            <div className="mt-4 flex items-center gap-2 text-xs text-surface-400 dark:text-surface-500">
-              <Briefcase className="h-3.5 w-3.5" />
-              <span>
-                {projects?.length ?? 0} {projects?.length === 1 ? 'matter' : 'matters'}
-              </span>
-            </div>
-          </FadeIn>
-        )}
       </div>
 
       <CreateProjectDialog
@@ -393,18 +375,11 @@ function MetricCard({
   label: string;
   value: string | number;
   detail: string;
-  tone: 'primary' | 'emerald' | 'neutral';
+  tone?: string;
 }) {
-  const toneClasses =
-    tone === 'primary'
-      ? 'border-primary-200/70 bg-primary-50/80 text-primary-700 dark:border-primary-900/50 dark:bg-primary-950/25 dark:text-primary-300'
-      : tone === 'emerald'
-        ? 'border-emerald-200/70 bg-emerald-50/80 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300'
-        : 'border-surface-200/80 bg-white/85 text-surface-700 dark:border-surface-800 dark:bg-surface-900/70 dark:text-surface-200';
-
   return (
-    <div className={cn('flex min-w-0 flex-col rounded-2xl border p-4 shadow-sm', toneClasses)}>
-      <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
+    <div className="flex min-w-0 flex-col rounded-2xl border border-translucent bg-white/90 p-4 shadow-sm dark:bg-surface-900/70">
+      <div className="flex items-center gap-2 text-xs font-medium text-current/80">
         {icon}
         <span>{label}</span>
       </div>

@@ -179,10 +179,10 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-[11px] font-medium text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                     {goalType}
                   </span>
-                  <span className={cn('max-w-full rounded-full border px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] [overflow-wrap:anywhere]', status.chip)}>
+                  <span className={cn('max-w-full rounded-full border px-2.5 py-1.5 text-[11px] font-medium [overflow-wrap:anywhere]', status.chip)}>
                     {status.label}
                   </span>
                 </div>
@@ -271,7 +271,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
 
           <div className="mt-auto grid grid-cols-1 gap-3 pt-5 sm:grid-cols-2">
             <div className="rounded-2xl border border-surface-200/80 bg-surface-50/80 px-3.5 py-3 dark:border-surface-800 dark:bg-surface-950/40">
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
+              <div className="flex items-center gap-2 text-[11px] font-medium text-surface-400 dark:text-surface-500">
                 <FileText className="h-3.5 w-3.5" />
                 Evidence
               </div>
@@ -284,7 +284,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
             </div>
 
             <div className="rounded-2xl border border-surface-200/80 bg-surface-50/80 px-3.5 py-3 dark:border-surface-800 dark:bg-surface-950/40">
-              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
+              <div className="flex items-center gap-2 text-[11px] font-medium text-surface-400 dark:text-surface-500">
                 <Calendar className="h-3.5 w-3.5" />
                 Activity
               </div>

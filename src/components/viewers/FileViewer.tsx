@@ -127,7 +127,7 @@ export function FileViewer() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
                 Jump back in
               </p>
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 divide-y divide-surface-100 dark:divide-surface-800">
                 {recentProjectFiles.map((file) => (
                   <button
                     key={file.id}
@@ -142,7 +142,7 @@ export function FileViewer() {
                     <span className="truncate pr-3 text-sm font-medium text-surface-700 dark:text-surface-200">
                       {file.name}
                     </span>
-                    <span className="shrink-0 text-[11px] text-surface-400 dark:text-surface-500">
+                    <span className="shrink-0 text-xs text-surface-400 dark:text-surface-500">
                       {file.file_type ?? 'file'}
                     </span>
                   </button>
@@ -198,7 +198,7 @@ export function FileViewer() {
   if (error || !fileUrl) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-[26px] border border-red-200/80 bg-red-50/80 p-5 text-center shadow-sm dark:border-red-900/40 dark:bg-red-950/20">
+        <div className="w-full max-w-sm rounded-[26px] border border-red-300 bg-red-50/80 p-5 text-center shadow-sm dark:border-red-800/60 dark:bg-red-950/20">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 dark:bg-red-950/30">
             <FileSearch className="h-6 w-6 text-red-400" />
           </div>

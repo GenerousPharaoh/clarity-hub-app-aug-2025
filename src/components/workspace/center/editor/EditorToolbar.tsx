@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useRef, useCallback, forwardRef } from 'react';
 import type { Editor } from '@tiptap/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
   Bold,
@@ -395,38 +396,44 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
             <MoreHorizontal className="h-4 w-4" />
           </ToolbarButton>
 
-          {overflowOpen && (
-            <div
-              className="fixed z-[60] max-h-[70vh] w-56 overflow-y-auto rounded-xl border border-surface-200 bg-white/95 py-1 shadow-xl ring-1 ring-surface-100 dark:border-surface-700 dark:bg-surface-800/95 dark:ring-surface-800"
-              style={{ top: dropdownPos.top, right: dropdownPos.right }}
-            >
-              {overflowGroups.map((group, gi) => (
-                <div key={group.id}>
-                  <div className="px-3 pb-1 pt-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                      {group.label}
-                    </span>
+          <AnimatePresence>
+            {overflowOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.12 }}
+                className="fixed z-[60] max-h-[70vh] w-56 overflow-y-auto rounded-xl border border-surface-200 bg-white/95 py-1 shadow-xl ring-1 ring-surface-100 dark:border-surface-700 dark:bg-surface-800/95 dark:ring-surface-800"
+                style={{ top: dropdownPos.top, right: dropdownPos.right }}
+              >
+                {overflowGroups.map((group, gi) => (
+                  <div key={group.id}>
+                    <div className="px-3 pb-1 pt-2">
+                      <span className="font-semibold bg-surface-50 dark:bg-surface-800/50 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                        {group.label}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-0.5 px-2 pb-1.5">
+                      {group.items.map((item) => (
+                        <ToolbarButton
+                          key={item.key}
+                          onClick={() => handleAction(item)}
+                          active={item.getActive?.(editor)}
+                          disabled={item.getDisabled?.(editor)}
+                          title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
+                        >
+                          {item.icon}
+                        </ToolbarButton>
+                      ))}
+                    </div>
+                    {gi < overflowGroups.length - 1 && (
+                      <div className="mx-2 my-0.5 h-px bg-surface-100 dark:bg-surface-700" />
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-0.5 px-2 pb-1.5">
-                    {group.items.map((item) => (
-                      <ToolbarButton
-                        key={item.key}
-                        onClick={() => handleAction(item)}
-                        active={item.getActive?.(editor)}
-                        disabled={item.getDisabled?.(editor)}
-                        title={item.shortcut ? `${item.label} (${item.shortcut})` : item.label}
-                      >
-                        {item.icon}
-                      </ToolbarButton>
-                    ))}
-                  </div>
-                  {gi < overflowGroups.length - 1 && (
-                    <div className="mx-2 my-0.5 h-px bg-surface-100 dark:bg-surface-700" />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </div>
@@ -497,12 +504,12 @@ const ToolbarButton = forwardRef<
       disabled={disabled}
       title={title}
       className={cn(
-        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-transparent transition-all duration-150',
+        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-transparent transition-all duration-150 focus-visible:ring-2 focus-visible:ring-primary-500/40',
         active
           ? 'border-primary-200 bg-primary-50 text-primary-700 shadow-[0_1px_2px_rgba(15,23,42,0.1)] ring-1 ring-primary-100 dark:border-primary-800/60 dark:bg-primary-900/40 dark:text-primary-300 dark:ring-primary-900/40'
           : 'text-surface-500 hover:-translate-y-px hover:border-surface-200 hover:bg-white hover:text-surface-700 dark:text-surface-400 dark:hover:border-surface-700 dark:hover:bg-surface-800 dark:hover:text-surface-200',
         disabled &&
-          'cursor-not-allowed opacity-35 hover:translate-y-0 hover:border-transparent hover:bg-transparent hover:text-surface-500 dark:hover:bg-transparent dark:hover:text-surface-400'
+          'cursor-not-allowed opacity-35 hover:translate-y-0 hover:shadow-none hover:border-transparent hover:bg-transparent hover:text-surface-500 dark:hover:bg-transparent dark:hover:text-surface-400'
       )}
     >
       {children}

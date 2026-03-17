@@ -61,7 +61,7 @@ export function KeyboardShortcutsHelp({
             )}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-surface-100 px-5 py-3.5 dark:border-surface-700">
+            <div className="flex items-center justify-between border-b border-surface-200 px-5 py-3.5 dark:border-surface-700">
               <div className="flex items-center gap-2.5">
                 <Keyboard className="h-4 w-4 text-primary-500" />
                 <h2
@@ -85,7 +85,7 @@ export function KeyboardShortcutsHelp({
               {SHORTCUTS.map((shortcut, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between py-2.5"
+                  className="flex items-center justify-between rounded-lg py-2.5 hover:bg-surface-50 dark:hover:bg-surface-800/50"
                 >
                   <span className="text-xs text-surface-600 dark:text-surface-300">
                     {shortcut.description}
@@ -101,9 +101,9 @@ export function KeyboardShortcutsHelp({
                         <kbd
                           className={cn(
                             'inline-flex min-w-[20px] items-center justify-center rounded',
-                            'border border-surface-200 bg-surface-50 px-1.5 py-0.5',
+                            'ring-1 ring-surface-200 bg-surface-50 px-1.5 py-0.5 shadow-sm',
                             'font-mono text-[10px] font-medium text-surface-600',
-                            'dark:border-surface-600 dark:bg-surface-700 dark:text-surface-300'
+                            'dark:ring-surface-700 dark:bg-surface-700 dark:text-surface-300'
                           )}
                         >
                           {formatKey(key)}
@@ -116,8 +116,8 @@ export function KeyboardShortcutsHelp({
             </div>
 
             {/* Footer */}
-            <div className="border-t border-surface-100 px-5 py-3 dark:border-surface-700">
-              <p className="text-[10px] text-surface-400 dark:text-surface-500">
+            <div className="border-t border-surface-200 px-5 py-3 dark:border-surface-700">
+              <p className="text-[10px] text-surface-500 dark:text-surface-500">
                 {isMac ? 'Use Cmd' : 'Use Ctrl'} as the modifier key
               </p>
             </div>

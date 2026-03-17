@@ -87,9 +87,9 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
       <div
         {...getRootProps()}
         className={cn(
-          'relative overflow-hidden rounded-[22px] border border-dashed transition-all duration-200',
+          'relative overflow-hidden rounded-2xl border border-dashed transition-all duration-200',
           isDragActive
-            ? 'border-primary-400 bg-white/92 shadow-[0_20px_48px_-32px_rgba(30,43,57,0.42)] ring-1 ring-primary-500/12 dark:border-primary-500 dark:bg-surface-900/82 dark:ring-primary-400/18'
+            ? 'border-primary-400 bg-white/92 shadow-overlay ring-1 ring-primary-500/12 dark:border-primary-500 dark:bg-surface-900/82 dark:ring-primary-400/18'
             : 'border-surface-200/90 bg-surface-50/80 dark:border-surface-700/80 dark:bg-surface-950/30'
         )}
       >
@@ -104,7 +104,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
             <p className="text-sm font-semibold text-primary-700 dark:text-primary-300">
               Drop files here
             </p>
-            <p className="max-w-[16rem] text-[11px] leading-5 text-primary-600/80 dark:text-primary-300/70">
+            <p className="max-w-[16rem] text-xs leading-5 text-primary-600/80 dark:text-primary-300/70">
               Max {formatFileSize(MAX_FILE_SIZE)} per file
             </p>
           </div>
@@ -124,7 +124,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
                 <div className="h-full w-1/3 animate-[indeterminate_1.5s_ease-in-out_infinite] rounded-full bg-primary-500" />
               </div>
             </div>
-            <span className="shrink-0 rounded-full bg-surface-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+            <span className="shrink-0 rounded-full bg-surface-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:bg-surface-800 dark:text-surface-300">
               Uploading
             </span>
           </div>
@@ -144,7 +144,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
                 <p className="mt-1 text-sm font-medium text-surface-800 dark:text-surface-100">
                   {isDemoMode ? 'Uploads require sign-in' : 'Drop evidence or browse'}
                 </p>
-                <p className="mt-1 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
+                <p className="mt-1 text-xs leading-5 text-surface-500 dark:text-surface-400">
                   PDF, DOCX, image, audio, video, and text files are supported.
                 </p>
               </div>
@@ -173,7 +173,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
       </div>
 
       {isDemoMode && (
-        <p className="mt-2 px-1 text-[11px] leading-relaxed text-surface-400 dark:text-surface-500">
+        <p className="mt-2 px-1 text-xs leading-relaxed text-surface-400 dark:text-surface-500">
           Demo workspaces include seeded files only. Sign in with Google to upload and process your own documents.
         </p>
       )}

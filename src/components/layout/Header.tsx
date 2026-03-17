@@ -68,7 +68,7 @@ export function Header() {
               to="/"
               className={cn(
                 'flex shrink-0 items-center gap-1 rounded-md px-2 py-2 sm:px-1.5 sm:py-1',
-                'font-medium text-surface-400',
+                'font-medium text-surface-500',
                 'transition-all hover:bg-surface-100 hover:text-surface-600',
                 'dark:hover:bg-surface-800 dark:hover:text-surface-300'
               )}
@@ -78,13 +78,13 @@ export function Header() {
             </Link>
             {projectName && (
               <>
-                <ChevronRight className="h-3 w-3 shrink-0 text-surface-300 dark:text-surface-600" />
+                <ChevronRight className="h-3 w-3 shrink-0 text-surface-300 transition-colors dark:text-surface-600" />
                 {isDemoMode && (
                   <>
                     <span className="hidden shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-amber-700 dark:border-amber-800/60 dark:bg-amber-900/20 dark:text-amber-300 sm:inline-flex">
                       Demo
                     </span>
-                    <ChevronRight className="hidden h-3 w-3 shrink-0 text-surface-300 dark:text-surface-600 sm:block" />
+                    <ChevronRight className="hidden h-3 w-3 shrink-0 text-surface-300 transition-colors dark:text-surface-600 sm:block" />
                   </>
                 )}
                 <span className="min-w-0 max-w-[7.5rem] truncate font-medium text-surface-700 sm:max-w-[180px] dark:text-surface-200">
@@ -171,7 +171,8 @@ function HeaderButton({
         'flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-lg',
         'text-surface-400 transition-all',
         'hover:bg-surface-100 hover:text-surface-600',
-        'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+        'dark:hover:bg-surface-800 dark:hover:text-surface-300',
+        'focus-visible:ring-2 focus-visible:ring-primary-500/40 focus-visible:ring-offset-1'
       )}
       title={title}
     >

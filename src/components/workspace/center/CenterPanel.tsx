@@ -64,7 +64,7 @@ export function CenterPanel() {
   return (
     <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Tab bar */}
-      <div className="flex shrink-0 items-center justify-end border-b border-surface-200/80 bg-surface-50/70 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/70 sm:px-4">
+      <div className="flex shrink-0 items-center justify-end border-b border-surface-200/80 bg-surface-50/70 px-3 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-850/70 sm:px-4">
         <div
           className={cn(
             'flex items-center gap-1 rounded-2xl border border-surface-200/80 bg-white/85 p-1 shadow-sm dark:border-surface-700 dark:bg-surface-900/80',
@@ -185,6 +185,7 @@ function TabButton({
         <motion.span
           layoutId="center-tab-pill"
           className="absolute inset-0 -z-10 rounded-xl bg-white/92 shadow-sm ring-1 ring-surface-200/70 dark:bg-surface-800 dark:ring-surface-700/60"
+          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}
       {icon}
@@ -356,10 +357,10 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
         {/* Skeleton header bar */}
         <div className="flex shrink-0 items-center gap-3 border-b border-surface-200/80 px-3 py-3 dark:border-surface-800 sm:px-4">
           <div className="h-4 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-5 w-14 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
+          <div className="h-5 w-14 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '75ms' }} />
           <div className="ml-auto flex gap-1.5">
-            <div className="h-8 w-24 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" />
-            <div className="h-8 w-8 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" />
+            <div className="h-8 w-24 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '150ms' }} />
+            <div className="h-8 w-8 animate-pulse rounded-xl bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '225ms' }} />
           </div>
         </div>
         {/* Skeleton title bar */}
@@ -369,12 +370,12 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
         {/* Skeleton editor body */}
         <div className="flex-1 space-y-3 px-4 py-4">
           <div className="h-4 w-5/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-4 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-4 w-4/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-4 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="mt-6 h-4 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-4 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-4 w-5/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-4 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '75ms' }} />
+          <div className="h-4 w-4/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '150ms' }} />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '225ms' }} />
+          <div className="mt-6 h-4 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '300ms' }} />
+          <div className="h-4 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '375ms' }} />
+          <div className="h-4 w-5/6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" style={{ animationDelay: '450ms' }} />
         </div>
       </div>
     );
@@ -466,7 +467,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                 disabled={createNote.isPending}
                 className={cn(
                   'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium',
-                  'border-surface-200 bg-white text-surface-600 transition-colors hover:bg-surface-50',
+                  'border-surface-200 bg-white text-surface-600 transition-all hover:-translate-y-0.5 hover:bg-surface-50',
                   'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700',
                   'disabled:cursor-not-allowed disabled:opacity-50'
                 )}
@@ -493,8 +494,8 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                 <button
                   onClick={() => setNoteToDelete(activeNote)}
                   className={cn(
-                    'rounded-xl border border-transparent p-2 text-surface-400 transition-colors',
-                    'hover:border-red-200 hover:bg-red-50 hover:text-red-500',
+                    'rounded-xl border border-transparent p-2 text-surface-400 transition-all',
+                    'hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-red-500',
                     'dark:hover:border-red-900/40 dark:hover:bg-red-900/20 dark:hover:text-red-400'
                   )}
                   title="Delete note"
@@ -535,7 +536,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                     (e.target as HTMLInputElement).blur();
                   }
                 }}
-                className="min-w-0 flex-1 bg-transparent px-3 text-sm font-semibold text-surface-700 outline-none placeholder:text-surface-400 dark:text-surface-200 dark:placeholder:text-surface-500"
+                className="min-w-0 flex-1 rounded-xl bg-transparent px-3 text-sm font-semibold text-surface-700 outline-none placeholder:text-surface-400 focus:ring-2 focus:ring-primary-500/20 dark:text-surface-200 dark:placeholder:text-surface-500"
                 placeholder="Untitled"
                 aria-label="Document title"
               />
@@ -554,13 +555,13 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
             <AnimatePresence>
               {dropdownOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
+                  initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.97 }}
                   transition={{ duration: 0.12 }}
                   className={cn(
                     'absolute left-0 top-full z-50 mt-2 max-h-[70vh] min-w-[18rem] max-w-[28rem] overflow-hidden rounded-[22px]',
-                    'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
+                    'border border-surface-200 bg-white shadow-overlay',
                     'dark:border-surface-700 dark:bg-surface-850 dark:shadow-surface-950/30'
                   )}
                 >

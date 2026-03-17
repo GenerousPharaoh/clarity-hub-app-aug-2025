@@ -119,13 +119,13 @@ function BubbleButton({
       onClick={onClick}
       title={title}
       className={cn(
-        'flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+        'flex h-8 w-8 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-primary-500/40',
         isAI
           ? active
-            ? 'bg-accent-100 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300'
+            ? 'bg-accent-50 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300'
             : 'text-accent-500 hover:bg-accent-50 hover:text-accent-600 dark:text-accent-400 dark:hover:bg-accent-900/20 dark:hover:text-accent-300'
           : active
-            ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+            ? 'bg-primary-100 text-primary-700 dark:bg-primary-800/50 dark:text-primary-300'
             : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-200',
         className
       )}

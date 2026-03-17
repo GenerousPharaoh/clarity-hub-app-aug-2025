@@ -37,40 +37,42 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
   if (hasError) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
-          <FileText className="h-7 w-7 text-red-400" />
-        </div>
-        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-          Failed to Load PDF
-        </h3>
-        <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-          Your browser couldn't render this PDF inline.
-        </p>
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={handleDownload}
-            className={cn(
-              'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-              'text-xs font-medium text-primary-600',
-              'transition-colors hover:bg-primary-50',
-              'dark:text-primary-400 dark:hover:bg-primary-900/20'
-            )}
-          >
-            <Download className="h-3.5 w-3.5" />
-            Download
-          </button>
-          <button
-            onClick={handleOpenInTab}
-            className={cn(
-              'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-              'text-xs font-medium text-surface-600',
-              'transition-colors hover:bg-surface-100',
-              'dark:text-surface-400 dark:hover:bg-surface-800'
-            )}
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            Open in Tab
-          </button>
+        <div className="w-full max-w-sm rounded-2xl border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-950/40">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-white/80 dark:bg-red-950/30">
+            <FileText className="h-7 w-7 text-red-400" />
+          </div>
+          <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+            Failed to Load PDF
+          </h3>
+          <p className="mx-auto mt-1.5 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+            Your browser couldn't render this PDF inline.
+          </p>
+          <div className="mt-4 flex justify-center gap-2">
+            <button
+              onClick={handleDownload}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
+                'text-xs font-medium text-primary-600',
+                'transition-colors hover:bg-primary-50',
+                'dark:text-primary-400 dark:hover:bg-primary-900/20'
+              )}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download
+            </button>
+            <button
+              onClick={handleOpenInTab}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
+                'text-xs font-medium text-surface-600',
+                'transition-colors hover:bg-surface-100',
+                'dark:text-surface-400 dark:hover:bg-surface-800'
+              )}
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Open in Tab
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -82,7 +84,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
       <div className="flex h-full flex-col">
         <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-2 dark:border-surface-700">
           <div className="flex min-w-0 flex-1 items-center gap-2">
-            <FileText className="h-3.5 w-3.5 shrink-0 text-red-500" />
+            <FileText className="h-4 w-4 shrink-0 text-red-500" />
             <span
               className="truncate text-xs font-medium text-surface-600 dark:text-surface-300"
               title={fileName}
@@ -137,7 +139,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Minimal toolbar: file name + actions */}
-      <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-2 dark:border-surface-700">
+      <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-2 shadow-sm dark:border-surface-700">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <FileText className="h-3.5 w-3.5 shrink-0 text-red-500" />
           <span
@@ -148,7 +150,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
           </span>
         </div>
 
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-1 rounded-lg bg-surface-100/80 p-0.5 dark:bg-surface-800/60">
           <button
             onClick={handleDownload}
             className={cn(

@@ -88,7 +88,7 @@ export function ConfirmDialog({
         <div className="flex gap-3.5">
           {/* Icon */}
           {isDanger && (
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/40">
               <AlertTriangle className="h-4.5 w-4.5 text-red-500 dark:text-red-400" />
             </div>
           )}
@@ -118,11 +118,11 @@ export function ConfirmDialog({
             </p>
 
             {/* Actions */}
-            <div className="mt-4 flex items-center justify-end gap-2">
+            <div className="mt-4 flex items-center justify-end gap-2 pt-1">
               <button
                 ref={cancelRef}
                 onClick={onCancel}
-                className="rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-all hover:-translate-y-0.5 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
               >
                 {cancelLabel}
               </button>
@@ -131,7 +131,7 @@ export function ConfirmDialog({
                 className={cn(
                   'rounded-lg px-4 py-1.5 text-xs font-medium text-white transition-colors',
                   isDanger
-                    ? 'bg-red-600 hover:bg-red-700 focus:ring-2 focus:ring-red-500/20 dark:bg-red-600 dark:hover:bg-red-500'
+                    ? 'bg-red-600 shadow-sm shadow-red-500/20 hover:bg-red-700 focus:ring-2 focus:ring-red-500/20 dark:bg-red-600 dark:hover:bg-red-500'
                     : 'bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500/20'
                 )}
               >

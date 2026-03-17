@@ -269,30 +269,24 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
             {project.description || 'No summary'}
           </p>
 
-          <div className="mt-auto grid grid-cols-1 gap-3 pt-5 sm:grid-cols-2">
-            <div className="rounded-2xl border border-surface-200/80 bg-surface-50/80 px-3.5 py-3 dark:border-surface-800 dark:bg-surface-950/40">
-              <div className="flex items-center gap-2 text-[11px] font-medium text-surface-400 dark:text-surface-500">
-                <FileText className="h-3.5 w-3.5" />
+          <div className="mt-auto grid grid-cols-2 items-stretch gap-3 pt-5">
+            <div className="flex flex-col rounded-xl border border-surface-200/80 bg-surface-50/80 px-3 py-2.5 dark:border-surface-800 dark:bg-surface-950/40">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-surface-400 dark:text-surface-500">
+                <FileText className="h-3 w-3" />
                 Evidence
               </div>
-              <p className="mt-2 font-heading text-2xl font-semibold text-surface-950 dark:text-surface-100">
-                {fileCount ?? 0}
-              </p>
-              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-                {fileCount === 1 ? 'file' : 'files'}
+              <p className="mt-1 font-heading text-lg font-semibold text-surface-950 dark:text-surface-100">
+                {fileCount ?? 0} <span className="text-xs font-normal text-surface-500">{fileCount === 1 ? 'file' : 'files'}</span>
               </p>
             </div>
 
-            <div className="rounded-2xl border border-surface-200/80 bg-surface-50/80 px-3.5 py-3 dark:border-surface-800 dark:bg-surface-950/40">
-              <div className="flex items-center gap-2 text-[11px] font-medium text-surface-400 dark:text-surface-500">
-                <Calendar className="h-3.5 w-3.5" />
+            <div className="flex flex-col rounded-xl border border-surface-200/80 bg-surface-50/80 px-3 py-2.5 dark:border-surface-800 dark:bg-surface-950/40">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-surface-400 dark:text-surface-500">
+                <Calendar className="h-3 w-3" />
                 Activity
               </div>
-              <p className="mt-2 font-heading text-lg font-semibold text-surface-950 dark:text-surface-100">
+              <p className="mt-1 truncate font-heading text-lg font-semibold text-surface-950 dark:text-surface-100">
                 {updatedLabel}
-              </p>
-              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-                Opened {formatDate(project.created_at)}
               </p>
             </div>
           </div>

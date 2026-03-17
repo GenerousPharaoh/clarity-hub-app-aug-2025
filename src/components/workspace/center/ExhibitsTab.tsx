@@ -424,11 +424,11 @@ function ExhibitCard({
               onClick={() => setShowFilePicker(!showFilePicker)}
               className="flex items-center gap-1 text-[10px] text-surface-400 transition-colors hover:text-surface-600 dark:hover:text-surface-300"
             >
-              <Link2 className="h-3 w-3" />
+              <Link2 className="h-3.5 w-3.5" />
               Link file
             </button>
 
-            {showFilePicker && (
+            {showFilePicker && files.length > 0 && (
               <FilePicker
                 files={files}
                 onSelect={(fileId) => {
@@ -467,7 +467,7 @@ function FilePicker({
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
       <div
-        className="absolute left-0 top-full z-50 mt-1 w-full max-w-64 rounded-lg border border-surface-200 bg-white p-2 shadow-lg dark:border-surface-700 dark:bg-surface-800"
+        className="absolute left-0 top-full z-50 mt-1 min-w-[240px] rounded-xl border border-translucent bg-white p-2 shadow-overlay dark:bg-surface-800"
         role="listbox"
         aria-label="Select a file"
       >
@@ -494,8 +494,8 @@ function FilePicker({
 
         <div className="max-h-40 overflow-y-auto">
           {filtered.length === 0 ? (
-            <p className="px-2 py-3 text-center text-[10px] text-surface-400">
-              No files found
+            <p className="px-2 py-3 text-center text-xs text-surface-400">
+              No files match
             </p>
           ) : (
             filtered.map((f) => (

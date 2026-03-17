@@ -79,16 +79,16 @@ export function CenterPanel() {
             icon={<LayoutList className="h-3.5 w-3.5" />}
             label="Overview"
             controls="panel-overview"
-            showLabel={!ultraCompact}
+            showLabel={!compact}
             compact={ultraCompact}
           />
           <TabButton
             active={activeTab === 'editor'}
             onClick={() => setActiveTab('editor')}
             icon={<PenLine className="h-3.5 w-3.5" />}
-            label="Documents"
+            label="Docs"
             controls="panel-editor"
-            showLabel={!ultraCompact}
+            showLabel={!compact}
             compact={ultraCompact}
           />
           <TabButton
@@ -97,7 +97,7 @@ export function CenterPanel() {
             icon={<Tag className="h-3.5 w-3.5" />}
             label="Exhibits"
             controls="panel-exhibits"
-            showLabel={!ultraCompact}
+            showLabel={!compact}
             compact={ultraCompact}
           />
           <TabButton
@@ -106,7 +106,7 @@ export function CenterPanel() {
             icon={<Clock className="h-3.5 w-3.5" />}
             label="Timeline"
             controls="panel-timeline"
-            showLabel={!ultraCompact}
+            showLabel={!compact}
             compact={ultraCompact}
           />
         </div>
@@ -173,7 +173,7 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all',
+        'relative flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all',
         compact ? 'px-1.5' : 'px-3.5',
         active
           ? 'text-primary-700 dark:text-primary-300'
@@ -189,7 +189,7 @@ function TabButton({
         />
       )}
       {icon}
-      {showLabel && <span className="truncate">{label}</span>}
+      {showLabel && <span>{label}</span>}
     </button>
   );
 }

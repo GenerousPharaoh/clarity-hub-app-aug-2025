@@ -217,7 +217,6 @@ When analyzing legal issues:
   const requestParams = {
     model: 'gpt-5.2' as const,
     messages,
-    temperature: 0.2,
     max_completion_tokens: params.maxCompletionTokens ?? 16384,
     ...(params.reasoningEffort ? { reasoning_effort: params.reasoningEffort } : {}),
   };

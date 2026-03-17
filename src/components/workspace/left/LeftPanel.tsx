@@ -338,7 +338,7 @@ export function LeftPanel() {
 
         {/* Document type filter chips */}
         {files.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             {([
               { key: null, label: 'All' },
               { key: 'court', label: 'Court' },
@@ -351,9 +351,9 @@ export function LeftPanel() {
                 key={label}
                 onClick={() => setTypeFilter(key)}
                 className={cn(
-                  'rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors',
+                  'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
                   typeFilter === key
-                    ? 'bg-primary-100 text-primary-700 ring-1 ring-primary-300 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-700'
+                    ? 'bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-950/30 dark:text-primary-300 dark:border-primary-700'
                     : 'bg-surface-100 text-surface-500 hover:bg-surface-200 hover:text-surface-700 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300'
                 )}
               >

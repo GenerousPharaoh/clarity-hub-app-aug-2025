@@ -238,7 +238,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 />
                 <OverviewMetricCard
                   icon={<NotebookPen className="h-4 w-4" />}
-                  label="Documents"
+                  label="Docs"
                   value={noteCount}
                   detail={noteCount === 1 ? 'draft' : 'drafts'}
                   onClick={onSwitchTab ? () => onSwitchTab('editor') : undefined}
@@ -254,7 +254,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                   icon={<Sparkles className="h-4 w-4" />}
                   label="Processed"
                   value={processedCount}
-                  detail={processedCount === fileCount && fileCount > 0 ? 'all indexed' : 'AI-search ready'}
+                  detail={processedCount === fileCount && fileCount > 0 ? 'all indexed' : 'indexed'}
                 />
               </div>
 
@@ -553,7 +553,7 @@ function OverviewMetricCard({
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
         {icon}
         <span>{label}</span>
       </div>
@@ -588,7 +588,7 @@ function AnchorCard({
         onClick && 'transition-colors hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <p className="truncate text-sm font-medium text-surface-900 dark:text-surface-100">
+      <p className="line-clamp-2 text-sm font-medium text-surface-900 dark:text-surface-100">
         {title}
       </p>
       <p className="mt-1 line-clamp-1 text-xs text-surface-500 dark:text-surface-400">
@@ -627,9 +627,9 @@ function MatterStageCard({
 
   return (
     <div className={cn('rounded-[28px] border p-5 shadow-sm', toneClasses)}>
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-500 dark:text-surface-400">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-400">
         <ShieldCheck className="h-4 w-4" />
-        Matter posture
+        Status
       </div>
       <h3 className="mt-4 font-heading text-2xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
         {stage.label}
@@ -663,7 +663,7 @@ function NextStepsCard({
 }) {
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
         <Sparkles className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Next steps
       </div>
@@ -731,7 +731,7 @@ function FileTypeBreakdown({
 
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
         <FileText className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Evidence profile
       </div>
@@ -805,7 +805,7 @@ function RecentActivity({
 
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
         <Clock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Recent activity
       </div>
@@ -819,7 +819,7 @@ function RecentActivity({
             <span className="flex min-w-0 flex-1 items-start gap-3">
               <span className="mt-0.5 shrink-0">{item.icon}</span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400 dark:text-surface-500">
+                <span className="block truncate text-xs font-medium text-surface-400 dark:text-surface-500">
                   {item.kind}
                 </span>
                 <span className="mt-1 block truncate text-sm font-medium text-surface-800 dark:text-surface-100">
@@ -852,7 +852,7 @@ function MatterDetailsCard({
 }) {
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
         <FolderOpen className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Matter details
       </div>
@@ -937,23 +937,17 @@ function QuickActions() {
         className="hidden"
       />
 
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-surface-400 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
         <Upload className="h-4 w-4 text-primary-500 dark:text-primary-400" />
-        Intake lane
+        Quick actions
       </div>
-      <h3 className="mt-4 font-heading text-2xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
-        Keep the matter moving.
-      </h3>
-      <p className="mt-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
-        Upload evidence or continue drafting.
-      </p>
 
       <button
         onClick={() => {
           if (!isDemoMode) fileInputRef.current?.click();
         }}
         className={cn(
-          'mt-5 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-all',
+          'mt-4 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium transition-all',
           isDemoMode
             ? 'cursor-not-allowed border border-surface-200 bg-surface-100 text-surface-400 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-500'
             : 'bg-surface-950 text-white hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100'

@@ -53,8 +53,8 @@ export function CenterPanel() {
     return () => ro.disconnect();
   }, []);
 
-  const compact = panelWidth > 0 && panelWidth < 400;
-  const ultraCompact = panelWidth > 0 && panelWidth < 300;
+  const compact = panelWidth > 0 && panelWidth < 500;
+  const ultraCompact = panelWidth > 0 && panelWidth < 350;
 
   useEffect(() => {
     if (!selectedProjectId) return;

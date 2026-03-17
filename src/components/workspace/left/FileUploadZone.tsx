@@ -133,29 +133,16 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         {/* Upload button (persistent, always visible when not dragging and not uploading) */}
         {!isDragActive && !uploadingFile && (
           <div className="p-3">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-surface-200/80 dark:bg-surface-900 dark:ring-surface-700/80">
-                <Upload className="h-4 w-4 text-primary-500 dark:text-primary-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
-                  Intake
-                </p>
-                <p className="mt-1 text-sm font-medium text-surface-800 dark:text-surface-100">
-                  {isDemoMode ? 'Uploads require sign-in' : 'Drop evidence or browse'}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-surface-500 dark:text-surface-400">
-                  PDF, DOCX, image, audio, video, and text files are supported.
-                </p>
-              </div>
-            </div>
+            <p className="mb-2 text-center text-xs text-surface-400 dark:text-surface-500">
+              Drop files
+            </p>
 
             <button
               type="button"
               onClick={isDemoMode ? undefined : open}
               disabled={isDemoMode}
               className={cn(
-                'mt-3 flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2.5',
+                'flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2.5',
                 'border border-dashed border-surface-300 bg-white text-xs font-medium text-surface-600 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
                 'transition-all duration-150',
                 'hover:border-primary-400 hover:bg-surface-50 hover:text-primary-700',

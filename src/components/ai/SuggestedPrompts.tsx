@@ -133,7 +133,7 @@ export function SuggestedPrompts({
   return (
     <div className="w-full">
       {filePrompts.length > 0 && (
-        <p className="mb-2 px-4 text-[10px] font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
+        <p className="mb-2 px-4 text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
           Suggestions for selected file
         </p>
       )}
@@ -154,7 +154,7 @@ export function SuggestedPrompts({
               {prompt.icon}
             </div>
             <span className={compact
-              ? 'line-clamp-2 text-[11px] leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'
+              ? 'line-clamp-2 text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'
               : 'line-clamp-2 text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'}
             >
               {prompt.label}

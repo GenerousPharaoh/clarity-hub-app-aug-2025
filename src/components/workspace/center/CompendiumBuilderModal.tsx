@@ -218,7 +218,7 @@ export function CompendiumBuilderModal({
               >
                 Build Exhibit Book
               </h2>
-              <p className="text-[10px] text-surface-400 dark:text-surface-500">
+              <p className="text-xs text-surface-400 dark:text-surface-500">
                 Step {step} of 3
               </p>
             </div>
@@ -238,7 +238,7 @@ export function CompendiumBuilderModal({
             <div key={s} className="flex items-center gap-1">
               <div
                 className={cn(
-                  'flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold',
+                  'flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold',
                   s === step
                     ? 'bg-primary-600 text-white'
                     : s < step
@@ -250,7 +250,7 @@ export function CompendiumBuilderModal({
               </div>
               <span
                 className={cn(
-                  'text-[10px]',
+                  'text-xs',
                   s === step ? 'font-medium text-surface-700 dark:text-surface-200' : 'text-surface-400 dark:text-surface-500'
                 )}
               >
@@ -366,7 +366,7 @@ function StepSelect({
           <button
             onClick={() => onTabStyleChange('letter')}
             className={cn(
-              'rounded-md px-2.5 py-1 text-[10px] font-medium transition-colors',
+              'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
               tabStyle === 'letter'
                 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'text-surface-400 hover:text-surface-600 dark:hover:text-surface-300'
@@ -377,7 +377,7 @@ function StepSelect({
           <button
             onClick={() => onTabStyleChange('number')}
             className={cn(
-              'rounded-md px-2.5 py-1 text-[10px] font-medium transition-colors',
+              'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
               tabStyle === 'number'
                 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'text-surface-400 hover:text-surface-600 dark:hover:text-surface-300'
@@ -397,7 +397,7 @@ function StepSelect({
           <h3 className="mt-3 font-heading text-xs font-semibold text-surface-700 dark:text-surface-200">
             No exhibits found
           </h3>
-          <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500">
+          <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
             Link files to exhibits first.
           </p>
         </div>
@@ -428,7 +428,7 @@ function StepSelect({
 
               {/* Tab label badge */}
               {item.selected && (
-                <span className="flex h-6 min-w-[32px] shrink-0 items-center justify-center rounded-lg bg-primary-100 px-1.5 text-[10px] font-bold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                <span className="flex h-6 min-w-[32px] shrink-0 items-center justify-center rounded-lg bg-primary-100 px-1.5 text-xs font-bold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
                   {item.tabLabel}
                 </span>
               )}
@@ -460,7 +460,7 @@ function StepSelect({
                     <p className="truncate text-xs font-medium text-surface-700 dark:text-surface-200">
                       {item.displayTitle}
                     </p>
-                    <p className="truncate text-[10px] text-surface-400">
+                    <p className="truncate text-xs text-surface-400">
                       {item.exhibitId} &middot; {item.fileName}
                     </p>
                   </button>
@@ -726,7 +726,7 @@ function InputField({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-[10px] font-medium text-surface-500 dark:text-surface-400">
+      <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
         {label}
       </label>
       <input

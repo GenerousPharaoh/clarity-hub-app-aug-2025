@@ -340,7 +340,7 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
         <div key={group.label}>
           {/* Group header */}
           <div className="px-3 pb-1 pt-2.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+            <span className="text-xs font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
               {group.label}
             </span>
           </div>
@@ -383,7 +383,7 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
                 <div className="truncate text-xs font-medium text-surface-700 dark:text-surface-200">
                   {cmd.title}
                 </div>
-                <div className="truncate text-[11px] text-surface-400 dark:text-surface-500">
+                <div className="truncate text-xs text-surface-400 dark:text-surface-500">
                   {cmd.description}
                 </div>
               </div>

@@ -206,7 +206,7 @@ export function SettingsPage() {
                       >
                         {opt.label}
                       </p>
-                      <p className="mt-0.5 text-[11px] leading-tight text-surface-400 dark:text-surface-500">
+                      <p className="mt-0.5 text-xs leading-tight text-surface-400 dark:text-surface-500">
                         {opt.description}
                       </p>
                     </div>
@@ -267,13 +267,13 @@ export function SettingsPage() {
                 </p>
                 <button
                   onClick={refreshUsage}
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-surface-500 transition-colors hover:bg-surface-200 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-200 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Refresh
                 </button>
               </div>
-              <p className="mt-1 text-[11px] text-surface-500 dark:text-surface-400">
+              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
                 Today: {usage.files} file{usage.files !== 1 ? 's' : ''} processed, {formatFileSize(usage.bytes)} of data.
               </p>
             </div>
@@ -370,7 +370,7 @@ export function SettingsPage() {
             </p>
 
             <div className="mt-4 rounded-lg bg-surface-50 p-3 dark:bg-surface-800/50">
-              <p className="text-[11px] leading-relaxed text-surface-400 dark:text-surface-500">
+              <p className="text-xs leading-relaxed text-surface-400 dark:text-surface-500">
                 Disclaimer: The AI features in this application provide general
                 information and analysis support only. They do not constitute
                 legal advice, and no solicitor-client relationship is created

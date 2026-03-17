@@ -314,7 +314,7 @@ export function AIChatPanel() {
         {showJumpToLatest && (
           <button
             onClick={jumpToLatest}
-            className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-[11px] font-medium text-surface-600 shadow-md transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+            className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs font-medium text-surface-600 shadow-md transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
           >
             <ArrowDown className="h-3 w-3" />
             Jump to latest
@@ -326,7 +326,7 @@ export function AIChatPanel() {
       <div className={cn('shrink-0 border-t border-surface-200 dark:border-surface-700', compact ? 'p-2' : 'p-3')}>
         {isDemoMode && (
           <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800/50 dark:bg-amber-900/20">
-            <p className="text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
+            <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-300">
               Demo mode keeps AI responses local to the seeded workspace. Use it to explore the flow, then sign in for live model-backed analysis.
             </p>
           </div>

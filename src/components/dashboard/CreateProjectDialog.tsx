@@ -143,7 +143,7 @@ export function CreateProjectDialog({
                 />
                 <div className="mt-1 flex items-center justify-between">
                   {nameError ? (
-                    <span className="text-[10px] text-red-500 dark:text-red-400">
+                    <span className="text-xs text-red-500 dark:text-red-400">
                       Project name is required
                     </span>
                   ) : (
@@ -151,7 +151,7 @@ export function CreateProjectDialog({
                   )}
                   <span
                     className={cn(
-                      'text-[10px] tabular-nums',
+                      'text-xs tabular-nums',
                       name.length > 100
                         ? 'text-amber-500 dark:text-amber-400'
                         : 'text-surface-400 dark:text-surface-500'
@@ -196,7 +196,7 @@ export function CreateProjectDialog({
                   <div className="mt-1 flex justify-end">
                     <span
                       className={cn(
-                        'text-[10px] tabular-nums',
+                        'text-xs tabular-nums',
                         description.length > 450
                           ? 'text-amber-500 dark:text-amber-400'
                           : 'text-surface-400 dark:text-surface-500'

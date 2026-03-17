@@ -343,7 +343,7 @@ export function TimelineTab() {
             <div className="space-y-3 px-3 py-4 sm:px-4">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="flex-1">
-                  <label className="mb-1 block text-[11px] font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
                     Date *
                   </label>
                   <input
@@ -359,7 +359,7 @@ export function TimelineTab() {
                   />
                 </div>
                 <div className="flex-[2]">
-                  <label className="mb-1 block text-[11px] font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
                     Title *
                   </label>
                   <input
@@ -379,7 +379,7 @@ export function TimelineTab() {
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="flex-[2]">
-                  <label className="mb-1 block text-[11px] font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
                     Description
                   </label>
                   <input
@@ -396,7 +396,7 @@ export function TimelineTab() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="mb-1 block text-[11px] font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
                     Category
                   </label>
                   <select
@@ -453,7 +453,7 @@ export function TimelineTab() {
             <h3 className="mt-3 text-center font-heading text-xs font-semibold text-surface-700 dark:text-surface-200">
               No timeline events
             </h3>
-            <p className="mt-1 max-w-xs text-center text-[11px] text-surface-400 dark:text-surface-500">
+            <p className="mt-1 max-w-xs text-center text-xs text-surface-400 dark:text-surface-500">
               Add events manually or extract from files with AI.
             </p>
           </div>
@@ -540,7 +540,7 @@ function TimelineEventCard({
         {/* Date + title row */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-medium text-surface-400 dark:text-surface-500">
+            <p className="text-xs font-medium text-surface-400 dark:text-surface-500">
               {formatEventDate(event.date)}
             </p>
             <h4 className="mt-0.5 font-heading text-sm font-semibold text-surface-800 dark:text-surface-100">
@@ -620,12 +620,12 @@ function TimelineEventCard({
         {(event.description || event.excerpt) && (
           <div className="mt-2">
             {event.excerpt && (
-              <p className="text-[11px] italic leading-relaxed text-surface-500 dark:text-surface-400">
+              <p className="text-xs italic leading-relaxed text-surface-500 dark:text-surface-400">
                 "{event.excerpt}"
               </p>
             )}
             {event.description && !event.excerpt && (
-              <p className="text-[11px] leading-relaxed text-surface-500 dark:text-surface-400">
+              <p className="text-xs leading-relaxed text-surface-500 dark:text-surface-400">
                 {event.description}
               </p>
             )}

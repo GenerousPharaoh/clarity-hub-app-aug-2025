@@ -109,7 +109,7 @@ export function FileViewer() {
     return (
       <div className="flex h-full items-center justify-center p-4">
         <div className="w-full max-w-sm rounded-[26px] border border-surface-200/80 bg-white/88 p-5 text-center shadow-sm dark:border-surface-800 dark:bg-surface-900/78">
-          <div className="inline-flex items-center gap-2 rounded-full border border-surface-200/80 bg-surface-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-surface-200/80 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
             <FileSearch className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
             Evidence viewer
           </div>
@@ -124,7 +124,7 @@ export function FileViewer() {
           </p>
           {recentProjectFiles.length > 0 && (
             <div className="mt-5 rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-3 text-left dark:border-surface-800 dark:bg-surface-950/35">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
                 Jump back in
               </p>
               <div className="mt-3 divide-y divide-surface-100 dark:divide-surface-800">

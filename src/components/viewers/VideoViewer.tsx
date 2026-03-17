@@ -275,7 +275,7 @@ export function VideoViewer({ url, fileName }: VideoViewerProps) {
         >
           {/* Progress bar */}
           <div className="mb-2 flex items-center gap-2">
-            <span className="w-12 text-right font-mono text-[10px] text-white/70">
+            <span className="w-12 text-right font-mono text-xs text-white/70">
               {formatTime(currentTime)}
             </span>
             <div className="relative flex-1">
@@ -295,7 +295,7 @@ export function VideoViewer({ url, fileName }: VideoViewerProps) {
                 aria-label="Seek"
               />
             </div>
-            <span className="w-12 font-mono text-[10px] text-white/70">
+            <span className="w-12 font-mono text-xs text-white/70">
               {formatTime(duration)}
             </span>
           </div>
@@ -339,7 +339,7 @@ export function VideoViewer({ url, fileName }: VideoViewerProps) {
             <button
               onClick={cyclePlaybackRate}
               className={cn(
-                'flex h-7 items-center justify-center rounded-md px-1.5 text-[10px] font-bold tabular-nums transition-colors',
+                'flex h-7 items-center justify-center rounded-md px-1.5 text-xs font-bold tabular-nums transition-colors',
                 playbackRate !== 1
                   ? 'bg-white/20 text-white'
                   : 'text-white/60 hover:bg-white/10 hover:text-white'

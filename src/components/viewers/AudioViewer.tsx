@@ -207,7 +207,7 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
       <div className="w-full max-w-sm">
         {/* Progress bar */}
         <div className="mb-3 flex items-center gap-2">
-          <span className="w-10 text-right font-mono text-[10px] text-surface-400">
+          <span className="w-10 text-right font-mono text-xs text-surface-400">
             {formatTime(currentTime)}
           </span>
           <div className="relative flex-1">
@@ -227,7 +227,7 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
               aria-label="Seek"
             />
           </div>
-          <span className="w-10 font-mono text-[10px] text-surface-400">
+          <span className="w-10 font-mono text-xs text-surface-400">
             {formatTime(duration)}
           </span>
         </div>
@@ -296,7 +296,7 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
             <button
               onClick={cyclePlaybackRate}
               className={cn(
-                'flex h-7 items-center justify-center rounded-md px-1.5 text-[10px] font-bold tabular-nums transition-colors',
+                'flex h-7 items-center justify-center rounded-md px-1.5 text-xs font-bold tabular-nums transition-colors',
                 playbackRate !== 1
                   ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
                   : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300'
@@ -316,7 +316,7 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
         </div>
 
         {/* Keyboard hints */}
-        <p className="mt-4 text-center text-[10px] text-surface-300 dark:text-surface-600">
+        <p className="mt-4 text-center text-xs text-surface-300 dark:text-surface-600">
           Space: play/pause &middot; Arrows: seek/volume &middot; M: mute
         </p>
       </div>

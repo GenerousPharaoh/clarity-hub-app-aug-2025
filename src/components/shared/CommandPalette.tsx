@@ -360,7 +360,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                 placeholder="Search commands, projects, files..."
                 className="h-12 w-full bg-transparent text-sm text-surface-900 placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:text-surface-100 dark:placeholder:text-surface-500"
               />
-              <kbd className="hidden shrink-0 rounded border border-surface-200 bg-surface-50 px-1.5 py-0.5 font-mono text-[10px] text-surface-400 sm:inline dark:border-surface-700 dark:bg-surface-700 dark:text-surface-500">
+              <kbd className="hidden shrink-0 rounded border border-surface-200 bg-surface-50 px-1.5 py-0.5 font-mono text-xs text-surface-400 sm:inline dark:border-surface-700 dark:bg-surface-700 dark:text-surface-500">
                 ESC
               </kbd>
             </div>
@@ -377,7 +377,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                 Object.entries(grouped).map(([group, items]) => (
                   <div key={group}>
                     <div className="px-4 pb-1 pt-2">
-                      <span className="bg-surface-50/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:bg-surface-800/50 dark:text-surface-500">
+                      <span className="bg-surface-50/50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-surface-400 dark:bg-surface-800/50 dark:text-surface-500">
                         {group}
                       </span>
                     </div>

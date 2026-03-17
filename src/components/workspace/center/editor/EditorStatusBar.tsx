@@ -16,19 +16,19 @@ export function EditorStatusBar({ editor, saveStatus }: EditorStatusBarProps) {
   return (
     <div className="flex h-7 shrink-0 items-center justify-between border-t border-surface-200 bg-surface-50/50 px-4 dark:border-surface-800 dark:bg-surface-850/50">
       <div className="flex items-center gap-3">
-        <span className="text-[10px] tabular-nums text-surface-400 dark:text-surface-500">
+        <span className="text-xs tabular-nums text-surface-400 dark:text-surface-500">
           {wordCount} {wordCount === 1 ? 'word' : 'words'}
         </span>
-        <span className="text-[10px] tabular-nums text-surface-400 dark:text-surface-500">
+        <span className="text-xs tabular-nums text-surface-400 dark:text-surface-500">
           {charCount} {charCount === 1 ? 'char' : 'chars'}
         </span>
-        <span className="text-[10px] text-surface-400 dark:text-surface-500">
+        <span className="text-xs text-surface-400 dark:text-surface-500">
           {readingTime} min read
         </span>
       </div>
       <div
         className={cn(
-          'flex items-center gap-1 text-[10px] font-medium transition-colors duration-200',
+          'flex items-center gap-1 text-xs font-medium transition-colors duration-200',
           saveStatus === 'error'
             ? 'text-red-500 dark:text-red-400'
             : saveStatus === 'saved'

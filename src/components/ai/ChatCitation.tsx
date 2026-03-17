@@ -48,7 +48,7 @@ export function ChatCitation({ source }: ChatCitationProps) {
         onClick={handleClick}
         className={cn(
           'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 mx-0.5',
-          'text-[11px] font-medium leading-tight',
+          'text-xs font-medium leading-tight',
           'bg-accent-50 text-accent-700 border border-accent-200',
           'hover:bg-accent-100 hover:border-accent-300',
           'dark:bg-accent-900/30 dark:text-accent-300 dark:border-accent-700',
@@ -78,13 +78,13 @@ export function ChatCitation({ source }: ChatCitationProps) {
             </span>
           </div>
           {source.pageNumber && (
-            <p className="text-[10px] text-surface-500 dark:text-surface-400 mb-1">
+            <p className="text-xs text-surface-500 dark:text-surface-400 mb-1">
               Page {source.pageNumber}
               {source.sectionHeading && ` — ${source.sectionHeading}`}
             </p>
           )}
           {source.contentPreview && (
-            <p className="text-[11px] leading-snug text-surface-600 dark:text-surface-300 line-clamp-3">
+            <p className="text-xs leading-snug text-surface-600 dark:text-surface-300 line-clamp-3">
               {source.contentPreview}
             </p>
           )}
@@ -107,7 +107,7 @@ export function SourcesList({ sources }: { sources: ChatSource[] }) {
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className="flex items-center gap-1 text-[10px] font-medium text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 transition-colors"
+        className="flex items-center gap-1 text-xs font-medium text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 transition-colors"
       >
         <span>{expanded ? 'Hide' : 'Show'} {sources.length} source{sources.length !== 1 ? 's' : ''}</span>
       </button>
@@ -144,11 +144,11 @@ function SourceListItem({ source }: { source: ChatSource }) {
     >
       <IconComponent className="h-3 w-3 shrink-0 text-surface-400" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[11px] font-medium text-surface-600 dark:text-surface-300">
+        <p className="truncate text-xs font-medium text-surface-600 dark:text-surface-300">
           [{source.sourceIndex}] {source.fileName}
         </p>
         {(source.pageNumber || source.sectionHeading) && (
-          <p className="text-[10px] text-surface-400 dark:text-surface-500">
+          <p className="text-xs text-surface-400 dark:text-surface-500">
             {source.pageNumber ? `Page ${source.pageNumber}` : ''}
             {source.pageNumber && source.sectionHeading ? ' — ' : ''}
             {source.sectionHeading || ''}

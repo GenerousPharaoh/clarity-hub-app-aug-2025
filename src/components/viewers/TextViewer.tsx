@@ -78,7 +78,7 @@ export function TextViewer({ url, fileName }: TextViewerProps) {
         <span className="truncate text-xs text-surface-500 dark:text-surface-400" title={fileName}>
           {fileName}
         </span>
-        <span className="ml-auto text-[10px] text-surface-400">
+        <span className="ml-auto text-xs text-surface-400">
           {isEmpty ? '0 bytes' : `${lines.length} lines`}
         </span>
       </div>
@@ -91,7 +91,7 @@ export function TextViewer({ url, fileName }: TextViewerProps) {
             <p className="mt-3 text-xs font-medium text-surface-500 dark:text-surface-400">
               Empty file
             </p>
-            <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500">
+            <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
               This file contains no content.
             </p>
           </div>
@@ -102,7 +102,7 @@ export function TextViewer({ url, fileName }: TextViewerProps) {
               {lines.map((_, i) => (
                 <div
                   key={i}
-                  className="font-mono text-[11px] leading-5 text-surface-300 dark:text-surface-500"
+                  className="font-mono text-xs leading-5 text-surface-300 dark:text-surface-500"
                 >
                   {i + 1}
                 </div>
@@ -111,7 +111,7 @@ export function TextViewer({ url, fileName }: TextViewerProps) {
 
             {/* Code content */}
             <pre className="flex-1 overflow-x-auto p-3">
-              <code className="font-mono text-[11px] leading-5 text-surface-700 dark:text-surface-300">
+              <code className="font-mono text-xs leading-5 text-surface-700 dark:text-surface-300">
                 {content}
               </code>
             </pre>

@@ -391,7 +391,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
 
                     return (
                       <code
-                        className="rounded bg-surface-100 px-1 py-0.5 font-mono text-[11px] text-accent-700 dark:bg-surface-800 dark:text-accent-300"
+                        className="rounded bg-surface-100 px-1 py-0.5 font-mono text-xs text-accent-700 dark:bg-surface-800 dark:text-accent-300"
                         {...props}
                       >
                         {children}

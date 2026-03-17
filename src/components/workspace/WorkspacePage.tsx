@@ -387,7 +387,7 @@ function MobileTabButton({
       <div className="relative">
         {icon}
         {badge !== undefined && (
-          <span className="absolute -right-3 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary-600 px-1 text-[10px] font-semibold leading-none text-white dark:bg-primary-500">
+          <span className="absolute -right-3 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary-600 px-1 text-xs font-semibold leading-none text-white dark:bg-primary-500">
             {badge}
           </span>
         )}

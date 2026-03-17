@@ -68,7 +68,7 @@ export function BubbleToolbar({ editor, onInsertLink }: BubbleToolbarProps) {
           active={editor.isActive('highlight')}
           title="Highlight"
         >
-          <span className="flex h-4 w-4 items-center justify-center rounded bg-yellow-300/40 text-[10px] font-bold dark:bg-yellow-400/30">H</span>
+          <span className="flex h-4 w-4 items-center justify-center rounded bg-yellow-300/40 text-xs font-bold dark:bg-yellow-400/30">H</span>
         </BubbleButton>
         <BubbleButton
           onClick={onInsertLink}

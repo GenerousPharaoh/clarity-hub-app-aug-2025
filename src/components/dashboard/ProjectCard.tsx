@@ -179,10 +179,10 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-[11px] font-medium text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-xs font-medium text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                     {goalType}
                   </span>
-                  <span className={cn('max-w-full rounded-full border px-2.5 py-1.5 text-[11px] font-medium [overflow-wrap:anywhere]', status.chip)}>
+                  <span className={cn('max-w-full rounded-full border px-2.5 py-1.5 text-xs font-medium [overflow-wrap:anywhere]', status.chip)}>
                     {status.label}
                   </span>
                 </div>

@@ -124,7 +124,7 @@ function buildGroups(onInsertLink: () => void, onInsertImage: () => void): Toolb
         {
           key: 'highlight',
           icon: (
-            <span className="flex h-4 w-4 items-center justify-center rounded bg-yellow-300/40 text-[11px] font-bold dark:bg-yellow-400/30">
+            <span className="flex h-4 w-4 items-center justify-center rounded bg-yellow-300/40 text-xs font-bold dark:bg-yellow-400/30">
               H
             </span>
           ),
@@ -409,7 +409,7 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
                 {overflowGroups.map((group, gi) => (
                   <div key={group.id}>
                     <div className="px-3 pb-1 pt-2">
-                      <span className="font-semibold bg-surface-50 dark:bg-surface-800/50 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                      <span className="font-semibold bg-surface-50 dark:bg-surface-800/50 px-2 py-0.5 rounded text-xs uppercase tracking-wider text-surface-400 dark:text-surface-500">
                         {group.label}
                       </span>
                     </div>

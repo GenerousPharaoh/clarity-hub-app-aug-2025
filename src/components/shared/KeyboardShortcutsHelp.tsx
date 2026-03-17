@@ -94,7 +94,7 @@ export function KeyboardShortcutsHelp({
                     {shortcut.keys.map((key, j) => (
                       <span key={j}>
                         {j > 0 && (
-                          <span className="mx-0.5 text-[10px] text-surface-300 dark:text-surface-600">
+                          <span className="mx-0.5 text-xs text-surface-300 dark:text-surface-600">
                             +
                           </span>
                         )}
@@ -102,7 +102,7 @@ export function KeyboardShortcutsHelp({
                           className={cn(
                             'inline-flex min-w-[20px] items-center justify-center rounded',
                             'ring-1 ring-surface-200 bg-surface-50 px-1.5 py-0.5 shadow-sm',
-                            'font-mono text-[10px] font-medium text-surface-600',
+                            'font-mono text-xs font-medium text-surface-600',
                             'dark:ring-surface-700 dark:bg-surface-700 dark:text-surface-300'
                           )}
                         >
@@ -117,7 +117,7 @@ export function KeyboardShortcutsHelp({
 
             {/* Footer */}
             <div className="border-t border-surface-200 px-5 py-3 dark:border-surface-700">
-              <p className="text-[10px] text-surface-500 dark:text-surface-500">
+              <p className="text-xs text-surface-500 dark:text-surface-500">
                 {isMac ? 'Use Cmd' : 'Use Ctrl'} as the modifier key
               </p>
             </div>

@@ -124,7 +124,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
                 <div className="h-full w-1/3 animate-[indeterminate_1.5s_ease-in-out_infinite] rounded-full bg-primary-500" />
               </div>
             </div>
-            <span className="shrink-0 rounded-full bg-surface-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:bg-surface-800 dark:text-surface-300">
+            <span className="shrink-0 rounded-full bg-surface-100 px-2 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:bg-surface-800 dark:text-surface-300">
               Uploading
             </span>
           </div>

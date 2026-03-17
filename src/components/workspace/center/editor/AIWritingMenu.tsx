@@ -277,7 +277,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
             <div className="mb-2 flex items-center gap-1.5">
               {resultModel && (
                 <span className={cn(
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
                   resultModel === 'gpt'
                     ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                     : 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
@@ -287,7 +287,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
               )}
               {resultEffort && (
                 <span className={cn(
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
+                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize',
                   EFFORT_BADGE_STYLES[resultEffort]
                 )}>
                   {resultEffort}

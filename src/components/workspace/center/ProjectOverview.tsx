@@ -524,7 +524,7 @@ function OverviewBadge({
           : 'border-surface-200 bg-white/80 text-surface-500 dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400';
 
   return (
-    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]', toneClasses)}>
+    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]', toneClasses)}>
       {children}
     </span>
   );

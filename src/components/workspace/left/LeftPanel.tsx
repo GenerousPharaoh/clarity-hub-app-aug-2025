@@ -351,7 +351,7 @@ export function LeftPanel() {
                 key={label}
                 onClick={() => setTypeFilter(key)}
                 className={cn(
-                  'rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+                  'rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors',
                   typeFilter === key
                     ? 'bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-950/30 dark:text-primary-300 dark:border-primary-700'
                     : 'bg-surface-100 text-surface-500 hover:bg-surface-200 hover:text-surface-700 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300'
@@ -392,13 +392,13 @@ export function LeftPanel() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setSelectedBatchIds(processableFiles.map((f) => f.id))}
-                      className="text-[11px] font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
+                      className="text-xs font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
                     >
                       All
                     </button>
                     <button
                       onClick={() => setSelectedBatchIds([])}
-                      className="text-[11px] font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
+                      className="text-xs font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
                     >
                       None
                     </button>
@@ -410,7 +410,7 @@ export function LeftPanel() {
                       setBatchSelectionMode(false);
                       setSelectedBatchIds([]);
                     }}
-                    className="rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
+                    className="rounded-xl px-2.5 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
                     title="Cancel selection"
                   >
                     Cancel
@@ -419,7 +419,7 @@ export function LeftPanel() {
                     onClick={handleOpenBatchConfirm}
                     disabled={selectedBatchFiles.length === 0}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-medium transition-colors',
+                      'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-colors',
                       selectedBatchFiles.length === 0
                         ? 'cursor-not-allowed bg-surface-200 text-surface-400 dark:bg-surface-800 dark:text-surface-500'
                         : 'bg-surface-950 text-white hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100'
@@ -462,12 +462,12 @@ export function LeftPanel() {
             <h3 className="mt-3 text-center text-xs font-semibold text-red-700 dark:text-red-300">
               Failed to load files
             </h3>
-            <p className="mt-1 text-center text-[11px] text-red-600/80 dark:text-red-400/70">
+            <p className="mt-1 text-center text-xs text-red-600/80 dark:text-red-400/70">
               Check your connection and try again.
             </p>
             <button
               onClick={() => refetch()}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
             >
               <RefreshCw className="h-3 w-3" />
               Retry
@@ -484,7 +484,7 @@ export function LeftPanel() {
                 ? 'No files match your search'
                 : 'No files yet'}
             </h3>
-            <p className="mt-1 text-center text-[11px] text-surface-400 dark:text-surface-500">
+            <p className="mt-1 text-center text-xs text-surface-400 dark:text-surface-500">
               {searchQuery
                 ? 'Try a different search term.'
                 : 'Upload files to get started.'}
@@ -519,14 +519,14 @@ export function LeftPanel() {
 
       {/* ── Footer file count ─────────────────────────────── */}
       {files.length > 0 && (
-        <div className="flex shrink-0 items-center justify-between border-t border-surface-200/80 px-3 py-2 text-[11px] dark:border-surface-800">
-          <span className="text-[11px] text-surface-400 dark:text-surface-500">
+        <div className="flex shrink-0 items-center justify-between border-t border-surface-200/80 px-3 py-2 text-xs dark:border-surface-800">
+          <span className="text-xs text-surface-400 dark:text-surface-500">
             {searchQuery
               ? `${filteredFiles.length} of ${files.length} files`
               : `${files.length} file${files.length !== 1 ? 's' : ''}`}
           </span>
           {batchSelectionMode && (
-            <span className="text-[11px] text-surface-400 dark:text-surface-500">
+            <span className="text-xs text-surface-400 dark:text-surface-500">
               {selectedBatchFiles.length} selected
             </span>
           )}

@@ -325,7 +325,7 @@ function ExhibitCard({
       <div className="flex items-start justify-between gap-2">
         {/* Exhibit badge */}
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center rounded-md bg-primary-100 px-2 py-0.5 text-xs font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+          <span className="inline-flex items-center rounded-md bg-primary-100 px-2 py-1 text-sm font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
             {exhibit.exhibit_id}
           </span>
         </div>
@@ -386,11 +386,11 @@ function ExhibitCard({
             className="group flex cursor-pointer items-start gap-1"
           >
             {exhibit.description ? (
-              <p className="text-xs leading-relaxed text-surface-600 dark:text-surface-300">
+              <p className="text-sm leading-relaxed text-surface-600 dark:text-surface-300">
                 {exhibit.description}
               </p>
             ) : (
-              <p className="text-xs italic text-surface-400 dark:text-surface-500">
+              <p className="text-sm italic text-surface-400 dark:text-surface-500">
                 Add description
               </p>
             )}
@@ -422,7 +422,7 @@ function ExhibitCard({
           <div className="relative">
             <button
               onClick={() => setShowFilePicker(!showFilePicker)}
-              className="flex items-center gap-1 text-[10px] text-surface-400 transition-colors hover:text-surface-600 dark:hover:text-surface-300"
+              className="flex items-center gap-1 text-xs text-surface-400 transition-colors hover:text-surface-600 dark:hover:text-surface-300"
             >
               <Link2 className="h-3.5 w-3.5" />
               Link file

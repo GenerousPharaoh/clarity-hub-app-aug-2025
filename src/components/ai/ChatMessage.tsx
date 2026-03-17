@@ -156,13 +156,13 @@ function CodeBlock({
   return (
     <div className="group/code my-2 overflow-x-auto rounded-lg border border-surface-200 dark:border-surface-700">
       <div className="flex h-7 items-center justify-between bg-surface-100 px-3 dark:bg-surface-800">
-        <span className="font-mono text-[10px] text-surface-500 dark:text-surface-400">
+        <span className="font-mono text-xs text-surface-500 dark:text-surface-400">
           {language}
         </span>
         <button
           onClick={handleCodeCopy}
           className={cn(
-            'flex h-5 items-center gap-1 rounded px-1.5 text-[10px] font-medium transition-all',
+            'flex h-5 items-center gap-1 rounded px-2 text-xs font-medium transition-all',
             'opacity-0 group-hover/code:opacity-100',
             codeCopied
               ? 'text-green-600 dark:text-green-400'
@@ -170,9 +170,9 @@ function CodeBlock({
           )}
         >
           {codeCopied ? (
-            <><Check className="h-3 w-3" /> Copied</>
+            <><Check className="h-3.5 w-3.5" /> Copied</>
           ) : (
-            <><Copy className="h-3 w-3" /> Copy</>
+            <><Copy className="h-3.5 w-3.5" /> Copy</>
           )}
         </button>
       </div>
@@ -261,7 +261,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
             <div className="rounded-2xl rounded-br-md bg-primary-600 px-3 py-2 text-[13px] leading-relaxed text-white shadow-elevated break-words">
               {message.content}
             </div>
-            <div className="mt-1 text-right text-[10px] text-surface-400 dark:text-surface-500">
+            <div className="mt-1 text-right text-xs text-surface-400 dark:text-surface-500">
               {timestamp}
             </div>
           </div>
@@ -300,7 +300,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               {modelConfig && (
                 <span
                   className={cn(
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
                     modelConfig.className
                   )}
                   title={
@@ -315,7 +315,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               {message.complexity && COMPLEXITY_CONFIG[message.complexity] && (
                 <span
                   className={cn(
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
                     COMPLEXITY_CONFIG[message.complexity].className
                   )}
                 >
@@ -325,7 +325,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               {message.effortLevel && EFFORT_BADGE_CONFIG[message.effortLevel] && (
                 <span
                   className={cn(
-                    'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium',
+                    'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
                     EFFORT_BADGE_CONFIG[message.effortLevel].className
                   )}
                 >
@@ -358,9 +358,9 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                 title="Copy to clipboard"
               >
                 {copied ? (
-                  <Check className="h-3 w-3" />
+                  <Check className="h-3.5 w-3.5" />
                 ) : (
-                  <Copy className="h-3 w-3" />
+                  <Copy className="h-3.5 w-3.5" />
                 )}
               </button>
             )}
@@ -489,15 +489,15 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           {isError && onRetry && (
             <button
               onClick={handleRetry}
-              className="mt-1.5 flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+              className="mt-1.5 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
             >
-              <RotateCcw className="h-3 w-3" />
+              <RotateCcw className="h-3.5 w-3.5" />
               Retry
             </button>
           )}
 
           {/* Timestamp */}
-          <div className="mt-1 text-[10px] text-surface-400 dark:text-surface-500">{timestamp}</div>
+          <div className="mt-1 text-xs text-surface-400 dark:text-surface-500">{timestamp}</div>
 
           {/* Follow-up suggestions on latest assistant message */}
           {isLatest && !isError && message.followUps && message.followUps.length > 0 && onFollowUpSelect && (

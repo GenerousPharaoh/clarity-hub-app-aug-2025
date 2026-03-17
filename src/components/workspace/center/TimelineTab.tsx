@@ -278,11 +278,11 @@ export function TimelineTab() {
               Timeline
             </h2>
             <div className="flex flex-nowrap gap-2 overflow-hidden">
-              <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+              <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                 {eventCount} event{eventCount !== 1 ? 's' : ''}
               </span>
               {verifiedCount > 0 && (
-                <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">
+                <span className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">
                   {verifiedCount} verified
                 </span>
               )}
@@ -553,7 +553,7 @@ function TimelineEventCard({
             <button
               onClick={() => onToggleVerified(event)}
               className={cn(
-                'flex h-7 items-center gap-1 rounded-lg px-2 text-[10px] font-medium transition-colors',
+                'flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-medium transition-colors',
                 event.is_verified
                   ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30'
                   : 'bg-surface-50 text-surface-500 hover:bg-surface-100 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700'
@@ -561,9 +561,9 @@ function TimelineEventCard({
               title={event.is_verified ? 'Mark as unverified' : 'Mark as verified'}
             >
               {event.is_verified ? (
-                <CheckCircle2 className="h-3 w-3" />
+                <CheckCircle2 className="h-3.5 w-3.5" />
               ) : (
-                <Circle className="h-3 w-3" />
+                <Circle className="h-3.5 w-3.5" />
               )}
               {event.is_verified ? 'Verified' : 'Verify'}
             </button>
@@ -573,7 +573,7 @@ function TimelineEventCard({
               className="flex h-7 w-7 items-center justify-center rounded-lg text-surface-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               title="Delete event"
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
@@ -583,7 +583,7 @@ function TimelineEventCard({
           {event.category && (
             <span
               className={cn(
-                'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium capitalize',
+                'inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium capitalize',
                 categoryStyle.bg,
                 categoryStyle.text,
                 categoryStyle.border
@@ -594,7 +594,7 @@ function TimelineEventCard({
           )}
 
           {event.confidence && (
-            <span className="rounded-full bg-surface-100 px-2 py-0.5 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+            <span className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
               {getConfidenceLabel(event.confidence)}
             </span>
           )}
@@ -602,7 +602,7 @@ function TimelineEventCard({
           {event.source_file_name ? (
             <button
               onClick={() => event.source_file_id && onSourceClick(event.source_file_id)}
-              className="interactive-lift inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+              className="interactive-lift inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
               title={`Open ${event.source_file_name}`}
             >
               <FileText className="h-2.5 w-2.5" />
@@ -610,7 +610,7 @@ function TimelineEventCard({
               {event.source_page != null && ` p.${event.source_page}`}
             </button>
           ) : (
-            <span className="rounded-full bg-surface-100 px-2 py-0.5 text-[10px] font-medium text-surface-400 dark:bg-surface-800 dark:text-surface-500">
+            <span className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-400 dark:bg-surface-800 dark:text-surface-500">
               Manual entry
             </span>
           )}

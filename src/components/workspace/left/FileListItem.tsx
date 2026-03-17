@@ -103,7 +103,7 @@ function getProcessingBadge(
       label: 'Indexing',
       className:
         'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-900/40 dark:bg-primary-950/30 dark:text-primary-300',
-      icon: <Loader2 className="h-3 w-3 animate-spin" />,
+      icon: <Loader2 className="h-3.5 w-3.5 animate-spin" />,
     };
   }
 
@@ -112,7 +112,7 @@ function getProcessingBadge(
       label: 'AI-ready',
       className:
         'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300',
-      icon: <CheckCircle2 className="h-3 w-3" />,
+      icon: <CheckCircle2 className="h-3.5 w-3.5" />,
     };
   }
 
@@ -121,7 +121,7 @@ function getProcessingBadge(
       label: 'Retry needed',
       className:
         'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300',
-      icon: <AlertTriangle className="h-3 w-3" />,
+      icon: <AlertTriangle className="h-3.5 w-3.5" />,
     };
   }
 
@@ -129,7 +129,7 @@ function getProcessingBadge(
     label: 'Pending',
     className:
       'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300',
-    icon: <Zap className="h-3 w-3" />,
+    icon: <Zap className="h-3.5 w-3.5" />,
   };
 }
 
@@ -265,7 +265,7 @@ export function FileListItem({
             aria-label={isBatchSelected ? `Deselect ${file.name}` : `Select ${file.name}`}
             title={isBatchSelected ? 'Deselect file' : 'Select file'}
           >
-            <span className="text-[10px] leading-none">✓</span>
+            <span className="text-xs leading-none">✓</span>
           </button>
         )}
 
@@ -307,7 +307,7 @@ export function FileListItem({
                     return (
                       <span
                         className={cn(
-                          'rounded-full px-2 py-0.5 text-[10px] font-medium',
+                          'rounded-full px-2 py-1 text-xs font-medium',
                           style.bg,
                           style.text,
                           isUncertain && `border ${style.border} border-dashed`
@@ -325,13 +325,13 @@ export function FileListItem({
                   return null;
                 })()}
                 {file.added_at && (
-                  <span className="rounded-full bg-surface-100 px-2 py-1 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+                  <span className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
                     {formatDate(file.added_at)}
                   </span>
                 )}
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]',
+                    'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em]',
                     statusBadge.className
                   )}
                   title={file.ai_summary || file.processing_error || statusBadge.label}
@@ -352,7 +352,7 @@ export function FileListItem({
                   }}
                   disabled={processingState?.isProcessing}
                   className={cn(
-                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-[11px] font-medium transition-all',
+                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-medium transition-all',
                     processingState?.isProcessing
                       ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
                       : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',
@@ -396,7 +396,7 @@ export function FileListItem({
             </div>
           </div>
 
-          <p className="mt-3 line-clamp-2 text-[11px] leading-5 text-surface-500 dark:text-surface-400">
+          <p className="mt-3 line-clamp-2 text-xs leading-5 text-surface-500 dark:text-surface-400">
             {summary}
           </p>
         </div>

@@ -450,11 +450,11 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                 Documents
               </h2>
               <div className="flex flex-nowrap gap-2 overflow-hidden">
-                <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                   {noteCount} {noteCount === 1 ? 'doc' : 'docs'}
                 </span>
                 {activeNote && (
-                  <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-[10px] font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
+                  <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-xs font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
                     Edited {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
                   </span>
                 )}
@@ -580,7 +580,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                           <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200">
                             {note.title || 'Untitled'}
                           </p>
-                          <p className="mt-0.5 text-[11px] text-surface-400 dark:text-surface-500">
+                          <p className="mt-0.5 text-xs text-surface-400 dark:text-surface-500">
                             {formatRelativeDate(note.last_modified ?? note.created_at)}
                           </p>
                         </div>

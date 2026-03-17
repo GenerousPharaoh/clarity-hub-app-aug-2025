@@ -398,7 +398,7 @@ export function AIChatPanel() {
 
         <div className={cn('mt-2 flex items-center gap-1 px-1', compact ? 'justify-end' : 'justify-between')}>
           {!compact && !narrow && (
-            <span className="text-[10px] text-surface-400 dark:text-surface-500">
+            <span className="text-xs text-surface-400 dark:text-surface-500">
               <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
               <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>
               <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Shift+Enter</kbd> new line
@@ -406,7 +406,7 @@ export function AIChatPanel() {
           )}
           {input.length > 2000 ? (
             <span className={cn(
-              'text-[10px] whitespace-nowrap',
+              'text-xs whitespace-nowrap',
               input.length > 3600
                 ? 'text-red-500 dark:text-red-400'
                 : input.length > 3200
@@ -416,7 +416,7 @@ export function AIChatPanel() {
               {input.length.toLocaleString()} / 4,000
             </span>
           ) : (
-            <span className="text-[10px] text-surface-400 dark:text-surface-500">Not legal advice</span>
+            <span className="text-xs text-surface-400 dark:text-surface-500">Not legal advice</span>
           )}
         </div>
       </div>

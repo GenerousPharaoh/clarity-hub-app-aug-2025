@@ -154,7 +154,7 @@ export function FileViewer() {
                   setRightTab('ai');
                   setMobileTab('viewer');
                 }}
-                className="mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-900/20"
+                className="mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-900/20"
               >
                 <MessageSquareText className="h-3.5 w-3.5" />
                 Open AI chat instead
@@ -212,7 +212,7 @@ export function FileViewer() {
             onClick={handleRetry}
             className={cn(
               'mt-4 inline-flex items-center gap-1.5 rounded-xl px-3 py-2',
-              'text-xs font-medium text-red-600',
+              'text-sm font-medium text-red-600',
               'transition-colors hover:bg-white/70',
               'dark:text-red-300 dark:hover:bg-red-950/30'
             )}

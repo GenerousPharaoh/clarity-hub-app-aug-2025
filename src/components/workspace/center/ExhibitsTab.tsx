@@ -142,7 +142,7 @@ export function ExhibitsTab() {
         </p>
         <button
           onClick={() => refetch()}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -164,7 +164,7 @@ export function ExhibitsTab() {
               onClick={() => setShowCompendiumBuilder(true)}
               className={cn(
                 'flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
-                'text-xs font-medium text-surface-600 dark:text-surface-300',
+                'text-sm font-medium text-surface-600 dark:text-surface-300',
                 'transition-colors hover:bg-surface-100 dark:hover:bg-surface-700'
               )}
             >
@@ -177,7 +177,7 @@ export function ExhibitsTab() {
             disabled={createExhibit.isPending}
             className={cn(
               'flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
-              'text-xs font-medium text-primary-600 dark:text-primary-400',
+              'text-sm font-medium text-primary-600 dark:text-primary-400',
               'transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20',
               'disabled:opacity-50'
             )}
@@ -275,7 +275,7 @@ function EmptyState({
         disabled={isCreating}
         className={cn(
           'mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2',
-          'bg-primary-600 text-xs font-medium text-white',
+          'bg-primary-600 text-sm font-medium text-white',
           'transition-colors hover:bg-primary-700',
           'disabled:opacity-50'
         )}

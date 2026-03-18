@@ -88,7 +88,7 @@ export function TextViewer({ url, fileName }: TextViewerProps) {
         {isEmpty ? (
           <div className="flex h-full flex-col items-center justify-center px-8 text-center">
             <FileText className="h-8 w-8 text-surface-300 dark:text-surface-600" />
-            <p className="mt-3 text-xs font-medium text-surface-500 dark:text-surface-400">
+            <p className="mt-3 text-sm font-medium text-surface-500 dark:text-surface-400">
               Empty file
             </p>
             <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">

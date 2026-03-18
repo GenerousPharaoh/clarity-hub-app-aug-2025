@@ -57,7 +57,7 @@ export function DocumentViewer({ url, fileName }: DocumentViewerProps) {
             onClick={handleDownload}
             className={cn(
               'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-              'text-xs font-medium text-primary-600',
+              'text-sm font-medium text-primary-600',
               'transition-colors hover:bg-primary-50',
               'dark:text-primary-400 dark:hover:bg-primary-900/20'
             )}
@@ -69,7 +69,7 @@ export function DocumentViewer({ url, fileName }: DocumentViewerProps) {
             onClick={handleOpenInTab}
             className={cn(
               'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-              'text-xs font-medium text-surface-600',
+              'text-sm font-medium text-surface-600',
               'transition-colors hover:bg-surface-100',
               'dark:text-surface-400 dark:hover:bg-surface-800'
             )}
@@ -89,7 +89,7 @@ export function DocumentViewer({ url, fileName }: DocumentViewerProps) {
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <FileText className="h-3.5 w-3.5 shrink-0 text-blue-500" />
           <span
-            className="truncate text-xs font-medium text-surface-600 dark:text-surface-300"
+            className="truncate text-sm font-medium text-surface-600 dark:text-surface-300"
             title={fileName}
           >
             {fileName}

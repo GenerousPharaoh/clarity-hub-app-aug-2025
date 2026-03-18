@@ -206,7 +206,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
         </p>
         <button
           onClick={() => navigate('/')}
-          className="mt-4 text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+          className="mt-4 text-sm font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
         >
           &larr; Back to dashboard
         </button>
@@ -467,7 +467,7 @@ function EditableProjectHeader({
             <button
               onClick={saveDesc}
               disabled={updateProject.isPending}
-              className="inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-50 disabled:opacity-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
+              className="inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-sm font-medium text-primary-700 hover:bg-primary-50 disabled:opacity-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
             >
               {updateProject.isPending && <Loader2 className="h-3 w-3 animate-spin" />}
               Save summary
@@ -478,7 +478,7 @@ function EditableProjectHeader({
                 setIsEditingDesc(false);
               }}
               disabled={updateProject.isPending}
-              className="rounded-xl px-3 py-1.5 text-xs font-medium text-surface-500 hover:bg-surface-100 disabled:opacity-50 dark:hover:bg-surface-700"
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-surface-500 hover:bg-surface-100 disabled:opacity-50 dark:hover:bg-surface-700"
             >
               Cancel
             </button>
@@ -553,7 +553,7 @@ function OverviewMetricCard({
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         {icon}
         <span>{label}</span>
       </div>
@@ -627,7 +627,7 @@ function MatterStageCard({
 
   return (
     <div className={cn('rounded-[28px] border p-5 shadow-sm', toneClasses)}>
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-400">
+      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-400">
         <ShieldCheck className="h-4 w-4" />
         Status
       </div>
@@ -663,7 +663,7 @@ function NextStepsCard({
 }) {
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <Sparkles className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Next steps
       </div>
@@ -679,7 +679,7 @@ function NextStepsCard({
             {action.action && action.actionLabel && (
               <button
                 onClick={action.action}
-                className="mt-auto inline-flex items-center gap-1.5 self-start rounded-xl px-3 py-2 pt-3 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
+                className="mt-auto inline-flex items-center gap-1.5 self-start rounded-xl px-3 py-2 pt-3 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
               >
                 {action.actionLabel}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -731,7 +731,7 @@ function FileTypeBreakdown({
 
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <FileText className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Evidence profile
       </div>
@@ -805,7 +805,7 @@ function RecentActivity({
 
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <Clock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Recent activity
       </div>
@@ -819,7 +819,7 @@ function RecentActivity({
             <span className="flex min-w-0 flex-1 items-start gap-3">
               <span className="mt-0.5 shrink-0">{item.icon}</span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-xs font-medium text-surface-400 dark:text-surface-500">
+                <span className="block truncate text-sm font-medium text-surface-400 dark:text-surface-500">
                   {item.kind}
                 </span>
                 <span className="mt-1 block truncate text-sm font-medium text-surface-800 dark:text-surface-100">
@@ -852,7 +852,7 @@ function MatterDetailsCard({
 }) {
   return (
     <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <FolderOpen className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Matter details
       </div>
@@ -937,7 +937,7 @@ function QuickActions() {
         className="hidden"
       />
 
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <Upload className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Quick actions
       </div>

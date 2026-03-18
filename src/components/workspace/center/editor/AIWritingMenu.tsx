@@ -277,7 +277,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
             <div className="mb-2 flex items-center gap-1.5">
               {resultModel && (
                 <span className={cn(
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                  'inline-flex items-center rounded-full px-2 py-0.5 text-sm font-medium',
                   resultModel === 'gpt'
                     ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                     : 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
@@ -287,7 +287,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
               )}
               {resultEffort && (
                 <span className={cn(
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize',
+                  'inline-flex items-center rounded-full px-2 py-0.5 text-sm font-medium capitalize',
                   EFFORT_BADGE_STYLES[resultEffort]
                 )}>
                   {resultEffort}
@@ -302,21 +302,21 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
           <div className="mt-3 flex items-center gap-2">
             <button
               onClick={acceptResult}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-700"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
             >
               <Check className="h-3.5 w-3.5" />
               Accept
             </button>
             <button
               onClick={retryResult}
-              className="flex items-center justify-center gap-1.5 rounded-lg bg-surface-100 px-3 py-2 text-xs font-medium text-surface-600 transition-colors hover:bg-surface-200 dark:bg-surface-700 dark:text-surface-300 dark:hover:bg-surface-600"
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-surface-100 px-3 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-200 dark:bg-surface-700 dark:text-surface-300 dark:hover:bg-surface-600"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Retry
             </button>
             <button
               onClick={rejectResult}
-              className="flex items-center justify-center gap-1.5 rounded-lg bg-surface-100 px-3 py-2 text-xs font-medium text-surface-600 transition-colors hover:bg-surface-200 dark:bg-surface-700 dark:text-surface-300 dark:hover:bg-surface-600"
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-surface-100 px-3 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-200 dark:bg-surface-700 dark:text-surface-300 dark:hover:bg-surface-600"
             >
               <X className="h-3.5 w-3.5" />
               Discard
@@ -367,7 +367,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
                 onClick={() => handleQuickAction(action)}
                 disabled={!selectedText.trim()}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition-colors',
+                  'flex items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm font-medium transition-colors',
                   selectedText.trim()
                     ? 'text-surface-600 hover:bg-surface-100 hover:text-surface-800 dark:text-surface-300 dark:hover:bg-surface-700 dark:hover:text-surface-100'
                     : 'cursor-not-allowed text-surface-300 dark:text-surface-500'

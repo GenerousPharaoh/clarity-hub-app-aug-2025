@@ -256,7 +256,7 @@ export function TimelineTab() {
         </p>
         <button
           onClick={() => refetch()}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -294,7 +294,7 @@ export function TimelineTab() {
               onClick={handleExtract}
               disabled={extractTimeline.isPending}
               className={cn(
-                'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium',
+                'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium',
                 'border-surface-200 bg-white text-surface-600 transition-colors hover:bg-surface-50',
                 'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700',
                 'disabled:cursor-not-allowed disabled:opacity-50'
@@ -312,7 +312,7 @@ export function TimelineTab() {
             <button
               onClick={() => setShowAddForm((prev) => !prev)}
               className={cn(
-                'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium',
+                'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium',
                 showAddForm
                   ? 'border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-800 dark:bg-primary-900/20 dark:text-primary-300'
                   : 'border-surface-200 bg-white text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700'
@@ -343,7 +343,7 @@ export function TimelineTab() {
             <div className="space-y-3 px-3 py-4 sm:px-4">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="flex-1">
-                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-sm font-medium text-surface-500 dark:text-surface-400">
                     Date *
                   </label>
                   <input
@@ -359,7 +359,7 @@ export function TimelineTab() {
                   />
                 </div>
                 <div className="flex-[2]">
-                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-sm font-medium text-surface-500 dark:text-surface-400">
                     Title *
                   </label>
                   <input
@@ -379,7 +379,7 @@ export function TimelineTab() {
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="flex-[2]">
-                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-sm font-medium text-surface-500 dark:text-surface-400">
                     Description
                   </label>
                   <input
@@ -396,7 +396,7 @@ export function TimelineTab() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
+                  <label className="mb-1 block text-sm font-medium text-surface-500 dark:text-surface-400">
                     Category
                   </label>
                   <select
@@ -425,7 +425,7 @@ export function TimelineTab() {
                   onClick={handleCreate}
                   disabled={createEvent.isPending || !newDate.trim() || !newTitle.trim()}
                   className={cn(
-                    'inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-medium transition-colors',
+                    'inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors',
                     'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-700',
                     'disabled:cursor-not-allowed disabled:opacity-50'
                   )}
@@ -540,7 +540,7 @@ function TimelineEventCard({
         {/* Date + title row */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-surface-400 dark:text-surface-500">
+            <p className="text-sm font-medium text-surface-400 dark:text-surface-500">
               {formatEventDate(event.date)}
             </p>
             <h4 className="mt-0.5 font-heading text-sm font-semibold text-surface-800 dark:text-surface-100">
@@ -553,7 +553,7 @@ function TimelineEventCard({
             <button
               onClick={() => onToggleVerified(event)}
               className={cn(
-                'flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-medium transition-colors',
+                'flex h-7 items-center gap-1 rounded-lg px-2 text-sm font-medium transition-colors',
                 event.is_verified
                   ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30'
                   : 'bg-surface-50 text-surface-500 hover:bg-surface-100 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700'
@@ -583,7 +583,7 @@ function TimelineEventCard({
           {event.category && (
             <span
               className={cn(
-                'inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium capitalize',
+                'inline-flex items-center rounded-full border px-2 py-1 text-sm font-medium capitalize',
                 categoryStyle.bg,
                 categoryStyle.text,
                 categoryStyle.border
@@ -594,7 +594,7 @@ function TimelineEventCard({
           )}
 
           {event.confidence && (
-            <span className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+            <span className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
               {getConfidenceLabel(event.confidence)}
             </span>
           )}
@@ -602,7 +602,7 @@ function TimelineEventCard({
           {event.source_file_name ? (
             <button
               onClick={() => event.source_file_id && onSourceClick(event.source_file_id)}
-              className="interactive-lift inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+              className="interactive-lift inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-1 text-sm font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
               title={`Open ${event.source_file_name}`}
             >
               <FileText className="h-2.5 w-2.5" />
@@ -610,7 +610,7 @@ function TimelineEventCard({
               {event.source_page != null && ` p.${event.source_page}`}
             </button>
           ) : (
-            <span className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-400 dark:bg-surface-800 dark:text-surface-500">
+            <span className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-400 dark:bg-surface-800 dark:text-surface-500">
               Manual entry
             </span>
           )}

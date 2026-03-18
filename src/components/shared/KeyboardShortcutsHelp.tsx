@@ -102,7 +102,7 @@ export function KeyboardShortcutsHelp({
                           className={cn(
                             'inline-flex min-w-[20px] items-center justify-center rounded',
                             'ring-1 ring-surface-200 bg-surface-50 px-1.5 py-0.5 shadow-sm',
-                            'font-mono text-xs font-medium text-surface-600',
+                            'font-mono text-sm font-medium text-surface-600',
                             'dark:ring-surface-700 dark:bg-surface-700 dark:text-surface-300'
                           )}
                         >

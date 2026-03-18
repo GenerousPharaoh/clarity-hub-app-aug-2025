@@ -52,7 +52,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
               onClick={handleDownload}
               className={cn(
                 'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-                'text-xs font-medium text-primary-600',
+                'text-sm font-medium text-primary-600',
                 'transition-colors hover:bg-primary-50',
                 'dark:text-primary-400 dark:hover:bg-primary-900/20'
               )}
@@ -64,7 +64,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
               onClick={handleOpenInTab}
               className={cn(
                 'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-                'text-xs font-medium text-surface-600',
+                'text-sm font-medium text-surface-600',
                 'transition-colors hover:bg-surface-100',
                 'dark:text-surface-400 dark:hover:bg-surface-800'
               )}
@@ -86,7 +86,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <FileText className="h-4 w-4 shrink-0 text-red-500" />
             <span
-              className="truncate text-xs font-medium text-surface-600 dark:text-surface-300"
+              className="truncate text-sm font-medium text-surface-600 dark:text-surface-300"
               title={fileName}
             >
               {fileName}
@@ -109,7 +109,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
               onClick={handleOpenInTab}
               className={cn(
                 'flex items-center gap-2 rounded-xl px-5 py-2.5',
-                'bg-primary-600 text-xs font-medium text-white',
+                'bg-primary-600 text-sm font-medium text-white',
                 'transition-colors hover:bg-primary-700 active:bg-primary-700',
                 'shadow-sm shadow-primary-500/25'
               )}
@@ -121,7 +121,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
               onClick={handleDownload}
               className={cn(
                 'flex items-center gap-2 rounded-xl px-4 py-2.5',
-                'text-xs font-medium text-surface-600',
+                'text-sm font-medium text-surface-600',
                 'border border-surface-200 transition-colors',
                 'hover:bg-surface-50 dark:border-surface-700',
                 'dark:text-surface-300 dark:hover:bg-surface-800'
@@ -143,7 +143,7 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <FileText className="h-3.5 w-3.5 shrink-0 text-red-500" />
           <span
-            className="truncate text-xs font-medium text-surface-600 dark:text-surface-300"
+            className="truncate text-sm font-medium text-surface-600 dark:text-surface-300"
             title={fileName}
           >
             {fileName}

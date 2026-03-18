@@ -163,7 +163,7 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-all',
+        'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium transition-all',
         compact ? 'px-2' : 'px-2.5',
         active
           ? activeColor

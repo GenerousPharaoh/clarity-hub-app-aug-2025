@@ -392,7 +392,7 @@ function MobileTabButton({
           </span>
         )}
       </div>
-      <span className="text-xs font-medium">{label}</span>
+      <span className="text-sm font-medium">{label}</span>
     </button>
   );
 }

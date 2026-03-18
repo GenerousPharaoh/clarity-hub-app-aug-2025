@@ -187,7 +187,7 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
             <ZoomOut className="h-3.5 w-3.5" />
           </ToolbarButton>
 
-          <span className="min-w-[3rem] text-center text-xs font-medium text-surface-500 dark:text-surface-400">
+          <span className="min-w-[3rem] text-center text-sm font-medium text-surface-500 dark:text-surface-400">
             {displayZoom}
           </span>
 

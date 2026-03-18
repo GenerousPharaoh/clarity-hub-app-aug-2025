@@ -28,7 +28,7 @@ export function EditorStatusBar({ editor, saveStatus }: EditorStatusBarProps) {
       </div>
       <div
         className={cn(
-          'flex items-center gap-1 text-xs font-medium transition-colors duration-200',
+          'flex items-center gap-1 text-sm font-medium transition-colors duration-200',
           saveStatus === 'error'
             ? 'text-red-500 dark:text-red-400'
             : saveStatus === 'saved'

@@ -380,7 +380,7 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
                 {cmd.icon}
               </div>
               <div className="min-w-0">
-                <div className="truncate text-xs font-medium text-surface-700 dark:text-surface-200">
+                <div className="truncate text-sm font-medium text-surface-700 dark:text-surface-200">
                   {cmd.title}
                 </div>
                 <div className="truncate text-xs text-surface-400 dark:text-surface-500">

@@ -267,7 +267,7 @@ export function SettingsPage() {
                 </p>
                 <button
                   onClick={refreshUsage}
-                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-200 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-200 hover:text-surface-700 dark:hover:bg-surface-700 dark:hover:text-surface-200"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Refresh
@@ -303,14 +303,14 @@ export function SettingsPage() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       onClick={handleResetDemo}
-                      className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-900/30"
+                      className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-900/30"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                       Reset Demo
                     </button>
                     <button
                       onClick={() => void signInWithGoogle()}
-                      className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-500"
+                      className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-500"
                     >
                       <LogOut className="h-3.5 w-3.5" />
                       Use Google instead

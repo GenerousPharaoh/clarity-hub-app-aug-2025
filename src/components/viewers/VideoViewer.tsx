@@ -235,7 +235,7 @@ export function VideoViewer({ url, fileName }: VideoViewerProps) {
     >
       {/* Toolbar */}
       <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-2 dark:border-surface-700">
-        <span className="truncate text-xs font-medium text-surface-600 dark:text-surface-300" title={fileName}>
+        <span className="truncate text-sm font-medium text-surface-600 dark:text-surface-300" title={fileName}>
           {fileName}
         </span>
         <button

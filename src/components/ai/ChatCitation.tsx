@@ -48,7 +48,7 @@ export function ChatCitation({ source }: ChatCitationProps) {
         onClick={handleClick}
         className={cn(
           'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 mx-0.5',
-          'text-xs font-medium leading-tight',
+          'text-sm font-medium leading-tight',
           'bg-accent-50 text-accent-700 border border-accent-200',
           'hover:bg-accent-100 hover:border-accent-300',
           'dark:bg-accent-900/30 dark:text-accent-300 dark:border-accent-700',
@@ -107,7 +107,7 @@ export function SourcesList({ sources }: { sources: ChatSource[] }) {
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className="flex items-center gap-1 text-xs font-medium text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 transition-colors"
+        className="flex items-center gap-1 text-sm font-medium text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 transition-colors"
       >
         <span>{expanded ? 'Hide' : 'Show'} {sources.length} source{sources.length !== 1 ? 's' : ''}</span>
       </button>
@@ -144,7 +144,7 @@ function SourceListItem({ source }: { source: ChatSource }) {
     >
       <IconComponent className="h-3 w-3 shrink-0 text-surface-400" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-medium text-surface-600 dark:text-surface-300">
+        <p className="truncate text-sm font-medium text-surface-600 dark:text-surface-300">
           [{source.sourceIndex}] {source.fileName}
         </p>
         {(source.pageNumber || source.sectionHeading) && (

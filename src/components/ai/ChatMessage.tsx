@@ -162,7 +162,7 @@ function CodeBlock({
         <button
           onClick={handleCodeCopy}
           className={cn(
-            'flex h-5 items-center gap-1 rounded px-2 text-xs font-medium transition-all',
+            'flex h-5 items-center gap-1 rounded px-2 text-sm font-medium transition-all',
             'opacity-0 group-hover/code:opacity-100',
             codeCopied
               ? 'text-green-600 dark:text-green-400'
@@ -300,7 +300,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               {modelConfig && (
                 <span
                   className={cn(
-                    'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
+                    'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
                     modelConfig.className
                   )}
                   title={
@@ -315,7 +315,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               {message.complexity && COMPLEXITY_CONFIG[message.complexity] && (
                 <span
                   className={cn(
-                    'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
+                    'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
                     COMPLEXITY_CONFIG[message.complexity].className
                   )}
                 >
@@ -325,7 +325,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
               {message.effortLevel && EFFORT_BADGE_CONFIG[message.effortLevel] && (
                 <span
                   className={cn(
-                    'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium',
+                    'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
                     EFFORT_BADGE_CONFIG[message.effortLevel].className
                   )}
                 >
@@ -489,7 +489,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           {isError && onRetry && (
             <button
               onClick={handleRetry}
-              className="mt-1.5 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+              className="mt-1.5 flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               Retry

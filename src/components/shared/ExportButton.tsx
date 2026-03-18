@@ -124,7 +124,7 @@ export function ExportButton({
         onClick={() => setOpen((prev) => !prev)}
         className={cn(
           'flex items-center gap-1 rounded-lg px-2 py-1.5',
-          'text-xs font-medium text-surface-500 dark:text-surface-400',
+          'text-sm font-medium text-surface-500 dark:text-surface-400',
           'transition-colors hover:bg-surface-100 hover:text-surface-700',
           'dark:hover:bg-surface-800 dark:hover:text-surface-200',
           className

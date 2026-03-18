@@ -307,7 +307,7 @@ export function FileListItem({
                     return (
                       <span
                         className={cn(
-                          'rounded-full px-2 py-1 text-xs font-medium',
+                          'rounded-full px-2 py-1 text-sm font-medium',
                           style.bg,
                           style.text,
                           isUncertain && `border ${style.border} border-dashed`
@@ -325,7 +325,7 @@ export function FileListItem({
                   return null;
                 })()}
                 {file.added_at && (
-                  <span className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+                  <span className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
                     {formatDate(file.added_at)}
                   </span>
                 )}
@@ -352,7 +352,7 @@ export function FileListItem({
                   }}
                   disabled={processingState?.isProcessing}
                   className={cn(
-                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-xs font-medium transition-all',
+                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-sm font-medium transition-all',
                     processingState?.isProcessing
                       ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
                       : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',

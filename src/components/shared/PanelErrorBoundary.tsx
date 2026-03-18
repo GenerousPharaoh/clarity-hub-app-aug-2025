@@ -53,7 +53,7 @@ export class PanelErrorBoundary extends Component<Props, State> {
             </p>
             <button
               onClick={this.handleReset}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-700"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-700"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               Try again

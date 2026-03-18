@@ -351,7 +351,7 @@ export function LeftPanel() {
                 key={label}
                 onClick={() => setTypeFilter(key)}
                 className={cn(
-                  'rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors',
+                  'rounded-full px-2.5 py-1.5 text-sm font-medium transition-colors',
                   typeFilter === key
                     ? 'bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-950/30 dark:text-primary-300 dark:border-primary-700'
                     : 'bg-surface-100 text-surface-500 hover:bg-surface-200 hover:text-surface-700 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300'
@@ -376,7 +376,7 @@ export function LeftPanel() {
                 onClick={() => setBatchSelectionMode(true)}
                 className="flex w-full items-center justify-between gap-3 rounded-xl px-2 py-1.5 text-left transition-colors hover:bg-surface-100 dark:hover:bg-surface-800"
               >
-                <p className="text-xs font-medium text-surface-600 dark:text-surface-300">
+                <p className="text-sm font-medium text-surface-600 dark:text-surface-300">
                   Batch index
                 </p>
                 <span className="text-xs text-surface-400 dark:text-surface-500">
@@ -386,19 +386,19 @@ export function LeftPanel() {
             ) : (
               <div>
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs font-medium text-surface-700 dark:text-surface-200">
+                  <p className="text-sm font-medium text-surface-700 dark:text-surface-200">
                     {selectedBatchFiles.length} selected
                   </p>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setSelectedBatchIds(processableFiles.map((f) => f.id))}
-                      className="text-xs font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
+                      className="text-sm font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
                     >
                       All
                     </button>
                     <button
                       onClick={() => setSelectedBatchIds([])}
-                      className="text-xs font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
+                      className="text-sm font-medium text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
                     >
                       None
                     </button>
@@ -410,7 +410,7 @@ export function LeftPanel() {
                       setBatchSelectionMode(false);
                       setSelectedBatchIds([]);
                     }}
-                    className="rounded-xl px-2.5 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
+                    className="rounded-xl px-2.5 py-1.5 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
                     title="Cancel selection"
                   >
                     Cancel
@@ -419,7 +419,7 @@ export function LeftPanel() {
                     onClick={handleOpenBatchConfirm}
                     disabled={selectedBatchFiles.length === 0}
                     className={cn(
-                      'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-colors',
+                      'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium transition-colors',
                       selectedBatchFiles.length === 0
                         ? 'cursor-not-allowed bg-surface-200 text-surface-400 dark:bg-surface-800 dark:text-surface-500'
                         : 'bg-surface-950 text-white hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100'
@@ -467,7 +467,7 @@ export function LeftPanel() {
             </p>
             <button
               onClick={() => refetch()}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-2.5 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
             >
               <RefreshCw className="h-3 w-3" />
               Retry

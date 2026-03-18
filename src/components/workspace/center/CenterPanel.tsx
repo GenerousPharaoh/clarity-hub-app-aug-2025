@@ -173,7 +173,7 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-9 items-center justify-center gap-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all',
+        'relative flex h-9 items-center justify-center gap-1.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all',
         compact ? 'px-1.5' : 'px-3.5',
         active
           ? 'text-primary-700 dark:text-primary-300'
@@ -395,7 +395,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
         </p>
         <button
           onClick={() => refetch()}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Retry
@@ -422,7 +422,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
           disabled={createNote.isPending}
           className={cn(
             'mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2',
-            'bg-primary-600 text-xs font-medium text-white',
+            'bg-primary-600 text-sm font-medium text-white',
             'transition-colors hover:bg-primary-700 active:bg-primary-700',
             'disabled:opacity-50'
           )}
@@ -454,7 +454,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                   {noteCount} {noteCount === 1 ? 'doc' : 'docs'}
                 </span>
                 {activeNote && (
-                  <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-xs font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
+                  <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-sm font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
                     Edited {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
                   </span>
                 )}
@@ -466,7 +466,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                 onClick={handleCreate}
                 disabled={createNote.isPending}
                 className={cn(
-                  'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium',
+                  'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium',
                   'border-surface-200 bg-white text-surface-600 transition-all hover:-translate-y-0.5 hover:bg-surface-50',
                   'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700',
                   'disabled:cursor-not-allowed disabled:opacity-50'
@@ -595,7 +595,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                       onClick={handleCreate}
                       disabled={createNote.isPending}
                       className={cn(
-                        'flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-xs font-medium',
+                        'flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium',
                         'text-primary-600 transition-colors hover:bg-primary-50',
                         'dark:text-primary-400 dark:hover:bg-primary-900/20',
                         'disabled:opacity-50'

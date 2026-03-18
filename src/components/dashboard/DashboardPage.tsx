@@ -275,7 +275,7 @@ export function DashboardPage() {
               </div>
               <button
                 onClick={() => queryClient.invalidateQueries({ queryKey: ['projects'] })}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 Retry
@@ -330,7 +330,7 @@ export function DashboardPage() {
                   </p>
                   <button
                     onClick={() => setProjectQuery('')}
-                    className="mt-4 rounded-xl border border-surface-200 px-3 py-2 text-xs font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800"
+                    className="mt-4 rounded-xl border border-surface-200 px-3 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800"
                   >
                     Clear search
                   </button>
@@ -379,7 +379,7 @@ function MetricCard({
 }) {
   return (
     <div className="flex min-w-0 flex-col rounded-2xl border border-translucent bg-white/90 p-4 shadow-sm dark:bg-surface-900/70">
-      <div className="flex items-center gap-2 text-xs font-medium text-current/80">
+      <div className="flex items-center gap-2 text-sm font-medium text-current/80">
         {icon}
         <span>{label}</span>
       </div>

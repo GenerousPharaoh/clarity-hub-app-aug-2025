@@ -133,7 +133,7 @@ export function SuggestedPrompts({
   return (
     <div className="w-full">
       {filePrompts.length > 0 && (
-        <p className="mb-2 px-4 text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
+        <p className="mb-2 px-4 text-sm font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
           Suggestions for selected file
         </p>
       )}

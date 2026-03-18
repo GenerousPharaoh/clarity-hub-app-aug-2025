@@ -143,7 +143,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
               disabled={isDemoMode}
               className={cn(
                 'flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2.5',
-                'border border-dashed border-surface-300 bg-white text-xs font-medium text-surface-600 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
+                'border border-dashed border-surface-300 bg-white text-sm font-medium text-surface-600 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
                 'transition-all duration-150',
                 'hover:border-primary-400 hover:bg-surface-50 hover:text-primary-700',
                 'dark:hover:border-primary-500 dark:hover:bg-surface-900 dark:hover:text-primary-300',

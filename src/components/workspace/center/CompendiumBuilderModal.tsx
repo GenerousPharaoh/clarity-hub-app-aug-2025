@@ -300,7 +300,7 @@ export function CompendiumBuilderModal({
               if (step === 1) onClose();
               else setStep((s) => (s - 1) as 1 | 2 | 3);
             }}
-            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
+            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
           >
             {step === 1 ? (
               'Cancel'
@@ -316,7 +316,7 @@ export function CompendiumBuilderModal({
               onClick={() => setStep((s) => (s + 1) as 1 | 2 | 3)}
               disabled={step === 1 && selectedCount === 0}
               className={cn(
-                'flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-xs font-medium text-white transition-colors',
+                'flex items-center gap-1.5 rounded-xl px-4 py-1.5 text-sm font-medium text-white transition-colors',
                 'bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed'
               )}
             >
@@ -325,7 +325,7 @@ export function CompendiumBuilderModal({
           ) : (
             <button
               onClick={onClose}
-              className="rounded-xl px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
             >
               Done
             </button>
@@ -359,14 +359,14 @@ function StepSelect({
     <div className="space-y-4">
       {/* Tab style toggle */}
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-surface-600 dark:text-surface-300">
+        <p className="text-sm font-medium text-surface-600 dark:text-surface-300">
           {items.filter((i) => i.selected).length} of {items.length} exhibits selected
         </p>
         <div className="flex items-center gap-1 rounded-xl border border-translucent p-0.5">
           <button
             onClick={() => onTabStyleChange('letter')}
             className={cn(
-              'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+              'rounded-md px-2.5 py-1 text-sm font-medium transition-colors',
               tabStyle === 'letter'
                 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'text-surface-400 hover:text-surface-600 dark:hover:text-surface-300'
@@ -377,7 +377,7 @@ function StepSelect({
           <button
             onClick={() => onTabStyleChange('number')}
             className={cn(
-              'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+              'rounded-md px-2.5 py-1 text-sm font-medium transition-colors',
               tabStyle === 'number'
                 ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
                 : 'text-surface-400 hover:text-surface-600 dark:hover:text-surface-300'
@@ -457,7 +457,7 @@ function StepSelect({
                     onClick={() => setEditingIdx(idx)}
                     className="w-full text-left"
                   >
-                    <p className="truncate text-xs font-medium text-surface-700 dark:text-surface-200">
+                    <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200">
                       {item.displayTitle}
                     </p>
                     <p className="truncate text-xs text-surface-400">
@@ -677,7 +677,7 @@ function StepGenerate({
               onClick={onDownload}
               className={cn(
                 'flex items-center gap-2 rounded-xl px-4 py-2',
-                'bg-primary-600 text-xs font-medium text-white',
+                'bg-primary-600 text-sm font-medium text-white',
                 'transition-colors hover:bg-primary-700'
               )}
             >
@@ -688,7 +688,7 @@ function StepGenerate({
               onClick={onSave}
               disabled={isSaving || isSaved}
               className={cn(
-                'flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-medium transition-colors',
+                'flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-colors',
                 isSaved
                   ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-800/50 dark:bg-green-900/20 dark:text-green-400'
                   : 'border-translucent text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700',
@@ -726,7 +726,7 @@ function InputField({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-surface-500 dark:text-surface-400">
+      <label className="mb-1 block text-sm font-medium text-surface-500 dark:text-surface-400">
         {label}
       </label>
       <input

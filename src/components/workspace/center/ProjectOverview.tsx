@@ -217,7 +217,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   return (
     <FadeIn className="flex-1 overflow-y-auto bg-surface-50/60 dark:bg-surface-950/30">
       <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6">
-        <div className="grid gap-5 2xl:grid-cols-[1.6fr_0.85fr]">
+        <div className="space-y-5">
           <section className="min-w-0 overflow-hidden rounded-[28px] border border-surface-200/80 bg-white/90 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/78 md:p-7">
             <div className="min-w-0">
               <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
@@ -229,7 +229,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 <EditableProjectHeader project={project} />
               </div>
 
-              <div className="mt-6 grid items-stretch gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+              <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4">
                 <OverviewMetricCard
                   icon={<FileText className="h-4 w-4" />}
                   label="Files"
@@ -258,7 +258,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 />
               </div>
 
-              <div className="mt-6 grid items-stretch gap-3 2xl:grid-cols-2">
+              <div className="mt-6 grid items-stretch gap-3 sm:grid-cols-2">
                 <AnchorCard
                   eyebrow="Latest evidence"
                   title={latestFile?.name ?? 'No files yet'}
@@ -293,7 +293,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
             </div>
           </section>
 
-          <div className="min-w-0 space-y-5">
+          <div className="grid items-stretch gap-4 sm:grid-cols-2">
             <MatterStageCard
               stage={stage}
               readinessPercent={readinessPercent}
@@ -305,7 +305,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           </div>
         </div>
 
-        <div className="grid items-stretch gap-5 2xl:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid items-stretch gap-5 sm:grid-cols-2">
           <NextStepsCard actions={nextSteps} />
           <RecentActivity
             files={projectFiles}
@@ -319,7 +319,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           />
         </div>
 
-        <div className="grid items-stretch gap-5 2xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid items-stretch gap-5 sm:grid-cols-2">
           {fileCount > 0 ? (
             <FileTypeBreakdown files={projectFiles} />
           ) : (
@@ -524,7 +524,7 @@ function OverviewBadge({
           : 'border-surface-200 bg-white/80 text-surface-500 dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400';
 
   return (
-    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]', toneClasses)}>
+    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-sm font-medium', toneClasses)}>
       {children}
     </span>
   );

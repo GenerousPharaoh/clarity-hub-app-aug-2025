@@ -215,10 +215,10 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   }
 
   return (
-    <FadeIn className="flex-1 overflow-y-auto bg-surface-50/60 dark:bg-surface-950/30">
-      <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6">
+    <FadeIn className="flex-1 overflow-y-auto bg-surface-50/60 @container dark:bg-surface-950/30">
+      <div className="mx-auto max-w-5xl space-y-5 p-4 @lg:p-6">
         <div className="space-y-5">
-          <section className="min-w-0 overflow-hidden rounded-[28px] border border-surface-200/80 bg-white/90 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/78 md:p-7">
+          <section className="min-w-0 overflow-hidden rounded-2xl border border-surface-200/80 bg-white/90 p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900/78 @lg:p-6">
             <div className="min-w-0">
               <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
                 <OverviewBadge tone={stage.tone}>{stage.label}</OverviewBadge>
@@ -229,7 +229,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 <EditableProjectHeader project={project} />
               </div>
 
-              <div className="mt-6 grid grid-cols-2 items-stretch gap-3 sm:grid-cols-4">
+              <div className="mt-5 grid grid-cols-2 items-stretch gap-3 @md:grid-cols-4">
                 <OverviewMetricCard
                   icon={<FileText className="h-4 w-4" />}
                   label="Files"
@@ -258,7 +258,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 />
               </div>
 
-              <div className="mt-6 grid items-stretch gap-3 sm:grid-cols-2">
+              <div className="mt-5 grid items-stretch gap-3 @md:grid-cols-2">
                 <AnchorCard
                   eyebrow="Latest evidence"
                   title={latestFile?.name ?? 'No files yet'}
@@ -293,7 +293,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
             </div>
           </section>
 
-          <div className="grid items-stretch gap-4 sm:grid-cols-2">
+          <div className="grid items-stretch gap-4 @md:grid-cols-2">
             <MatterStageCard
               stage={stage}
               readinessPercent={readinessPercent}
@@ -305,7 +305,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           </div>
         </div>
 
-        <div className="grid items-stretch gap-5 sm:grid-cols-2">
+        <div className="grid items-stretch gap-4 @md:grid-cols-2">
           <NextStepsCard actions={nextSteps} />
           <RecentActivity
             files={projectFiles}
@@ -319,7 +319,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           />
         </div>
 
-        <div className="grid items-stretch gap-5 sm:grid-cols-2">
+        <div className="grid items-stretch gap-4 @md:grid-cols-2">
           {fileCount > 0 ? (
             <FileTypeBreakdown files={projectFiles} />
           ) : (
@@ -385,7 +385,7 @@ function EditableProjectHeader({
   return (
     <div>
       {isEditingName ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-2 @sm:flex-row @sm:items-center">
           <input
             ref={nameInputRef}
             value={editName}
@@ -401,7 +401,7 @@ function EditableProjectHeader({
             autoFocus
             className="min-w-0 flex-1 rounded-2xl border border-primary-300 bg-white/90 px-3 py-2 font-heading text-2xl font-semibold tracking-tight text-surface-950 outline-none focus:ring-2 focus:ring-primary-500/25 disabled:opacity-50 dark:border-primary-700 dark:bg-surface-900 dark:text-surface-50"
           />
-          <div className="flex items-center gap-2 self-end sm:self-auto">
+          <div className="flex items-center gap-2 self-end @sm:self-auto">
             <button
               onClick={saveName}
               disabled={updateProject.isPending}

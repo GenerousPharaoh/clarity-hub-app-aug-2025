@@ -7,9 +7,17 @@ import { ChevronRight, Eye, Sparkles, Loader2 } from 'lucide-react';
 import { FileViewer } from '@/components/viewers/FileViewer';
 import { useIsMobile } from '@/hooks/useMediaQuery';
 
-// Lazy-load AI chat panel (pulls in react-markdown + syntax-highlighter)
+// Lazy-load AI chat panel with auto-reload on stale chunk failure
 const AIChatPanel = lazy(() =>
-  import('@/components/ai/AIChatPanel').then((m) => ({ default: m.AIChatPanel }))
+  import('@/components/ai/AIChatPanel')
+    .then((m) => ({ default: m.AIChatPanel }))
+    .catch(() => {
+      if (!sessionStorage.getItem('chunk-reload')) {
+        sessionStorage.setItem('chunk-reload', '1');
+        window.location.reload();
+      }
+      return import('@/components/ai/AIChatPanel').then((m) => ({ default: m.AIChatPanel }));
+    })
 );
 
 export function RightPanel() {

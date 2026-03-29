@@ -10,18 +10,44 @@ import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import { LoadingScreen } from './components/shared/LoadingScreen';
 import useAppStore from './store';
 
+/**
+ * Lazy import with auto-reload on chunk load failure.
+ * After a new deployment, cached HTML may reference old chunk hashes.
+ * On failure, reload the page once to pick up the new HTML + chunks.
+ */
+function lazyWithReload<T extends React.ComponentType>(
+  factory: () => Promise<{ default: T }>
+) {
+  return lazy(() =>
+    factory().catch(() => {
+      const reloaded = sessionStorage.getItem('chunk-reload');
+      if (!reloaded) {
+        sessionStorage.setItem('chunk-reload', '1');
+        window.location.reload();
+      }
+      // If already reloaded once, surface the error
+      return factory();
+    })
+  );
+}
+
+// Clear the reload flag on successful page load
+if (typeof window !== 'undefined') {
+  sessionStorage.removeItem('chunk-reload');
+}
+
 // Lazy-loaded page components for code splitting
-const DashboardPage = lazy(() =>
+const DashboardPage = lazyWithReload(() =>
   import('./components/dashboard/DashboardPage').then((m) => ({
     default: m.DashboardPage,
   }))
 );
-const WorkspacePage = lazy(() =>
+const WorkspacePage = lazyWithReload(() =>
   import('./components/workspace/WorkspacePage').then((m) => ({
     default: m.WorkspacePage,
   }))
 );
-const SettingsPage = lazy(() =>
+const SettingsPage = lazyWithReload(() =>
   import('./components/settings/SettingsPage').then((m) => ({
     default: m.SettingsPage,
   }))

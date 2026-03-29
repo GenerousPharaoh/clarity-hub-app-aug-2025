@@ -8,14 +8,29 @@ import { useNotes, useCreateNote, useDeleteNote, useUpdateNote } from '@/hooks/u
 import { ProjectOverview } from './ProjectOverview';
 import { ExhibitsTab } from './ExhibitsTab';
 
-// Lazy-load TipTap editor (~467KB) — only loaded when user opens the editor tab
+// Lazy imports with auto-reload on stale chunk failure (post-deployment)
 const TipTapEditor = lazy(() =>
-  import('./editor/TipTapEditor').then((m) => ({ default: m.TipTapEditor }))
+  import('./editor/TipTapEditor')
+    .then((m) => ({ default: m.TipTapEditor }))
+    .catch(() => {
+      if (!sessionStorage.getItem('chunk-reload')) {
+        sessionStorage.setItem('chunk-reload', '1');
+        window.location.reload();
+      }
+      return import('./editor/TipTapEditor').then((m) => ({ default: m.TipTapEditor }));
+    })
 );
 
-// Lazy-load Timeline tab — only loaded when user opens it
 const TimelineTab = lazy(() =>
-  import('./TimelineTab').then((m) => ({ default: m.TimelineTab }))
+  import('./TimelineTab')
+    .then((m) => ({ default: m.TimelineTab }))
+    .catch(() => {
+      if (!sessionStorage.getItem('chunk-reload')) {
+        sessionStorage.setItem('chunk-reload', '1');
+        window.location.reload();
+      }
+      return import('./TimelineTab').then((m) => ({ default: m.TimelineTab }));
+    })
 );
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';

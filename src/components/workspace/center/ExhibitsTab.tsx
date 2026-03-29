@@ -29,7 +29,15 @@ import {
 import type { ExhibitMarker, FileRecord } from '@/types';
 
 const CompendiumBuilderModal = lazy(() =>
-  import('./CompendiumBuilderModal').then((m) => ({ default: m.CompendiumBuilderModal }))
+  import('./CompendiumBuilderModal')
+    .then((m) => ({ default: m.CompendiumBuilderModal }))
+    .catch(() => {
+      if (!sessionStorage.getItem('chunk-reload')) {
+        sessionStorage.setItem('chunk-reload', '1');
+        window.location.reload();
+      }
+      return import('./CompendiumBuilderModal').then((m) => ({ default: m.CompendiumBuilderModal }));
+    })
 );
 
 export function ExhibitsTab() {

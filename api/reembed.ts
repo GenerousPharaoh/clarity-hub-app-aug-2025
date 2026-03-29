@@ -12,7 +12,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { embedBatch, getEmbeddingProvider, getEmbeddingDimension } from './lib/embeddings.js';
+import { embedBatch, getEmbeddingProvider, getEmbeddingDimension } from './_lib/embeddings.js';
 
 function isAllowedOrigin(origin: string | undefined): string | null {
   if (!origin) return null;

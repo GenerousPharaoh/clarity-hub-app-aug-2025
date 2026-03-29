@@ -11,7 +11,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { embedText, embedBatch, getEmbeddingProvider, getEmbeddingDimension } from './lib/embeddings.js';
+import { embedText, embedBatch, getEmbeddingProvider, getEmbeddingDimension } from './_lib/embeddings.js';
 
 // ============================================================
 // CORS

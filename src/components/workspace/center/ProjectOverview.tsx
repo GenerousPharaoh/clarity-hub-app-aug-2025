@@ -319,6 +319,11 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           />
         </div>
 
+        {/* Case Analysis */}
+        {processedCount >= 2 && (
+          <CaseAnalysisCard projectId={selectedProjectId} fileCount={processedCount} />
+        )}
+
         <div className="grid items-stretch gap-4 @md:grid-cols-2">
           {fileCount > 0 ? (
             <FileTypeBreakdown files={projectFiles} />
@@ -963,6 +968,204 @@ function QuickActions() {
           ? 'Demo: view, draft, and manage exhibits.'
           : ''}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Case Analysis Card — AI-powered structured case theory generation.
+ * Analyzes all processed files to produce a comprehensive case assessment.
+ */
+function CaseAnalysisCard({
+  projectId,
+  fileCount,
+}: {
+  projectId: string | null;
+  fileCount: number;
+}) {
+  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleAnalyze = useCallback(async () => {
+    if (!projectId || isAnalyzing) return;
+    setIsAnalyzing(true);
+    setAnalysis(null);
+
+    try {
+      const { supabase } = await import('@/lib/supabase');
+
+      // Fetch all processed files with summaries and extracted text
+      const { data: files } = await supabase
+        .from('files')
+        .select('name, file_type, document_type, ai_summary, extracted_text')
+        .eq('project_id', projectId)
+        .eq('processing_status', 'completed')
+        .is('is_deleted', false);
+
+      if (!files || files.length === 0) {
+        setAnalysis('No processed files available for analysis.');
+        return;
+      }
+
+      // Build structured evidence summary for the AI
+      const evidenceSummary = files.map((f) => {
+        const docType = f.document_type ? ` [${f.document_type.replace(/_/g, ' ')}]` : '';
+        const text = f.extracted_text
+          ? f.extracted_text.slice(0, 3000) // First 3K chars per file
+          : f.ai_summary || 'No content available';
+        return `=== ${f.name}${docType} ===\n${text}`;
+      }).join('\n\n');
+
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Not authenticated');
+
+      // Send to AI with structured case analysis prompt
+      const response = await fetch('/api/ai-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          query: `You are analyzing a legal case file containing ${files.length} documents. Produce a structured case analysis with these sections:
+
+## Parties & Roles
+Identify all parties mentioned across the documents and their roles (plaintiff, defendant, employer, employee, regulatory body, etc.)
+
+## Key Facts
+List the most important facts established by the documentary evidence, in chronological order. Cite which document each fact comes from.
+
+## Timeline
+A concise chronological timeline of key events with dates.
+
+## Legal Issues
+Identify the legal issues raised by the facts (e.g., wrongful dismissal, human rights violation, breach of contract, etc.)
+
+## Strengths
+What aspects of the evidence are strongest? What facts/documents support the case?
+
+## Weaknesses & Risks
+What gaps exist in the evidence? What could the opposing side argue? What are the litigation risks?
+
+## Recommended Next Steps
+Based on the evidence, what should be done next? (e.g., obtain missing documents, file a specific motion, seek a specific remedy)
+
+Base your analysis ONLY on the documents provided. Do not fabricate facts. If information is unclear, say so.`,
+          caseContext: evidenceSummary,
+          effortLevel: 'deep',
+          legalContext: '',
+        }),
+      });
+
+      if (!response.ok) throw new Error('Analysis request failed');
+
+      const result = await response.json();
+      setAnalysis(result.response);
+      setExpanded(true);
+    } catch (err) {
+      setAnalysis(`Analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [projectId, isAnalyzing]);
+
+  return (
+    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
+            <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-surface-700 dark:text-surface-200">
+              Case Analysis
+            </h3>
+            <p className="text-xs text-surface-400 dark:text-surface-500">
+              AI-powered assessment across {fileCount} documents
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={analysis ? () => setExpanded(!expanded) : handleAnalyze}
+          disabled={isAnalyzing}
+          className={cn(
+            'flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all',
+            isAnalyzing
+              ? 'bg-surface-100 text-surface-400 dark:bg-surface-800 dark:text-surface-500'
+              : analysis
+                ? 'bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700'
+                : 'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600'
+          )}
+        >
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Analyzing...
+            </>
+          ) : analysis ? (
+            expanded ? 'Collapse' : 'Expand'
+          ) : (
+            <>
+              <Sparkles className="h-3.5 w-3.5" />
+              Analyze Case
+            </>
+          )}
+        </button>
+      </div>
+
+      {expanded && analysis && (
+        <div className="mt-4 rounded-2xl border border-surface-100 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
+          <div className="prose-chat max-h-[500px] overflow-y-auto text-sm leading-relaxed text-surface-700 dark:text-surface-200">
+            <AnalysisRenderer content={analysis} />
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={handleAnalyze}
+              className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+            >
+              Re-analyze
+            </button>
+            <button
+              onClick={() => navigator.clipboard.writeText(analysis)}
+              className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+            >
+              Copy to clipboard
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Simple markdown-ish renderer for analysis text */
+function AnalysisRenderer({ content }: { content: string }) {
+  const lines = content.split('\n');
+  return (
+    <div>
+      {lines.map((line, i) => {
+        if (line.startsWith('## ')) {
+          return <h2 key={i} className="mb-2 mt-4 font-heading text-sm font-bold text-surface-800 dark:text-surface-100 first:mt-0">{line.slice(3)}</h2>;
+        }
+        if (line.startsWith('### ')) {
+          return <h3 key={i} className="mb-1 mt-3 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">{line.slice(4)}</h3>;
+        }
+        if (line.startsWith('- ') || line.startsWith('* ')) {
+          return <li key={i} className="ml-4 list-disc text-[13px]">{line.slice(2)}</li>;
+        }
+        if (line.match(/^\d+\.\s/)) {
+          return <li key={i} className="ml-4 list-decimal text-[13px]">{line.replace(/^\d+\.\s/, '')}</li>;
+        }
+        if (line.startsWith('**') && line.endsWith('**')) {
+          return <p key={i} className="mb-1 font-semibold text-[13px]">{line.slice(2, -2)}</p>;
+        }
+        if (line.trim() === '') {
+          return <div key={i} className="h-2" />;
+        }
+        return <p key={i} className="mb-1 text-[13px]">{line}</p>;
+      })}
     </div>
   );
 }

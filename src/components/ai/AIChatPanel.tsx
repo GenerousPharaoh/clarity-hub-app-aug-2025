@@ -390,34 +390,38 @@ export function AIChatPanel() {
               {selectedFiles.length > 0 ? 'Add more files' : 'Select files for context'}
             </button>
             {showFilePicker && (
-              <div className="absolute bottom-full left-0 z-20 mb-1 max-h-48 w-64 overflow-y-auto rounded-lg border border-surface-200 bg-white shadow-lg dark:border-surface-700 dark:bg-surface-800">
-                {processedFiles.map((f) => {
-                  const isSelected = selectedFileIds.has(f.id);
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => {
-                        setSelectedFileIds((prev) => {
-                          const next = new Set(prev);
-                          if (next.has(f.id)) next.delete(f.id);
-                          else next.add(f.id);
-                          return next;
-                        });
-                      }}
-                      className={cn(
-                        'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors',
-                        isSelected
-                          ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                          : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700'
-                      )}
-                    >
-                      <FileContextIcon type={f.file_type} />
-                      <span className="min-w-0 flex-1 truncate">{f.name}</span>
-                      {isSelected && <span className="text-primary-500 text-xs">&#10003;</span>}
-                    </button>
-                  );
-                })}
-              </div>
+              <>
+                {/* Click-outside overlay */}
+                <div className="fixed inset-0 z-10" onClick={() => setShowFilePicker(false)} />
+                <div className="absolute bottom-full left-0 z-20 mb-1 max-h-48 w-64 overflow-y-auto rounded-lg border border-surface-200 bg-white shadow-lg dark:border-surface-700 dark:bg-surface-800">
+                  {processedFiles.map((f) => {
+                    const isSelected = selectedFileIds.has(f.id);
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={() => {
+                          setSelectedFileIds((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(f.id)) next.delete(f.id);
+                            else next.add(f.id);
+                            return next;
+                          });
+                        }}
+                        className={cn(
+                          'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors',
+                          isSelected
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                            : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700'
+                        )}
+                      >
+                        <FileContextIcon type={f.file_type} />
+                        <span className="min-w-0 flex-1 truncate">{f.name}</span>
+                        {isSelected && <span className="text-primary-500 text-xs">&#10003;</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         )}

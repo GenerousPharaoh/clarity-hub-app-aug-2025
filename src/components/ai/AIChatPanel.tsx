@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown } from 'lucide-react';
+import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown, Zap, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -9,7 +9,6 @@ import { SuggestedPrompts } from './SuggestedPrompts';
 import useAppStore from '@/store';
 import type { EffortLevel } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { aiRouter } from '@/services/aiRouter';
 
 /** Parse a stored fileContext string like 'File: "report.pdf" (type: pdf)' back into structured data. */
 function parseFileContext(fileContext: string): { name: string; path: string; type: string | null } | undefined {
@@ -35,6 +34,7 @@ export function AIChatPanel() {
     useAIChat({ projectId: selectedProjectId });
 
   const [input, setInput] = useState('');
+  const [useDeepThinking, setUseDeepThinking] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -123,14 +123,9 @@ export function AIChatPanel() {
         }
       : undefined;
 
-    // Auto-detect effort level from query complexity
-    const complexity = aiRouter.classifyQuery(content);
-    const effort: EffortLevel =
-      complexity === 'deep' ? 'deep' :
-      complexity === 'moderate' ? 'thorough' : 'standard';
-
+    const effort: EffortLevel = useDeepThinking ? 'deep' : 'standard';
     await sendMessage(content, fileContext, effort);
-  }, [input, isLoading, sendMessage, selectedFile]);
+  }, [input, isLoading, sendMessage, selectedFile, useDeepThinking]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -169,23 +164,20 @@ export function AIChatPanel() {
           const fileContext = userMsg.fileContext
             ? parseFileContext(userMsg.fileContext)
             : undefined;
-          const complexity = aiRouter.classifyQuery(userMsg.content);
-          const retryEffort: EffortLevel =
-            complexity === 'deep' ? 'deep' :
-            complexity === 'moderate' ? 'thorough' : 'standard';
+          const retryEffort: EffortLevel = useDeepThinking ? 'deep' : 'standard';
           sendMessage(userMsg.content, fileContext, retryEffort);
           break;
         }
       }
     },
-    [messages, sendMessage]
+    [messages, sendMessage, useDeepThinking]
   );
 
   const isEmpty = messages.length === 0;
   const narrow = panelWidth > 0 && panelWidth < 320;
   const compact = panelWidth > 0 && panelWidth < 250;
 
-  const loadingLabel = 'Analyzing...';
+  const loadingLabel = useDeepThinking ? 'Thinking deeply...' : 'Analyzing...';
 
   if (!selectedProjectId) {
     return (
@@ -357,6 +349,36 @@ export function AIChatPanel() {
             </button>
           </div>
         )}
+
+        {/* Fast / Thinking toggle */}
+        <div className="mb-2 flex items-center gap-1">
+          <button
+            onClick={() => setUseDeepThinking(false)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              !useDeepThinking
+                ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+            )}
+            title="Quick, balanced response"
+          >
+            <Zap className="h-3 w-3" />
+            {!compact && 'Fast'}
+          </button>
+          <button
+            onClick={() => setUseDeepThinking(true)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              useDeepThinking
+                ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+            )}
+            title="Deep legal reasoning with extended thinking"
+          >
+            <Brain className="h-3 w-3" />
+            {!compact && 'Thinking'}
+          </button>
+        </div>
 
         <div
           className={cn(

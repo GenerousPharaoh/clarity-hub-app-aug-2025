@@ -385,39 +385,106 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? '\n\nIMPORTANT: When referencing information from the provided document search results, cite them using [Source N] notation (e.g., [Source 1], [Source 2]). Each [Source N] corresponds to a specific document chunk provided in the context. Only cite sources that are actually relevant to your answer.'
       : '';
 
-    // Tavily web search (when enabled and API key is configured)
+    // Web research (when enabled): Tavily live search + CanLII case law lookup
     let webSearchContext = '';
-    if (enableWebSearch && process.env.TAVILY_API_KEY) {
-      try {
-        const tavilyResponse = await fetch('https://api.tavily.com/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            api_key: process.env.TAVILY_API_KEY,
-            query: `${query.trim()} Ontario Canada law`,
-            search_depth: 'advanced',
-            max_results: 5,
-            include_domains: [
-              'canlii.org', 'ontario.ca', 'laws-lois.justice.gc.ca',
-              'ohrc.on.ca', 'tribunalsontario.ca', 'scc-csc.ca', 'lso.ca',
-            ],
-          }),
-        });
+    if (enableWebSearch) {
+      const webParts: string[] = [];
 
-        if (tavilyResponse.ok) {
-          const tavilyResult = await tavilyResponse.json();
-          const webResults = (tavilyResult.results || []) as Array<{
-            title: string; url: string; content: string;
-          }>;
-          if (webResults.length > 0) {
-            const formatted = webResults
-              .map((r, i) => `[Web ${i + 1}: ${r.title}](${r.url})\n${r.content.slice(0, 500)}`)
-              .join('\n\n');
-            webSearchContext = `\n\n--- LIVE WEB SEARCH RESULTS ---\n${formatted}\n--- END WEB SEARCH ---\n\nNote: The above are live web search results. Cite them as [Web N] when relevant. Verify against authoritative sources before relying on them.`;
+      // 1. CanLII: detect case citations in the query and fetch metadata
+      if (process.env.CANLII_API_KEY) {
+        try {
+          const canliiKey = process.env.CANLII_API_KEY;
+          // Extract neutral citations like "2024 ONCA 123"
+          const citationPattern = /(\d{4})\s+(SCC|ONCA|ONSC|ONSCDC|HRTO|CanLII)\s+(\d+)/gi;
+          const citations = [...query.matchAll(citationPattern)];
+
+          // Also detect keyword-based legal queries for CanLII search
+          const legalTerms = query.match(/\b(wrongful dismissal|constructive dismissal|just cause|human rights|termination|severance|reasonable notice|duty to accommodate|reprisal|bad faith)\b/gi);
+
+          // Fetch cited cases from CanLII
+          const canliiResults: string[] = [];
+
+          for (const cite of citations.slice(0, 3)) {
+            const year = cite[1];
+            const court = cite[2].toLowerCase();
+            const num = cite[3];
+            // Map court abbreviation to CanLII database ID
+            const dbMap: Record<string, string> = {
+              scc: 'csc-scc', onca: 'onca', onsc: 'onsc', onscdc: 'onscdc',
+              hrto: 'onhrt', canlii: 'onca',
+            };
+            const dbId = dbMap[court];
+            if (!dbId) continue;
+
+            const caseId = `${year}${court}${num}`;
+            const metaUrl = `https://api.canlii.org/v1/caseBrowse/en/${dbId}/${caseId}/?api_key=${canliiKey}`;
+            const metaResp = await fetch(metaUrl).catch(() => null);
+            if (metaResp?.ok) {
+              const meta = await metaResp.json();
+              canliiResults.push(
+                `**${meta.title || caseId}** (${meta.citation || `${year} ${court.toUpperCase()} ${num}`})\n` +
+                `Date: ${meta.decisionDate || 'Unknown'} | Court: ${dbId.toUpperCase()}\n` +
+                `URL: ${meta.url || `https://canlii.org/en/${dbId}/${caseId}/`}`
+              );
+            }
           }
+
+          // If query has legal terms but no specific citations, search recent ONCA/ONSC decisions
+          if (canliiResults.length === 0 && legalTerms && legalTerms.length > 0) {
+            // Search for recent relevant cases via Tavily (CanLII doesn't have a text search API)
+            // This is handled by the Tavily block below
+          }
+
+          if (canliiResults.length > 0) {
+            webParts.push(
+              `--- CANLII CASE LAW ---\n${canliiResults.join('\n\n')}\n--- END CANLII ---`
+            );
+          }
+        } catch (canliiError) {
+          console.error('CanLII lookup failed (non-blocking):', canliiError);
         }
-      } catch (webError) {
-        console.error('Tavily web search failed (non-blocking):', webError);
+      }
+
+      // 2. Tavily: live web search across Canadian legal sources
+      if (process.env.TAVILY_API_KEY) {
+        try {
+          const tavilyResponse = await fetch('https://api.tavily.com/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              api_key: process.env.TAVILY_API_KEY,
+              query: `${query.trim()} Ontario Canada law`,
+              search_depth: 'advanced',
+              max_results: 5,
+              include_domains: [
+                'canlii.org', 'ontario.ca', 'laws-lois.justice.gc.ca',
+                'ohrc.on.ca', 'tribunalsontario.ca', 'scc-csc.ca', 'lso.ca',
+              ],
+            }),
+          });
+
+          if (tavilyResponse.ok) {
+            const tavilyResult = await tavilyResponse.json();
+            const webResults = (tavilyResult.results || []) as Array<{
+              title: string; url: string; content: string;
+            }>;
+            if (webResults.length > 0) {
+              const formatted = webResults
+                .map((r, i) => `[Web ${i + 1}: ${r.title}](${r.url})\n${r.content.slice(0, 500)}`)
+                .join('\n\n');
+              webParts.push(
+                `--- LIVE WEB SEARCH RESULTS ---\n${formatted}\n--- END WEB SEARCH ---`
+              );
+            }
+          }
+        } catch (webError) {
+          console.error('Tavily web search failed (non-blocking):', webError);
+        }
+      }
+
+      if (webParts.length > 0) {
+        webSearchContext = '\n\n' + webParts.join('\n\n') +
+          '\n\nNote: The above are live research results. Cite CanLII cases with their neutral citations and web results as [Web N]. Verify against authoritative sources before relying on them.';
       }
     }
 

@@ -398,21 +398,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const citationPattern = /(\d{4})\s+(SCC|ONCA|ONSC|ONSCDC|HRTO|CanLII)\s+(\d+)/gi;
           const citations = [...query.matchAll(citationPattern)];
 
-          // Also detect keyword-based legal queries for CanLII search
-          const legalTerms = query.match(/\b(wrongful dismissal|constructive dismissal|just cause|human rights|termination|severance|reasonable notice|duty to accommodate|reprisal|bad faith)\b/gi);
-
-          // Fetch cited cases from CanLII
           const canliiResults: string[] = [];
+
+          // A. Fetch specific cited cases (e.g. "2024 ONCA 391")
+          const dbMap: Record<string, string> = {
+            scc: 'csc-scc', onca: 'onca', onsc: 'onsc', onscdc: 'onscdc',
+            hrto: 'onhrt', canlii: 'onca', oncece: 'oncece',
+          };
 
           for (const cite of citations.slice(0, 3)) {
             const year = cite[1];
             const court = cite[2].toLowerCase();
             const num = cite[3];
-            // Map court abbreviation to CanLII database ID
-            const dbMap: Record<string, string> = {
-              scc: 'csc-scc', onca: 'onca', onsc: 'onsc', onscdc: 'onscdc',
-              hrto: 'onhrt', canlii: 'onca',
-            };
             const dbId = dbMap[court];
             if (!dbId) continue;
 
@@ -429,10 +426,59 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
           }
 
-          // If query has legal terms but no specific citations, search recent ONCA/ONSC decisions
-          if (canliiResults.length === 0 && legalTerms && legalTerms.length > 0) {
-            // Search for recent relevant cases via Tavily (CanLII doesn't have a text search API)
-            // This is handled by the Tavily block below
+          // B. Browse recent decisions from a specific court/tribunal mentioned in the query
+          const courtMentions: Record<string, string> = {
+            'hrto': 'onhrt', 'human rights tribunal': 'onhrt',
+            'onca': 'onca', 'court of appeal': 'onca',
+            'onsc': 'onsc', 'superior court': 'onsc',
+            'divisional court': 'onscdc', 'onscdc': 'onscdc',
+            'labour arbitration': 'onla', 'onlat': 'onla',
+            'wsiat': 'onwsiat',
+          };
+
+          const queryLower = query.toLowerCase();
+          let detectedCourtDb: string | null = null;
+          let detectedCourtName = '';
+          for (const [term, db] of Object.entries(courtMentions)) {
+            if (queryLower.includes(term)) {
+              detectedCourtDb = db;
+              detectedCourtName = term.toUpperCase();
+              break;
+            }
+          }
+
+          // If a court/tribunal is mentioned, fetch recent decisions from it
+          if (detectedCourtDb && citations.length === 0) {
+            try {
+              // Get decisions from the last 12 months
+              const oneYearAgo = new Date();
+              oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+              const dateAfter = oneYearAgo.toISOString().split('T')[0];
+
+              const browseUrl = `https://api.canlii.org/v1/caseBrowse/en/${detectedCourtDb}/?offset=0&resultCount=25&decisionDateAfter=${dateAfter}&api_key=${canliiKey}`;
+              const browseResp = await fetch(browseUrl).catch(() => null);
+
+              if (browseResp?.ok) {
+                const browseResult = await browseResp.json();
+                const cases = (browseResult.cases || []) as Array<{
+                  caseId: string; title: string; citation: string;
+                }>;
+
+                if (cases.length > 0) {
+                  const caseList = cases
+                    .map((c) => `- ${c.title} (${c.citation})`)
+                    .join('\n');
+                  canliiResults.push(
+                    `**Recent ${detectedCourtName} Decisions (last 12 months, ${cases.length} most recent):**\n${caseList}\n\n` +
+                    `Use these citations to identify which decisions are relevant to the user's query. ` +
+                    `The user asked about: "${query.trim()}". ` +
+                    `Identify which of these cases likely relate to the topic based on the case title and parties.`
+                  );
+                }
+              }
+            } catch {
+              // non-blocking
+            }
           }
 
           if (canliiResults.length > 0) {

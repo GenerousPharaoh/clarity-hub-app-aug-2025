@@ -33,6 +33,8 @@ function getOpenAIClient(): OpenAI | null {
 }
 
 function useVoyage(): boolean {
+  // Voyage AI requires a payment method for usable rate limits.
+  // Disabled by default — set VOYAGE_API_KEY env var to enable.
   return !!process.env.VOYAGE_API_KEY;
 }
 

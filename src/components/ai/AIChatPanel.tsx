@@ -6,10 +6,10 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { useAIChat } from '@/hooks/useAIChat';
 import { ChatMessageComponent } from './ChatMessage';
 import { SuggestedPrompts } from './SuggestedPrompts';
-import { EffortSelector } from './EffortSelector';
 import useAppStore from '@/store';
 import type { EffortLevel } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { aiRouter } from '@/services/aiRouter';
 
 /** Parse a stored fileContext string like 'File: "report.pdf" (type: pdf)' back into structured data. */
 function parseFileContext(fileContext: string): { name: string; path: string; type: string | null } | undefined {
@@ -35,7 +35,6 @@ export function AIChatPanel() {
     useAIChat({ projectId: selectedProjectId });
 
   const [input, setInput] = useState('');
-  const [effort, setEffort] = useState<EffortLevel>('standard');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -124,8 +123,14 @@ export function AIChatPanel() {
         }
       : undefined;
 
+    // Auto-detect effort level from query complexity
+    const complexity = aiRouter.classifyQuery(content);
+    const effort: EffortLevel =
+      complexity === 'deep' ? 'deep' :
+      complexity === 'moderate' ? 'thorough' : 'standard';
+
     await sendMessage(content, fileContext, effort);
-  }, [input, isLoading, sendMessage, selectedFile, effort]);
+  }, [input, isLoading, sendMessage, selectedFile]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -164,24 +169,23 @@ export function AIChatPanel() {
           const fileContext = userMsg.fileContext
             ? parseFileContext(userMsg.fileContext)
             : undefined;
-          sendMessage(userMsg.content, fileContext, effort);
+          const complexity = aiRouter.classifyQuery(userMsg.content);
+          const retryEffort: EffortLevel =
+            complexity === 'deep' ? 'deep' :
+            complexity === 'moderate' ? 'thorough' : 'standard';
+          sendMessage(userMsg.content, fileContext, retryEffort);
           break;
         }
       }
     },
-    [messages, sendMessage, effort]
+    [messages, sendMessage]
   );
 
   const isEmpty = messages.length === 0;
   const narrow = panelWidth > 0 && panelWidth < 320;
   const compact = panelWidth > 0 && panelWidth < 250;
 
-  // Loading label based on effort
-  const loadingLabel = effort === 'deep'
-    ? 'Thinking with GPT-5.2...'
-    : effort === 'quick'
-      ? 'Generating with Gemini...'
-      : 'Generating...';
+  const loadingLabel = 'Analyzing...';
 
   if (!selectedProjectId) {
     return (
@@ -353,11 +357,6 @@ export function AIChatPanel() {
             </button>
           </div>
         )}
-
-        {/* Effort selector */}
-        <div className="mb-2 overflow-hidden">
-          <EffortSelector value={effort} onChange={setEffort} variant={narrow ? 'compact' : 'full'} wrap={!narrow} />
-        </div>
 
         <div
           className={cn(

@@ -32,7 +32,8 @@ async function uploadToMistral(
   apiKey: string
 ): Promise<string> {
   const formData = new FormData();
-  formData.append('file', new File([blob], fileName, { type: blob.type }));
+  // Use Blob with filename (3rd arg) — File constructor may not exist in Node 18
+  formData.append('file', new Blob([await blob.arrayBuffer()], { type: blob.type || 'application/pdf' }), fileName);
   formData.append('purpose', 'ocr');
 
   const response = await fetch(MISTRAL_FILES_URL, {

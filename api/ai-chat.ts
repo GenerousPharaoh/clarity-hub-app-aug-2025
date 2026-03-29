@@ -445,40 +445,70 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
 
-      // 2. Tavily: live web search across Canadian legal sources
+      // 2. Tavily: targeted legal web search
+      // Run two searches: one on CanLII specifically, one broader across legal sources
       if (process.env.TAVILY_API_KEY) {
+        const tavilyKey = process.env.TAVILY_API_KEY;
+        const allWebResults: Array<{ title: string; url: string; content: string }> = [];
+
+        // Search A: CanLII-specific search (most relevant for case law)
         try {
-          const tavilyResponse = await fetch('https://api.tavily.com/search', {
+          const canliiSearch = await fetch('https://api.tavily.com/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              api_key: process.env.TAVILY_API_KEY,
-              query: `${query.trim()} Ontario Canada law`,
+              api_key: tavilyKey,
+              query: query.trim(),
               search_depth: 'advanced',
               max_results: 5,
+              include_domains: ['canlii.org'],
+            }),
+          });
+
+          if (canliiSearch.ok) {
+            const result = await canliiSearch.json();
+            allWebResults.push(...(result.results || []));
+          }
+        } catch { /* non-blocking */ }
+
+        // Search B: broader legal sources (legislation, tribunal guides, commentary)
+        try {
+          const broadSearch = await fetch('https://api.tavily.com/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              api_key: tavilyKey,
+              query: `${query.trim()} Ontario`,
+              search_depth: 'basic',
+              max_results: 3,
               include_domains: [
-                'canlii.org', 'ontario.ca', 'laws-lois.justice.gc.ca',
-                'ohrc.on.ca', 'tribunalsontario.ca', 'scc-csc.ca', 'lso.ca',
+                'ontario.ca', 'laws-lois.justice.gc.ca', 'ohrc.on.ca',
+                'tribunalsontario.ca', 'scc-csc.ca', 'lso.ca',
               ],
             }),
           });
 
-          if (tavilyResponse.ok) {
-            const tavilyResult = await tavilyResponse.json();
-            const webResults = (tavilyResult.results || []) as Array<{
-              title: string; url: string; content: string;
-            }>;
-            if (webResults.length > 0) {
-              const formatted = webResults
-                .map((r, i) => `[Web ${i + 1}: ${r.title}](${r.url})\n${r.content.slice(0, 500)}`)
-                .join('\n\n');
-              webParts.push(
-                `--- LIVE WEB SEARCH RESULTS ---\n${formatted}\n--- END WEB SEARCH ---`
-              );
-            }
+          if (broadSearch.ok) {
+            const result = await broadSearch.json();
+            allWebResults.push(...(result.results || []));
           }
-        } catch (webError) {
-          console.error('Tavily web search failed (non-blocking):', webError);
+        } catch { /* non-blocking */ }
+
+        // Deduplicate by URL
+        const seen = new Set<string>();
+        const dedupedResults = allWebResults.filter((r) => {
+          if (seen.has(r.url)) return false;
+          seen.add(r.url);
+          return true;
+        });
+
+        if (dedupedResults.length > 0) {
+          const formatted = dedupedResults
+            .map((r, i) => `[Web ${i + 1}: ${r.title}](${r.url})\n${r.content.slice(0, 500)}`)
+            .join('\n\n');
+          webParts.push(
+            `--- LIVE WEB SEARCH RESULTS ---\n${formatted}\n--- END WEB SEARCH ---`
+          );
         }
       }
 

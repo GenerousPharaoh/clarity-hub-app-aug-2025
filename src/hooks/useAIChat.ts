@@ -261,7 +261,8 @@ interface UseAIChatReturn {
   sendMessage: (
     content: string,
     fileContexts?: FileContextItem[],
-    effortLevel?: EffortLevel
+    effortLevel?: EffortLevel,
+    enableWebSearch?: boolean
   ) => Promise<void>;
   clearChat: () => void;
   latestFollowUps: string[];
@@ -318,7 +319,8 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
     async (
       content: string,
       fileContexts?: FileContextItem[],
-      effortLevel?: EffortLevel
+      effortLevel?: EffortLevel,
+      enableWebSearch?: boolean
     ) => {
       if (!content.trim() || !projectId || !user || isLoadingRef.current) return;
 
@@ -493,6 +495,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           caseContext: fullContext || undefined,
           sources: sources.length > 0 ? sources : undefined,
           legalContext,
+          enableWebSearch,
         });
 
         if (abortRef.current) return;

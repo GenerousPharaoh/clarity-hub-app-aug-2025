@@ -139,6 +139,7 @@ class AIRouter {
     caseContext?: string;
     sources?: Array<{ sourceIndex: number; fileName: string; pageNumber: number | null; sectionHeading: string | null }>;
     legalContext?: string;
+    enableWebSearch?: boolean;
   }): Promise<{
     response: string;
     model: ModelChoice;
@@ -168,6 +169,7 @@ class AIRouter {
         caseContext: params.caseContext,
         effortLevel: effort,
         documentSources: params.sources,
+        enableWebSearch: params.enableWebSearch,
       }),
     });
 

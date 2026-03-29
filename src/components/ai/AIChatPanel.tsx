@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown, Zap, Brain } from 'lucide-react';
+import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown, Zap, Brain, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -50,6 +50,7 @@ export function AIChatPanel() {
 
   const [input, setInput] = useState('');
   const [useDeepThinking, setUseDeepThinking] = useState(false);
+  const [useWebSearch, setUseWebSearch] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -139,8 +140,8 @@ export function AIChatPanel() {
       : undefined;
 
     const effort: EffortLevel = useDeepThinking ? 'deep' : 'standard';
-    await sendMessage(content, fileContexts, effort);
-  }, [input, isLoading, sendMessage, selectedFiles, useDeepThinking]);
+    await sendMessage(content, fileContexts, effort, useWebSearch);
+  }, [input, isLoading, sendMessage, selectedFiles, useDeepThinking, useWebSearch]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -421,7 +422,7 @@ export function AIChatPanel() {
           </div>
         )}
 
-        {/* Fast / Thinking toggle */}
+        {/* Mode toggles */}
         <div className="mb-2 flex items-center gap-1">
           <button
             onClick={() => setUseDeepThinking(false)}
@@ -448,6 +449,22 @@ export function AIChatPanel() {
           >
             <Brain className="h-3 w-3" />
             {!compact && 'Thinking'}
+          </button>
+
+          <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+
+          <button
+            onClick={() => setUseWebSearch(!useWebSearch)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              useWebSearch
+                ? 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+            )}
+            title="Search live legal sources (CanLII, Ontario.ca, tribunals)"
+          >
+            <Globe className="h-3 w-3" />
+            {!compact && 'Web'}
           </button>
         </div>
 

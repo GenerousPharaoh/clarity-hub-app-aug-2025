@@ -64,10 +64,10 @@ const COMPLEXITY_CONFIG: Record<string, { label: string; className: string }> = 
 };
 
 const EFFORT_BADGE_CONFIG: Record<string, { label: string; className: string }> = {
-  quick:    { label: 'Quick',    className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
-  standard: { label: 'Standard', className: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300' },
-  thorough: { label: 'Thorough', className: 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300' },
-  deep:     { label: 'Deep',     className: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300' },
+  quick:    { label: 'Fast',     className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
+  standard: { label: 'Fast',     className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
+  thorough: { label: 'Fast',     className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
+  deep:     { label: 'Thinking', className: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300' },
 };
 
 /**
@@ -294,8 +294,8 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          {/* Model + complexity + effort badges */}
-          {(modelConfig || message.complexity || message.effortLevel) && !isError && (
+          {/* Model + mode badge */}
+          {(modelConfig || message.effortLevel) && !isError && (
             <div className="mb-1.5 flex flex-nowrap items-center gap-1.5 overflow-hidden">
               {modelConfig && (
                 <span
@@ -303,23 +303,8 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                     'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
                     modelConfig.className
                   )}
-                  title={
-                    message.model === 'gpt'
-                      ? 'GPT-5.2 — used for deep legal reasoning and complex analysis'
-                      : 'Gemini — used for general questions and file analysis'
-                  }
                 >
                   {modelConfig.label}
-                </span>
-              )}
-              {message.complexity && COMPLEXITY_CONFIG[message.complexity] && (
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
-                    COMPLEXITY_CONFIG[message.complexity].className
-                  )}
-                >
-                  {COMPLEXITY_CONFIG[message.complexity].label}
                 </span>
               )}
               {message.effortLevel && EFFORT_BADGE_CONFIG[message.effortLevel] && (

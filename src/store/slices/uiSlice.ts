@@ -3,11 +3,13 @@ import type { StateCreator } from 'zustand';
 const PROCESS_ON_UPLOAD_KEY = 'clarity-hub-process-on-upload';
 
 function loadProcessOnUpload(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') return true;
   try {
-    return localStorage.getItem(PROCESS_ON_UPLOAD_KEY) === '1';
+    // Default to ON — only disabled if explicitly set to '0'
+    const stored = localStorage.getItem(PROCESS_ON_UPLOAD_KEY);
+    return stored !== '0';
   } catch {
-    return false;
+    return true;
   }
 }
 

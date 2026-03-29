@@ -13,7 +13,7 @@ import OpenAI from 'openai';
 
 const VOYAGE_API_URL = 'https://api.voyageai.com/v1/embeddings';
 const VOYAGE_MODEL = 'voyage-law-2';
-const VOYAGE_BATCH_SIZE = 128;
+const VOYAGE_BATCH_SIZE = 10; // Small batches to avoid TPM limits on free tier
 const VOYAGE_MAX_CHARS = 64_000; // ~16K tokens × 4 chars/token
 
 // ─── OpenAI (fallback) ───────────────────────────────────────
@@ -63,27 +63,41 @@ async function voyageEmbed(texts: string[]): Promise<number[][]> {
   const apiKey = process.env.VOYAGE_API_KEY;
   if (!apiKey) throw new Error('VOYAGE_API_KEY not set');
 
-  const response = await fetch(VOYAGE_API_URL, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      input: texts,
-      model: VOYAGE_MODEL,
-    }),
-  });
+  const MAX_RETRIES = 3;
 
-  if (!response.ok) {
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const response = await fetch(VOYAGE_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: texts,
+        model: VOYAGE_MODEL,
+      }),
+    });
+
+    if (response.ok) {
+      const result: VoyageResponse = await response.json();
+      return result.data
+        .sort((a, b) => a.index - b.index)
+        .map((d) => d.embedding);
+    }
+
+    // Retry on rate limit (429) with exponential backoff
+    if (response.status === 429 && attempt < MAX_RETRIES - 1) {
+      const waitMs = (attempt + 1) * 30_000; // 30s, 60s
+      console.warn(`Voyage AI rate limited, retrying in ${waitMs / 1000}s (attempt ${attempt + 1}/${MAX_RETRIES})...`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      continue;
+    }
+
     const errorBody = await response.text();
     throw new Error(`Voyage AI embedding failed (${response.status}): ${errorBody}`);
   }
 
-  const result: VoyageResponse = await response.json();
-  return result.data
-    .sort((a, b) => a.index - b.index)
-    .map((d) => d.embedding);
+  throw new Error('Voyage AI embedding failed after retries');
 }
 
 // ─── OpenAI calls ─────────────────────────────────────────────
@@ -161,6 +175,11 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
 
     for (let j = 0; j < slice.length; j++) {
       results.push(embeddingMap.get(j) ?? []);
+    }
+
+    // Delay between Voyage batches to respect rate limits
+    if (provider === 'voyage' && i + batchSize < texts.length) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 

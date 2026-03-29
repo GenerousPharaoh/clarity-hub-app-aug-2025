@@ -248,13 +248,19 @@ interface UseAIChatOptions {
   projectId: string | null;
 }
 
+export interface FileContextItem {
+  name: string;
+  path: string;
+  type: string | null;
+}
+
 interface UseAIChatReturn {
   messages: ChatMessage[];
   isLoading: boolean;
   isFetchingMessages: boolean;
   sendMessage: (
     content: string,
-    fileContext?: { name: string; path: string; type: string | null },
+    fileContexts?: FileContextItem[],
     effortLevel?: EffortLevel
   ) => Promise<void>;
   clearChat: () => void;
@@ -311,7 +317,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
   const sendMessage = useCallback(
     async (
       content: string,
-      fileContext?: { name: string; path: string; type: string | null },
+      fileContexts?: FileContextItem[],
       effortLevel?: EffortLevel
     ) => {
       if (!content.trim() || !projectId || !user || isLoadingRef.current) return;
@@ -319,8 +325,8 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
       abortRef.current = false;
       isLoadingRef.current = true;
       const effort = effortLevel ?? 'standard';
-      const basicFileContext = fileContext
-        ? `File: "${fileContext.name}" (type: ${fileContext.type || 'unknown'})`
+      const basicFileContext = fileContexts?.length
+        ? fileContexts.map((f) => `File: "${f.name}" (type: ${f.type || 'unknown'})`).join(', ')
         : undefined;
 
       // Unique loading indicator ID
@@ -353,7 +359,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
             projectId,
             content,
             effortLevel: effort,
-            fileContext,
+            fileContext: fileContexts?.[0],
           });
 
           queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
@@ -374,19 +380,49 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
         return;
       }
 
-      // Build file context string
+      // Build file context: multi-file support + project-wide summaries
       let fileContextStr: string | undefined;
       let enrichedContext: string | undefined;
 
-      if (fileContext) {
+      // 1. Fetch project-wide file summaries for birds-eye context
+      let projectSummaries = '';
+      try {
+        const { data: allFiles } = await supabase
+          .from('files')
+          .select('name, file_type, document_type, ai_summary')
+          .eq('project_id', projectId)
+          .is('is_deleted', false)
+          .not('ai_summary', 'is', null);
+
+        if (allFiles && allFiles.length > 0) {
+          const summaryLines = allFiles.map((f) => {
+            const docType = f.document_type ? ` [${f.document_type.replace(/_/g, ' ')}]` : '';
+            return `- ${f.name}${docType}: ${f.ai_summary}`;
+          });
+          projectSummaries = `--- PROJECT FILES OVERVIEW (${allFiles.length} files) ---\n${summaryLines.join('\n')}\n--- END OVERVIEW ---\n\n`;
+        }
+      } catch {
+        // Non-critical — proceed without summaries
+      }
+
+      // 2. Fetch full extracted text for explicitly selected files
+      if (fileContexts?.length) {
         fileContextStr = basicFileContext;
-        // Fetch actual file content for the AI
-        const fileContent = await fetchFileContent(
-          fileContext.path,
-          fileContext.type,
-          fileContext.name
+        const fileContentParts: string[] = [];
+
+        // Fetch content for all selected files in parallel
+        const contentPromises = fileContexts.map((fc) =>
+          fetchFileContent(fc.path, fc.type, fc.name)
         );
-        enrichedContext = `${fileContextStr}\n\n--- FILE CONTENT ---\n${fileContent}\n--- END FILE CONTENT ---`;
+        const contents = await Promise.all(contentPromises);
+
+        for (let i = 0; i < fileContexts.length; i++) {
+          fileContentParts.push(
+            `--- FILE: ${fileContexts[i].name} ---\n${contents[i]}\n--- END FILE ---`
+          );
+        }
+
+        enrichedContext = `${fileContextStr}\n\n${fileContentParts.join('\n\n')}`;
       }
 
       try {
@@ -445,8 +481,8 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           .filter((m) => m.content !== '__loading__')
           .map((m) => ({ role: m.role, content: m.content }));
 
-        // Combine file context with document search context
-        const fullContext = [enrichedContext || fileContextStr, documentContext]
+        // Combine: project summaries + selected file content + RAG search results
+        const fullContext = [projectSummaries, enrichedContext || fileContextStr, documentContext]
           .filter(Boolean)
           .join('\n');
 

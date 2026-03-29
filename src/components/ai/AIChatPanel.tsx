@@ -26,9 +26,24 @@ export function AIChatPanel() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const files = useAppStore((s) => s.files);
-  const selectedFile = selectedFileId
-    ? files.find((f) => f.id === selectedFileId) ?? null
-    : null;
+  const processedFiles = files.filter((f) => f.processing_status === 'completed' && !f.is_deleted);
+
+  // Multi-file selection: start with the sidebar-selected file if any
+  const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
+  const [showFilePicker, setShowFilePicker] = useState(false);
+
+  // Sync sidebar file selection into the multi-select
+  useEffect(() => {
+    if (selectedFileId) {
+      setSelectedFileIds((prev) => {
+        const next = new Set(prev);
+        next.add(selectedFileId);
+        return next;
+      });
+    }
+  }, [selectedFileId]);
+
+  const selectedFiles = files.filter((f) => selectedFileIds.has(f.id));
 
   const { messages, isLoading, isFetchingMessages, sendMessage, clearChat } =
     useAIChat({ projectId: selectedProjectId });
@@ -115,17 +130,17 @@ export function AIChatPanel() {
       }
     }
 
-    const fileContext = selectedFile
-      ? {
-          name: selectedFile.name,
-          path: selectedFile.file_path,
-          type: selectedFile.file_type,
-        }
+    const fileContexts = selectedFiles.length > 0
+      ? selectedFiles.map((f) => ({
+          name: f.name,
+          path: f.file_path,
+          type: f.file_type,
+        }))
       : undefined;
 
     const effort: EffortLevel = useDeepThinking ? 'deep' : 'standard';
-    await sendMessage(content, fileContext, effort);
-  }, [input, isLoading, sendMessage, selectedFile, useDeepThinking]);
+    await sendMessage(content, fileContexts, effort);
+  }, [input, isLoading, sendMessage, selectedFiles, useDeepThinking]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -165,7 +180,8 @@ export function AIChatPanel() {
             ? parseFileContext(userMsg.fileContext)
             : undefined;
           const retryEffort: EffortLevel = useDeepThinking ? 'deep' : 'standard';
-          sendMessage(userMsg.content, fileContext, retryEffort);
+          const retryFileContexts = fileContext ? [fileContext] : undefined;
+          sendMessage(userMsg.content, retryFileContexts, retryEffort);
           break;
         }
       }
@@ -237,8 +253,8 @@ export function AIChatPanel() {
               {/* Suggested prompts -- adapt to selected file */}
               <SuggestedPrompts
                 onSelectPrompt={handlePromptSelect}
-                selectedFileType={selectedFile?.file_type}
-                selectedFileName={selectedFile?.name}
+                selectedFileType={selectedFiles[0]?.file_type}
+                selectedFileName={selectedFiles[0]?.name}
                 compact={narrow}
               />
             </div>
@@ -328,25 +344,80 @@ export function AIChatPanel() {
           </div>
         )}
 
-        {/* File context indicator */}
-        {selectedFile && (
-          <div className="mb-2 flex items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 dark:border-primary-800/50 dark:bg-primary-900/20">
-            <FileContextIcon type={selectedFile.file_type} />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-primary-700 dark:text-primary-300">
-                {selectedFile.name}
+        {/* Selected files indicator */}
+        {selectedFiles.length > 0 && (
+          <div className="mb-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 dark:border-primary-800/50 dark:bg-primary-900/20">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-primary-600 dark:text-primary-400">
+                {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} selected
               </p>
-              <p className="text-xs text-primary-500/70 dark:text-primary-400/60">
-                Using {selectedFile.file_type ? `${selectedFile.file_type.toUpperCase()} file` : 'this file'}
-              </p>
+              <button
+                onClick={() => { setSelectedFileIds(new Set()); useAppStore.getState().setSelectedFile(null); }}
+                className="text-xs text-primary-400 hover:text-primary-600 dark:hover:text-primary-300"
+              >
+                Clear all
+              </button>
             </div>
+            <div className="mt-1 flex flex-wrap gap-1">
+              {selectedFiles.map((f) => (
+                <span
+                  key={f.id}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-2 py-0.5 text-xs text-primary-700 dark:bg-primary-800/40 dark:text-primary-300"
+                >
+                  <FileContextIcon type={f.file_type} />
+                  <span className="max-w-[120px] truncate">{f.name}</span>
+                  <button
+                    onClick={() => setSelectedFileIds((prev) => { const next = new Set(prev); next.delete(f.id); return next; })}
+                    className="ml-0.5 text-primary-400 hover:text-primary-600"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add files button */}
+        {processedFiles.length > 0 && (
+          <div className="mb-2 relative">
             <button
-              onClick={() => useAppStore.getState().setSelectedFile(null)}
-              className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-primary-400 transition-colors hover:bg-primary-100 hover:text-primary-600 dark:hover:bg-primary-800/50 dark:hover:text-primary-300"
-              title="Clear file context"
+              onClick={() => setShowFilePicker(!showFilePicker)}
+              className="flex items-center gap-1 text-xs text-surface-400 hover:text-surface-600 dark:text-surface-500 dark:hover:text-surface-300 transition-colors"
             >
-              <X className="h-3 w-3" />
+              <File className="h-3 w-3" />
+              {selectedFiles.length > 0 ? 'Add more files' : 'Select files for context'}
             </button>
+            {showFilePicker && (
+              <div className="absolute bottom-full left-0 z-20 mb-1 max-h-48 w-64 overflow-y-auto rounded-lg border border-surface-200 bg-white shadow-lg dark:border-surface-700 dark:bg-surface-800">
+                {processedFiles.map((f) => {
+                  const isSelected = selectedFileIds.has(f.id);
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => {
+                        setSelectedFileIds((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(f.id)) next.delete(f.id);
+                          else next.add(f.id);
+                          return next;
+                        });
+                      }}
+                      className={cn(
+                        'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors',
+                        isSelected
+                          ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+                          : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700'
+                      )}
+                    >
+                      <FileContextIcon type={f.file_type} />
+                      <span className="min-w-0 flex-1 truncate">{f.name}</span>
+                      {isSelected && <span className="text-primary-500 text-xs">&#10003;</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

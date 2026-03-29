@@ -58,9 +58,14 @@ function searchResultsToSources(results: SearchResult[]): ChatSource[] {
 }
 
 /**
- * Fetch text content from a file stored in Supabase Storage.
- * For text-based files, returns the raw text (truncated to ~30K chars).
- * For images/PDFs, returns a description string so the AI knows what it is.
+ * Fetch text content from a file for AI context.
+ *
+ * For processed files (PDFs, images, audio/video): uses the extracted text
+ * stored in the `files` table by the document processing pipeline (Mistral OCR
+ * or GPT-4.1 vision). This is structured text the AI can actually understand.
+ *
+ * For text-based files: reads raw text from storage directly.
+ * For images (unprocessed): falls back to base64 for multimodal AI.
  */
 async function fetchFileContent(
   filePath: string,
@@ -68,10 +73,55 @@ async function fetchFileContent(
   fileName: string
 ): Promise<string> {
   try {
-    const blob = await downloadFile(filePath);
     const type = fileType?.toLowerCase() || '';
 
-    // Text-based files: extract raw text
+    // For file types that go through the processing pipeline (PDF, image, audio, video),
+    // use the extracted text from the database — not the raw binary.
+    const isProcessedType =
+      type.includes('pdf') || fileName.match(/\.pdf$/i) ||
+      type.includes('image') || fileName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/i) ||
+      type.includes('audio') || type.includes('video');
+
+    if (isProcessedType) {
+      const { data: fileRecord } = await supabase
+        .from('files')
+        .select('extracted_text, processing_status, ai_summary')
+        .eq('file_path', filePath)
+        .single();
+
+      // Use extracted text if the file has been processed
+      if (fileRecord?.extracted_text) {
+        const text = fileRecord.extracted_text;
+        const summary = fileRecord.ai_summary
+          ? `\nAI Summary: ${fileRecord.ai_summary}\n`
+          : '';
+        const header = `Extracted text from "${fileName}":${summary}\n`;
+        if (text.length > 30000) {
+          return header + text.slice(0, 30000) + '\n\n[Content truncated at 30,000 characters]';
+        }
+        return header + text;
+      }
+
+      // File not processed — for images, fall back to base64 multimodal
+      if (type.includes('image') || fileName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp)$/i)) {
+        const blob = await downloadFile(filePath);
+        const buffer = await blob.arrayBuffer();
+        const base64 = btoa(
+          new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+        const mimeType = blob.type || 'image/png';
+        if (base64.length > 500000) {
+          return `[Image file: "${fileName}" — too large for inline analysis. Size: ${Math.round(blob.size / 1024)}KB]`;
+        }
+        return `[Image file: "${fileName}" — ${mimeType} base64 content follows]\n${base64}`;
+      }
+
+      // PDF/audio/video not processed — tell the user
+      return `[File "${fileName}" has not been processed yet. Click the process button on this file to extract its text content, then try again.]`;
+    }
+
+    // Text-based files: read raw text from storage directly
+    const blob = await downloadFile(filePath);
     if (
       type.includes('text') ||
       type.includes('csv') ||
@@ -85,31 +135,6 @@ async function fetchFileContent(
         return text.slice(0, 30000) + '\n\n[Content truncated at 30,000 characters]';
       }
       return text;
-    }
-
-    // PDF: return base64 for multimodal AI
-    if (type.includes('pdf') || fileName.match(/\.pdf$/i)) {
-      const buffer = await blob.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
-      if (base64.length > 500000) {
-        return `[PDF file: "${fileName}" — too large for inline analysis. Size: ${Math.round(blob.size / 1024)}KB]`;
-      }
-      return `[PDF file: "${fileName}" — base64 content follows]\n${base64}`;
-    }
-
-    // Images: return base64 for multimodal AI
-    if (type.includes('image') || fileName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp)$/i)) {
-      const buffer = await blob.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
-      const mimeType = blob.type || 'image/png';
-      if (base64.length > 500000) {
-        return `[Image file: "${fileName}" — too large for inline analysis. Size: ${Math.round(blob.size / 1024)}KB]`;
-      }
-      return `[Image file: "${fileName}" — ${mimeType} base64 content follows]\n${base64}`;
     }
 
     // Other file types: just note what it is

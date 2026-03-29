@@ -1,21 +1,29 @@
 /**
- * Vercel Serverless Function: AI Embeddings
- * POST /api/ai-embeddings
+ * Vercel Serverless Function: Legal Web Search
+ * POST /api/legal-web-search
  *
- * Generates text embeddings server-side, keeping API keys out of the client bundle.
- * Uses Voyage AI voyage-law-2 (1024 dims) when configured, falls back to OpenAI (1536 dims).
- *
- * Body: { text: string } | { texts: string[] }
+ * Real-time web search via Tavily for recent case law, regulatory news,
+ * and legal developments not yet in the static knowledge base.
+ * Body: { query: string, searchDepth?: 'basic' | 'advanced', maxResults?: number }
  * Headers: Authorization: Bearer <supabase-jwt>
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { embedText, embedBatch, getEmbeddingProvider, getEmbeddingDimension } from './lib/embeddings.js';
 
-// ============================================================
-// CORS
-// ============================================================
+const TAVILY_SEARCH_URL = 'https://api.tavily.com/search';
+
+// Preferred Canadian legal sources
+const LEGAL_DOMAINS = [
+  'canlii.org',
+  'ontario.ca',
+  'laws-lois.justice.gc.ca',
+  'ohrc.on.ca',
+  'tribunalsontario.ca',
+  'cpo.on.ca',
+  'lso.ca',
+  'scc-csc.ca',
+];
 
 function isAllowedOrigin(origin: string | undefined): string | null {
   if (!origin) return null;
@@ -40,12 +48,7 @@ function getServiceClient() {
   });
 }
 
-// ============================================================
-// Handler
-// ============================================================
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
   const allowedOrigin = isAllowedOrigin(req.headers.origin as string | undefined);
   if (allowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
@@ -59,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // --- Auth ---
+    // Auth
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Missing authorization token' });
@@ -67,59 +70,64 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const token = authHeader.slice(7);
     const serviceClient = getServiceClient();
-    if (!serviceClient) {
-      return res.status(500).json({ error: 'Server configuration error' });
-    }
+    if (!serviceClient) return res.status(500).json({ error: 'Server configuration error' });
 
     const { data: userData, error: userError } = await serviceClient.auth.getUser(token);
     if (userError || !userData.user) {
       return res.status(401).json({ error: 'Invalid or expired authorization token' });
     }
 
-    // --- Parse body ---
-    const { text, texts } = req.body ?? {};
-
-    // Support both single text and batch
-    const isBatch = Array.isArray(texts) && texts.length > 0;
-    const inputTexts: string[] = isBatch
-      ? texts.map((t: unknown) => (typeof t === 'string' ? t : ''))
-      : typeof text === 'string' && text.trim()
-        ? [text]
-        : [];
-
-    if (inputTexts.length === 0) {
-      return res.status(400).json({ error: 'text (string) or texts (string[]) is required' });
+    const tavilyApiKey = process.env.TAVILY_API_KEY;
+    if (!tavilyApiKey) {
+      return res.status(503).json({ error: 'Tavily API key not configured' });
     }
 
-    // Cap batch size at 100 to prevent abuse
-    if (inputTexts.length > 100) {
-      return res.status(400).json({ error: 'Maximum 100 texts per batch request' });
+    const { query, searchDepth = 'advanced', maxResults = 5 } = req.body ?? {};
+
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ error: 'query is required' });
     }
 
-    // Use the shared embedding module (Voyage or OpenAI based on env)
-    if (isBatch) {
-      const embeddings = await embedBatch(inputTexts);
-      return res.status(200).json({
-        embeddings,
-        provider: getEmbeddingProvider(),
-        dimension: getEmbeddingDimension(),
-      });
-    }
+    // Focus search on Canadian legal sources
+    const legalQuery = `${query.trim()} Ontario Canada law`;
 
-    const embedding = await embedText(inputTexts[0]);
-    return res.status(200).json({
-      embedding,
-      provider: getEmbeddingProvider(),
-      dimension: getEmbeddingDimension(),
+    const tavilyResponse = await fetch(TAVILY_SEARCH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: tavilyApiKey,
+        query: legalQuery,
+        search_depth: searchDepth,
+        max_results: Math.min(maxResults, 10),
+        include_domains: LEGAL_DOMAINS,
+      }),
     });
+
+    if (!tavilyResponse.ok) {
+      const errorBody = await tavilyResponse.text();
+      console.error('Tavily search error:', errorBody);
+      return res.status(200).json({ results: [] });
+    }
+
+    const tavilyResult = await tavilyResponse.json();
+
+    const results = (tavilyResult.results || []).map(
+      (r: { title: string; url: string; content: string; score: number; published_date?: string }) => ({
+        title: r.title,
+        url: r.url,
+        content: r.content,
+        score: r.score,
+        published_date: r.published_date,
+      })
+    );
+
+    return res.status(200).json({ results });
   } catch (error) {
-    console.error('AI embeddings error:', error);
+    console.error('Legal web search error:', error);
     return res.status(500).json({
       error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 }
 
-export const config = {
-  maxDuration: 30,
-};
+export const config = { maxDuration: 30 };

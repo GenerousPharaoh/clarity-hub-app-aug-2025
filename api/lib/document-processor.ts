@@ -9,6 +9,7 @@ import OpenAI from 'openai';
 import { chunkText } from './chunker.js';
 import { embedBatch } from './embeddings.js';
 import { extractTimelineEvents } from './timeline-extractor.js';
+import { extractWithMistralOCR } from './mistral-ocr.js';
 
 // Initialize clients
 function getSupabase() {
@@ -416,11 +417,23 @@ async function extractText(
 }
 
 /**
- * Extract text from PDF using pdf-parse.
+ * Extract text from PDF.
+ * Primary: Mistral OCR (structured markdown with tables/headers preserved)
+ * Fallback: pdf-parse → GPT-4.1 vision OCR
  */
 async function extractPdfText(blob: Blob): Promise<string> {
+  // Try Mistral OCR first (best quality — preserves structure, tables, headers)
+  if (process.env.MISTRAL_API_KEY) {
+    try {
+      const text = await extractWithMistralOCR(blob, 'document.pdf');
+      if (text.trim().length > 0) return text;
+    } catch (error) {
+      console.error('Mistral OCR failed for PDF, falling back to pdf-parse:', error);
+    }
+  }
+
+  // Fallback: pdf-parse
   try {
-    // pdf-parse v2 exposes a parser class instead of a callable default export.
     const { PDFParse } = await import('pdf-parse');
     const data = new Uint8Array(await blob.arrayBuffer());
     const parser = new PDFParse({ data });
@@ -433,15 +446,28 @@ async function extractPdfText(blob: Blob): Promise<string> {
     }
   } catch (error) {
     console.error('PDF extraction failed:', error);
-    // Fallback: use GPT-4.1 vision for OCR
+    // Last resort: GPT-4.1 vision OCR
     return extractImageText(blob, 'document.pdf');
   }
 }
 
 /**
- * Extract text from images using GPT-4.1 vision OCR.
+ * Extract text from images.
+ * Primary: Mistral OCR (handles scanned docs, photos of text)
+ * Fallback: GPT-4.1 vision OCR
  */
 async function extractImageText(blob: Blob, fileName: string): Promise<string> {
+  // Try Mistral OCR first
+  if (process.env.MISTRAL_API_KEY) {
+    try {
+      const text = await extractWithMistralOCR(blob, fileName);
+      if (text.trim().length > 0) return text;
+    } catch (error) {
+      console.error('Mistral OCR failed for image, falling back to GPT-4.1 vision:', error);
+    }
+  }
+
+  // Fallback: GPT-4.1 vision OCR
   const openai = getOpenAI();
   const buffer = Buffer.from(await blob.arrayBuffer());
   const base64 = buffer.toString('base64');

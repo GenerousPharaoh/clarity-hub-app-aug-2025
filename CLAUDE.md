@@ -30,16 +30,21 @@ All AI calls go through Vercel serverless functions — API keys are NOT in the 
 | Route | Purpose |
 |-------|---------|
 | `api/ai-chat.ts` | Main AI chat — routes to Gemini (quick/standard) or GPT (deep) based on query complexity. Rate limited (30/min). |
-| `api/ai-embeddings.ts` | OpenAI text-embedding-3-small for RAG |
-| `api/process-file.ts` | File processing: text extraction → classification → summary → timeline extraction → chunking → embedding |
+| `api/ai-embeddings.ts` | Voyage AI voyage-law-2 embeddings (1024-dim, legal-optimized). Falls back to OpenAI if Voyage unavailable. |
+| `api/process-file.ts` | File processing: Mistral OCR → classification → summary → timeline → chunking → Voyage embedding |
 | `api/classify-file.ts` | Standalone classification for already-processed files |
 | `api/extract-timeline.ts` | Bulk timeline extraction across all project files (5-min timeout) |
+| `api/rerank.ts` | Cohere Rerank — re-scores search results for precision retrieval |
+| `api/canlii.ts` | CanLII API proxy — Canadian case law and legislation lookup |
+| `api/legal-web-search.ts` | Tavily web search — real-time legal research for recent case law/news |
+| `api/reembed.ts` | Re-embed utility — regenerate embeddings after provider switch (5-min timeout) |
 
 **Client services** (`src/services/`):
 - `aiRouter.ts` — classifies queries, calls `/api/ai-chat`, extracts citations
 - `geminiAIService.ts` / `openaiService.ts` — stubs (SDKs removed from client bundle)
 - `legalKnowledgeService.ts` — searches legal_cases, legal_principles, legal_legislation (typed Supabase queries, no `as any`)
-- `documentSearchService.ts` — RAG vector + full-text search over project files
+- `documentSearchService.ts` — RAG vector + full-text search → Cohere rerank → precise AI context
+- `canliiService.ts` — CanLII client for case law research (courts, cases, citations, legislation)
 - `compendiumGenerator.ts` — PDF compilation using pdf-lib
 
 **System prompt focus:** Ontario employment law specialist — ESA 2000, Human Rights Code, Waksdale, Bardal factors, costs grid.
@@ -50,8 +55,13 @@ All AI calls go through Vercel serverless functions — API keys are NOT in the 
 |----------|-------|---------|
 | `VITE_SUPABASE_URL` | Client | Supabase client |
 | `VITE_SUPABASE_ANON_KEY` | Client | Supabase client |
-| `OPENAI_API_KEY` | Server | ai-chat, ai-embeddings, process-file, classify-file, extract-timeline |
+| `OPENAI_API_KEY` | Server | ai-chat, process-file (classify/summary/timeline), ai-embeddings (fallback) |
 | `GEMINI_API_KEY` | Server | ai-chat (optional, falls back to OpenAI) |
+| `VOYAGE_API_KEY` | Server | ai-embeddings, process-file — voyage-law-2 (1024-dim, legal-optimized) |
+| `MISTRAL_API_KEY` | Server | process-file — Mistral OCR for PDF/image text extraction |
+| `COHERE_API_KEY` | Server | rerank — Cohere Rerank for precision document retrieval |
+| `CANLII_API_KEY` | Server | canlii — CanLII API for Canadian case law/legislation |
+| `TAVILY_API_KEY` | Server | legal-web-search, ai-chat — Tavily for real-time legal web search |
 | `SUPABASE_URL` | Server | All API routes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server | All API routes |
 
@@ -165,4 +175,23 @@ src/
 - `openaiService.ts` and `geminiAIService.ts` are stubs — all AI calls go through `api/` routes.
 - The `adaptiveAIService.ts` and `AdaptiveLegalAIChat.tsx` files referenced in old docs **do not exist** — removed/replaced.
 - Free-tier Supabase projects pause after inactivity. If the app won't load, restore the project in Supabase dashboard.
-- Feature roadmap at `FEATURE-ROADMAP.md` — CanLII integration and brief drafting assistant are next.
+- Feature roadmap at `FEATURE-ROADMAP.md` — brief drafting assistant is next.
+
+### Enhanced AI Pipeline (March 2026)
+
+**Document Processing:** Upload → **Mistral OCR** (structured markdown) → classify → summarize → timeline → chunk → **Voyage-law-2 embed** (1024-dim) → pgvector
+
+**AI Chat Query:** User query → **Voyage embed** → pgvector hybrid search (RRF) → **Cohere Rerank** (precision top-N) → legal knowledge context → optional **Tavily web search** → route to Gemini/GPT → response with citations
+
+**New Capabilities:**
+- **Mistral OCR** (`api/lib/mistral-ocr.ts`): Structured markdown extraction preserving tables, headers, complex layouts. Falls back to pdf-parse → GPT-4.1 vision.
+- **Voyage-law-2** (`api/lib/embeddings.ts`): Legal-optimized embeddings, 6-15% better retrieval vs OpenAI. 1024-dim vectors. Falls back to OpenAI text-embedding-3-small (1536-dim) — but dimensions must match the pgvector column.
+- **Cohere Rerank** (`api/rerank.ts`): Two-stage retrieval — pgvector pulls top 30, Cohere rescores to top N. Falls back to original RRF order.
+- **CanLII** (`api/canlii.ts` + `src/services/canliiService.ts`): Browse Ontario courts/tribunals, fetch case metadata, build citation graphs (cited/citing cases), search legislation.
+- **Tavily** (`api/legal-web-search.ts`): Real-time web search focused on Canadian legal sources. Integrated into ai-chat via `enableWebSearch` flag.
+
+**Embedding Migration (March 2026):**
+- Switched from OpenAI text-embedding-3-small (1536-dim) to Voyage AI voyage-law-2 (1024-dim)
+- Migration: `switch_embeddings_to_voyage_law_2_1024_dims`
+- `search_documents` RPC updated to cast `vector(1024)`
+- Re-embedding endpoint: `POST /api/reembed { table: 'legal_knowledge_chunks' }`

@@ -367,6 +367,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       caseContext,
       effortLevel,
       documentSources,
+      enableWebSearch,
     } = req.body ?? {};
 
     if (!query || typeof query !== 'string' || !query.trim()) {
@@ -384,7 +385,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ? '\n\nIMPORTANT: When referencing information from the provided document search results, cite them using [Source N] notation (e.g., [Source 1], [Source 2]). Each [Source N] corresponds to a specific document chunk provided in the context. Only cite sources that are actually relevant to your answer.'
       : '';
 
-    const fullLegalContext = (legalContext || '') + citationInstruction;
+    // Tavily web search (when enabled and API key is configured)
+    let webSearchContext = '';
+    if (enableWebSearch && process.env.TAVILY_API_KEY) {
+      try {
+        const tavilyResponse = await fetch('https://api.tavily.com/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            api_key: process.env.TAVILY_API_KEY,
+            query: `${query.trim()} Ontario Canada law`,
+            search_depth: 'advanced',
+            max_results: 5,
+            include_domains: [
+              'canlii.org', 'ontario.ca', 'laws-lois.justice.gc.ca',
+              'ohrc.on.ca', 'tribunalsontario.ca', 'scc-csc.ca', 'lso.ca',
+            ],
+          }),
+        });
+
+        if (tavilyResponse.ok) {
+          const tavilyResult = await tavilyResponse.json();
+          const webResults = (tavilyResult.results || []) as Array<{
+            title: string; url: string; content: string;
+          }>;
+          if (webResults.length > 0) {
+            const formatted = webResults
+              .map((r, i) => `[Web ${i + 1}: ${r.title}](${r.url})\n${r.content.slice(0, 500)}`)
+              .join('\n\n');
+            webSearchContext = `\n\n--- LIVE WEB SEARCH RESULTS ---\n${formatted}\n--- END WEB SEARCH ---\n\nNote: The above are live web search results. Cite them as [Web N] when relevant. Verify against authoritative sources before relying on them.`;
+          }
+        }
+      } catch (webError) {
+        console.error('Tavily web search failed (non-blocking):', webError);
+      }
+    }
+
+    const fullLegalContext = (legalContext || '') + citationInstruction + webSearchContext;
 
     // --- Determine model ---
     const geminiAvailable = !!getGeminiModel();
@@ -462,6 +499,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       model,
       effortLevel: effort,
       followUps,
+      webSearchUsed: webSearchContext.length > 0,
     });
   } catch (error) {
     console.error('AI chat error:', error);

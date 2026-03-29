@@ -1,21 +1,18 @@
 /**
- * Vercel Serverless Function: AI Embeddings
- * POST /api/ai-embeddings
+ * Vercel Serverless Function: Re-embed
+ * POST /api/reembed
  *
- * Generates text embeddings server-side, keeping API keys out of the client bundle.
- * Uses Voyage AI voyage-law-2 (1024 dims) when configured, falls back to OpenAI (1536 dims).
+ * Re-generates embeddings for all legal_knowledge_chunks using the current
+ * embedding provider (Voyage AI voyage-law-2 or OpenAI fallback).
+ * Used after switching embedding providers or dimensions.
  *
- * Body: { text: string } | { texts: string[] }
+ * Body: { table?: 'legal_knowledge_chunks' | 'document_chunks' }
  * Headers: Authorization: Bearer <supabase-jwt>
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { embedText, embedBatch, getEmbeddingProvider, getEmbeddingDimension } from './lib/embeddings.js';
-
-// ============================================================
-// CORS
-// ============================================================
+import { embedBatch, getEmbeddingProvider, getEmbeddingDimension } from './lib/embeddings.js';
 
 function isAllowedOrigin(origin: string | undefined): string | null {
   if (!origin) return null;
@@ -40,12 +37,7 @@ function getServiceClient() {
   });
 }
 
-// ============================================================
-// Handler
-// ============================================================
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
   const allowedOrigin = isAllowedOrigin(req.headers.origin as string | undefined);
   if (allowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
@@ -59,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // --- Auth ---
+    // Auth
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Missing authorization token' });
@@ -67,59 +59,72 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const token = authHeader.slice(7);
     const serviceClient = getServiceClient();
-    if (!serviceClient) {
-      return res.status(500).json({ error: 'Server configuration error' });
-    }
+    if (!serviceClient) return res.status(500).json({ error: 'Server configuration error' });
 
     const { data: userData, error: userError } = await serviceClient.auth.getUser(token);
     if (userError || !userData.user) {
       return res.status(401).json({ error: 'Invalid or expired authorization token' });
     }
 
-    // --- Parse body ---
-    const { text, texts } = req.body ?? {};
+    const { table = 'legal_knowledge_chunks' } = req.body ?? {};
 
-    // Support both single text and batch
-    const isBatch = Array.isArray(texts) && texts.length > 0;
-    const inputTexts: string[] = isBatch
-      ? texts.map((t: unknown) => (typeof t === 'string' ? t : ''))
-      : typeof text === 'string' && text.trim()
-        ? [text]
-        : [];
-
-    if (inputTexts.length === 0) {
-      return res.status(400).json({ error: 'text (string) or texts (string[]) is required' });
+    if (table !== 'legal_knowledge_chunks' && table !== 'document_chunks') {
+      return res.status(400).json({ error: 'table must be legal_knowledge_chunks or document_chunks' });
     }
 
-    // Cap batch size at 100 to prevent abuse
-    if (inputTexts.length > 100) {
-      return res.status(400).json({ error: 'Maximum 100 texts per batch request' });
+    // Fetch all rows that need embedding
+    const { data: rows, error: fetchError } = await serviceClient
+      .from(table)
+      .select('id, content')
+      .order('id');
+
+    if (fetchError) {
+      return res.status(500).json({ error: `Failed to fetch rows: ${fetchError.message}` });
     }
 
-    // Use the shared embedding module (Voyage or OpenAI based on env)
-    if (isBatch) {
-      const embeddings = await embedBatch(inputTexts);
-      return res.status(200).json({
-        embeddings,
-        provider: getEmbeddingProvider(),
-        dimension: getEmbeddingDimension(),
-      });
+    if (!rows || rows.length === 0) {
+      return res.status(200).json({ message: 'No rows to embed', count: 0 });
     }
 
-    const embedding = await embedText(inputTexts[0]);
+    const provider = getEmbeddingProvider();
+    const dimension = getEmbeddingDimension();
+
+    // Generate embeddings in batches
+    const texts = rows.map((r) => r.content || '');
+    const embeddings = await embedBatch(texts);
+
+    // Update each row with its new embedding
+    let updated = 0;
+    for (let i = 0; i < rows.length; i++) {
+      const embedding = embeddings[i];
+      if (!embedding || embedding.length === 0) continue;
+
+      const { error: updateError } = await serviceClient
+        .from(table)
+        .update({ embedding: JSON.stringify(embedding) })
+        .eq('id', rows[i].id);
+
+      if (updateError) {
+        console.error(`Failed to update row ${rows[i].id}:`, updateError.message);
+      } else {
+        updated++;
+      }
+    }
+
     return res.status(200).json({
-      embedding,
-      provider: getEmbeddingProvider(),
-      dimension: getEmbeddingDimension(),
+      message: `Re-embedded ${updated}/${rows.length} rows`,
+      table,
+      provider,
+      dimension,
+      total: rows.length,
+      updated,
     });
   } catch (error) {
-    console.error('AI embeddings error:', error);
+    console.error('Re-embed error:', error);
     return res.status(500).json({
       error: error instanceof Error ? error.message : 'Internal server error',
     });
   }
 }
 
-export const config = {
-  maxDuration: 30,
-};
+export const config = { maxDuration: 300 }; // 5 minutes for large batches

@@ -1,6 +1,11 @@
 /**
- * Client-side document search using the hybrid vector + full-text
- * search_documents RPC in Supabase.
+ * Client-side document search with Cohere Rerank.
+ *
+ * Pipeline:
+ * 1. Generate query embedding via /api/ai-embeddings (Voyage or OpenAI)
+ * 2. Hybrid search via Supabase RPC (pgvector + full-text, RRF)
+ * 3. Rerank top results via /api/rerank (Cohere) for precision
+ * 4. Return final results for AI context
  */
 
 import { supabase } from '@/lib/supabase';
@@ -19,8 +24,62 @@ export interface SearchResult {
 }
 
 /**
+ * Rerank search results using the server-side Cohere endpoint.
+ * Falls back to original order if reranking fails.
+ */
+async function rerankResults(
+  query: string,
+  results: SearchResult[],
+  topN: number
+): Promise<SearchResult[]> {
+  if (results.length <= 1) return results;
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return results.slice(0, topN);
+
+    const response = await fetch('/api/rerank', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        query,
+        documents: results.map((r) => ({ id: r.chunkId, content: r.content })),
+        topN,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Rerank request failed:', response.status);
+      return results.slice(0, topN);
+    }
+
+    const { results: reranked } = await response.json();
+
+    // Map reranked IDs back to full SearchResult objects
+    const resultMap = new Map(results.map((r) => [r.chunkId, r]));
+    const rerankedResults: SearchResult[] = [];
+
+    for (const item of reranked) {
+      const original = resultMap.get(item.id);
+      if (original) {
+        rerankedResults.push({ ...original, score: item.relevance_score });
+      }
+    }
+
+    return rerankedResults;
+  } catch (err) {
+    console.error('Rerank failed, using original order:', err);
+    return results.slice(0, topN);
+  }
+}
+
+/**
  * Search across all processed documents in a project.
- * Uses Reciprocal Rank Fusion over vector + full-text results.
+ * Uses Reciprocal Rank Fusion over vector + full-text results,
+ * then reranks with Cohere for precision.
  */
 export async function searchDocuments(params: {
   query: string;
@@ -39,15 +98,17 @@ export async function searchDocuments(params: {
     const embedding = await aiRouter.generateEmbedding(query);
 
     if (!embedding || embedding.length === 0) {
-      // Fall back to text-only search if embedding fails
       return fallbackSearch();
     }
+
+    // Fetch more results than needed for reranking (3x the final limit)
+    const fetchCount = Math.min(limit * 3, 30);
 
     // Call the hybrid search RPC
     const { data, error } = await supabase.rpc('search_documents', {
       p_query_text: query,
       p_query_embedding: JSON.stringify(embedding),
-      p_match_count: limit,
+      p_match_count: fetchCount,
       p_project_id: projectId,
       p_file_type: fileType ?? undefined,
     });
@@ -57,7 +118,7 @@ export async function searchDocuments(params: {
       return fallbackSearch();
     }
 
-    return (data || []).map((row: {
+    const initialResults: SearchResult[] = (data || []).map((row: {
       chunk_id: string;
       file_id: string;
       content: string;
@@ -78,6 +139,9 @@ export async function searchDocuments(params: {
       score: row.rrf_score,
       timestampStart: row.timestamp_start,
     }));
+
+    // Rerank with Cohere for precision (falls back to original order if unavailable)
+    return rerankResults(query, initialResults, limit);
   } catch (err) {
     console.error('Document search failed:', err);
     return fallbackSearch();

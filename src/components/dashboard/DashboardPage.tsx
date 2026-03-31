@@ -172,8 +172,8 @@ export function DashboardPage() {
                   Your Matters
                 </h1>
                 {(projects?.length ?? 0) > 0 && (
-                  <p className="mt-3 text-base text-surface-400">
-                    {projects?.length} active matter{(projects?.length ?? 0) !== 1 ? 's' : ''} &middot; {totalFiles} files uploaded
+                  <p className="mt-3 text-base text-surface-300">
+                    {projects?.length} active matter{(projects?.length ?? 0) !== 1 ? 's' : ''} / {totalFiles} files uploaded
                   </p>
                 )}
               </div>

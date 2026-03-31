@@ -69,8 +69,8 @@ export function LoginPage() {
             <br />
             deserves.
           </h1>
-          <p className="mt-6 max-w-md text-base leading-relaxed text-surface-400">
-            Upload documents, annotate PDFs, build timelines, draft filings, and prepare case strategy — powered by AI that understands Ontario law.
+          <p className="mt-6 max-w-md text-base leading-relaxed text-surface-300">
+            Upload documents, annotate PDFs, build timelines, draft filings, and prepare case strategy. Powered by AI that understands Ontario law.
           </p>
 
           {/* Feature cards */}
@@ -95,7 +95,7 @@ export function LoginPage() {
 
         {/* Footer */}
         <p className="relative z-10 text-xs text-surface-600">
-          Clarity Hub &middot; Legal Case Management
+          Clarity Hub
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export function LoginPage() {
           <h2 className="font-heading text-3xl font-bold text-surface-900 dark:text-surface-100">
             Sign in
           </h2>
-          <p className="mt-2 text-base text-surface-500 dark:text-surface-400">
+          <p className="mt-2 text-base text-surface-600 dark:text-surface-400">
             Access your legal workspace
           </p>
 
@@ -184,8 +184,8 @@ export function LoginPage() {
             </button>
           </div>
 
-          <div className="mt-8 rounded-2xl border border-surface-200 p-5 dark:border-surface-800">
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-surface-400 dark:text-surface-500">
+          <div className="mt-8 rounded-2xl border border-surface-200 bg-surface-50 p-5 dark:border-surface-800 dark:bg-surface-800/50">
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-surface-500 dark:text-surface-400">
               Included
             </p>
             <div className="mt-4 space-y-3">
@@ -203,13 +203,13 @@ export function LoginPage() {
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="flex items-start gap-4 rounded-xl bg-white/[0.04] px-5 py-4 ring-1 ring-white/[0.06]">
+    <div className="flex items-start gap-4 rounded-xl bg-white/[0.05] px-5 py-4 ring-1 ring-white/[0.08]">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500/10 text-accent-400">
         {icon}
       </div>
       <div>
         <p className="text-sm font-semibold text-white">{title}</p>
-        <p className="mt-0.5 text-sm leading-relaxed text-surface-500">{desc}</p>
+        <p className="mt-0.5 text-sm leading-relaxed text-surface-400">{desc}</p>
       </div>
     </div>
   );
@@ -219,7 +219,7 @@ function CheckItem({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3">
       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent-500 dark:text-accent-400" />
-      <p className="text-sm leading-relaxed text-surface-600 dark:text-surface-300">{children}</p>
+      <p className="text-sm leading-relaxed text-surface-700 dark:text-surface-300">{children}</p>
     </div>
   );
 }

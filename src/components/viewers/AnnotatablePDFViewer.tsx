@@ -26,9 +26,15 @@ import {
   ZoomOut,
   Download,
   ExternalLink,
+  Highlighter,
   MessageSquare,
   FileText,
   Loader2,
+  Copy,
+  X as XIcon,
+  Sparkles,
+  FileSignature,
+  Clock,
   Save,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -151,7 +157,7 @@ export function AnnotatablePDFViewer({
   // Selection is now handled via the selectionTip prop on PdfHighlighter
   // (see SelectionTipFromContext component)
 
-  const [highlightMode, setHighlightMode] = useState(true);
+  const [highlightMode, setHighlightMode] = useState(false);
   const annotationCount = annotations.length;
 
   return (
@@ -279,20 +285,33 @@ export function AnnotatablePDFViewer({
       </div>
 
       {/* Annotation toolbar */}
-      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-surface-100 bg-surface-50 px-3 dark:border-surface-800 dark:bg-surface-850">
-        <button
-          onClick={() => setHighlightMode(!highlightMode)}
-          className={cn(
-            'flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-all',
-            highlightMode
-              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-              : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700'
-          )}
-          title={highlightMode ? 'Highlight mode ON — select text to highlight' : 'Click to enable highlighting'}
-        >
-          <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: highlightMode ? '#FFEB3B' : '#d4d4d8' }} />
-          Highlight
-        </button>
+      <div className="flex h-9 shrink-0 items-center gap-1.5 border-b border-surface-100 bg-surface-50/80 px-3 dark:border-surface-800 dark:bg-surface-850">
+        {/* Mode toggle */}
+        <div className="flex items-center rounded-lg border border-surface-200 bg-white p-0.5 dark:border-surface-700 dark:bg-surface-800">
+          <button
+            onClick={() => setHighlightMode(false)}
+            className={cn(
+              'flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
+              !highlightMode
+                ? 'bg-surface-100 text-surface-700 shadow-sm dark:bg-surface-700 dark:text-surface-200'
+                : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
+            )}
+          >
+            Read
+          </button>
+          <button
+            onClick={() => setHighlightMode(true)}
+            className={cn(
+              'flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
+              highlightMode
+                ? 'bg-yellow-100 text-yellow-800 shadow-sm dark:bg-yellow-900/30 dark:text-yellow-300'
+                : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
+            )}
+          >
+            <Highlighter className="h-3 w-3" />
+            Annotate
+          </button>
+        </div>
 
         <div className="h-4 w-px bg-surface-200 dark:bg-surface-700" />
 
@@ -310,7 +329,7 @@ export function AnnotatablePDFViewer({
         </button>
 
         <span className="ml-auto text-[10px] text-surface-300 dark:text-surface-600">
-          Select text to highlight &middot; Alt+drag for area
+          {highlightMode ? 'Select text to annotate' : 'Select text to copy'}
         </span>
       </div>
 
@@ -350,6 +369,7 @@ export function AnnotatablePDFViewer({
               createAnnotation={createAnnotation}
               onTotalPagesChange={setTotalPages}
               totalPages={totalPages}
+              highlightMode={highlightMode}
             />
           )}
         </PdfLoader>
@@ -382,6 +402,7 @@ function PdfHighlighterInner({
   createAnnotation,
   onTotalPagesChange,
   totalPages,
+  highlightMode,
 }: {
   pdfDocument: Parameters<NonNullable<Parameters<typeof PdfLoader>[0]['children']>>[0];
   scale: PdfScaleValue;
@@ -392,6 +413,7 @@ function PdfHighlighterInner({
   createAnnotation: ReturnType<typeof useCreateAnnotation>;
   onTotalPagesChange: (pages: number) => void;
   totalPages: number;
+  highlightMode: boolean;
 }) {
   // Set total pages on initial load
   useEffect(() => {
@@ -409,13 +431,15 @@ function PdfHighlighterInner({
         highlighterUtilsRef.current = utils;
       }}
       selectionTip={
-        <SelectionTipFromContext
-          fileId={fileId}
-          projectId={projectId}
-          createAnnotation={createAnnotation}
-        />
+        highlightMode ? (
+          <SelectionTipFromContext
+            fileId={fileId}
+            projectId={projectId}
+            createAnnotation={createAnnotation}
+          />
+        ) : undefined
       }
-      enableAreaSelection={(event) => event.altKey}
+      enableAreaSelection={highlightMode ? (event) => event.altKey : () => false}
       textSelectionColor="rgba(98, 121, 143, 0.15)"
       style={{
         height: '100%',
@@ -536,7 +560,6 @@ function SelectionTipFromContext({
  * Floating tip shown when text is selected.
  * Lets the user pick a color, add a comment, and save.
  */
-import { Copy, Highlighter, X as XIcon, Sparkles, FileSignature, Clock } from 'lucide-react';
 
 type TipMode = 'menu' | 'highlight' | 'comment';
 

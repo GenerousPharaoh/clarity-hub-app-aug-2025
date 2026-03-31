@@ -46,11 +46,15 @@ import {
 } from '@/types/annotations';
 import { AnnotationSidebar } from './AnnotationSidebar';
 
-// PDF.js worker setup — use the bundled worker via Vite's URL resolution
-const WORKER_SRC = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).href;
+// Required CSS for react-pdf-highlighter-extended + pdfjs
+import 'react-pdf-highlighter-extended/dist/esm/style/pdf_viewer.css';
+import 'react-pdf-highlighter-extended/dist/esm/style/PdfHighlighter.css';
+import 'react-pdf-highlighter-extended/dist/esm/style/TextHighlight.css';
+import 'react-pdf-highlighter-extended/dist/esm/style/AreaHighlight.css';
+import 'react-pdf-highlighter-extended/dist/esm/style/MouseSelection.css';
+
+// PDF.js worker — Vite's ?url suffix gives us the correct production asset path
+import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 interface AnnotatablePDFViewerProps {
   url: string;
@@ -303,7 +307,7 @@ export function AnnotatablePDFViewer({
       <div className="relative flex-1 overflow-hidden">
         <PdfLoader
           document={url}
-          workerSrc={WORKER_SRC}
+          workerSrc={pdfjsWorkerUrl}
           beforeLoad={() => (
             <div className="flex h-full flex-col items-center justify-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-primary-500" />

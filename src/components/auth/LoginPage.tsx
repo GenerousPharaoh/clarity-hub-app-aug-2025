@@ -54,8 +54,8 @@ export function LoginPage() {
         <div className="absolute inset-0 opacity-60"
           style={{
             background: `
-              radial-gradient(ellipse 80% 60% at 10% 90%, rgba(99,102,241,0.15), transparent),
-              radial-gradient(ellipse 60% 50% at 80% 20%, rgba(245,158,11,0.08), transparent)
+              radial-gradient(ellipse 80% 60% at 10% 90%, rgba(20,184,166,0.12), transparent),
+              radial-gradient(ellipse 60% 50% at 80% 20%, rgba(100,116,139,0.1), transparent)
             `,
           }}
         />
@@ -84,7 +84,7 @@ export function LoginPage() {
           <h1 className="font-heading text-5xl font-bold leading-[1.1] tracking-tight text-white xl:text-6xl">
             Evidence.
             <br />
-            <span className="text-primary-400">Analysis.</span>
+            <span className="text-accent-400">Analysis.</span>
             <br />
             Strategy.
           </h1>
@@ -120,7 +120,7 @@ export function LoginPage() {
       {/* Right: Login form — clean, spacious */}
       <div className="relative flex flex-1 items-center justify-center bg-white p-8 dark:bg-surface-900 lg:p-16">
         {/* Subtle corner accent */}
-        <div className="pointer-events-none absolute right-0 top-0 h-[300px] w-[300px] rounded-bl-full bg-primary-50/50 dark:bg-primary-950/20" />
+        <div className="pointer-events-none absolute right-0 top-0 h-[300px] w-[300px] rounded-bl-full bg-accent-50/40 dark:bg-accent-950/10" />
 
         <div className="relative w-full max-w-md">
           {/* Mobile logo */}

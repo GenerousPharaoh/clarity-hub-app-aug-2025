@@ -5,31 +5,31 @@
 
 /* ── Design Tokens ─────────────────────────────────────── */
 @theme {
-  /* Primary - Modern indigo */
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
-  --color-primary-950: #1e1b4b;
+  /* Primary - Deep slate */
+  --color-primary-50: #f8fafc;
+  --color-primary-100: #f1f5f9;
+  --color-primary-200: #e2e8f0;
+  --color-primary-300: #cbd5e1;
+  --color-primary-400: #94a3b8;
+  --color-primary-500: #64748b;
+  --color-primary-600: #475569;
+  --color-primary-700: #334155;
+  --color-primary-800: #1e293b;
+  --color-primary-900: #0f172a;
+  --color-primary-950: #020617;
 
-  /* Accent - Warm amber */
-  --color-accent-50: #fffbeb;
-  --color-accent-100: #fef3c7;
-  --color-accent-200: #fde68a;
-  --color-accent-300: #fcd34d;
-  --color-accent-400: #fbbf24;
-  --color-accent-500: #f59e0b;
-  --color-accent-600: #d97706;
-  --color-accent-700: #b45309;
-  --color-accent-800: #92400e;
-  --color-accent-900: #78350f;
-  --color-accent-950: #451a03;
+  /* Accent - Sharp teal */
+  --color-accent-50: #f0fdfa;
+  --color-accent-100: #ccfbf1;
+  --color-accent-200: #99f6e4;
+  --color-accent-300: #5eead4;
+  --color-accent-400: #2dd4bf;
+  --color-accent-500: #14b8a6;
+  --color-accent-600: #0d9488;
+  --color-accent-700: #0f766e;
+  --color-accent-800: #115e59;
+  --color-accent-900: #134e4a;
+  --color-accent-950: #042f2e;
 
   /* Surfaces - Zinc-based for modern neutral feel */
   --color-surface-50: #fafafa;
@@ -49,7 +49,7 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-info: #6366f1;
+  --color-info: #14b8a6;
 
   /* Radii */
   --radius-sm: 6px;
@@ -72,8 +72,8 @@
     0 4px 8px hsl(220 40% 2% / 0.04),
     0 8px 16px hsl(220 40% 2% / 0.05),
     0 16px 32px hsl(220 40% 2% / 0.06);
-  --shadow-glow-primary: 0 0 24px rgb(99 102 241 / 0.2);
-  --shadow-glow-accent: 0 0 20px rgb(245 158 11 / 0.18);
+  --shadow-glow-primary: 0 0 24px rgb(100 116 139 / 0.15);
+  --shadow-glow-accent: 0 0 20px rgb(20 184 166 / 0.2);
 
   /* Motion */
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
@@ -154,11 +154,11 @@ code, pre, kbd {
 }
 
 .textLayer ::selection {
-  background: rgba(99, 102, 241, 0.2) !important;
+  background: rgba(20, 184, 166, 0.2) !important;
 }
 
 .textLayer span::selection {
-  background: rgba(99, 102, 241, 0.2) !important;
+  background: rgba(20, 184, 166, 0.2) !important;
   color: transparent;
 }
 

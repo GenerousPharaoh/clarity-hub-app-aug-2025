@@ -139,6 +139,41 @@ code, pre, kbd {
   font-family: var(--font-mono);
 }
 
+/* ── PDF.js text layer — clean text selection ──────────── */
+.textLayer {
+  opacity: 1 !important;
+  mix-blend-mode: multiply;
+}
+
+.textLayer span,
+.textLayer br {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  transform-origin: 0% 0%;
+}
+
+.textLayer ::selection {
+  background: rgba(99, 102, 241, 0.2) !important;
+}
+
+.textLayer span::selection {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: transparent;
+}
+
+/* Remove the ugly strikethrough/line decorations on text layer spans */
+.textLayer span {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+
+/* Ensure text layer doesn't show its own colored backgrounds */
+.textLayer .highlight {
+  background: none !important;
+}
+
 /* ── Dark Mode ─────────────────────────────────────────── */
 .dark {
   color-scheme: dark;

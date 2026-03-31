@@ -761,6 +761,18 @@ function ChronologyView({ projectId }: { projectId: string }) {
           className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300">
           <Download className="h-3 w-3" /> Export CSV
         </button>
+        <button
+          onClick={() => {
+            createEntry.mutate({
+              project_id: projectId,
+              date_display: new Date().toLocaleDateString('en-CA'),
+              description: 'New entry',
+            });
+          }}
+          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300"
+        >
+          <Plus className="h-3 w-3" /> Add Entry
+        </button>
         <span className="ml-auto text-xs text-surface-400">{entries?.filter((e) => e.is_included).length ?? 0} entries</span>
       </div>
       <div className="flex-1 overflow-auto">

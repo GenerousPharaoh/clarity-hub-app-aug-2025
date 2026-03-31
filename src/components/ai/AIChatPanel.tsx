@@ -207,7 +207,11 @@ export function AIChatPanel() {
   const narrow = panelWidth > 0 && panelWidth < 320;
   const compact = panelWidth > 0 && panelWidth < 250;
 
-  const loadingLabel = useDeepThinking ? 'Thinking deeply...' : 'Analyzing...';
+  const loadingLabel = useWebSearch
+    ? 'Searching legal sources...'
+    : useDeepThinking
+      ? 'Thinking deeply...'
+      : 'Analyzing...';
 
   if (!selectedProjectId) {
     return (

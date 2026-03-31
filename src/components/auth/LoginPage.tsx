@@ -203,8 +203,8 @@ export function LoginPage() {
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="flex items-start gap-4 rounded-xl bg-white/[0.05] px-5 py-4 ring-1 ring-white/[0.08]">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500/10 text-accent-400">
+    <div className="group flex items-start gap-4 rounded-xl bg-white/[0.05] px-5 py-4 ring-1 ring-white/[0.08] transition-all duration-300 hover:bg-white/[0.08] hover:ring-accent-500/30">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500/10 text-accent-400 transition-colors group-hover:bg-accent-500/20">
         {icon}
       </div>
       <div>

@@ -121,12 +121,12 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
   };
 
   const accentGradients = [
-    'from-primary-700 via-primary-600 to-primary-500',
-    'from-primary-700 via-primary-600 to-accent-500',
-    'from-surface-800 via-primary-700 to-primary-500',
-    'from-accent-700 via-accent-600 to-primary-500',
-    'from-primary-800 via-primary-700 to-accent-600',
-    'from-surface-700 via-surface-600 to-primary-500',
+    'from-accent-600 via-accent-500 to-accent-400',
+    'from-primary-800 via-primary-700 to-accent-500',
+    'from-surface-800 via-surface-700 to-accent-600',
+    'from-accent-700 via-accent-600 to-accent-400',
+    'from-primary-700 via-accent-600 to-accent-400',
+    'from-surface-700 via-primary-700 to-accent-500',
   ];
 
   const accent = accentGradients[index % accentGradients.length];
@@ -156,15 +156,16 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           }
         }}
         className={cn(
-          'group relative flex h-full min-w-0 flex-col overflow-hidden rounded-[26px] border p-5',
-          'border-translucent bg-white/88 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.42)]',
-          'interactive-lift surface-grain',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-950',
-          'dark:bg-surface-900/78 dark:shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)]'
+          'group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border p-6',
+          'border-surface-200 bg-white',
+          'shadow-sm transition-all duration-300',
+          'hover:shadow-xl hover:shadow-surface-200/60 hover:-translate-y-1 hover:border-surface-300',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2',
+          'dark:border-surface-800 dark:bg-surface-900',
+          'dark:hover:shadow-xl dark:hover:shadow-surface-950/60 dark:hover:border-surface-700'
         )}
       >
-        <div className={cn('absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r', accent)} />
-        <div className="pointer-events-none absolute -right-10 top-0 h-32 w-32 rounded-full bg-white/70 blur-3xl dark:bg-surface-700/20" />
+        <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', accent)} />
 
         <div className="relative flex flex-1 flex-col">
           <div className="flex items-start justify-between gap-3">
@@ -204,7 +205,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                       )}
                     />
                   ) : (
-                    <h3 className="line-clamp-2 font-heading text-xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50">
+                    <h3 className="line-clamp-2 font-heading text-xl font-bold tracking-tight text-surface-900 [overflow-wrap:anywhere] dark:text-surface-100">
                       {project.name}
                     </h3>
                   )}
@@ -265,36 +266,34 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
             </div>
           </div>
 
-          <p className="mt-4 line-clamp-2 text-sm leading-6 text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
-            {project.description || 'No summary'}
+          <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
+            {project.description || 'No description yet'}
           </p>
 
-          <div className="mt-auto grid grid-cols-2 items-stretch gap-3 pt-5">
-            <div className="flex flex-col rounded-xl border border-surface-200/80 bg-surface-50/80 px-3 py-2.5 dark:border-surface-800 dark:bg-surface-950/40">
-              <div className="flex items-center gap-1.5 text-sm font-medium text-surface-400 dark:text-surface-500">
-                <FileText className="h-3 w-3" />
-                Evidence
-              </div>
-              <p className="mt-1 font-heading text-lg font-semibold text-surface-950 dark:text-surface-100">
-                {fileCount ?? 0} <span className="text-xs font-normal text-surface-500">{fileCount === 1 ? 'file' : 'files'}</span>
+          <div className="mt-auto flex items-center gap-6 border-t border-surface-100 pt-5 dark:border-surface-800">
+            <div>
+              <p className="font-heading text-2xl font-bold text-surface-900 dark:text-surface-100">
+                {fileCount ?? 0}
+              </p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">
+                {fileCount === 1 ? 'file' : 'files'}
               </p>
             </div>
-
-            <div className="flex flex-col rounded-xl border border-surface-200/80 bg-surface-50/80 px-3 py-2.5 dark:border-surface-800 dark:bg-surface-950/40">
-              <div className="flex items-center gap-1.5 text-sm font-medium text-surface-400 dark:text-surface-500">
-                <Calendar className="h-3 w-3" />
-                Activity
-              </div>
-              <p className="mt-1 truncate font-heading text-lg font-semibold text-surface-950 dark:text-surface-100">
+            <div className="h-8 w-px bg-surface-200 dark:bg-surface-700" />
+            <div>
+              <p className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
                 {updatedLabel}
+              </p>
+              <p className="text-xs text-surface-500 dark:text-surface-400">
+                last activity
               </p>
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 border-t border-surface-100 pt-4 dark:border-surface-800 sm:flex-row sm:items-center sm:justify-end">
-            <span className="inline-flex items-center gap-1 self-start text-sm font-medium text-primary-700 transition-all sm:text-surface-700 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover:text-primary-700 dark:text-primary-300 sm:dark:text-surface-200 sm:dark:group-hover:text-primary-300">
+          <div className="mt-5 flex items-center justify-end">
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-100 px-3 py-1.5 text-xs font-semibold text-surface-600 transition-all group-hover:bg-accent-500 group-hover:text-white dark:bg-surface-800 dark:text-surface-300 dark:group-hover:bg-accent-500 dark:group-hover:text-white">
               Open
-              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
         </div>

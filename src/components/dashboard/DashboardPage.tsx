@@ -232,7 +232,7 @@ export function DashboardPage() {
         </FadeIn>
 
         <FadeIn delay={0.06}>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <h2 className="font-heading text-2xl font-bold text-surface-900 dark:text-surface-100">
                 All Matters
@@ -240,8 +240,8 @@ export function DashboardPage() {
               {isFetching && !isLoading && (
                 <Loader2 className="h-4 w-4 animate-spin text-surface-400 dark:text-surface-500" />
               )}
-              <span className="text-xs text-surface-400 dark:text-surface-500">
-                {visibleProjects.length} of {projects?.length ?? 0}
+              <span className="rounded-full bg-surface-100 px-2.5 py-1 text-xs font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+                {visibleProjects.length}
               </span>
             </div>
 
@@ -252,7 +252,7 @@ export function DashboardPage() {
                   value={projectQuery}
                   onChange={(e) => setProjectQuery(e.target.value)}
                   placeholder="Search..."
-                  className="w-44 rounded-xl border border-surface-200 bg-white/90 py-2 pl-9 pr-3 text-sm text-surface-700 shadow-sm outline-none transition-colors focus:border-primary-500 focus:ring-2 focus:ring-primary-500/15 dark:border-surface-700 dark:bg-surface-950/80 dark:text-surface-100 dark:focus:border-primary-400 dark:focus:ring-primary-400/20"
+                  className="w-52 rounded-xl border border-surface-200 bg-white py-2.5 pl-9 pr-3 text-sm text-surface-700 outline-none transition-all focus:border-accent-500 focus:ring-2 focus:ring-accent-500/15 focus:w-64 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-100 dark:focus:border-accent-400 dark:focus:ring-accent-400/20"
                 />
               </div>
               <div className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-surface-50 px-2.5 py-2 text-xs text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
@@ -351,7 +351,7 @@ export function DashboardPage() {
                 </div>
               </FadeIn>
             ) : (
-              <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleProjects.map((project, index) => (
                   <ProjectCard
                     key={project.id}

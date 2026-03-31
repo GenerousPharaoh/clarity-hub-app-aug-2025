@@ -239,7 +239,12 @@ export function DraftsTab() {
 function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: string }) {
   const updateDraft = useUpdateBriefDraft();
   const [generatingSection, setGeneratingSection] = useState<string | null>(null);
+  const [generatingAll, setGeneratingAll] = useState(false);
   const [sectionInstructions, setSectionInstructions] = useState<Record<string, string>>({});
+
+  const completedCount = draft.sections.filter((s) => s.content_html).length;
+  const totalCount = draft.sections.length;
+  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   const handleGenerateSection = useCallback(async (sectionKey: string) => {
     setGeneratingSection(sectionKey);
@@ -325,6 +330,20 @@ Return ONLY the section content — no section heading (it will be added automat
     await updateDraft.mutateAsync({ id: draft.id, projectId, sections: updatedSections });
   }, [draft, projectId, updateDraft]);
 
+  const handleGenerateAll = useCallback(async () => {
+    setGeneratingAll(true);
+    const emptySections = draft.sections.filter((s) => !s.content_html);
+    for (const section of emptySections) {
+      try {
+        await handleGenerateSection(section.key);
+      } catch {
+        // Continue with remaining sections even if one fails
+      }
+    }
+    setGeneratingAll(false);
+    toast.success(`Generated ${emptySections.length} sections`);
+  }, [draft.sections, handleGenerateSection]);
+
   const handleExportDraft = useCallback(() => {
     const header = [
       draft.court_name && `Court: ${draft.court_name}`,
@@ -356,16 +375,51 @@ Return ONLY the section content — no section heading (it will be added automat
 
   return (
     <div className="p-4 space-y-4">
-      {/* Draft header with export */}
-      <div className="flex items-center justify-between">
-        <h3 className="font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">{draft.title}</h3>
-        <button
-          onClick={handleExportDraft}
-          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-400 dark:hover:bg-surface-800"
-        >
-          <Download className="h-3 w-3" />
-          Export
-        </button>
+      {/* Draft header with progress + actions */}
+      <div className="rounded-2xl border border-surface-200/80 bg-white p-4 shadow-sm dark:border-surface-700 dark:bg-surface-800">
+        <div className="flex items-center justify-between">
+          <h3 className="font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">{draft.title}</h3>
+          <div className="flex items-center gap-2">
+            {completedCount < totalCount && (
+              <button
+                onClick={handleGenerateAll}
+                disabled={generatingAll || !!generatingSection}
+                className={cn(
+                  'flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
+                  generatingAll || generatingSection
+                    ? 'bg-surface-100 text-surface-400 dark:bg-surface-800'
+                    : 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
+                )}
+              >
+                {generatingAll ? (
+                  <><Loader2 className="h-3 w-3 animate-spin" /> Generating...</>
+                ) : (
+                  <><Sparkles className="h-3 w-3" /> Generate All</>
+                )}
+              </button>
+            )}
+            <button
+              onClick={handleExportDraft}
+              className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-400"
+            >
+              <Download className="h-3 w-3" />
+              Export
+            </button>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="mt-3 flex items-center gap-3">
+          <div className="flex-1 h-1.5 rounded-full bg-surface-100 dark:bg-surface-700 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-primary-500 transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          <span className="text-xs text-surface-400 whitespace-nowrap">
+            {completedCount}/{totalCount} sections
+          </span>
+        </div>
       </div>
       <div className="rounded-2xl border border-surface-200/80 bg-surface-50/50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
         <div className="grid gap-3 sm:grid-cols-2">

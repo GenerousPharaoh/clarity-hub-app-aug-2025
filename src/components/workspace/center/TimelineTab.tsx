@@ -30,7 +30,7 @@ import {
   useExtractTimeline,
 } from '@/hooks/useTimeline';
 import type { TimelineEvent } from '@/hooks/useTimeline';
-import { useChronologyEntries, useImportFromTimeline, useDeleteChronologyEntry, useCreateChronologyEntry } from '@/hooks/useChronology';
+import { useChronologyEntries, useImportFromTimeline, useDeleteChronologyEntry, useCreateChronologyEntry, useUpdateChronologyEntry } from '@/hooks/useChronology';
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   employment: {
@@ -676,6 +676,7 @@ function ChronologyView({ projectId }: { projectId: string }) {
   const importTimeline = useImportFromTimeline();
   const deleteEntry = useDeleteChronologyEntry();
   const createEntry = useCreateChronologyEntry();
+  const updateEntry = useUpdateChronologyEntry();
   const pendingEntry = useAppStore((s) => s.pendingChronologyEntry);
   const clearPendingEntry = useAppStore((s) => s.setPendingChronologyEntry);
 
@@ -784,14 +785,56 @@ function ChronologyView({ projectId }: { projectId: string }) {
             </thead>
             <tbody>
               {entries.map((entry) => (
-                <tr key={entry.id} className={cn('border-b border-surface-100 hover:bg-surface-50 dark:border-surface-800', !entry.is_included && 'opacity-40')}>
-                  <td className="whitespace-nowrap px-3 py-2 text-xs font-medium text-surface-700 dark:text-surface-200">{entry.date_display}</td>
-                  <td className="px-3 py-2 text-xs text-surface-600 dark:text-surface-300">{entry.description}</td>
-                  <td className="px-3 py-2 text-xs text-surface-400">{entry.source_description || '—'}</td>
-                  <td className="px-3 py-2 text-xs text-surface-400">{entry.exhibit_ref || '—'}</td>
+                <tr key={entry.id} className={cn('border-b border-surface-100 hover:bg-surface-50 dark:border-surface-800 group', !entry.is_included && 'opacity-40')}>
+                  <td className="whitespace-nowrap px-3 py-2 text-xs font-medium text-surface-700 dark:text-surface-200">
+                    <input
+                      defaultValue={entry.date_display}
+                      onBlur={(e) => {
+                        if (e.target.value !== entry.date_display) {
+                          updateEntry.mutate({ id: entry.id, projectId, date_display: e.target.value });
+                        }
+                      }}
+                      className="w-full bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-primary-300 focus:rounded px-1 -mx-1 dark:focus:bg-surface-800"
+                    />
+                  </td>
+                  <td className="px-3 py-2 text-xs text-surface-600 dark:text-surface-300">
+                    <input
+                      defaultValue={entry.description}
+                      onBlur={(e) => {
+                        if (e.target.value !== entry.description) {
+                          updateEntry.mutate({ id: entry.id, projectId, description: e.target.value });
+                        }
+                      }}
+                      className="w-full bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-primary-300 focus:rounded px-1 -mx-1 dark:focus:bg-surface-800"
+                    />
+                  </td>
+                  <td className="px-3 py-2 text-xs text-surface-400">
+                    <input
+                      defaultValue={entry.source_description || ''}
+                      placeholder="—"
+                      onBlur={(e) => {
+                        if (e.target.value !== (entry.source_description || '')) {
+                          updateEntry.mutate({ id: entry.id, projectId, source_description: e.target.value || undefined });
+                        }
+                      }}
+                      className="w-full bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-primary-300 focus:rounded px-1 -mx-1 dark:focus:bg-surface-800"
+                    />
+                  </td>
+                  <td className="px-3 py-2 text-xs text-surface-400">
+                    <input
+                      defaultValue={entry.exhibit_ref || ''}
+                      placeholder="—"
+                      onBlur={(e) => {
+                        if (e.target.value !== (entry.exhibit_ref || '')) {
+                          updateEntry.mutate({ id: entry.id, projectId, exhibit_ref: e.target.value || undefined });
+                        }
+                      }}
+                      className="w-full bg-transparent outline-none focus:bg-white focus:ring-1 focus:ring-primary-300 focus:rounded px-1 -mx-1 dark:focus:bg-surface-800"
+                    />
+                  </td>
                   <td className="px-2 py-2">
                     <button onClick={() => deleteEntry.mutate({ id: entry.id, projectId })}
-                      className="rounded p-1 text-surface-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">
+                      className="rounded p-1 text-surface-300 opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 transition-opacity">
                       <Trash2 className="h-3 w-3" />
                     </button>
                   </td>

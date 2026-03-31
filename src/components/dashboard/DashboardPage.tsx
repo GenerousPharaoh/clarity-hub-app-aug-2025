@@ -144,58 +144,62 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="surface-grain relative min-h-full overflow-hidden bg-surface-50 dark:bg-surface-950">
+    <div className="relative min-h-full overflow-hidden bg-white dark:bg-surface-950">
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
         <FadeIn>
-          <section
-            className={cn(
-              'relative overflow-hidden rounded-2xl border border-l-[3px] p-5 sm:p-6',
-              'border-surface-200/80 border-l-primary-500 bg-white',
-              'shadow-sm',
-              'dark:border-surface-800 dark:border-l-primary-500 dark:bg-surface-900'
-            )}
-          >
-            <div className="relative min-w-0">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 max-w-2xl">
-                  <p className="text-sm text-surface-500 dark:text-surface-400 mb-1">
-                    {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}{firstName ? `, ${firstName}` : ''}
-                  </p>
-                  <h1 className="font-heading text-2xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-3xl">
-                    Your matters
-                  </h1>
-                  {(projects?.length ?? 0) > 0 && (
-                    <p className="mt-1.5 text-sm text-surface-400 dark:text-surface-500">
-                      {projects?.length} active matter{(projects?.length ?? 0) !== 1 ? 's' : ''} &middot; {totalFiles} files uploaded
-                    </p>
-                  )}
-                </div>
+          {/* Hero section — big, bold, spacious */}
+          <section className="relative overflow-hidden rounded-3xl bg-surface-950 px-8 py-10 sm:px-12 sm:py-14 dark:bg-surface-900">
+            {/* Background texture */}
+            <div className="absolute inset-0 opacity-[0.04]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
+                `,
+                backgroundSize: '48px 48px',
+              }}
+            />
+            {/* Accent glow */}
+            <div className="pointer-events-none absolute -right-20 -top-20 h-[400px] w-[400px] rounded-full bg-primary-500/10 blur-[100px]" />
 
-                <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
-                  {resumeProject && (
-                    <button
-                      onClick={() => navigate(`/project/${resumeProject.id}`)}
-                      className="focus-accent inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-surface-950 px-4 py-3 sm:py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
-                    >
-                      Resume
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setDialogOpen(true)}
-                    className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-surface-200 bg-white px-4 py-3 sm:py-2.5 text-sm font-medium text-surface-700 transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200 dark:hover:border-primary-600 dark:hover:text-primary-300"
-                  >
-                    <Plus className="h-4 w-4" />
-                    New matter
-                  </button>
-                </div>
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="min-w-0 max-w-2xl">
+                <p className="text-sm font-medium text-primary-400 mb-3">
+                  {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}{firstName ? `, ${firstName}` : ''}
+                </p>
+                <h1 className="font-heading text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                  Your Matters
+                </h1>
+                {(projects?.length ?? 0) > 0 && (
+                  <p className="mt-3 text-base text-surface-400">
+                    {projects?.length} active matter{(projects?.length ?? 0) !== 1 ? 's' : ''} &middot; {totalFiles} files uploaded
+                  </p>
+                )}
               </div>
 
+              <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
+                {resumeProject && (
+                  <button
+                    onClick={() => navigate(`/project/${resumeProject.id}`)}
+                    className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-surface-950 shadow-lg shadow-white/10 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+                  >
+                    Resume working
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+                )}
+                <button
+                  onClick={() => setDialogOpen(true)}
+                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/30"
+                >
+                  <Plus className="h-4 w-4" />
+                  New matter
+                </button>
+              </div>
             </div>
           </section>
 
-          <div className="mt-3 grid items-stretch gap-3 grid-cols-1 sm:grid-cols-3">
+          <div className="mt-6 grid items-stretch gap-4 grid-cols-1 sm:grid-cols-3">
             <MetricCard
               icon={<Briefcase className="h-4 w-4" />}
               label="Active matters"
@@ -229,8 +233,8 @@ export function DashboardPage() {
 
         <FadeIn delay={0.06}>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="font-heading text-lg font-semibold text-surface-900 dark:text-surface-100">
+            <div className="flex items-center gap-3">
+              <h2 className="font-heading text-2xl font-bold text-surface-900 dark:text-surface-100">
                 All Matters
               </h2>
               {isFetching && !isLoading && (
@@ -314,7 +318,7 @@ export function DashboardPage() {
                     <p className="text-xs text-surface-400 mt-1 mb-3">A matter is a case or legal issue you&apos;re working on.</p>
                     <button
                       onClick={() => setDialogOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-primary-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary-500/20 transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-xl dark:bg-primary-500 dark:hover:bg-primary-400"
                     >
                       <Plus className="h-4 w-4" />
                       New matter
@@ -387,26 +391,38 @@ function MetricCard({
   detail: string;
   tone?: string;
 }) {
-  const toneColors: Record<string, string> = {
-    primary: 'border-l-primary-500',
-    emerald: 'border-l-emerald-500',
-    neutral: 'border-l-surface-300 dark:border-l-surface-600',
+  const toneStyles: Record<string, { icon: string; bg: string }> = {
+    primary: {
+      icon: 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400',
+      bg: 'hover:border-primary-200 dark:hover:border-primary-800',
+    },
+    emerald: {
+      icon: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400',
+      bg: 'hover:border-emerald-200 dark:hover:border-emerald-800',
+    },
+    neutral: {
+      icon: 'bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400',
+      bg: 'hover:border-surface-300 dark:hover:border-surface-600',
+    },
   };
+
+  const style = toneStyles[tone ?? 'neutral'];
 
   return (
     <div className={cn(
-      'flex min-w-0 flex-col rounded-2xl border border-surface-200/80 bg-white p-4 dark:border-surface-800 dark:bg-surface-900/70',
-      'border-l-[3px]',
-      toneColors[tone ?? 'neutral']
+      'flex min-w-0 flex-col rounded-2xl border border-surface-200 bg-white p-6 transition-colors dark:border-surface-800 dark:bg-surface-900',
+      style.bg
     )}>
-      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
+      <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl', style.icon)}>
         {icon}
-        <span>{label}</span>
       </div>
-      <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-surface-900 dark:text-surface-100 [overflow-wrap:anywhere]">
+      <p className="mt-4 font-heading text-3xl font-bold tracking-tight text-surface-900 dark:text-surface-100 [overflow-wrap:anywhere]">
         {value}
       </p>
-      <p className="mt-auto text-xs leading-5 text-surface-500 dark:text-surface-400 [overflow-wrap:anywhere]">
+      <p className="mt-1 text-sm font-medium text-surface-500 dark:text-surface-400">
+        {label}
+      </p>
+      <p className="mt-0.5 text-xs text-surface-400 dark:text-surface-500 [overflow-wrap:anywhere]">
         {detail}
       </p>
     </div>

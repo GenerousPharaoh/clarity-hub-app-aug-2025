@@ -305,7 +305,7 @@ export function AnnotatablePDFViewer({
       </div>
 
       {/* PDF viewer area */}
-      <div className="relative flex-1 overflow-hidden">
+      <div className="relative flex-1 overflow-auto">
         <PdfLoader
           document={url}
           workerSrc={PDF_WORKER_URL}
@@ -398,7 +398,9 @@ function PdfHighlighterInner({
       style={{
         height: '100%',
         width: '100%',
-        position: 'relative',
+        position: 'absolute',
+        top: 0,
+        left: 0,
       }}
     >
       <HighlightContainer />

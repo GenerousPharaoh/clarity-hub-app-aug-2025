@@ -34,6 +34,7 @@ import {
   Save,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import useAppStore from '@/store';
 import {
   useFileAnnotations,
   useCreateAnnotation,
@@ -515,7 +516,7 @@ function HighlightContainer() {
  * Floating tip shown when text is selected.
  * Lets the user pick a color, add a comment, and save.
  */
-import { Copy, Highlighter, X as XIcon } from 'lucide-react';
+import { Copy, Highlighter, X as XIcon, Sparkles, FileSignature, Clock } from 'lucide-react';
 
 type TipMode = 'menu' | 'highlight' | 'comment';
 
@@ -582,37 +583,102 @@ function SelectionTip({
     onSave(); // dismiss tip
   }, [selectedText, onSave]);
 
-  // Initial menu: Copy | Highlight | Comment
+  const handleAskAI = useCallback(() => {
+    if (!selectedText) return;
+    // Switch to AI chat tab and pre-fill with the selected text
+    useAppStore.getState().setRightTab('ai');
+    useAppStore.getState().setRightPanel(true);
+    // Store the text so the AI chat can pick it up
+    const event = new CustomEvent('ask-ai-about-text', { detail: { text: selectedText, fileName: fileId } });
+    window.dispatchEvent(event);
+    onSave();
+  }, [selectedText, fileId, onSave]);
+
+  const handleAddToBrief = useCallback(() => {
+    if (!selectedText) return;
+    useAppStore.getState().setPendingBriefInsertion({
+      text: selectedText,
+      fileId,
+      fileName: fileId, // Will be resolved by the drafter
+      page: ghost.position.boundingRect.pageNumber,
+    });
+    useAppStore.getState().setCenterTab('drafts');
+    onSave();
+  }, [selectedText, fileId, ghost.position, onSave]);
+
+  const handleAddToChronology = useCallback(() => {
+    if (!selectedText) return;
+    useAppStore.getState().setPendingChronologyEntry({
+      text: selectedText,
+      fileId,
+      fileName: fileId,
+      page: ghost.position.boundingRect.pageNumber,
+    });
+    useAppStore.getState().setCenterTab('timeline');
+    onSave();
+  }, [selectedText, fileId, ghost.position, onSave]);
+
+  // Initial menu: actions grid
   if (mode === 'menu') {
     return (
       <div className={cn(
-        'flex items-center rounded-xl border border-surface-200 bg-white shadow-xl overflow-hidden',
+        'rounded-xl border border-surface-200 bg-white shadow-xl overflow-hidden',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
-          title="Copy selected text"
-        >
-          <Copy className="h-3.5 w-3.5" />
-          Copy
-        </button>
-        <button
-          onClick={() => setMode('highlight')}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-600 hover:bg-yellow-50 dark:text-surface-300 dark:hover:bg-yellow-900/20 border-r border-surface-100 dark:border-surface-800"
-          title="Highlight this text"
-        >
-          <Highlighter className="h-3.5 w-3.5" />
-          Highlight
-        </button>
-        <button
-          onClick={() => setMode('comment')}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-600 hover:bg-blue-50 dark:text-surface-300 dark:hover:bg-blue-900/20"
-          title="Add a comment on this text"
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-          Comment
-        </button>
+        {/* Primary actions row */}
+        <div className="flex border-b border-surface-100 dark:border-surface-800">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
+            title="Copy selected text"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            Copy
+          </button>
+          <button
+            onClick={() => setMode('highlight')}
+            className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium text-surface-600 hover:bg-yellow-50 dark:text-surface-300 dark:hover:bg-yellow-900/20 border-r border-surface-100 dark:border-surface-800"
+            title="Highlight this text"
+          >
+            <Highlighter className="h-3.5 w-3.5 text-yellow-600" />
+            Highlight
+          </button>
+          <button
+            onClick={() => setMode('comment')}
+            className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium text-surface-600 hover:bg-blue-50 dark:text-surface-300 dark:hover:bg-blue-900/20"
+            title="Add a comment"
+          >
+            <MessageSquare className="h-3.5 w-3.5 text-blue-500" />
+            Comment
+          </button>
+        </div>
+        {/* Secondary actions row */}
+        <div className="flex">
+          <button
+            onClick={handleAskAI}
+            className="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 border-r border-surface-100 dark:border-surface-800"
+            title="Ask AI about this text"
+          >
+            <Sparkles className="h-3 w-3" />
+            Ask AI
+          </button>
+          <button
+            onClick={handleAddToBrief}
+            className="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
+            title="Insert into a legal draft"
+          >
+            <FileSignature className="h-3 w-3" />
+            Brief
+          </button>
+          <button
+            onClick={handleAddToChronology}
+            className="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800"
+            title="Add to chronology"
+          >
+            <Clock className="h-3 w-3" />
+            Timeline
+          </button>
+        </div>
       </div>
     );
   }

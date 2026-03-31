@@ -1,6 +1,9 @@
-import { useMemo, useCallback } from 'react';
-import { X, Trash2, MessageSquare, FileText } from 'lucide-react';
+import { useMemo, useCallback, useState } from 'react';
+import { X, Trash2, MessageSquare, FileText, Copy, Download, Check, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useUpdateAnnotation } from '@/hooks/useAnnotations';
+import { HIGHLIGHT_COLORS } from '@/types/annotations';
 import type { PdfAnnotation } from '@/types/annotations';
 import type { AnnotationHighlight } from '@/types/annotations';
 
@@ -19,22 +22,28 @@ export function AnnotationSidebar({
   onScrollTo,
   onDelete,
 }: AnnotationSidebarProps) {
+  const [colorFilter, setColorFilter] = useState<string | null>(null);
+
+  const filtered = useMemo(
+    () => colorFilter ? annotations.filter((a) => a.color === colorFilter) : annotations,
+    [annotations, colorFilter]
+  );
+
   // Group annotations by page number
   const grouped = useMemo(() => {
     const map = new Map<number, PdfAnnotation[]>();
-    for (const a of annotations) {
+    for (const a of filtered) {
       const page = a.page_number;
       if (!map.has(page)) map.set(page, []);
       map.get(page)!.push(a);
     }
     return Array.from(map.entries()).sort(([a], [b]) => a - b);
-  }, [annotations]);
+  }, [filtered]);
 
   const handleScrollTo = useCallback(
     (a: PdfAnnotation) => {
       const highlight: AnnotationHighlight = {
         id: `annot-${a.id}`,
-        
         type: 'text',
         position: a.position_data as AnnotationHighlight['position'],
         color: a.color ?? 'yellow',
@@ -45,6 +54,42 @@ export function AnnotationSidebar({
     },
     [onScrollTo],
   );
+
+  const handleExportAll = useCallback(() => {
+    if (annotations.length === 0) return;
+
+    const grouped = new Map<number, PdfAnnotation[]>();
+    for (const a of annotations) {
+      if (!grouped.has(a.page_number)) grouped.set(a.page_number, []);
+      grouped.get(a.page_number)!.push(a);
+    }
+
+    let md = '# Highlights & Notes\n\n';
+    for (const [page, items] of Array.from(grouped.entries()).sort(([a], [b]) => a - b)) {
+      md += `## Page ${page}\n\n`;
+      for (const a of items) {
+        if (a.selected_text) {
+          md += `> ${a.selected_text}\n\n`;
+        }
+        if (a.comment) {
+          md += `**Note:** ${a.comment}\n\n`;
+        }
+        md += '---\n\n';
+      }
+    }
+
+    navigator.clipboard.writeText(md).then(() => {
+      toast.success('All highlights copied to clipboard');
+    }).catch(() => {
+      // Fallback: download as file
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'highlights.md';
+      a.click();
+      toast.success('Highlights exported');
+    });
+  }, [annotations]);
 
   return (
     <div
@@ -64,32 +109,73 @@ export function AnnotationSidebar({
             Annotations
           </span>
           <span className="ml-1 rounded-full bg-surface-100 px-1.5 py-0.5 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
-            {annotations.length}
+            {filtered.length}
           </span>
         </div>
-        <button
-          onClick={onClose}
-          className={cn(
-            'flex h-6 w-6 items-center justify-center rounded-md',
-            'text-surface-400 transition-colors',
-            'hover:bg-surface-100 hover:text-surface-600',
-            'dark:hover:bg-surface-800 dark:hover:text-surface-300',
+        <div className="flex items-center gap-1">
+          {annotations.length > 0 && (
+            <button
+              onClick={handleExportAll}
+              className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
+              title="Export all highlights"
+            >
+              <Download className="h-3 w-3" />
+            </button>
           )}
-          aria-label="Close annotations"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
+          <button
+            onClick={onClose}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
+
+      {/* Color filter */}
+      {annotations.length > 0 && (
+        <div className="flex items-center gap-1.5 border-b border-surface-100 px-3 py-2 dark:border-surface-800">
+          <button
+            onClick={() => setColorFilter(null)}
+            className={cn(
+              'rounded-full px-2 py-0.5 text-[10px] font-medium transition-all',
+              !colorFilter
+                ? 'bg-surface-200 text-surface-700 dark:bg-surface-700 dark:text-surface-200'
+                : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800'
+            )}
+          >
+            All
+          </button>
+          {HIGHLIGHT_COLORS.map((c) => {
+            const count = annotations.filter((a) => a.color === c.value).length;
+            if (count === 0) return null;
+            return (
+              <button
+                key={c.name}
+                onClick={() => setColorFilter(colorFilter === c.value ? null : c.value)}
+                className={cn(
+                  'flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium transition-all',
+                  colorFilter === c.value
+                    ? 'ring-2 ring-primary-400 ring-offset-1'
+                    : 'hover:ring-1 hover:ring-surface-300'
+                )}
+              >
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: c.value }} />
+                {count}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
-        {annotations.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-800">
               <FileText className="h-5 w-5 text-surface-400" />
             </div>
             <p className="mt-3 text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-              No annotations yet. Select text in the PDF to create highlights.
+              {colorFilter ? 'No annotations with this color.' : 'No annotations yet. Select text in the PDF to create highlights.'}
             </p>
           </div>
         ) : (
@@ -129,59 +215,114 @@ function AnnotationCard({
   onScrollTo: () => void;
   onDelete: () => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [editComment, setEditComment] = useState(annotation.comment ?? '');
+  const [copied, setCopied] = useState(false);
+  const updateAnnotation = useUpdateAnnotation();
+
+  const handleSaveComment = useCallback(() => {
+    updateAnnotation.mutate({
+      id: annotation.id,
+      comment: editComment.trim() || null,
+    });
+    setEditing(false);
+  }, [annotation.id, editComment, updateAnnotation]);
+
+  const handleCopyText = useCallback(() => {
+    if (!annotation.selected_text) return;
+    navigator.clipboard.writeText(annotation.selected_text).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }, [annotation.selected_text]);
+
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={onScrollTo}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onScrollTo();
-      }}
       className={cn(
-        'group relative cursor-pointer rounded-lg px-2.5 py-2',
+        'group relative rounded-lg px-2.5 py-2',
         'transition-colors hover:bg-surface-50',
         'dark:hover:bg-surface-800/60',
       )}
     >
       <div className="flex items-start gap-2">
-        {/* Color dot */}
-        <span
-          className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full"
-          style={{ backgroundColor: annotation.color.replace(/[\d.]+\)$/, '1)') }}
-        />
+        {/* Color dot — click to scroll */}
+        <button onClick={onScrollTo} className="mt-0.5 shrink-0" title="Jump to highlight">
+          <span
+            className="block h-3 w-3 rounded-full ring-1 ring-surface-200 transition-transform hover:scale-125 dark:ring-surface-700"
+            style={{ backgroundColor: annotation.color ?? '#FFEB3B' }}
+          />
+        </button>
         <div className="min-w-0 flex-1">
-          {/* Selected text preview */}
+          {/* Selected text */}
           {annotation.selected_text && (
-            <p className="line-clamp-2 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
-              {annotation.selected_text}
+            <p
+              onClick={onScrollTo}
+              className="cursor-pointer line-clamp-3 text-xs leading-relaxed text-surface-600 dark:text-surface-300 hover:text-surface-800 dark:hover:text-surface-100"
+            >
+              "{annotation.selected_text}"
             </p>
           )}
-          {/* Comment */}
-          {annotation.comment && (
-            <p className="mt-1 line-clamp-2 text-[11px] italic leading-relaxed text-surface-400 dark:text-surface-500">
+
+          {/* Comment — editable */}
+          {editing ? (
+            <div className="mt-1">
+              <textarea
+                value={editComment}
+                onChange={(e) => setEditComment(e.target.value)}
+                className="w-full resize-none rounded border border-surface-200 px-2 py-1 text-[11px] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200"
+                rows={2}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSaveComment(); }
+                  if (e.key === 'Escape') setEditing(false);
+                }}
+              />
+              <div className="mt-1 flex justify-end gap-1">
+                <button onClick={() => setEditing(false)} className="rounded px-2 py-0.5 text-[10px] text-surface-400 hover:bg-surface-100">Cancel</button>
+                <button onClick={handleSaveComment} className="rounded bg-primary-600 px-2 py-0.5 text-[10px] text-white hover:bg-primary-700">Save</button>
+              </div>
+            </div>
+          ) : annotation.comment ? (
+            <p
+              onClick={() => setEditing(true)}
+              className="mt-1 cursor-pointer line-clamp-2 rounded px-1 text-[11px] italic leading-relaxed text-surface-400 hover:bg-surface-100 dark:text-surface-500 dark:hover:bg-surface-800"
+              title="Click to edit"
+            >
               {annotation.comment}
             </p>
+          ) : (
+            <button
+              onClick={() => setEditing(true)}
+              className="mt-1 flex items-center gap-1 text-[10px] text-surface-300 hover:text-surface-500 dark:text-surface-600 dark:hover:text-surface-400"
+            >
+              <Pencil className="h-2.5 w-2.5" />
+              Add note
+            </button>
           )}
         </div>
       </div>
 
-      {/* Delete button — visible on hover */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className={cn(
-          'absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded',
-          'text-surface-300 opacity-0 transition-all',
-          'hover:bg-red-50 hover:text-red-500',
-          'group-hover:opacity-100',
-          'dark:text-surface-600 dark:hover:bg-red-900/20 dark:hover:text-red-400',
+      {/* Action buttons — visible on hover */}
+      <div className={cn(
+        'absolute right-1 top-1 flex items-center gap-0.5',
+        'opacity-0 transition-all group-hover:opacity-100',
+      )}>
+        {annotation.selected_text && (
+          <button
+            onClick={(e) => { e.stopPropagation(); handleCopyText(); }}
+            className="flex h-5 w-5 items-center justify-center rounded text-surface-300 hover:bg-surface-100 hover:text-surface-500 dark:hover:bg-surface-800"
+            title="Copy text"
+          >
+            {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+          </button>
         )}
-        aria-label="Delete annotation"
-      >
-        <Trash2 className="h-3 w-3" />
-      </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          className="flex h-5 w-5 items-center justify-center rounded text-surface-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+          title="Delete"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      </div>
     </div>
   );
 }

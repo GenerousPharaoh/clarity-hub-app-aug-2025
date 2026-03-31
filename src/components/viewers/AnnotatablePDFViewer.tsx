@@ -180,15 +180,18 @@ export function AnnotatablePDFViewer({
     [fileId, projectId, createAnnotation],
   );
 
+  const [highlightMode, setHighlightMode] = useState(true);
+  const annotationCount = annotations.length;
+
   return (
     <div className="relative flex h-full flex-col">
       {/* Toolbar */}
-      <div className="flex h-9 shrink-0 items-center justify-between border-b border-surface-200 px-2 shadow-sm dark:border-surface-700">
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 bg-white px-2 dark:border-surface-700 dark:bg-surface-900">
         {/* File name */}
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <FileText className="h-3.5 w-3.5 shrink-0 text-red-500" />
           <span
-            className="truncate text-sm font-medium text-surface-600 dark:text-surface-300"
+            className="truncate text-sm font-medium text-surface-600 dark:text-surface-300 max-w-[120px]"
             title={fileName}
           >
             {fileName}
@@ -302,6 +305,42 @@ export function AnnotatablePDFViewer({
             <ExternalLink className="h-3.5 w-3.5" />
           </button>
         </div>
+      </div>
+
+      {/* Annotation toolbar */}
+      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-surface-100 bg-surface-50 px-3 dark:border-surface-800 dark:bg-surface-850">
+        <button
+          onClick={() => setHighlightMode(!highlightMode)}
+          className={cn(
+            'flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-all',
+            highlightMode
+              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+              : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700'
+          )}
+          title={highlightMode ? 'Highlight mode ON — select text to highlight' : 'Click to enable highlighting'}
+        >
+          <span className="inline-block h-3 w-3 rounded-sm" style={{ backgroundColor: highlightMode ? '#FFEB3B' : '#d4d4d8' }} />
+          Highlight
+        </button>
+
+        <div className="h-4 w-px bg-surface-200 dark:bg-surface-700" />
+
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className={cn(
+            'flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-all',
+            sidebarOpen
+              ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+              : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700'
+          )}
+        >
+          <MessageSquare className="h-3 w-3" />
+          {annotationCount > 0 ? `${annotationCount} note${annotationCount > 1 ? 's' : ''}` : 'Notes'}
+        </button>
+
+        <span className="ml-auto text-[10px] text-surface-300 dark:text-surface-600">
+          Select text to highlight &middot; Alt+drag for area
+        </span>
       </div>
 
       {/* PDF viewer area */}
@@ -526,22 +565,52 @@ function SelectionTip({
     onSave,
   ]);
 
+  // Quick save — just highlight with current color, no comment
+  const handleQuickSave = useCallback(() => {
+    createAnnotation.mutate(
+      {
+        file_id: fileId,
+        project_id: projectId,
+        annotation_type: 'highlight',
+        page_number: ghost.position.boundingRect.pageNumber,
+        position_data: ghost.position,
+        selected_text: selectedText || undefined,
+        color,
+      },
+      { onSuccess: onSave },
+    );
+  }, [createAnnotation, fileId, projectId, ghost.position, selectedText, color, onSave]);
+
   if (!expanded) {
     return (
-      <button
-        onClick={() => setExpanded(true)}
-        className={cn(
-          'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
-          'border border-surface-200 bg-white shadow-lg',
-          'text-xs font-medium text-surface-600',
-          'transition-colors hover:bg-surface-50',
-          'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
-          'dark:hover:bg-surface-800',
-        )}
-      >
-        <Save className="h-3 w-3" />
-        Highlight
-      </button>
+      <div className={cn(
+        'flex items-center gap-1 rounded-xl border border-surface-200 bg-white p-1.5 shadow-xl',
+        'dark:border-surface-700 dark:bg-surface-900',
+      )}>
+        {/* Quick color buttons — one click to save */}
+        {HIGHLIGHT_COLORS.map((c) => (
+          <button
+            key={c.name}
+            onClick={() => { setColor(c.value); handleQuickSave(); }}
+            className="h-6 w-6 rounded-full transition-transform hover:scale-110 ring-1 ring-surface-200 dark:ring-surface-700"
+            style={{ backgroundColor: c.value }}
+            title={`Highlight ${c.label}`}
+          />
+        ))}
+        <div className="mx-0.5 h-5 w-px bg-surface-200 dark:bg-surface-700" />
+        <button
+          onClick={() => setExpanded(true)}
+          className={cn(
+            'flex items-center gap-1 rounded-lg px-2 py-1',
+            'text-xs font-medium text-surface-500 hover:bg-surface-100',
+            'dark:text-surface-400 dark:hover:bg-surface-800',
+          )}
+          title="Add a comment"
+        >
+          <MessageSquare className="h-3 w-3" />
+          Note
+        </button>
+      </div>
     );
   }
 

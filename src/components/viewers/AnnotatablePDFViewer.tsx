@@ -515,6 +515,10 @@ function HighlightContainer() {
  * Floating tip shown when text is selected.
  * Lets the user pick a color, add a comment, and save.
  */
+import { Copy, Highlighter, X as XIcon } from 'lucide-react';
+
+type TipMode = 'menu' | 'highlight' | 'comment';
+
 function SelectionTip({
   selectedText,
   ghost,
@@ -530,43 +534,17 @@ function SelectionTip({
   onSave: () => void;
   createAnnotation: ReturnType<typeof useCreateAnnotation>;
 }) {
+  const [mode, setMode] = useState<TipMode>('menu');
   const [color, setColor] = useState<string>(HIGHLIGHT_COLORS[0].value);
   const [comment, setComment] = useState('');
-  const [expanded, setExpanded] = useState(false);
 
   const { updateTipPosition } = usePdfHighlighterContext();
 
   useLayoutEffect(() => {
     updateTipPosition();
-  }, [expanded, updateTipPosition]);
+  }, [mode, updateTipPosition]);
 
-  const handleSave = useCallback(() => {
-    createAnnotation.mutate(
-      {
-        file_id: fileId,
-        project_id: projectId,
-        annotation_type: comment.trim() ? 'comment' : 'highlight',
-        page_number: ghost.position.boundingRect.pageNumber,
-        position_data: ghost.position,
-        selected_text: selectedText || undefined,
-        comment: comment.trim() || undefined,
-        color,
-      },
-      { onSuccess: onSave },
-    );
-  }, [
-    createAnnotation,
-    fileId,
-    projectId,
-    ghost.position,
-    selectedText,
-    comment,
-    color,
-    onSave,
-  ]);
-
-  // Quick save — just highlight with current color, no comment
-  const handleQuickSave = useCallback(() => {
+  const handleHighlight = useCallback((highlightColor: string) => {
     createAnnotation.mutate(
       {
         file_id: fileId,
@@ -575,101 +553,155 @@ function SelectionTip({
         page_number: ghost.position.boundingRect.pageNumber,
         position_data: ghost.position,
         selected_text: selectedText || undefined,
+        color: highlightColor,
+      },
+      { onSuccess: onSave },
+    );
+  }, [createAnnotation, fileId, projectId, ghost.position, selectedText, onSave]);
+
+  const handleSaveComment = useCallback(() => {
+    createAnnotation.mutate(
+      {
+        file_id: fileId,
+        project_id: projectId,
+        annotation_type: 'comment',
+        page_number: ghost.position.boundingRect.pageNumber,
+        position_data: ghost.position,
+        selected_text: selectedText || undefined,
+        comment: comment.trim() || undefined,
         color,
       },
       { onSuccess: onSave },
     );
-  }, [createAnnotation, fileId, projectId, ghost.position, selectedText, color, onSave]);
+  }, [createAnnotation, fileId, projectId, ghost.position, selectedText, comment, color, onSave]);
 
-  if (!expanded) {
+  const handleCopy = useCallback(() => {
+    if (selectedText) {
+      navigator.clipboard.writeText(selectedText).catch(() => {});
+    }
+    onSave(); // dismiss tip
+  }, [selectedText, onSave]);
+
+  // Initial menu: Copy | Highlight | Comment
+  if (mode === 'menu') {
     return (
       <div className={cn(
-        'flex items-center gap-1 rounded-xl border border-surface-200 bg-white p-1.5 shadow-xl',
+        'flex items-center rounded-xl border border-surface-200 bg-white shadow-xl overflow-hidden',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
-        {/* Quick color buttons — one click to save */}
-        {HIGHLIGHT_COLORS.map((c) => (
-          <button
-            key={c.name}
-            onClick={() => { setColor(c.value); handleQuickSave(); }}
-            className="h-6 w-6 rounded-full transition-transform hover:scale-110 ring-1 ring-surface-200 dark:ring-surface-700"
-            style={{ backgroundColor: c.value }}
-            title={`Highlight ${c.label}`}
-          />
-        ))}
-        <div className="mx-0.5 h-5 w-px bg-surface-200 dark:bg-surface-700" />
         <button
-          onClick={() => setExpanded(true)}
-          className={cn(
-            'flex items-center gap-1 rounded-lg px-2 py-1',
-            'text-xs font-medium text-surface-500 hover:bg-surface-100',
-            'dark:text-surface-400 dark:hover:bg-surface-800',
-          )}
-          title="Add a comment"
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
+          title="Copy selected text"
         >
-          <MessageSquare className="h-3 w-3" />
-          Note
+          <Copy className="h-3.5 w-3.5" />
+          Copy
+        </button>
+        <button
+          onClick={() => setMode('highlight')}
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-600 hover:bg-yellow-50 dark:text-surface-300 dark:hover:bg-yellow-900/20 border-r border-surface-100 dark:border-surface-800"
+          title="Highlight this text"
+        >
+          <Highlighter className="h-3.5 w-3.5" />
+          Highlight
+        </button>
+        <button
+          onClick={() => setMode('comment')}
+          className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-600 hover:bg-blue-50 dark:text-surface-300 dark:hover:bg-blue-900/20"
+          title="Add a comment on this text"
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+          Comment
         </button>
       </div>
     );
   }
 
-  return (
-    <div
-      className={cn(
-        'w-64 rounded-xl border border-surface-200 bg-white p-3 shadow-xl',
+  // Highlight mode: pick a color → instant save
+  if (mode === 'highlight') {
+    return (
+      <div className={cn(
+        'flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white p-2 shadow-xl',
         'dark:border-surface-700 dark:bg-surface-900',
-      )}
-    >
-      {/* Color picker */}
-      <div className="flex items-center gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">
-          Color
-        </span>
-        <div className="flex gap-1.5">
-          {HIGHLIGHT_COLORS.map((c) => (
-            <button
-              key={c.name}
-              onClick={() => setColor(c.value)}
-              className={cn(
-                'h-5 w-5 rounded-full transition-all',
-                color === c.value
-                  ? 'ring-2 ring-primary-500 ring-offset-1 dark:ring-offset-surface-900'
-                  : 'ring-1 ring-surface-200 hover:ring-surface-300 dark:ring-surface-700',
-              )}
-              style={{ backgroundColor: c.value }}
-              aria-label={`${c.name} highlight`}
-              title={c.name}
-            />
-          ))}
+      )}>
+        <span className="text-[10px] font-medium text-surface-400 mr-1">Color:</span>
+        {HIGHLIGHT_COLORS.map((c) => (
+          <button
+            key={c.name}
+            onClick={() => handleHighlight(c.value)}
+            className="h-7 w-7 rounded-full transition-transform hover:scale-110 ring-1 ring-surface-200 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
+            style={{ backgroundColor: c.value }}
+            title={c.label}
+          />
+        ))}
+        <button
+          onClick={() => setMode('menu')}
+          className="ml-1 rounded-md p-1 text-surface-300 hover:bg-surface-100 hover:text-surface-500 dark:hover:bg-surface-800"
+          title="Back"
+        >
+          <XIcon className="h-3 w-3" />
+        </button>
+      </div>
+    );
+  }
+
+  // Comment mode: color picker + text input + save
+  return (
+    <div className={cn(
+      'w-72 rounded-xl border border-surface-200 bg-white p-3 shadow-xl',
+      'dark:border-surface-700 dark:bg-surface-900',
+    )}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">Color</span>
+          <div className="flex gap-1.5">
+            {HIGHLIGHT_COLORS.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => setColor(c.value)}
+                className={cn(
+                  'h-5 w-5 rounded-full transition-all',
+                  color === c.value
+                    ? 'ring-2 ring-primary-500 ring-offset-1 dark:ring-offset-surface-900'
+                    : 'ring-1 ring-surface-200 hover:ring-surface-300 dark:ring-surface-700',
+                )}
+                style={{ backgroundColor: c.value }}
+                title={c.label}
+              />
+            ))}
+          </div>
         </div>
+        <button
+          onClick={() => setMode('menu')}
+          className="rounded-md p-1 text-surface-300 hover:bg-surface-100 hover:text-surface-500 dark:hover:bg-surface-800"
+          title="Back"
+        >
+          <XIcon className="h-3 w-3" />
+        </button>
       </div>
 
-      {/* Comment input */}
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Add a note (optional)"
-        rows={2}
+        placeholder="Write your comment..."
+        rows={3}
+        autoFocus
         className={cn(
-          'mt-2 w-full resize-none rounded-lg border border-surface-200 px-2.5 py-1.5',
+          'w-full resize-none rounded-lg border border-surface-200 px-2.5 py-2',
           'text-xs text-surface-700 placeholder:text-surface-400',
           'focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-300',
           'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200',
-          'dark:placeholder:text-surface-600 dark:focus:border-primary-600 dark:focus:ring-primary-600',
         )}
       />
 
-      {/* Save button */}
       <div className="mt-2 flex justify-end">
         <button
-          onClick={handleSave}
+          onClick={handleSaveComment}
           disabled={createAnnotation.isPending}
           className={cn(
             'flex items-center gap-1.5 rounded-lg px-3 py-1.5',
             'bg-primary-600 text-xs font-medium text-white',
-            'transition-colors hover:bg-primary-700',
-            'disabled:opacity-50',
+            'hover:bg-primary-700 disabled:opacity-50',
             'shadow-sm shadow-primary-500/25',
           )}
         >

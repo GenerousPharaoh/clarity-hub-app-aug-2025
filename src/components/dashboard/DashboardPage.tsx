@@ -159,9 +159,17 @@ export function DashboardPage() {
             <div className="relative min-w-0">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 max-w-2xl">
+                  <p className="text-sm text-surface-500 dark:text-surface-400 mb-1">
+                    {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}{firstName ? `, ${firstName}` : ''}
+                  </p>
                   <h1 className="font-heading text-2xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-3xl">
-                    {firstName ? `${firstName}'s matters` : 'Your matters'}
+                    Your matters
                   </h1>
+                  {(projects?.length ?? 0) > 0 && (
+                    <p className="mt-1.5 text-sm text-surface-400 dark:text-surface-500">
+                      {projects?.length} active matter{(projects?.length ?? 0) !== 1 ? 's' : ''} &middot; {totalFiles} files uploaded
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -223,7 +231,7 @@ export function DashboardPage() {
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
               <h2 className="font-heading text-lg font-semibold text-surface-900 dark:text-surface-100">
-                Portfolio
+                All Matters
               </h2>
               {isFetching && !isLoading && (
                 <Loader2 className="h-4 w-4 animate-spin text-surface-400 dark:text-surface-500" />

@@ -58,8 +58,9 @@ export function LoginPage() {
             backgroundSize: '24px 24px',
           }}
         />
-        {/* Very subtle warm glow */}
-        <div className="absolute -top-32 -right-32 h-[400px] w-[400px] rounded-full bg-accent-500/5 blur-[150px]" />
+        {/* Subtle ambient glows */}
+        <div className="absolute -top-32 -right-32 h-[400px] w-[400px] rounded-full bg-primary-500/[0.07] blur-[120px]" />
+        <div className="absolute -bottom-20 -left-20 h-[300px] w-[300px] rounded-full bg-accent-500/[0.04] blur-[100px]" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-20">
@@ -69,15 +70,15 @@ export function LoginPage() {
             <span className="font-heading text-lg font-medium tracking-tight text-white/90">Clarity Hub</span>
           </div>
 
-          <h1 className="font-heading text-4xl font-semibold leading-[1.15] tracking-tight mb-5">
-            Legal case
+          <h1 className="font-heading text-4xl font-semibold leading-[1.15] tracking-tight mb-5 text-white">
+            Your evidence,
             <br />
-            management,
+            organized. Your case,
             <br />
-            <span className="bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">reimagined.</span>
+            prepared.
           </h1>
-          <p className="text-sm text-surface-400 max-w-sm leading-relaxed">
-            Organize evidence, annotate documents, draft legal filings, and build case theory with AI-powered intelligence.
+          <p className="text-sm text-surface-500 max-w-sm leading-relaxed">
+            Upload documents, annotate PDFs, build timelines, draft legal filings, and analyze your case — all in one workspace.
           </p>
 
           <div className="mt-10 space-y-3 max-w-sm">
@@ -99,12 +100,16 @@ export function LoginPage() {
       </div>
 
       {/* Right: Login form */}
-      <div className="flex flex-1 items-center justify-center bg-white p-8 dark:bg-surface-900">
-        <div className="w-full max-w-sm">
+      <div className="relative flex flex-1 items-center justify-center bg-surface-50 p-8 dark:bg-surface-900">
+        {/* Soft radial glow behind form */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-100/40 blur-[100px] dark:bg-primary-900/10" />
+        </div>
+        <div className="relative w-full max-w-sm">
           {/* Mobile logo */}
           <div className="mb-8 lg:hidden flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/25">
-              <Scale className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-900 dark:bg-white">
+              <Scale className="h-5 w-5 text-white dark:text-surface-900" />
             </div>
             <span className="font-heading text-xl font-semibold text-surface-900 dark:text-surface-100">
               Clarity Hub
@@ -114,14 +119,9 @@ export function LoginPage() {
           <h2 className="font-heading text-2xl font-semibold text-surface-900 dark:text-surface-100 mb-2">
             Welcome back
           </h2>
-          <p className="text-sm text-surface-500 dark:text-surface-400 mb-1">
-            Sign in to access your workspace
+          <p className="text-sm text-surface-500 dark:text-surface-400 mb-8">
+            Sign in to your legal workspace
           </p>
-          <div className="mb-8 mt-3 flex gap-1">
-            <div className="h-1 w-8 rounded-full bg-primary-500" />
-            <div className="h-1 w-3 rounded-full bg-primary-300" />
-            <div className="h-1 w-1.5 rounded-full bg-primary-200" />
-          </div>
 
           {authError && (
             <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 dark:border-red-800/50 dark:bg-red-950/30">
@@ -135,14 +135,14 @@ export function LoginPage() {
             disabled={signingIn || enteringDemo}
             className={cn(
               'flex w-full items-center justify-center gap-3 rounded-xl',
-              'border border-surface-200 bg-white px-4 py-3.5',
+              'border border-surface-200 bg-white px-4 py-4',
               'text-sm font-medium text-surface-700',
               'shadow-sm transition-all duration-200',
-              'hover:bg-surface-50 hover:shadow-md hover:border-surface-300',
-              'active:scale-[0.98]',
+              'hover:bg-white hover:shadow-lg hover:shadow-surface-200/50 hover:border-surface-300 hover:-translate-y-0.5',
+              'active:scale-[0.98] active:shadow-sm',
               'disabled:opacity-60 disabled:cursor-not-allowed',
               'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200',
-              'dark:hover:bg-surface-700 dark:hover:border-surface-600 dark:hover:shadow-lg dark:hover:shadow-surface-950/30'
+              'dark:hover:bg-surface-750 dark:hover:border-surface-600 dark:hover:shadow-lg dark:hover:shadow-surface-950/40'
             )}
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">

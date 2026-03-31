@@ -32,6 +32,18 @@ const TimelineTab = lazy(() =>
       return import('./TimelineTab').then((m) => ({ default: m.TimelineTab }));
     })
 );
+const DraftsTab = lazy(() =>
+  import('./DraftsTab')
+    .then((m) => ({ default: m.DraftsTab }))
+    .catch(() => {
+      if (!sessionStorage.getItem('chunk-reload')) {
+        sessionStorage.setItem('chunk-reload', '1');
+        window.location.reload();
+      }
+      return import('./DraftsTab').then((m) => ({ default: m.DraftsTab }));
+    })
+);
+
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { readWorkspaceSession, saveWorkspaceNote, saveWorkspaceView } from '@/lib/workspaceSession';
@@ -42,6 +54,7 @@ import {
   PenLine,
   Tag,
   Clock,
+  FileSignature,
   Plus,
   Trash2,
   Loader2,
@@ -124,6 +137,15 @@ export function CenterPanel() {
             showLabel={!compact}
             compact={ultraCompact}
           />
+          <TabButton
+            active={activeTab === 'drafts'}
+            onClick={() => setActiveTab('drafts')}
+            icon={<FileSignature className="h-3.5 w-3.5" />}
+            label="Drafts"
+            controls="panel-drafts"
+            showLabel={!compact}
+            compact={ultraCompact}
+          />
         </div>
       </div>
 
@@ -151,6 +173,16 @@ export function CenterPanel() {
                 }
               >
                 <TimelineTab />
+              </Suspense>
+            ) : activeTab === 'drafts' ? (
+              <Suspense
+                fallback={
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
+                  </div>
+                }
+              >
+                <DraftsTab />
               </Suspense>
             ) : (
               <ExhibitsTab />

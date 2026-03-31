@@ -13,6 +13,9 @@ import {
   RefreshCw,
   Calendar,
   X,
+  Table2,
+  Download,
+  Import,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -27,6 +30,7 @@ import {
   useExtractTimeline,
 } from '@/hooks/useTimeline';
 import type { TimelineEvent } from '@/hooks/useTimeline';
+import { useChronologyEntries, useImportFromTimeline, useDeleteChronologyEntry } from '@/hooks/useChronology';
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   employment: {
@@ -112,6 +116,7 @@ export function TimelineTab() {
   const deleteEvent = useDeleteTimelineEvent();
   const extractTimeline = useExtractTimeline();
 
+  const [viewMode, setViewMode] = useState<'events' | 'chronology'>('events');
   const [eventToDelete, setEventToDelete] = useState<TimelineEvent | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDate, setNewDate] = useState('');
@@ -274,9 +279,32 @@ export function TimelineTab() {
       <div className="shrink-0 border-b border-translucent bg-white/90 px-3 py-3 backdrop-blur dark:bg-surface-900/90 sm:px-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
-              Timeline
-            </h2>
+            <div className="flex items-center gap-1 rounded-full border border-surface-200 bg-surface-50 p-0.5 dark:border-surface-700 dark:bg-surface-800">
+              <button
+                onClick={() => setViewMode('events')}
+                className={cn(
+                  'flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all',
+                  viewMode === 'events'
+                    ? 'bg-white text-surface-700 shadow-sm dark:bg-surface-700 dark:text-surface-200'
+                    : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
+                )}
+              >
+                <Clock className="h-3 w-3" />
+                Events
+              </button>
+              <button
+                onClick={() => setViewMode('chronology')}
+                className={cn(
+                  'flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all',
+                  viewMode === 'chronology'
+                    ? 'bg-white text-surface-700 shadow-sm dark:bg-surface-700 dark:text-surface-200'
+                    : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
+                )}
+              >
+                <Table2 className="h-3 w-3" />
+                Chronology
+              </button>
+            </div>
             <div className="flex flex-nowrap gap-2 overflow-hidden">
               <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                 {eventCount} event{eventCount !== 1 ? 's' : ''}
@@ -443,8 +471,13 @@ export function TimelineTab() {
         )}
       </AnimatePresence>
 
+      {/* Chronology view */}
+      {viewMode === 'chronology' && (
+        <ChronologyView projectId={selectedProjectId} />
+      )}
+
       {/* Timeline events list */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
+      {viewMode === 'events' && <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
         {eventCount === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-dashed border-surface-300 bg-white/80 px-4 py-12 text-center surface-grain dark:border-surface-700 dark:bg-surface-900/60">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
@@ -484,7 +517,7 @@ export function TimelineTab() {
             </div>
           </div>
         )}
-      </div>
+      </div>}
 
       <ConfirmDialog
         open={eventToDelete !== null}
@@ -630,6 +663,92 @@ function TimelineEventCard({
               </p>
             )}
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Chronology view ──────────────────────────────────── */
+
+function ChronologyView({ projectId }: { projectId: string }) {
+  const { data: entries, isLoading } = useChronologyEntries(projectId);
+  const importTimeline = useImportFromTimeline();
+  const deleteEntry = useDeleteChronologyEntry();
+
+  const handleImport = useCallback(async () => {
+    try {
+      const result = await importTimeline.mutateAsync({ projectId });
+      toast.success(`Imported ${result.imported} events`);
+    } catch {
+      toast.error('Failed to import timeline events');
+    }
+  }, [projectId, importTimeline]);
+
+  const handleExportCSV = useCallback(() => {
+    if (!entries?.length) return;
+    const rows = entries.filter((e) => e.is_included).map((e) =>
+      `"${e.date_display}","${e.description.replace(/"/g, '""')}","${e.source_description || ''}","${e.exhibit_ref || ''}","${e.category || ''}"`
+    ).join('\n');
+    const blob = new Blob([`"Date","Event","Source","Exhibit","Category"\n${rows}`], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'chronology.csv';
+    a.click();
+    toast.success('Chronology exported');
+  }, [entries]);
+
+  return (
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex items-center gap-2 border-b border-surface-200 px-4 py-2 dark:border-surface-700">
+        <button onClick={handleImport} disabled={importTimeline.isPending}
+          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300">
+          {importTimeline.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Import className="h-3 w-3" />}
+          Import from Timeline
+        </button>
+        <button onClick={handleExportCSV} disabled={!entries?.length}
+          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300">
+          <Download className="h-3 w-3" /> Export CSV
+        </button>
+        <span className="ml-auto text-xs text-surface-400">{entries?.filter((e) => e.is_included).length ?? 0} entries</span>
+      </div>
+      <div className="flex-1 overflow-auto">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-surface-400" /></div>
+        ) : !entries?.length ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Table2 className="h-8 w-8 text-surface-300 dark:text-surface-600" />
+            <p className="mt-3 text-sm font-medium text-surface-500">No chronology entries</p>
+            <p className="mt-1 text-xs text-surface-400">Click "Import from Timeline" to populate.</p>
+          </div>
+        ) : (
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800">
+                <th className="px-3 py-2 text-left text-xs font-semibold text-surface-500">Date</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-surface-500">Event</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-surface-500">Source</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-surface-500">Exhibit</th>
+                <th className="w-8 px-2 py-2" />
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((entry) => (
+                <tr key={entry.id} className={cn('border-b border-surface-100 hover:bg-surface-50 dark:border-surface-800', !entry.is_included && 'opacity-40')}>
+                  <td className="whitespace-nowrap px-3 py-2 text-xs font-medium text-surface-700 dark:text-surface-200">{entry.date_display}</td>
+                  <td className="px-3 py-2 text-xs text-surface-600 dark:text-surface-300">{entry.description}</td>
+                  <td className="px-3 py-2 text-xs text-surface-400">{entry.source_description || '—'}</td>
+                  <td className="px-3 py-2 text-xs text-surface-400">{entry.exhibit_ref || '—'}</td>
+                  <td className="px-2 py-2">
+                    <button onClick={() => deleteEntry.mutate({ id: entry.id, projectId })}
+                      className="rounded p-1 text-surface-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20">
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

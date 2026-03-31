@@ -626,6 +626,22 @@ function TimelineEventCard({
             </span>
           )}
 
+          {/* Source badge — AI-extracted (has source_file) vs manual */}
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm font-medium',
+              event.source_file_id
+                ? 'bg-purple-50 text-purple-600 border border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800'
+                : 'bg-surface-100 text-surface-500 border border-surface-200 dark:bg-surface-800 dark:text-surface-400 dark:border-surface-700'
+            )}
+          >
+            {event.source_file_id ? (
+              <><Sparkles className="h-2.5 w-2.5" /> AI</>
+            ) : (
+              'Manual'
+            )}
+          </span>
+
           {event.confidence && (
             <span className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
               {getConfidenceLabel(event.confidence)}

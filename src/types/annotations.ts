@@ -1,6 +1,6 @@
 /** PDF annotation types for highlights, comments, and bookmarks. */
 
-import type { Highlight } from 'react-pdf-highlighter-extended';
+import type { Highlight } from 'react-pdf-highlighter-extended-extended';
 
 export interface PdfAnnotation {
   id: string;

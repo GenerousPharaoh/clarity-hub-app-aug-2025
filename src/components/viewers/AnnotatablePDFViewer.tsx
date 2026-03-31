@@ -20,7 +20,7 @@ import {
   type Tip,
   type PdfScaleValue,
   type ViewportPosition,
-} from 'react-pdf-highlighter-extended';
+} from 'react-pdf-highlighter-extended-extended';
 import {
   ChevronLeft,
   ChevronRight,
@@ -46,15 +46,16 @@ import {
 } from '@/types/annotations';
 import { AnnotationSidebar } from './AnnotationSidebar';
 
-// Required CSS for react-pdf-highlighter-extended + pdfjs
-import 'react-pdf-highlighter-extended/dist/esm/style/pdf_viewer.css';
-import 'react-pdf-highlighter-extended/dist/esm/style/PdfHighlighter.css';
-import 'react-pdf-highlighter-extended/dist/esm/style/TextHighlight.css';
-import 'react-pdf-highlighter-extended/dist/esm/style/AreaHighlight.css';
-import 'react-pdf-highlighter-extended/dist/esm/style/MouseSelection.css';
+// Required CSS for react-pdf-highlighter-extended-extended + pdfjs
+import 'react-pdf-highlighter-extended-extended/dist/esm/style/pdf_viewer.css';
+import 'react-pdf-highlighter-extended-extended/dist/esm/style/PdfHighlighter.css';
+import 'react-pdf-highlighter-extended-extended/dist/esm/style/TextHighlight.css';
+import 'react-pdf-highlighter-extended-extended/dist/esm/style/AreaHighlight.css';
+import 'react-pdf-highlighter-extended-extended/dist/esm/style/MouseSelection.css';
 
-// PDF.js worker — Vite's ?url suffix gives us the correct production asset path
-import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+// PDF.js worker — served from public/ for guaranteed availability
+// (no bundler resolution, no hash mismatch, no version conflicts)
+const PDF_WORKER_URL = '/pdf.worker.min.mjs';
 
 interface AnnotatablePDFViewerProps {
   url: string;
@@ -307,7 +308,7 @@ export function AnnotatablePDFViewer({
       <div className="relative flex-1 overflow-hidden">
         <PdfLoader
           document={url}
-          workerSrc={pdfjsWorkerUrl}
+          workerSrc={PDF_WORKER_URL}
           beforeLoad={() => (
             <div className="flex h-full flex-col items-center justify-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
@@ -456,14 +457,6 @@ function HighlightContainer() {
     <AreaHighlight
       isScrolledTo={isScrolledTo}
       highlight={highlight}
-      onChange={(boundingRect) => {
-        toggleEditInProgress(false);
-        // Area highlight edit — keep refs alive for potential future use
-        void viewportToScaled(boundingRect);
-        void screenshot;
-      }}
-      bounds={highlightBindings.textLayer}
-      onEditStart={() => toggleEditInProgress(true)}
       style={{
         background: highlight.color || 'rgba(255, 226, 100, 0.4)',
       }}

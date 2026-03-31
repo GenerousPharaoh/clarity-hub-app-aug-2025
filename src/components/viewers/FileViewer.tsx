@@ -252,7 +252,23 @@ export function FileViewer() {
   // Render the appropriate viewer based on file type
   switch (fileType) {
     case 'pdf':
-      return <PDFViewer url={fileUrl} fileName={selectedFile.name} />;
+      return (
+        <Suspense
+          fallback={
+            <div className="flex h-full flex-col items-center justify-center gap-3">
+              <Loader2 className="h-6 w-6 animate-spin text-surface-400" />
+              <span className="text-xs text-surface-400">Loading PDF viewer...</span>
+            </div>
+          }
+        >
+          <AnnotatablePDFViewer
+            url={fileUrl}
+            fileName={selectedFile.name}
+            fileId={selectedFile.id}
+            projectId={selectedFile.project_id}
+          />
+        </Suspense>
+      );
     case 'image':
       return <ImageViewer url={fileUrl} fileName={selectedFile.name} />;
     case 'audio':

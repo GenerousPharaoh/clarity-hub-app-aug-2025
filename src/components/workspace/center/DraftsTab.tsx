@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Plus, FileSignature, Trash2, Loader2, ChevronRight, Sparkles, BookOpen, Mail, Scale, Shield, ArrowRight, X, Download } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { Plus, FileSignature, Trash2, Loader2, Sparkles, BookOpen, Mail, Scale, Shield, ArrowRight, X, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import useAppStore from '@/store';

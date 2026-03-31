@@ -2,16 +2,14 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Calendar,
   ChevronRight,
-  FileText,
   FolderOpen,
   MoreVertical,
   Pencil,
   Trash2,
 } from 'lucide-react';
 import type { Project } from '@/types';
-import { cn, formatDate, formatRelativeDate } from '@/lib/utils';
+import { cn, formatRelativeDate } from '@/lib/utils';
 import { useUpdateProject } from '@/hooks/useProjects';
 
 interface ProjectCardProps {

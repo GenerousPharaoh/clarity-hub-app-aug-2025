@@ -544,13 +544,6 @@ function HighlightActionPopover({ highlight: rawHighlight }: { highlight: unknow
     setTip(null);
   }, [highlight.content?.text, setTip]);
 
-  const handleAskAI = useCallback(() => {
-    if (highlight.content?.text) {
-      useAppStore.getState().setRightTab('ai');
-      useAppStore.getState().setRightPanel(true);
-    }
-    setTip(null);
-  }, [highlight.content?.text, setTip]);
 
   if (editing) {
     return (

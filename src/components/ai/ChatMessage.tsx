@@ -54,16 +54,6 @@ const MODEL_CONFIG = {
   },
 } as const;
 
-const COMPLEXITY_CONFIG: Record<string, { label: string; className: string }> = {
-  deep: {
-    label: 'Deep Analysis',
-    className: 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-  },
-  moderate: {
-    label: 'Analysis',
-    className: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-  },
-};
 
 const EFFORT_BADGE_CONFIG: Record<string, { label: string; className: string }> = {
   quick:    { label: 'Fast',     className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },

@@ -1,4 +1,4 @@
-import { Scale, FileText, Search, BookOpen, ShieldCheck, Lightbulb, Image, Headphones, Video, DollarSign, PenTool } from 'lucide-react';
+import { Scale, FileText, Search, BookOpen, ShieldCheck, Image, Headphones, Video, DollarSign, PenTool } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface SuggestedPromptsProps {

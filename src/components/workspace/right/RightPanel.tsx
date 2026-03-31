@@ -50,9 +50,6 @@ export function RightPanel() {
 
   const compact = panelWidth > 0 && panelWidth < 240;
   const ultraCompact = panelWidth > 0 && panelWidth < 210;
-  const selectedFile = selectedFileId
-    ? files.find((file) => file.id === selectedFileId) ?? null
-    : null;
   const panelLabel = activeTab === 'viewer' ? 'Viewer' : 'AI Chat';
 
   return (

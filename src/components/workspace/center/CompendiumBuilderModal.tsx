@@ -32,7 +32,6 @@ import {
   type CompendiumItem,
 } from '@/hooks/useCompendiums';
 import type { ExhibitMarker, FileRecord } from '@/types';
-import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 
 // ── Props ──────────────────────────────────────────────────

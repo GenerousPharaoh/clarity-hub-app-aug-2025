@@ -3,7 +3,6 @@ import useAppStore from '@/store';
 import { getFileUrl, getSignedUrl } from '@/services/storageService';
 import { getFileType, cn } from '@/lib/utils';
 import { FileSearch, MessageSquareText, RefreshCw, Loader2 } from 'lucide-react';
-import { PDFViewer } from './PDFViewer';
 import { ImageViewer } from './ImageViewer';
 import { AudioViewer } from './AudioViewer';
 import { VideoViewer } from './VideoViewer';

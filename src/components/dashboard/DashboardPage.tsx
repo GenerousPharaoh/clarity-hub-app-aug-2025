@@ -151,21 +151,14 @@ export function DashboardPage() {
           <section
             className={cn(
               'relative overflow-hidden rounded-2xl border p-5 sm:p-6',
-              'border-primary-200/50 bg-gradient-to-br from-primary-50 via-white to-accent-50/30',
-              'shadow-[0_28px_80px_-48px_rgba(99,102,241,0.25)]',
-              'dark:border-primary-900/40 dark:from-primary-950/40 dark:via-surface-900 dark:to-surface-900',
-              'dark:shadow-[0_28px_80px_-48px_rgba(0,0,0,0.7)]'
+              'border-surface-200/80 bg-white',
+              'shadow-sm',
+              'dark:border-surface-800 dark:bg-surface-900'
             )}
           >
-            {/* Subtle gradient orb */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary-400/10 blur-3xl dark:bg-primary-500/5" />
-
             <div className="relative min-w-0">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0 max-w-2xl">
-                  <p className="mb-1 text-xs font-medium uppercase tracking-wider text-primary-500 dark:text-primary-400">
-                    Case Management
-                  </p>
                   <h1 className="font-heading text-2xl font-semibold tracking-tight text-surface-950 [overflow-wrap:anywhere] dark:text-surface-50 sm:text-3xl">
                     {firstName ? `${firstName}'s matters` : 'Your matters'}
                   </h1>
@@ -175,7 +168,7 @@ export function DashboardPage() {
                   {resumeProject && (
                     <button
                       onClick={() => navigate(`/project/${resumeProject.id}`)}
-                      className="focus-accent inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-3 sm:py-2.5 text-sm font-medium text-white shadow-sm shadow-primary-500/25 transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-md hover:shadow-primary-500/30 dark:bg-primary-500 dark:hover:bg-primary-400"
+                      className="focus-accent inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-surface-950 px-4 py-3 sm:py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
                     >
                       Resume
                       <ArrowRight className="h-4 w-4" />
@@ -313,7 +306,7 @@ export function DashboardPage() {
                     <p className="text-xs text-surface-400 mt-1 mb-3">A matter is a case or legal issue you&apos;re working on.</p>
                     <button
                       onClick={() => setDialogOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-primary-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-primary-500/25 transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-md dark:bg-primary-500 dark:hover:bg-primary-400"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-surface-950 px-4 py-2.5 text-sm font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100"
                     >
                       <Plus className="h-4 w-4" />
                       New matter

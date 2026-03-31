@@ -46,54 +46,55 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen dark:bg-surface-950">
-      {/* Left: Branding — gradient hero */}
+      {/* Left: Branding — dark premium */}
       <div className="relative hidden lg:flex lg:w-1/2 flex-col justify-between overflow-hidden p-12 text-white">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900" />
-        {/* Subtle grid pattern overlay */}
+        {/* Near-black gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-surface-950 via-surface-900 to-surface-950" />
+        {/* Subtle dot pattern */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
-            backgroundSize: '32px 32px',
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.4) 0.5px, transparent 0)`,
+            backgroundSize: '24px 24px',
           }}
         />
-        {/* Ambient glow */}
-        <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-accent-500/10 blur-[120px]" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-primary-500/10 blur-[100px]" />
+        {/* Very subtle warm glow */}
+        <div className="absolute -top-32 -right-32 h-[400px] w-[400px] rounded-full bg-accent-500/5 blur-[150px]" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-16">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
-              <Scale className="h-5 w-5" />
+          <div className="flex items-center gap-3 mb-20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.07] ring-1 ring-white/[0.08]">
+              <Scale className="h-4 w-4 text-white/80" />
             </div>
-            <span className="font-heading text-xl font-semibold">Clarity Hub</span>
+            <span className="font-heading text-lg font-medium tracking-tight text-white/90">Clarity Hub</span>
           </div>
 
-          <h1 className="font-heading text-4xl font-bold leading-tight mb-4">
-            Organize evidence.
+          <h1 className="font-heading text-4xl font-semibold leading-[1.15] tracking-tight mb-5">
+            Legal case
             <br />
-            Build stronger arguments.
+            management,
+            <br />
+            <span className="text-surface-400">reimagined.</span>
           </h1>
-          <p className="text-lg text-primary-200/80 max-w-md leading-relaxed">
-            Organize evidence and prepare strategy with AI.
+          <p className="text-sm text-surface-400 max-w-sm leading-relaxed">
+            Organize evidence, annotate documents, draft legal filings, and build case theory with AI-powered intelligence.
           </p>
 
-          <div className="mt-8 grid max-w-md gap-3">
+          <div className="mt-10 space-y-3 max-w-sm">
             <FeaturePill icon={<FolderSearch className="h-4 w-4" />}>
-              Structured workspace for files, notes, and exhibits
+              Evidence organization and exhibit management
             </FeaturePill>
             <FeaturePill icon={<ShieldCheck className="h-4 w-4" />}>
-              AI-powered evidence analysis
+              AI-powered document analysis and drafting
             </FeaturePill>
             <FeaturePill icon={<Sparkles className="h-4 w-4" />}>
-              Try the demo instantly
+              Ontario legal knowledge built in
             </FeaturePill>
           </div>
         </div>
 
-        <p className="relative z-10 text-sm text-white/40">
-          Powered by advanced AI reasoning
+        <p className="relative z-10 text-xs text-white/20 tracking-wide">
+          Built for legal professionals
         </p>
       </div>
 
@@ -215,11 +216,11 @@ function FeaturePill({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-white/8 px-4 py-3 backdrop-blur-sm ring-1 ring-white/10">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white">
+    <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/[0.06] text-surface-400">
         {icon}
       </div>
-      <p className="text-sm text-primary-100/90">{children}</p>
+      <p className="text-sm text-surface-400">{children}</p>
     </div>
   );
 }

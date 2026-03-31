@@ -16,10 +16,8 @@ import {
   usePdfHighlighterContext,
   type PdfHighlighterUtils,
   type GhostHighlight,
-  type PdfSelection,
   type Tip,
   type PdfScaleValue,
-  type ViewportPosition,
 } from 'react-pdf-highlighter-extended-extended';
 import {
   ChevronLeft,
@@ -150,36 +148,8 @@ export function AnnotatablePDFViewer({
     [deleteAnnotation, fileId, projectId],
   );
 
-  const handleSelection = useCallback(
-    (selection: PdfSelection) => {
-      if (!highlighterUtilsRef.current) return;
-
-      const ghost = selection.makeGhostHighlight();
-
-      // Ghost highlights have ScaledPosition; we cast through unknown
-      // to ViewportPosition since the library internally converts them
-      // for tip positioning.
-      const tipPosition = ghost.position as unknown as ViewportPosition;
-
-      highlighterUtilsRef.current.setTip({
-        position: tipPosition,
-        content: (
-          <SelectionTip
-            selectedText={ghost.content.text ?? null}
-            ghost={ghost}
-            fileId={fileId}
-            projectId={projectId}
-            onSave={() => {
-              highlighterUtilsRef.current?.setTip(null);
-              highlighterUtilsRef.current?.removeGhostHighlight();
-            }}
-            createAnnotation={createAnnotation}
-          />
-        ),
-      });
-    },
-    [fileId, projectId, createAnnotation],
-  );
+  // Selection is now handled via the selectionTip prop on PdfHighlighter
+  // (see SelectionTipFromContext component)
 
   const [highlightMode, setHighlightMode] = useState(true);
   const annotationCount = annotations.length;
@@ -375,7 +345,9 @@ export function AnnotatablePDFViewer({
               scale={scale}
               highlights={highlights}
               highlighterUtilsRef={highlighterUtilsRef}
-              onSelection={handleSelection}
+              fileId={fileId}
+              projectId={projectId}
+              createAnnotation={createAnnotation}
               onTotalPagesChange={setTotalPages}
               totalPages={totalPages}
             />
@@ -405,7 +377,9 @@ function PdfHighlighterInner({
   scale,
   highlights,
   highlighterUtilsRef,
-  onSelection,
+  fileId,
+  projectId,
+  createAnnotation,
   onTotalPagesChange,
   totalPages,
 }: {
@@ -413,7 +387,9 @@ function PdfHighlighterInner({
   scale: PdfScaleValue;
   highlights: AnnotationHighlight[];
   highlighterUtilsRef: React.MutableRefObject<PdfHighlighterUtils | null>;
-  onSelection: (selection: PdfSelection) => void;
+  fileId: string;
+  projectId: string;
+  createAnnotation: ReturnType<typeof useCreateAnnotation>;
   onTotalPagesChange: (pages: number) => void;
   totalPages: number;
 }) {
@@ -432,7 +408,13 @@ function PdfHighlighterInner({
       utilsRef={(utils) => {
         highlighterUtilsRef.current = utils;
       }}
-      onSelection={onSelection}
+      selectionTip={
+        <SelectionTipFromContext
+          fileId={fileId}
+          projectId={projectId}
+          createAnnotation={createAnnotation}
+        />
+      }
       enableAreaSelection={(event) => event.altKey}
       textSelectionColor="rgba(98, 121, 143, 0.15)"
       style={{
@@ -509,6 +491,44 @@ function HighlightContainer() {
     <MonitoredHighlightContainer highlightTip={highlightTip}>
       {component}
     </MonitoredHighlightContainer>
+  );
+}
+
+/**
+ * Wrapper that reads the current selection from PdfHighlighter context
+ * and renders the SelectionTip with the right data.
+ * This is rendered via the `selectionTip` prop, so it automatically
+ * appears when the user finishes selecting text.
+ */
+function SelectionTipFromContext({
+  fileId,
+  projectId,
+  createAnnotation,
+}: {
+  fileId: string;
+  projectId: string;
+  createAnnotation: ReturnType<typeof useCreateAnnotation>;
+}) {
+  const { getCurrentSelection, setTip, removeGhostHighlight } = usePdfHighlighterContext();
+  const selection = getCurrentSelection();
+
+  if (!selection) return null;
+
+  const ghost = selection.makeGhostHighlight();
+  const selectedText = ghost.content.text ?? null;
+
+  return (
+    <SelectionTip
+      selectedText={selectedText}
+      ghost={ghost}
+      fileId={fileId}
+      projectId={projectId}
+      onSave={() => {
+        setTip(null);
+        removeGhostHighlight();
+      }}
+      createAnnotation={createAnnotation}
+    />
   );
 }
 

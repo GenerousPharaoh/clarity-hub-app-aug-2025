@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
+  AlertCircle,
   ArrowRight,
   Check,
   Clock,
@@ -988,12 +990,19 @@ function CaseAnalysisCard({
 }) {
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [analyzedFileCount, setAnalyzedFileCount] = useState<number>(0);
+
+  // Detect if analysis is stale (more files now than when last analyzed)
+  const isStale = analysis && !analysisError && analyzedFileCount > 0 && fileCount > analyzedFileCount;
 
   const handleAnalyze = useCallback(async () => {
     if (!projectId || isAnalyzing) return;
     setIsAnalyzing(true);
     setAnalysis(null);
+    setAnalysisError(false);
 
     try {
       const { supabase } = await import('@/lib/supabase');
@@ -1066,13 +1075,23 @@ Base your analysis ONLY on the documents provided. Do not fabricate facts. If in
 
       const result = await response.json();
       setAnalysis(result.response);
+      setAnalyzedFileCount(files.length);
       setExpanded(true);
     } catch (err) {
-      setAnalysis(`Analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setAnalysisError(true);
+      setAnalysis(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setIsAnalyzing(false);
     }
   }, [projectId, isAnalyzing]);
+
+  const handleCopy = useCallback(() => {
+    if (!analysis) return;
+    navigator.clipboard.writeText(analysis).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [analysis]);
 
   return (
     <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
@@ -1086,18 +1105,20 @@ Base your analysis ONLY on the documents provided. Do not fabricate facts. If in
               Case Analysis
             </h3>
             <p className="text-xs text-surface-400 dark:text-surface-500">
-              AI-powered assessment across {fileCount} documents
+              {analyzedFileCount > 0 && analysis && !analysisError
+                ? `Analyzed ${analyzedFileCount} of ${fileCount} document${fileCount !== 1 ? 's' : ''}`
+                : `AI-powered assessment across ${fileCount} document${fileCount !== 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
         <button
-          onClick={analysis ? () => setExpanded(!expanded) : handleAnalyze}
+          onClick={analysis && !analysisError ? () => setExpanded(!expanded) : handleAnalyze}
           disabled={isAnalyzing}
           className={cn(
-            'flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all',
+            'flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all min-h-[36px]',
             isAnalyzing
               ? 'bg-surface-100 text-surface-400 dark:bg-surface-800 dark:text-surface-500'
-              : analysis
+              : analysis && !analysisError
                 ? 'bg-surface-100 text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700'
                 : 'bg-purple-600 text-white hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600'
           )}
@@ -1107,38 +1128,101 @@ Base your analysis ONLY on the documents provided. Do not fabricate facts. If in
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
               Analyzing...
             </>
-          ) : analysis ? (
+          ) : analysis && !analysisError ? (
             expanded ? 'Collapse' : 'Expand'
           ) : (
             <>
               <Sparkles className="h-3.5 w-3.5" />
-              Analyze Case
+              {analysisError ? 'Retry Analysis' : 'Analyze Case'}
             </>
           )}
         </button>
       </div>
 
-      {expanded && analysis && (
+      {/* Skeleton loading state */}
+      {isAnalyzing && (
         <div className="mt-4 rounded-2xl border border-surface-100 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
-          <div className="prose-chat max-h-[500px] overflow-y-auto text-sm leading-relaxed text-surface-700 dark:text-surface-200">
-            <AnalysisRenderer content={analysis} />
+          <div className="space-y-3 animate-pulse">
+            <div className="h-4 w-32 rounded bg-purple-100 dark:bg-purple-900/30" />
+            <div className="h-3 w-full rounded bg-surface-200 dark:bg-surface-700" />
+            <div className="h-3 w-5/6 rounded bg-surface-200 dark:bg-surface-700" />
+            <div className="h-3 w-4/6 rounded bg-surface-200 dark:bg-surface-700" />
+            <div className="h-4 w-28 mt-2 rounded bg-purple-100 dark:bg-purple-900/30" />
+            <div className="h-3 w-full rounded bg-surface-200 dark:bg-surface-700" />
+            <div className="h-3 w-3/4 rounded bg-surface-200 dark:bg-surface-700" />
           </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={handleAnalyze}
-              className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
-            >
-              Re-analyze
-            </button>
-            <button
-              onClick={() => navigator.clipboard.writeText(analysis)}
-              className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
-            >
-              Copy to clipboard
-            </button>
+          <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
+            Deep analysis in progress. This may take 15-30 seconds...
+          </p>
+        </div>
+      )}
+
+      {/* Error state */}
+      {analysisError && analysis && !isAnalyzing && (
+        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/20">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-700 dark:text-red-300">Analysis failed</p>
+              <p className="mt-1 text-xs text-red-600/80 dark:text-red-400/80">{analysis}</p>
+              <p className="mt-2 text-xs text-red-500 dark:text-red-400">
+                Check your connection and try again, or ensure files are processed.
+              </p>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Success state with animated expand */}
+      <AnimatePresence initial={false}>
+        {expanded && analysis && !analysisError && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="mt-4 rounded-2xl border border-surface-100 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
+              {/* Staleness warning */}
+              {isStale && (
+                <div className="mb-3 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800/50 dark:bg-amber-900/20">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      {fileCount - analyzedFileCount} new file{fileCount - analyzedFileCount !== 1 ? 's' : ''} added since last analysis
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={isAnalyzing}
+                    className="shrink-0 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-700 transition-colors"
+                  >
+                    Re-analyze
+                  </button>
+                </div>
+              )}
+              <div className="prose-chat max-h-[500px] overflow-y-auto text-sm leading-relaxed text-surface-700 dark:text-surface-200">
+                <AnalysisRenderer content={analysis} />
+              </div>
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={handleAnalyze}
+                  className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+                >
+                  Re-analyze
+                </button>
+                <button
+                  onClick={handleCopy}
+                  className="text-xs text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors"
+                >
+                  {copied ? 'Copied' : 'Copy to clipboard'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

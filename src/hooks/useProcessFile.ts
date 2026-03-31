@@ -118,6 +118,8 @@ export function useProcessFile() {
           chunk_count: result.chunksCreated ?? 0,
         }));
         void queryClient.invalidateQueries({ queryKey: filesQueryKey(projectId) });
+        // Timeline events are extracted during file processing — refresh the timeline
+        void queryClient.invalidateQueries({ queryKey: ['timeline-events', projectId] });
 
         setStates((prev) => ({
           ...prev,

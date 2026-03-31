@@ -71,11 +71,20 @@ export function exportToPlainText(content: string, title: string): string {
 
 // ── Chat Export ────────────────────────────────────────────
 
+interface ChatExportSource {
+  sourceIndex: number;
+  fileName: string;
+  pageNumber: number | null;
+  sectionHeading: string | null;
+  contentPreview: string;
+}
+
 interface ChatExportMessage {
   role: 'user' | 'assistant';
   content: string;
   model?: string;
   timestamp?: Date;
+  sources?: ChatExportSource[];
 }
 
 export function exportChatToMarkdown(
@@ -88,15 +97,70 @@ export function exportChatToMarkdown(
     const role = msg.role === 'user' ? 'You' : 'AI Assistant';
     const model = msg.model ? ` (${msg.model === 'gpt' ? 'GPT-5.2' : 'Gemini'})` : '';
     const time = msg.timestamp
-      ? ` — ${msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+      ? ` -- ${msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
       : '';
 
     lines.push(`### ${role}${model}${time}`, '');
     lines.push(msg.content, '');
+
+    // Include source citations if present
+    if (msg.sources && msg.sources.length > 0) {
+      lines.push('**Sources:**', '');
+      for (const src of msg.sources) {
+        const page = src.pageNumber != null ? `, p. ${src.pageNumber}` : '';
+        const section = src.sectionHeading ? ` (${src.sectionHeading})` : '';
+        lines.push(`- [${src.sourceIndex}] ${src.fileName}${page}${section}`);
+        if (src.contentPreview) {
+          const preview = src.contentPreview.length > 120
+            ? src.contentPreview.slice(0, 120) + '...'
+            : src.contentPreview;
+          lines.push(`  > ${preview}`);
+        }
+      }
+      lines.push('');
+    }
+
     lines.push('---', '');
   }
 
   return lines.join('\n');
+}
+
+// ── HTML to Text (exported for use by other modules) ──────
+
+export { htmlToText };
+
+// ── Formatted Text Table Builder ──────────────────────────
+
+/**
+ * Build a fixed-width text table from rows of strings.
+ * First row is treated as the header.
+ */
+export function buildTextTable(headers: string[], rows: string[][]): string {
+  const colCount = headers.length;
+  // Calculate column widths
+  const widths = headers.map((h, i) => {
+    let max = h.length;
+    for (const row of rows) {
+      const cell = row[i] ?? '';
+      if (cell.length > max) max = cell.length;
+    }
+    return Math.min(max, 60); // cap at 60 chars
+  });
+
+  const pad = (text: string, width: number) => {
+    const t = text.length > width ? text.slice(0, width - 3) + '...' : text;
+    return t + ' '.repeat(Math.max(0, width - t.length));
+  };
+
+  const divider = widths.map((w) => '-'.repeat(w)).join('-+-');
+  const headerLine = headers.map((h, i) => pad(h, widths[i])).join(' | ');
+
+  const bodyLines = rows.map((row) =>
+    Array.from({ length: colCount }, (_, i) => pad(row[i] ?? '', widths[i])).join(' | ')
+  );
+
+  return [headerLine, divider, ...bodyLines].join('\n');
 }
 
 // ── PDF Export ─────────────────────────────────────────────

@@ -387,6 +387,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Web research (when enabled): Tavily live search + CanLII case law lookup
     let webSearchContext = '';
+    let webSourcesList: Array<{ index: number; title: string; url: string }> = [];
     if (enableWebSearch) {
       const webParts: string[] = [];
 
@@ -555,6 +556,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           webParts.push(
             `--- LIVE WEB SEARCH RESULTS ---\n${formatted}\n--- END WEB SEARCH ---`
           );
+          // Collect web sources for client-side rendering
+          webSourcesList = dedupedResults.map((r, i) => ({
+            index: i + 1,
+            title: r.title,
+            url: r.url,
+          }));
         }
       }
 
@@ -643,6 +650,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       effortLevel: effort,
       followUps,
       webSearchUsed: webSearchContext.length > 0,
+      webSources: webSourcesList.length > 0 ? webSourcesList : undefined,
     });
   } catch (error) {
     console.error('AI chat error:', error);

@@ -12,15 +12,17 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
+  Info,
+  X,
 } from 'lucide-react';
 import { cn, formatDate, getFileExtension, getFileTypeFromExtension } from '@/lib/utils';
 import { FILE_TYPE_COLORS } from '@/lib/constants';
-import { getDocumentTypeLabel } from '@/lib/documentTypes';
+import { getDocumentTypeLabel, getDocumentTypeCategoryLabel } from '@/lib/documentTypes';
 import useAppStore from '@/store';
 import { useDeleteFile } from '@/hooks/useFiles';
 import type { FileRecord } from '@/types';
 
-// Document type badge color mapping
+// ── Document type badge colors ──────────────────────────────────────
 const DOC_TYPE_BADGE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   court: {
     bg: 'bg-blue-50 dark:bg-blue-900/20',
@@ -57,6 +59,45 @@ const DOC_TYPE_BADGE_COLORS: Record<string, { bg: string; text: string; border: 
 function getDocTypeBadgeStyle(docType: string) {
   return DOC_TYPE_BADGE_COLORS[docType] || DOC_TYPE_BADGE_COLORS.correspondence;
 }
+
+// ── Processing status dot colors ────────────────────────────────────
+const STATUS_DOT_COLORS: Record<string, string> = {
+  completed: 'bg-emerald-500',
+  processing: 'bg-amber-400 animate-pulse',
+  failed: 'bg-red-500',
+  pending: 'bg-surface-300 dark:bg-surface-600',
+};
+
+function getStatusDotColor(status: string | null, isProcessing?: boolean) {
+  if (isProcessing) return STATUS_DOT_COLORS.processing;
+  return STATUS_DOT_COLORS[status || 'pending'] || STATUS_DOT_COLORS.pending;
+}
+
+function getStatusLabel(status: string | null, isProcessing?: boolean): string {
+  if (isProcessing) return 'Processing (indexing for AI search)';
+  switch (status) {
+    case 'completed':
+      return 'Completed (AI-ready)';
+    case 'processing':
+      return 'Processing (indexing for AI search)';
+    case 'failed':
+      return 'Failed (retry needed)';
+    default:
+      return 'Pending (not yet indexed)';
+  }
+}
+
+// ── File type icon background colors ────────────────────────────────
+const FILE_TYPE_ICON_BG: Record<string, string> = {
+  pdf: 'bg-red-100 dark:bg-red-900/30',
+  image: 'bg-blue-100 dark:bg-blue-900/30',
+  audio: 'bg-purple-100 dark:bg-purple-900/30',
+  video: 'bg-orange-100 dark:bg-orange-900/30',
+  document: 'bg-sky-100 dark:bg-sky-900/30',
+  spreadsheet: 'bg-green-100 dark:bg-green-900/30',
+  text: 'bg-slate-100 dark:bg-slate-800/50',
+  other: 'bg-surface-100 dark:bg-surface-800/70',
+};
 
 interface FileListItemProps {
   file: FileRecord;
@@ -146,19 +187,25 @@ export function FileListItem({
   const deleteFile = useDeleteFile();
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
+  const detailsBtnRef = useRef<HTMLButtonElement>(null);
 
   const isSelected = selectedFileId === file.id;
   const ext = getFileExtension(file.name);
   const fileType = file.file_type || getFileTypeFromExtension(ext);
   const IconComponent = typeIconMap[fileType] || File;
   const colorClass = FILE_TYPE_COLORS[fileType] || FILE_TYPE_COLORS.other;
+  const iconBgClass = FILE_TYPE_ICON_BG[fileType] || FILE_TYPE_ICON_BG.other;
   const canProcess =
     !file.processing_status ||
     file.processing_status === 'pending' ||
     file.processing_status === 'failed';
   const statusBadge = getProcessingBadge(file, processingState);
   const summary = getFileSummary(file);
+  const statusDotColor = getStatusDotColor(file.processing_status, processingState?.isProcessing);
+  const statusTooltip = getStatusLabel(file.processing_status, processingState?.isProcessing);
 
   // Close menu when clicking outside or pressing Escape
   useEffect(() => {
@@ -182,6 +229,32 @@ export function FileListItem({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showMenu]);
+
+  // Close details popover when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!showDetails) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        detailsRef.current &&
+        !detailsRef.current.contains(e.target as Node) &&
+        detailsBtnRef.current &&
+        !detailsBtnRef.current.contains(e.target as Node)
+      ) {
+        setShowDetails(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setShowDetails(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showDetails]);
 
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
@@ -213,6 +286,14 @@ export function FileListItem({
     []
   );
 
+  const handleDetailsToggle = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setShowDetails((prev) => !prev);
+    },
+    []
+  );
+
   const handleDelete = useCallback(
     async (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -226,6 +307,12 @@ export function FileListItem({
     },
     [showConfirm, file, deleteFile]
   );
+
+  // Build detail items for the popover
+  const docType = file.document_type;
+  const confidence = file.classification_confidence;
+  const docTypeLabel = docType ? getDocumentTypeLabel(docType) : null;
+  const docCategoryLabel = docType ? getDocumentTypeCategoryLabel(docType) : null;
 
   return (
     <div className="relative">
@@ -265,20 +352,31 @@ export function FileListItem({
             aria-label={isBatchSelected ? `Deselect ${file.name}` : `Select ${file.name}`}
             title={isBatchSelected ? 'Deselect file' : 'Select file'}
           >
-            <span className="text-xs leading-none">✓</span>
+            <span className="text-xs leading-none">&#10003;</span>
           </button>
         )}
 
-        {/* File type icon */}
-        <div
-          className={cn(
-            'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl',
-            isSelected
-              ? 'bg-primary-100/85 dark:bg-primary-900/35'
-              : 'bg-surface-100 dark:bg-surface-800/70'
-          )}
-        >
-          <IconComponent className={cn('h-4 w-4', colorClass)} />
+        {/* File type icon with distinct color per type */}
+        <div className="relative mt-0.5 shrink-0">
+          <div
+            className={cn(
+              'flex h-10 w-10 items-center justify-center rounded-2xl',
+              isSelected
+                ? 'bg-primary-100/85 dark:bg-primary-900/35'
+                : iconBgClass
+            )}
+            title={`${fileType.charAt(0).toUpperCase() + fileType.slice(1)} file`}
+          >
+            <IconComponent className={cn('h-4 w-4', colorClass)} />
+          </div>
+          {/* Status dot overlay */}
+          <span
+            className={cn(
+              'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-surface-900',
+              statusDotColor
+            )}
+            title={statusTooltip}
+          />
         </div>
 
         {/* File info */}
@@ -297,35 +395,36 @@ export function FileListItem({
                 {file.name}
               </p>
               <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5 overflow-hidden max-h-7">
-                {/* Document type badge — shown when classification exists */}
+                {/* Document type badge */}
                 {(() => {
-                  const docType = file.document_type;
-                  const confidence = file.classification_confidence;
                   if (docType && docType !== 'other') {
                     const style = getDocTypeBadgeStyle(docType);
                     const isUncertain = typeof confidence === 'number' && confidence < 0.7;
+                    const fullLabel = getDocumentTypeLabel(docType);
+                    const tooltipText = isUncertain
+                      ? `${fullLabel} (low confidence: ${Math.round((confidence ?? 0) * 100)}%)`
+                      : `${fullLabel} - ${docCategoryLabel ?? 'Unknown category'}`;
                     return (
                       <span
                         className={cn(
-                          'rounded-full px-2 py-1 text-sm font-medium',
+                          'rounded-full px-2 py-1 text-sm font-medium truncate max-w-[140px]',
                           style.bg,
                           style.text,
                           isUncertain && `border ${style.border} border-dashed`
                         )}
-                        title={
-                          isUncertain
-                            ? `${getDocumentTypeLabel(docType)} (low confidence: ${Math.round((confidence ?? 0) * 100)}%)`
-                            : getDocumentTypeLabel(docType)
-                        }
+                        title={tooltipText}
                       >
-                        {getDocumentTypeLabel(docType)}
+                        {fullLabel}
                       </span>
                     );
                   }
                   return null;
                 })()}
                 {file.added_at && (
-                  <span className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+                  <span
+                    className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400"
+                    title={`Added: ${file.added_at}`}
+                  >
                     {formatDate(file.added_at)}
                   </span>
                 )}
@@ -334,7 +433,7 @@ export function FileListItem({
                     'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em]',
                     statusBadge.className
                   )}
-                  title={file.ai_summary || file.processing_error || statusBadge.label}
+                  title={statusTooltip}
                 >
                   {statusBadge.icon}
                   {statusBadge.label}
@@ -343,6 +442,25 @@ export function FileListItem({
             </div>
 
             <div className="flex min-w-0 shrink-0 items-center gap-1">
+              {/* Info/details toggle button */}
+              <button
+                ref={detailsBtnRef}
+                type="button"
+                onClick={handleDetailsToggle}
+                className={cn(
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors',
+                  showDetails
+                    ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300'
+                    : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
+                  'focus-visible:opacity-100 focus-visible:outline-none'
+                )}
+                title="View file details"
+                aria-label={`Details for ${file.name}`}
+                aria-expanded={showDetails}
+              >
+                <Info className="h-3.5 w-3.5" />
+              </button>
+
               {onProcess && canProcess && (
                 <button
                   type="button"
@@ -396,11 +514,161 @@ export function FileListItem({
             </div>
           </div>
 
-          <p className="mt-3 line-clamp-2 text-xs leading-5 text-surface-500 dark:text-surface-400">
+          {/* Summary with tooltip for full text */}
+          <p
+            className="mt-3 line-clamp-2 text-xs leading-5 text-surface-500 dark:text-surface-400"
+            title={summary}
+          >
             {summary}
           </p>
         </div>
       </div>
+
+      {/* ── Details popover ──────────────────────────────────── */}
+      {showDetails && (
+        <div
+          ref={detailsRef}
+          className={cn(
+            'absolute left-3 right-3 top-[calc(100%+4px)] z-50 overflow-hidden rounded-2xl',
+            'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
+            'dark:border-surface-700 dark:bg-surface-800 dark:shadow-surface-950/30',
+            'animate-in fade-in-0 zoom-in-95 duration-100'
+          )}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-surface-100 px-3 py-2 dark:border-surface-700">
+            <span className="text-xs font-semibold text-surface-700 dark:text-surface-200">
+              File Details
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetails(false);
+              }}
+              className="flex h-5 w-5 items-center justify-center rounded-full text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title="Close details"
+              aria-label="Close details"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+
+          <div className="space-y-2 px-3 py-2.5">
+            {/* AI Summary */}
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                AI Summary
+              </span>
+              <p className="mt-0.5 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
+                {file.ai_summary || 'No summary available'}
+              </p>
+            </div>
+
+            {/* Document Type & Classification */}
+            {docType && docType !== 'other' && (
+              <div>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                  Document Type
+                </span>
+                <div className="mt-0.5 flex items-center gap-2">
+                  <span className="text-xs font-medium text-surface-700 dark:text-surface-200">
+                    {docTypeLabel}
+                  </span>
+                  {docCategoryLabel && (
+                    <span className="text-xs text-surface-400 dark:text-surface-500">
+                      ({docCategoryLabel})
+                    </span>
+                  )}
+                </div>
+                {typeof confidence === 'number' && (
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className="h-1 flex-1 rounded-full bg-surface-100 dark:bg-surface-700">
+                      <div
+                        className={cn(
+                          'h-1 rounded-full transition-all',
+                          confidence >= 0.7
+                            ? 'bg-emerald-500'
+                            : confidence >= 0.4
+                              ? 'bg-amber-500'
+                              : 'bg-red-400'
+                        )}
+                        style={{ width: `${Math.round(confidence * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] tabular-nums text-surface-400 dark:text-surface-500">
+                      {Math.round(confidence * 100)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Processing Status */}
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                Processing Status
+              </span>
+              <div className="mt-0.5 flex items-center gap-1.5">
+                <span
+                  className={cn(
+                    'inline-block h-2 w-2 rounded-full',
+                    statusDotColor
+                  )}
+                />
+                <span className="text-xs text-surface-600 dark:text-surface-300">
+                  {statusTooltip}
+                </span>
+              </div>
+              {file.processed_at && (
+                <p className="mt-0.5 text-[10px] text-surface-400 dark:text-surface-500">
+                  Processed: {formatDate(file.processed_at)}
+                </p>
+              )}
+              {file.processing_error && (
+                <p className="mt-0.5 text-[10px] text-red-500 dark:text-red-400">
+                  Error: {file.processing_error}
+                </p>
+              )}
+            </div>
+
+            {/* Chunk Count */}
+            {typeof file.chunk_count === 'number' && file.chunk_count > 0 && (
+              <div>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                  Chunks
+                </span>
+                <p className="mt-0.5 text-xs text-surface-600 dark:text-surface-300">
+                  {file.chunk_count} indexed chunk{file.chunk_count !== 1 ? 's' : ''}
+                </p>
+              </div>
+            )}
+
+            {/* File type & extension */}
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                File Type
+              </span>
+              <p className="mt-0.5 text-xs text-surface-600 dark:text-surface-300">
+                {fileType.charAt(0).toUpperCase() + fileType.slice(1)}
+                {ext ? ` (.${ext})` : ''}
+              </p>
+            </div>
+
+            {/* Date added */}
+            {file.added_at && (
+              <div>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                  Added
+                </span>
+                <p className="mt-0.5 text-xs text-surface-600 dark:text-surface-300">
+                  {formatDate(file.added_at)}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Context menu */}
       {showMenu && (

@@ -198,15 +198,14 @@ export async function processFile(
           .from('timeline_events')
           .delete()
           .eq('source_file_id', fileId)
-          .eq('extraction_source', 'ai');
+          .eq('extraction_method', 'ai');
 
-        // Insert new events
+        // Insert new events — column names must match the actual DB schema
         const eventRows = timelineEvents.map((event) => ({
-          file_id: fileId,
           source_file_id: fileId,
           project_id: projectId,
-          event_date: event.date,
-          event_date_end: event.date_end || null,
+          date: event.date,
+          date_end: event.date_end || null,
           date_precision: event.date_precision,
           date_text: event.date_text || null,
           title: event.title,
@@ -217,8 +216,7 @@ export async function processFile(
           parties: event.parties || [],
           source_quote: event.source_quote || null,
           page_reference: event.page_reference || null,
-          extraction_source: 'ai',
-          extracted_at: new Date().toISOString(),
+          extraction_method: 'ai',
         }));
 
         const { error: timelineError } = await supabase

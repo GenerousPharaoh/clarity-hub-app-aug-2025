@@ -70,7 +70,7 @@ export function ExhibitsTab() {
       });
     } catch (err) {
       console.error('[ExhibitsTab] Failed to create exhibit:', err);
-      toast.error('Failed to create exhibit');
+      toast.error('Could not create exhibit. Check your connection and try again.');
     }
   }, [selectedProjectId, user, exhibits, createExhibit]);
 
@@ -276,7 +276,7 @@ function EmptyState({
         No Exhibits Yet
       </h3>
       <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-        Mark key evidence as exhibits.
+        Create exhibit markers and link them to uploaded files to build your exhibit book.
       </p>
       <button
         onClick={onCreateFirst}

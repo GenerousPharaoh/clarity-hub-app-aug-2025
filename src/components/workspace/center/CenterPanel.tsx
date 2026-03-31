@@ -328,7 +328,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
       setDropdownOpen(false);
     } catch (err) {
       console.error('[NotesTab] Failed to create note:', err);
-      toast.error('Failed to create document');
+      toast.error('Could not create document. Check your connection and try again.');
     }
   }, [selectedProjectId, user, createNote]);
 

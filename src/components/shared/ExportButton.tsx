@@ -23,6 +23,13 @@ interface ExportButtonProps {
     content: string;
     model?: string;
     timestamp?: Date;
+    sources?: Array<{
+      sourceIndex: number;
+      fileName: string;
+      pageNumber: number | null;
+      sectionHeading: string | null;
+      contentPreview: string;
+    }>;
   }>;
   className?: string;
 }

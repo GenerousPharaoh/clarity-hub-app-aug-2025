@@ -27,10 +27,10 @@ SyntaxHighlighter.registerLanguage('css', css);
 SyntaxHighlighter.registerLanguage('sql', sql);
 SyntaxHighlighter.registerLanguage('markdown', markdown);
 import { cn } from '@/lib/utils';
-import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check } from 'lucide-react';
+import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check, Globe } from 'lucide-react';
 import { ChatCitation, SourcesList } from './ChatCitation';
 import { FollowUpSuggestions } from './FollowUpSuggestions';
-import type { ChatMessage as ChatMessageType, ChatSource } from '@/types';
+import type { ChatMessage as ChatMessageType, ChatSource, WebSource } from '@/types';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -63,14 +63,43 @@ const EFFORT_BADGE_CONFIG: Record<string, { label: string; className: string }> 
 };
 
 /**
- * Replace [Source N] patterns in text with ChatCitation components.
+ * Inline web citation chip that renders [Web N] references as clickable links.
+ */
+function WebCitationChip({ source }: { source: WebSource }) {
+  return (
+    <a
+      href={source.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 mx-0.5',
+        'text-sm font-medium leading-tight',
+        'bg-blue-50 text-blue-700 border border-blue-200',
+        'hover:bg-blue-100 hover:border-blue-300',
+        'dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+        'dark:hover:bg-blue-900/50 dark:hover:border-blue-600',
+        'transition-colors cursor-pointer no-underline'
+      )}
+      title={`${source.title}\n${source.url}`}
+    >
+      <Globe className="h-3 w-3 shrink-0" />
+      <span>Web {source.index}</span>
+    </a>
+  );
+}
+
+/**
+ * Replace [Source N] and [Web N] patterns in text with interactive components.
  * Returns an array of string and ReactNode segments.
  */
-function renderWithCitations(text: string, sources?: ChatSource[]): ReactNode[] {
-  if (!sources || sources.length === 0) return [text];
+function renderWithCitations(text: string, sources?: ChatSource[], webSources?: WebSource[]): ReactNode[] {
+  const hasSources = sources && sources.length > 0;
+  const hasWebSources = webSources && webSources.length > 0;
+  if (!hasSources && !hasWebSources) return [text];
 
   const parts: ReactNode[] = [];
-  const regex = /\[Source\s+(\d+)(?:[^\]]*)\]/gi;
+  // Match both [Source N ...] and [Web N ...] patterns
+  const regex = /\[(?:(Source)\s+(\d+)(?:[^\]]*?)|(Web)\s+(\d+)(?:[^\]]*?))\]/gi;
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -80,13 +109,24 @@ function renderWithCitations(text: string, sources?: ChatSource[]): ReactNode[] 
       parts.push(text.slice(lastIndex, match.index));
     }
 
-    const sourceNum = parseInt(match[1], 10);
-    const source = sources.find((s) => s.sourceIndex === sourceNum);
-
-    if (source) {
-      parts.push(<ChatCitation key={`citation-${match.index}`} source={source} />);
-    } else {
-      parts.push(match[0]); // Keep original text if source not found
+    if (match[1]) {
+      // [Source N] match
+      const sourceNum = parseInt(match[2], 10);
+      const source = sources?.find((s) => s.sourceIndex === sourceNum);
+      if (source) {
+        parts.push(<ChatCitation key={`src-${match.index}`} source={source} />);
+      } else {
+        parts.push(match[0]);
+      }
+    } else if (match[3]) {
+      // [Web N] match
+      const webNum = parseInt(match[4], 10);
+      const webSource = webSources?.find((w) => w.index === webNum);
+      if (webSource) {
+        parts.push(<WebCitationChip key={`web-${match.index}`} source={webSource} />);
+      } else {
+        parts.push(match[0]);
+      }
     }
 
     lastIndex = match.index + match[0].length;
@@ -187,17 +227,17 @@ function CodeBlock({
 }
 
 /**
- * Process React children from ReactMarkdown to replace [Source N] text nodes
- * with ChatCitation components.
+ * Process React children from ReactMarkdown to replace [Source N] and [Web N] text nodes
+ * with interactive citation components.
  */
-function processChildrenForCitations(children: ReactNode, sources: ChatSource[]): ReactNode {
+function processChildrenForCitations(children: ReactNode, sources: ChatSource[], webSources?: WebSource[]): ReactNode {
   if (!children) return children;
 
   // Handle array of children
   if (Array.isArray(children)) {
     return children.map((child, i) => {
       if (typeof child === 'string') {
-        const parts = renderWithCitations(child, sources);
+        const parts = renderWithCitations(child, sources, webSources);
         return parts.length === 1 && typeof parts[0] === 'string'
           ? parts[0]
           : <span key={i}>{parts}</span>;
@@ -208,7 +248,7 @@ function processChildrenForCitations(children: ReactNode, sources: ChatSource[])
 
   // Handle single string child
   if (typeof children === 'string') {
-    const parts = renderWithCitations(children, sources);
+    const parts = renderWithCitations(children, sources, webSources);
     return parts.length === 1 && typeof parts[0] === 'string'
       ? parts[0]
       : <span>{parts}</span>;
@@ -377,9 +417,10 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                     );
                   },
                   p: ({ children }) => {
-                    // Process children to replace [Source N] text with citation chips
-                    if (message.sources && message.sources.length > 0) {
-                      const processed = processChildrenForCitations(children, message.sources);
+                    // Process children to replace [Source N] and [Web N] text with citation chips
+                    const hasCitations = (message.sources && message.sources.length > 0) || (message.webSources && message.webSources.length > 0);
+                    if (hasCitations) {
+                      const processed = processChildrenForCitations(children, message.sources ?? [], message.webSources);
                       return <p className="mb-2 last:mb-0">{processed}</p>;
                     }
                     return <p className="mb-2 last:mb-0">{children}</p>;
@@ -463,6 +504,11 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
             </div>
           )}
 
+          {/* Web sources list */}
+          {!isError && message.webSources && message.webSources.length > 0 && (
+            <WebSourcesList webSources={message.webSources} />
+          )}
+
           {/* Retry button for error messages */}
           {isError && onRetry && (
             <button
@@ -491,3 +537,52 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
     </div>
   );
 });
+
+/**
+ * Collapsible list of web sources used in the AI response.
+ */
+function WebSourcesList({ webSources }: { webSources: WebSource[] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (webSources.length === 0) return null;
+
+  return (
+    <div className="mt-1.5 border-t border-blue-100 pt-1.5 dark:border-blue-900/40">
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        className="flex items-center gap-1 text-sm font-medium text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+      >
+        <Globe className="h-3 w-3" />
+        <span>{expanded ? 'Hide' : 'Show'} {webSources.length} web source{webSources.length !== 1 ? 's' : ''}</span>
+      </button>
+
+      {expanded && (
+        <div className="mt-1 space-y-0.5">
+          {webSources.map((ws) => (
+            <a
+              key={ws.index}
+              href={ws.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left',
+                'transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20'
+              )}
+            >
+              <Globe className="h-3 w-3 shrink-0 text-blue-400" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-blue-600 dark:text-blue-300">
+                  [{ws.index}] {ws.title}
+                </p>
+                <p className="truncate text-xs text-blue-400 dark:text-blue-500">
+                  {ws.url}
+                </p>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

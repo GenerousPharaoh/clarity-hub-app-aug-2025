@@ -13,6 +13,8 @@ interface AnnotationSidebarProps {
   onClose: () => void;
   onScrollTo: (highlight: AnnotationHighlight) => void;
   onDelete: (annotation: PdfAnnotation) => void;
+  /** Name of the file being annotated, included in exports for context. */
+  fileName?: string;
 }
 
 export function AnnotationSidebar({
@@ -21,6 +23,7 @@ export function AnnotationSidebar({
   onClose,
   onScrollTo,
   onDelete,
+  fileName,
 }: AnnotationSidebarProps) {
   const [colorFilter, setColorFilter] = useState<string | null>(null);
 
@@ -58,21 +61,54 @@ export function AnnotationSidebar({
   const handleExportAll = useCallback(() => {
     if (annotations.length === 0) return;
 
-    const grouped = new Map<number, PdfAnnotation[]>();
+    const groupedByPage = new Map<number, PdfAnnotation[]>();
     for (const a of annotations) {
-      if (!grouped.has(a.page_number)) grouped.set(a.page_number, []);
-      grouped.get(a.page_number)!.push(a);
+      if (!groupedByPage.has(a.page_number)) groupedByPage.set(a.page_number, []);
+      groupedByPage.get(a.page_number)!.push(a);
     }
 
+    const getColorLabel = (color: string): string => {
+      const match = HIGHLIGHT_COLORS.find((c) => c.value === color);
+      return match ? match.label : 'Highlight';
+    };
+
+    const dateStr = new Date().toLocaleDateString('en-CA');
     let md = '# Highlights & Notes\n\n';
-    for (const [page, items] of Array.from(grouped.entries()).sort(([a], [b]) => a - b)) {
+    if (fileName) {
+      md += `**File:** ${fileName}\n`;
+    }
+    md += `**Exported:** ${dateStr}\n`;
+    md += `**Total annotations:** ${annotations.length}\n\n`;
+
+    // Summary counts by color
+    const colorCounts = HIGHLIGHT_COLORS.map((c) => ({
+      label: c.label,
+      count: annotations.filter((a) => a.color === c.value).length,
+    })).filter((c) => c.count > 0);
+
+    if (colorCounts.length > 0) {
+      md += colorCounts.map((c) => `- ${c.label}: ${c.count}`).join('\n') + '\n\n';
+    }
+
+    md += '---\n\n';
+
+    for (const [page, items] of Array.from(groupedByPage.entries()).sort(([a], [b]) => a - b)) {
       md += `## Page ${page}\n\n`;
       for (const a of items) {
+        const colorLabel = getColorLabel(a.color);
+        const typeLabel = a.annotation_type === 'bookmark' ? 'Bookmark' : colorLabel;
+        md += `**[${typeLabel}]**`;
+        if (a.label) md += ` *${a.label}*`;
+        md += '\n\n';
+
         if (a.selected_text) {
           md += `> ${a.selected_text}\n\n`;
         }
         if (a.comment) {
           md += `**Note:** ${a.comment}\n\n`;
+        }
+        if (a.tags && a.tags.length > 0) {
+          md += `Tags: ${a.tags.join(', ')}\n\n`;
         }
         md += '---\n\n';
       }
@@ -89,7 +125,7 @@ export function AnnotationSidebar({
       a.click();
       toast.success('Highlights exported');
     });
-  }, [annotations]);
+  }, [annotations, fileName]);
 
   return (
     <div

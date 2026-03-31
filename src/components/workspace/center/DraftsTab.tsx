@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Plus, FileSignature, Trash2, Loader2, Sparkles, BookOpen, Mail, Scale, Shield, ArrowRight, X, Download } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Plus, FileSignature, Trash2, Loader2, Sparkles, BookOpen, Mail, Scale, Shield, ArrowRight, X, Download, Copy, FileText, FileDown, FileType } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import useAppStore from '@/store';
@@ -9,6 +9,7 @@ import { BRIEF_TEMPLATES, type BriefDraft, type BriefTemplate } from '@/types/dr
 import { searchDocuments, formatSearchContext } from '@/services/documentSearchService';
 import { aiRouter } from '@/services/aiRouter';
 import { supabase } from '@/lib/supabase';
+import { htmlToText, exportToPdf, exportToDocx, downloadBlob, downloadText } from '@/lib/export-utils';
 
 const TEMPLATE_ICONS: Record<string, typeof Mail> = {
   Mail, Scale, BookOpen, Shield,
@@ -20,6 +21,7 @@ export function DraftsTab() {
   const { data: drafts, isLoading } = useBriefDrafts(selectedProjectId);
   const createDraft = useCreateBriefDraft();
   const deleteDraft = useDeleteBriefDraft();
+  const updateDraft = useUpdateBriefDraft();
 
   const [showTemplates, setShowTemplates] = useState(false);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function DraftsTab() {
       setShowTemplates(false);
       toast.success(`Created "${template.name}" draft`);
     } catch {
-      toast.error('Failed to create draft');
+      toast.error('Failed to create draft. Check your connection and try again.');
     }
   }, [selectedProjectId, createDraft]);
 
@@ -51,14 +53,42 @@ export function DraftsTab() {
       if (activeDraftId === id) setActiveDraftId(null);
       toast.success('Draft deleted');
     } catch {
-      toast.error('Failed to delete draft');
+      toast.error('Could not delete draft. Check your connection and try again.');
     }
   }, [selectedProjectId, deleteDraft, activeDraftId]);
 
   if (!selectedProjectId || !user) {
     return (
-      <div className="flex h-full items-center justify-center p-8">
-        <p className="text-sm text-surface-400">Select a project to start drafting.</p>
+      <div className="flex h-full flex-col items-center justify-center px-8">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+          <FileSignature className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+        </div>
+        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+          No Project Selected
+        </h3>
+        <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+          Select a project to start drafting legal documents.
+        </p>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex h-full flex-col overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between border-b border-surface-200 px-4 py-3 dark:border-surface-700">
+          <div className="h-4 w-20 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="h-8 w-24 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
+        </div>
+        <div className="flex-1 space-y-3 p-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="rounded-2xl border border-surface-200/80 bg-white p-4 dark:border-surface-700 dark:bg-surface-800">
+              <div className="h-4 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+              <div className="mt-2 h-3 w-1/3 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -141,8 +171,24 @@ export function DraftsTab() {
               {activeDraft && (
                 <button
                   onClick={() => {
-                    // Insert into the first empty section of the active draft
-                    toast.success('Text added to draft notes');
+                    // Insert into the first empty section, or append to the last section
+                    const targetSection = activeDraft.sections.find((s) => !s.content_html)
+                      ?? activeDraft.sections[activeDraft.sections.length - 1];
+                    if (targetSection && selectedProjectId) {
+                      const quote = `<blockquote><p>${pendingInsertion.text}</p><footer>Source: page ${pendingInsertion.page}</footer></blockquote>`;
+                      const newHtml = targetSection.content_html
+                        ? targetSection.content_html + '\n' + quote
+                        : quote;
+                      const updatedSections = activeDraft.sections.map((s) =>
+                        s.key === targetSection.key ? { ...s, content_html: newHtml } : s
+                      );
+                      updateDraft.mutate({
+                        id: activeDraft.id,
+                        projectId: selectedProjectId,
+                        sections: updatedSections,
+                      });
+                      toast.success(`Inserted into "${targetSection.heading}"`);
+                    }
                     clearPendingInsertion(null);
                   }}
                   className="flex items-center gap-1 rounded-md bg-amber-600 px-2 py-1 text-xs font-medium text-white hover:bg-amber-700"
@@ -225,8 +271,16 @@ export function DraftsTab() {
           {activeDraft ? (
             <DraftEditor draft={activeDraft} projectId={selectedProjectId} />
           ) : (
-            <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-surface-400">Select a draft from the sidebar</p>
+            <div className="flex h-full flex-col items-center justify-center px-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+                <FileSignature className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+              </div>
+              <h3 className="mt-3 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+                No Draft Selected
+              </h3>
+              <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+                Pick a draft from the sidebar to start editing.
+              </p>
             </div>
           )}
         </div>
@@ -252,10 +306,10 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
       const section = draft.sections.find((s) => s.key === sectionKey);
       if (!section) return;
 
-      // Gather context: file summaries + RAG search + legal knowledge
+      // Gather context: file summaries only (NOT extracted_text — full text comes from RAG)
       const { data: files } = await supabase
         .from('files')
-        .select('name, document_type, ai_summary, extracted_text')
+        .select('name, document_type, ai_summary')
         .eq('project_id', projectId)
         .eq('processing_status', 'completed')
         .is('is_deleted', false);
@@ -264,14 +318,53 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         .map((f) => `- ${f.name}${f.document_type ? ` [${f.document_type}]` : ''}: ${f.ai_summary ?? 'No summary'}`)
         .join('\n');
 
-      // RAG search for section-relevant content
+      // RAG search for section-relevant content (more chunks for facts sections)
+      const isFactsSection = sectionKey === 'facts' || sectionKey === 'background';
+      const chunkLimit = isFactsSection ? 15 : 10;
       const searchResults = await searchDocuments({
         query: `${section.heading} ${sectionInstructions[sectionKey] || ''}`.trim(),
         projectId,
-        limit: 10,
+        limit: chunkLimit,
       }).catch(() => []);
 
       const documentContext = formatSearchContext(searchResults);
+
+      // For facts/background sections, also fetch exhibit markers and timeline events
+      let exhibitsContext = '';
+      let timelineContext = '';
+
+      if (isFactsSection) {
+        // Fetch exhibit markers for evidence references
+        const { data: exhibits } = await supabase
+          .from('exhibit_markers')
+          .select('exhibit_id, description, file_id')
+          .eq('project_id', projectId)
+          .order('sort_order', { ascending: true });
+
+        if (exhibits && exhibits.length > 0) {
+          const exhibitLines = exhibits.map((ex) =>
+            `- Exhibit ${ex.exhibit_id}${ex.description ? `: ${ex.description}` : ''}`
+          );
+          exhibitsContext = `\n\n--- EXHIBIT LIST ---\n${exhibitLines.join('\n')}\n--- END EXHIBITS ---`;
+        }
+
+        // Fetch timeline events for chronological facts
+        const { data: timelineEvents } = await supabase
+          .from('timeline_events')
+          .select('date, title, description, category, source_file_name, is_verified')
+          .eq('project_id', projectId)
+          .eq('is_hidden', false)
+          .order('date', { ascending: true });
+
+        if (timelineEvents && timelineEvents.length > 0) {
+          const eventLines = timelineEvents.map((ev) => {
+            const verified = ev.is_verified ? ' [verified]' : '';
+            const source = ev.source_file_name ? ` (source: ${ev.source_file_name})` : '';
+            return `- ${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${source}${verified}`;
+          });
+          timelineContext = `\n\n--- CHRONOLOGICAL TIMELINE ---\n${eventLines.join('\n')}\n--- END TIMELINE ---`;
+        }
+      }
 
       // Build section-specific prompt
       const userInstructions = sectionInstructions[sectionKey]
@@ -284,6 +377,10 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         .map((s) => `## ${s.heading}\n${s.content_html.replace(/<[^>]+>/g, '')}`)
         .join('\n\n');
 
+      const factsInstructions = isFactsSection
+        ? '\nUse the exhibit list and timeline below to structure facts chronologically. Reference exhibits as (Exhibit [X]) where supported by the evidence.'
+        : '\nReference exhibits as (Exhibit [X]) where supported by the evidence.';
+
       const result = await aiRouter.routeQuery({
         query: `Generate the "${section.heading}" section for a ${draft.title} (Ontario legal document).
 
@@ -295,11 +392,11 @@ Document metadata:
 Section description: ${BRIEF_TEMPLATES.find((t) => t.slug === draft.template_type)?.sections.find((s) => s.key === sectionKey)?.description || section.heading}
 ${userInstructions}
 
-Write this section in formal legal prose suitable for filing. Use numbered paragraphs where appropriate. Reference exhibits as (Exhibit [X]) where supported by the evidence. Cite case law with neutral citations.
+Write this section in formal legal prose suitable for filing. Use numbered paragraphs where appropriate.${factsInstructions} Cite case law with neutral citations.
 
 Return ONLY the section content — no section heading (it will be added automatically).`,
         effortLevel: 'deep',
-        caseContext: `--- PROJECT FILES ---\n${fileSummaries}\n\n${documentContext}\n\n${priorSections ? `--- PRIOR SECTIONS ---\n${priorSections}` : ''}`,
+        caseContext: `--- PROJECT FILES ---\n${fileSummaries}\n\n${documentContext}${exhibitsContext}${timelineContext}\n\n${priorSections ? `--- PRIOR SECTIONS ---\n${priorSections}` : ''}`,
       });
 
       // Update the section with generated content
@@ -330,48 +427,118 @@ Return ONLY the section content — no section heading (it will be added automat
     await updateDraft.mutateAsync({ id: draft.id, projectId, sections: updatedSections });
   }, [draft, projectId, updateDraft]);
 
+  const [generateAllProgress, setGenerateAllProgress] = useState<{ current: number; total: number } | null>(null);
+
   const handleGenerateAll = useCallback(async () => {
     setGeneratingAll(true);
     const emptySections = draft.sections.filter((s) => !s.content_html);
-    for (const section of emptySections) {
+    let successCount = 0;
+    setGenerateAllProgress({ current: 0, total: emptySections.length });
+    for (let i = 0; i < emptySections.length; i++) {
+      setGenerateAllProgress({ current: i + 1, total: emptySections.length });
       try {
-        await handleGenerateSection(section.key);
+        await handleGenerateSection(emptySections[i].key);
+        successCount++;
       } catch {
         // Continue with remaining sections even if one fails
       }
     }
     setGeneratingAll(false);
-    toast.success(`Generated ${emptySections.length} sections`);
+    setGenerateAllProgress(null);
+    if (successCount === emptySections.length) {
+      toast.success(`Generated all ${successCount} sections`);
+    } else {
+      toast.success(`Generated ${successCount} of ${emptySections.length} sections`);
+    }
   }, [draft.sections, handleGenerateSection]);
 
-  const handleExportDraft = useCallback(() => {
-    const header = [
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close export menu on outside click
+  useEffect(() => {
+    if (!showExportMenu) return;
+    const handleClick = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showExportMenu]);
+
+  /** Build formatted plain text from draft content, properly converting HTML. */
+  const buildDraftText = useCallback(() => {
+    const headerParts = [
       draft.court_name && `Court: ${draft.court_name}`,
-      draft.file_number && `File No: ${draft.file_number}`,
+      draft.file_number && `File No.: ${draft.file_number}`,
       draft.case_name && `${draft.case_name}`,
       draft.party_name && `Party: ${draft.party_name}`,
-    ].filter(Boolean).join('\n');
+    ].filter(Boolean);
+
+    const header = headerParts.join('\n');
 
     const sections = draft.sections
       .filter((s) => s.content_html)
       .map((s) => {
-        const text = s.content_html.replace(/<[^>]+>/g, '').trim();
+        const text = htmlToText(s.content_html);
         return `## ${s.heading}\n\n${text}`;
       })
       .join('\n\n---\n\n');
 
-    const md = `# ${draft.title}\n\n${header}\n\n---\n\n${sections}`;
-    navigator.clipboard.writeText(md).then(() => {
-      toast.success('Draft copied to clipboard as markdown');
-    }).catch(() => {
-      const blob = new Blob([md], { type: 'text/markdown' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${draft.title.replace(/\s+/g, '-').toLowerCase()}.md`;
-      a.click();
-      toast.success('Draft exported');
-    });
+    return `# ${draft.title}\n\n${header}\n\n---\n\n${sections}`;
   }, [draft]);
+
+  const handleExportDraft = useCallback(async (format: 'clipboard' | 'md' | 'txt' | 'pdf' | 'docx') => {
+    setExporting(true);
+    setShowExportMenu(false);
+    try {
+      const content = buildDraftText();
+      const safeTitle = draft.title.replace(/[^a-zA-Z0-9\s-]/g, '').trim() || 'draft';
+
+      switch (format) {
+        case 'clipboard': {
+          await navigator.clipboard.writeText(content);
+          toast.success('Draft copied to clipboard');
+          break;
+        }
+        case 'md': {
+          downloadText(content, `${safeTitle}.md`, 'text/markdown');
+          toast.success('Markdown file downloaded');
+          break;
+        }
+        case 'txt': {
+          // Strip markdown formatting for plain text
+          const plain = content
+            .replace(/#{1,6}\s/g, '')
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+          downloadText(plain, `${safeTitle}.txt`, 'text/plain');
+          toast.success('Text file downloaded');
+          break;
+        }
+        case 'pdf': {
+          const blob = await exportToPdf(content, draft.title);
+          downloadBlob(blob, `${safeTitle}.pdf`);
+          toast.success('PDF downloaded');
+          break;
+        }
+        case 'docx': {
+          const blob = await exportToDocx(content, draft.title);
+          downloadBlob(blob, `${safeTitle}.docx`);
+          toast.success('DOCX downloaded');
+          break;
+        }
+      }
+    } catch (err) {
+      console.error('Export failed:', err);
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
+  }, [buildDraftText, draft.title]);
 
   return (
     <div className="p-4 space-y-4">
@@ -392,19 +559,41 @@ Return ONLY the section content — no section heading (it will be added automat
                 )}
               >
                 {generatingAll ? (
-                  <><Loader2 className="h-3 w-3 animate-spin" /> Generating...</>
+                  <><Loader2 className="h-3 w-3 animate-spin" /> {generateAllProgress ? `${generateAllProgress.current}/${generateAllProgress.total}` : 'Generating...'}</>
                 ) : (
                   <><Sparkles className="h-3 w-3" /> Generate All</>
                 )}
               </button>
             )}
-            <button
-              onClick={handleExportDraft}
-              className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-400"
-            >
-              <Download className="h-3 w-3" />
-              Export
-            </button>
+            <div className="relative" ref={exportMenuRef}>
+              <button
+                onClick={() => setShowExportMenu((p) => !p)}
+                disabled={exporting}
+                className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-400 disabled:opacity-50"
+              >
+                {exporting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                Export
+              </button>
+              {showExportMenu && (
+                <div className="absolute right-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-xl border border-surface-200 bg-white shadow-lg dark:border-surface-700 dark:bg-surface-850">
+                  <button onClick={() => handleExportDraft('clipboard')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                    <Copy className="h-3.5 w-3.5" /> Copy to clipboard
+                  </button>
+                  <button onClick={() => handleExportDraft('pdf')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                    <FileText className="h-3.5 w-3.5" /> Download PDF
+                  </button>
+                  <button onClick={() => handleExportDraft('docx')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                    <FileType className="h-3.5 w-3.5" /> Download DOCX
+                  </button>
+                  <button onClick={() => handleExportDraft('md')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                    <FileDown className="h-3.5 w-3.5" /> Download Markdown
+                  </button>
+                  <button onClick={() => handleExportDraft('txt')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                    <FileDown className="h-3.5 w-3.5" /> Download Plain Text
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

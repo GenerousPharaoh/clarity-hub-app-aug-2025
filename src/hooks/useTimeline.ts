@@ -219,9 +219,13 @@ export function useExtractTimeline() {
 
   return useMutation({
     mutationFn: async ({ projectId }: { projectId: string }) => {
+      const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch('/api/extract-timeline', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ projectId }),
       });
 

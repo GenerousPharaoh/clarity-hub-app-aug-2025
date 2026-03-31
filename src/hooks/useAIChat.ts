@@ -24,6 +24,7 @@ function rowToMessage(row: {
   file_context: string | null;
   created_at: string | null;
   sources?: unknown;
+  web_sources?: unknown;
   complexity?: string | null;
   effort_level?: string | null;
   follow_ups?: unknown;
@@ -36,6 +37,7 @@ function rowToMessage(row: {
     timestamp: row.created_at ? new Date(row.created_at) : new Date(),
     fileContext: row.file_context ?? undefined,
     sources: (row.sources as ChatSource[] | undefined) ?? undefined,
+    webSources: (row.web_sources as ChatMessage['webSources']) ?? undefined,
     complexity: row.complexity ?? undefined,
     effortLevel: (row.effort_level as EffortLevel) ?? undefined,
     followUps: (row.follow_ups as string[]) ?? undefined,
@@ -502,6 +504,7 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
 
         // Follow-ups are now returned by the server-side /api/ai-chat endpoint
         const followUps = result.followUps ?? [];
+        const webSources = result.webSources ?? [];
 
         // 2. Insert assistant message into DB
         const assistantRow = await insertMessage.mutateAsync({
@@ -516,11 +519,12 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           follow_ups: followUps.length > 0 ? followUps : null,
         });
 
-        // Remove loading indicator and add real response with effort + follow-ups
+        // Remove loading indicator and add real response with effort + follow-ups + web sources
         const assistantMsg: ChatMessage = {
           ...rowToMessage(assistantRow),
           effortLevel: effort,
           followUps: followUps.length > 0 ? followUps : undefined,
+          webSources: webSources.length > 0 ? webSources : undefined,
         };
         queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
           (old ?? []).filter((m) => m.id !== loadingId).concat(assistantMsg)

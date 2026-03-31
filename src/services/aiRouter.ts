@@ -147,6 +147,7 @@ class AIRouter {
     citations: string[];
     effortLevel: EffortLevel;
     followUps?: string[];
+    webSources?: Array<{ index: number; title: string; url: string }>;
   }> {
     const effort = params.effortLevel ?? 'standard';
     const complexity = this.classifyQuery(params.query);
@@ -187,6 +188,7 @@ class AIRouter {
       citations: result.citations || [],
       effortLevel: result.effortLevel || effort,
       followUps: result.followUps,
+      webSources: result.webSources,
     };
   }
 

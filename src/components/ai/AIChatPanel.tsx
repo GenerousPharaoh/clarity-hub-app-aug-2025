@@ -217,9 +217,14 @@ export function AIChatPanel() {
     return (
       <div className="flex h-full flex-col">
         <div className="flex flex-1 flex-col items-center justify-center px-6">
-          <Sparkles className="h-6 w-6 text-surface-300 dark:text-surface-500" />
-          <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
-            Select a project to start chatting.
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+            <Sparkles className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+          </div>
+          <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+            No Project Selected
+          </h3>
+          <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+            Select a project to start chatting with the AI assistant.
           </p>
         </div>
         {/* Disabled input area for visual context */}
@@ -290,6 +295,13 @@ export function AIChatPanel() {
                   content: m.content,
                   model: m.model,
                   timestamp: m.timestamp,
+                  sources: m.sources?.map((s) => ({
+                    sourceIndex: s.sourceIndex,
+                    fileName: s.fileName,
+                    pageNumber: s.pageNumber,
+                    sectionHeading: s.sectionHeading,
+                    contentPreview: s.contentPreview,
+                  })),
                 }))}
                 className="p-1.5 [&_span]:hidden"
               />

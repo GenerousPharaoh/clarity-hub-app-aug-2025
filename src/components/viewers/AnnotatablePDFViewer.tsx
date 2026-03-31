@@ -384,6 +384,7 @@ export function AnnotatablePDFViewer({
           onClose={() => setSidebarOpen(false)}
           onScrollTo={handleScrollToHighlight}
           onDelete={(a) => handleDeleteAnnotation(a)}
+          fileName={fileName}
         />
       </div>
     </div>

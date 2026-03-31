@@ -34,6 +34,13 @@ export interface ChatSource {
 // AI effort level for reasoning depth control
 export type EffortLevel = 'quick' | 'standard' | 'thorough' | 'deep';
 
+// Web search source (from Tavily/CanLII)
+export interface WebSource {
+  index: number;
+  title: string;
+  url: string;
+}
+
 // AI Chat types (UI representation)
 export interface ChatMessage {
   id: string;
@@ -43,6 +50,7 @@ export interface ChatMessage {
   timestamp: Date;
   fileContext?: string;
   sources?: ChatSource[];
+  webSources?: WebSource[];
   complexity?: string;
   effortLevel?: EffortLevel;
   followUps?: string[];

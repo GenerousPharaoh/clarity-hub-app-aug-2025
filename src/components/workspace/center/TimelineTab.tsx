@@ -16,8 +16,10 @@ import {
   Table2,
   Download,
   Import,
+  Copy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { buildTextTable } from '@/lib/export-utils';
 import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -138,7 +140,7 @@ export function TimelineTab() {
 
   const handleCreate = useCallback(async () => {
     if (!selectedProjectId || !user || !newDate.trim() || !newTitle.trim()) {
-      toast.error('Date and title are required');
+      toast.error('Date and title are required to create an event.');
       return;
     }
 
@@ -701,21 +703,51 @@ function ChronologyView({ projectId }: { projectId: string }) {
       const result = await importTimeline.mutateAsync({ projectId });
       toast.success(`Imported ${result.imported} events`);
     } catch {
-      toast.error('Failed to import timeline events');
+      toast.error('Could not import timeline events. Ensure events exist in the Events tab.');
     }
   }, [projectId, importTimeline]);
 
   const handleExportCSV = useCallback(() => {
     if (!entries?.length) return;
-    const rows = entries.filter((e) => e.is_included).map((e) =>
-      `"${e.date_display}","${e.description.replace(/"/g, '""')}","${e.source_description || ''}","${e.exhibit_ref || ''}","${e.category || ''}"`
+    const included = entries.filter((e) => e.is_included);
+    const csvEscape = (val: string) => `"${val.replace(/"/g, '""')}"`;
+    const header = ['No.', 'Date', 'Event', 'Source', 'Exhibit Ref.', 'Category', 'Included'].map(csvEscape).join(',');
+    const rows = included.map((e, i) =>
+      [
+        String(i + 1),
+        e.date_display,
+        e.description,
+        e.source_description || '',
+        e.exhibit_ref || '',
+        e.category || '',
+        e.is_included ? 'Yes' : 'No',
+      ].map(csvEscape).join(',')
     ).join('\n');
-    const blob = new Blob([`"Date","Event","Source","Exhibit","Category"\n${rows}`], { type: 'text/csv' });
+    const blob = new Blob([`${header}\n${rows}`], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'chronology.csv';
     a.click();
-    toast.success('Chronology exported');
+    toast.success('Chronology exported as CSV');
+  }, [entries]);
+
+  const handleCopyAsTable = useCallback(() => {
+    if (!entries?.length) return;
+    const included = entries.filter((e) => e.is_included);
+    const headers = ['No.', 'Date', 'Event', 'Source', 'Exhibit'];
+    const rows = included.map((e, i) => [
+      String(i + 1),
+      e.date_display,
+      e.description,
+      e.source_description || '',
+      e.exhibit_ref || '',
+    ]);
+    const table = buildTextTable(headers, rows);
+    navigator.clipboard.writeText(table).then(() => {
+      toast.success('Chronology table copied to clipboard');
+    }).catch(() => {
+      toast.error('Failed to copy to clipboard');
+    });
   }, [entries]);
 
   const handleAddPendingEntry = useCallback(async () => {
@@ -730,7 +762,7 @@ function ChronologyView({ projectId }: { projectId: string }) {
       clearPendingEntry(null);
       toast.success('Added to chronology');
     } catch {
-      toast.error('Failed to add entry');
+      toast.error('Could not add chronology entry. Check your connection and try again.');
     }
   }, [pendingEntry, projectId, createEntry, clearPendingEntry]);
 
@@ -774,8 +806,12 @@ function ChronologyView({ projectId }: { projectId: string }) {
           Import from Timeline
         </button>
         <button onClick={handleExportCSV} disabled={!entries?.length}
-          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300">
+          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300 disabled:opacity-50">
           <Download className="h-3 w-3" /> Export CSV
+        </button>
+        <button onClick={handleCopyAsTable} disabled={!entries?.length}
+          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300 disabled:opacity-50">
+          <Copy className="h-3 w-3" /> Copy Table
         </button>
         <button
           onClick={() => {
@@ -795,10 +831,33 @@ function ChronologyView({ projectId }: { projectId: string }) {
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-surface-400" /></div>
         ) : !entries?.length ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Table2 className="h-8 w-8 text-surface-300 dark:text-surface-600" />
-            <p className="mt-3 text-sm font-medium text-surface-500">No chronology entries</p>
-            <p className="mt-1 text-xs text-surface-400">Click "Import from Timeline" to populate.</p>
+          <div className="flex flex-col items-center justify-center py-12 px-8 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+              <Table2 className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+            </div>
+            <h3 className="mt-3 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+              No Chronology Entries
+            </h3>
+            <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+              Import events from the timeline, or add entries manually.
+            </p>
+            <button
+              onClick={handleImport}
+              disabled={importTimeline.isPending}
+              className={cn(
+                'mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2',
+                'bg-primary-600 text-sm font-medium text-white',
+                'transition-colors hover:bg-primary-700',
+                'disabled:opacity-50'
+              )}
+            >
+              {importTimeline.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Import className="h-3.5 w-3.5" />
+              )}
+              Import from Timeline
+            </button>
           </div>
         ) : (
           <table className="min-w-full text-sm">

@@ -127,7 +127,7 @@ export function useImportFromTimeline() {
         .from('timeline_events')
         .select('*')
         .eq('project_id', projectId)
-        .order('event_date');
+        .order('date');
 
       if (error) throw error;
       if (!events || events.length === 0) return { imported: 0 };

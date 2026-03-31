@@ -9,17 +9,17 @@ interface FadeInProps extends HTMLMotionProps<'div'> {
 }
 
 const directionMap = {
-  up: { y: 12 },
-  down: { y: -12 },
-  left: { x: 12 },
-  right: { x: -12 },
+  up: { y: 6 },
+  down: { y: -6 },
+  left: { x: 6 },
+  right: { x: -6 },
   none: {},
 };
 
 export function FadeIn({
   children,
   delay = 0,
-  duration = 0.3,
+  duration = 0.2,
   direction = 'up',
   ...props
 }: FadeInProps) {
@@ -30,7 +30,7 @@ export function FadeIn({
       transition={{
         duration,
         delay,
-        ease: [0.16, 1, 0.3, 1],
+        ease: 'easeOut',
       }}
       {...props}
     >

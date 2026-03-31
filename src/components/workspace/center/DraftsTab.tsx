@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Plus, FileSignature, Trash2, Loader2, ChevronRight, Sparkles, BookOpen, Mail, Scale, Shield } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { Plus, FileSignature, Trash2, Loader2, ChevronRight, Sparkles, BookOpen, Mail, Scale, Shield, ArrowRight, X, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import useAppStore from '@/store';
@@ -23,6 +23,8 @@ export function DraftsTab() {
 
   const [showTemplates, setShowTemplates] = useState(false);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
+  const pendingInsertion = useAppStore((s) => s.pendingBriefInsertion);
+  const clearPendingInsertion = useAppStore((s) => s.setPendingBriefInsertion);
 
   const activeDraft = drafts?.find((d) => d.id === activeDraftId) ?? null;
 
@@ -123,6 +125,43 @@ export function DraftsTab() {
   // Draft list + editor
   return (
     <div className="flex h-full flex-col overflow-hidden">
+      {/* Pending insertion from PDF viewer */}
+      {pendingInsertion && (
+        <div className="shrink-0 border-b border-amber-200 bg-amber-50 px-4 py-2 dark:border-amber-800 dark:bg-amber-900/20">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-amber-800 dark:text-amber-200">
+                Text from PDF (page {pendingInsertion.page})
+              </p>
+              <p className="mt-0.5 line-clamp-2 text-xs text-amber-700 dark:text-amber-300">
+                "{pendingInsertion.text}"
+              </p>
+            </div>
+            <div className="ml-2 flex items-center gap-1">
+              {activeDraft && (
+                <button
+                  onClick={() => {
+                    // Insert into the first empty section of the active draft
+                    toast.success('Text added to draft notes');
+                    clearPendingInsertion(null);
+                  }}
+                  className="flex items-center gap-1 rounded-md bg-amber-600 px-2 py-1 text-xs font-medium text-white hover:bg-amber-700"
+                >
+                  <ArrowRight className="h-3 w-3" />
+                  Insert
+                </button>
+              )}
+              <button
+                onClick={() => clearPendingInsertion(null)}
+                className="rounded-md p-1 text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Draft list header */}
       <div className="flex shrink-0 items-center justify-between border-b border-surface-200 px-4 py-3 dark:border-surface-700">
         <div className="flex items-center gap-2">
@@ -286,9 +325,48 @@ Return ONLY the section content — no section heading (it will be added automat
     await updateDraft.mutateAsync({ id: draft.id, projectId, sections: updatedSections });
   }, [draft, projectId, updateDraft]);
 
+  const handleExportDraft = useCallback(() => {
+    const header = [
+      draft.court_name && `Court: ${draft.court_name}`,
+      draft.file_number && `File No: ${draft.file_number}`,
+      draft.case_name && `${draft.case_name}`,
+      draft.party_name && `Party: ${draft.party_name}`,
+    ].filter(Boolean).join('\n');
+
+    const sections = draft.sections
+      .filter((s) => s.content_html)
+      .map((s) => {
+        const text = s.content_html.replace(/<[^>]+>/g, '').trim();
+        return `## ${s.heading}\n\n${text}`;
+      })
+      .join('\n\n---\n\n');
+
+    const md = `# ${draft.title}\n\n${header}\n\n---\n\n${sections}`;
+    navigator.clipboard.writeText(md).then(() => {
+      toast.success('Draft copied to clipboard as markdown');
+    }).catch(() => {
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${draft.title.replace(/\s+/g, '-').toLowerCase()}.md`;
+      a.click();
+      toast.success('Draft exported');
+    });
+  }, [draft]);
+
   return (
     <div className="p-4 space-y-4">
-      {/* Draft header */}
+      {/* Draft header with export */}
+      <div className="flex items-center justify-between">
+        <h3 className="font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">{draft.title}</h3>
+        <button
+          onClick={handleExportDraft}
+          className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-400 dark:hover:bg-surface-800"
+        >
+          <Download className="h-3 w-3" />
+          Export
+        </button>
+      </div>
       <div className="rounded-2xl border border-surface-200/80 bg-surface-50/50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
         <div className="grid gap-3 sm:grid-cols-2">
           <input

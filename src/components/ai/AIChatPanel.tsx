@@ -89,6 +89,19 @@ export function AIChatPanel() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Listen for "Ask AI about this text" events from the PDF viewer
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.text) {
+        setInput(`Analyze this passage:\n\n"${detail.text}"`);
+        textareaRef.current?.focus();
+      }
+    };
+    window.addEventListener('ask-ai-about-text', handler);
+    return () => window.removeEventListener('ask-ai-about-text', handler);
+  }, []);
+
   // Track panel width to switch to compact layouts when the panel is narrow.
   useEffect(() => {
     const el = panelRef.current;

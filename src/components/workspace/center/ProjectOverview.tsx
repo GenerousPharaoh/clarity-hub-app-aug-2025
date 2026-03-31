@@ -324,6 +324,9 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           <CaseAnalysisCard projectId={selectedProjectId} fileCount={processedCount} />
         )}
 
+        {/* Highlights Summary */}
+        <HighlightsSummaryCard projectId={selectedProjectId} />
+
         <div className="grid items-stretch gap-4 @md:grid-cols-2">
           {fileCount > 0 ? (
             <FileTypeBreakdown files={projectFiles} />
@@ -1166,6 +1169,84 @@ function AnalysisRenderer({ content }: { content: string }) {
         }
         return <p key={i} className="mb-1 text-[13px]">{line}</p>;
       })}
+    </div>
+  );
+}
+
+/** Highlights summary card on the overview — shows annotation count across all files. */
+function HighlightsSummaryCard({ projectId }: { projectId: string | null }) {
+  const [highlights, setHighlights] = useState<Array<{ selected_text: string | null; comment: string | null; color: string | null; page_number: number; file_name?: string }>>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!projectId) return;
+    setLoading(true);
+    import('@/lib/supabase').then(({ supabase }) => {
+      supabase
+        .from('pdf_annotations')
+        .select('selected_text, comment, color, page_number')
+        .eq('project_id', projectId)
+        .not('selected_text', 'is', null)
+        .order('page_number')
+        .then(({ data }) => {
+          setHighlights((data ?? []) as typeof highlights);
+          setLoading(false);
+        });
+    });
+  }, [projectId]);
+
+  if (loading || highlights.length === 0) return null;
+
+  const handleCopyAll = () => {
+    const md = highlights.map((h) => {
+      let line = `> ${h.selected_text}`;
+      if (h.comment) line += `\n**Note:** ${h.comment}`;
+      return line;
+    }).join('\n\n---\n\n');
+    navigator.clipboard.writeText(md).catch(() => {});
+  };
+
+  return (
+    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
+            <Tag className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-surface-700 dark:text-surface-200">
+              Highlights
+            </h3>
+            <p className="text-xs text-surface-400 dark:text-surface-500">
+              {highlights.length} passage{highlights.length !== 1 ? 's' : ''} highlighted across your files
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={handleCopyAll}
+          className="flex items-center gap-1 rounded-full bg-surface-100 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+        >
+          Copy all
+        </button>
+      </div>
+
+      {/* Preview of recent highlights */}
+      <div className="mt-3 space-y-2">
+        {highlights.slice(0, 3).map((h, i) => (
+          <div key={i} className="flex items-start gap-2 rounded-lg bg-surface-50 px-3 py-2 dark:bg-surface-800/50">
+            <span className="mt-0.5 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: h.color ?? '#FFEB3B' }} />
+            <div className="min-w-0 flex-1">
+              <p className="line-clamp-2 text-xs text-surface-600 dark:text-surface-300">"{h.selected_text}"</p>
+              {h.comment && (
+                <p className="mt-0.5 text-[11px] font-medium text-blue-600 dark:text-blue-400">{h.comment}</p>
+              )}
+            </div>
+          </div>
+        ))}
+        {highlights.length > 3 && (
+          <p className="text-center text-xs text-surface-400">+{highlights.length - 3} more</p>
+        )}
+      </div>
     </div>
   );
 }

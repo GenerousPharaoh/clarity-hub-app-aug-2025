@@ -30,7 +30,7 @@ import {
   useExtractTimeline,
 } from '@/hooks/useTimeline';
 import type { TimelineEvent } from '@/hooks/useTimeline';
-import { useChronologyEntries, useImportFromTimeline, useDeleteChronologyEntry } from '@/hooks/useChronology';
+import { useChronologyEntries, useImportFromTimeline, useDeleteChronologyEntry, useCreateChronologyEntry } from '@/hooks/useChronology';
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   employment: {
@@ -675,6 +675,9 @@ function ChronologyView({ projectId }: { projectId: string }) {
   const { data: entries, isLoading } = useChronologyEntries(projectId);
   const importTimeline = useImportFromTimeline();
   const deleteEntry = useDeleteChronologyEntry();
+  const createEntry = useCreateChronologyEntry();
+  const pendingEntry = useAppStore((s) => s.pendingChronologyEntry);
+  const clearPendingEntry = useAppStore((s) => s.setPendingChronologyEntry);
 
   const handleImport = useCallback(async () => {
     try {
@@ -698,8 +701,55 @@ function ChronologyView({ projectId }: { projectId: string }) {
     toast.success('Chronology exported');
   }, [entries]);
 
+  const handleAddPendingEntry = useCallback(async () => {
+    if (!pendingEntry) return;
+    try {
+      await createEntry.mutateAsync({
+        project_id: projectId,
+        date_display: pendingEntry.date || 'Unknown date',
+        description: pendingEntry.text,
+        source_description: `Page ${pendingEntry.page}`,
+      });
+      clearPendingEntry(null);
+      toast.success('Added to chronology');
+    } catch {
+      toast.error('Failed to add entry');
+    }
+  }, [pendingEntry, projectId, createEntry, clearPendingEntry]);
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Pending entry from PDF viewer */}
+      {pendingEntry && (
+        <div className="shrink-0 border-b border-emerald-200 bg-emerald-50 px-4 py-2 dark:border-emerald-800 dark:bg-emerald-900/20">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">
+                Add to chronology (page {pendingEntry.page})
+              </p>
+              <p className="mt-0.5 line-clamp-2 text-xs text-emerald-700 dark:text-emerald-300">
+                "{pendingEntry.text}"
+              </p>
+            </div>
+            <div className="ml-2 flex items-center gap-1">
+              <button
+                onClick={handleAddPendingEntry}
+                className="flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700"
+              >
+                <Plus className="h-3 w-3" />
+                Add
+              </button>
+              <button
+                onClick={() => clearPendingEntry(null)}
+                className="rounded-md p-1 text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 border-b border-surface-200 px-4 py-2 dark:border-surface-700">
         <button onClick={handleImport} disabled={importTimeline.isPending}
           className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300">

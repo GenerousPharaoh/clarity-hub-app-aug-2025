@@ -30,7 +30,7 @@ function savePanelState(state: PersistedPanelState) {
 
 export type RightTab = 'viewer' | 'ai';
 export type MobileTab = 'files' | 'content' | 'viewer';
-export type CenterTab = 'overview' | 'editor' | 'exhibits' | 'timeline';
+export type CenterTab = 'overview' | 'editor' | 'exhibits' | 'timeline' | 'drafts';
 
 export interface PanelSlice {
   isLeftPanelOpen: boolean;

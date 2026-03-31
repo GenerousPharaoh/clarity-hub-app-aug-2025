@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import useAppStore from '@/store';
 import { getFileUrl, getSignedUrl } from '@/services/storageService';
 import { getFileType, cn } from '@/lib/utils';
-import { FileSearch, MessageSquareText, RefreshCw } from 'lucide-react';
+import { FileSearch, MessageSquareText, RefreshCw, Loader2 } from 'lucide-react';
 import { PDFViewer } from './PDFViewer';
 import { ImageViewer } from './ImageViewer';
 import { AudioViewer } from './AudioViewer';
@@ -11,6 +11,30 @@ import { TextViewer } from './TextViewer';
 import { DocumentViewer } from './DocumentViewer';
 import { EmptyViewer } from './EmptyViewer';
 import { saveWorkspaceFile } from '@/lib/workspaceSession';
+
+// Lazy-load the annotatable PDF viewer — heavy dependency (pdfjs + highlighter)
+const AnnotatablePDFViewer = lazy(async () => {
+  try {
+    const mod = await import('./AnnotatablePDFViewer');
+    return { default: mod.AnnotatablePDFViewer };
+  } catch {
+    // If chunk fails to load (e.g. new deployment), try one reload
+    const reloadKey = 'annotatable-pdf-chunk-reload';
+    if (!sessionStorage.getItem(reloadKey)) {
+      sessionStorage.setItem(reloadKey, '1');
+      window.location.reload();
+    }
+    // Fallback: wrap the old iframe-based PDFViewer
+    const fallback = await import('./PDFViewer');
+    const FallbackViewer = (props: {
+      url: string;
+      fileName: string;
+      fileId?: string;
+      projectId?: string;
+    }) => fallback.PDFViewer({ url: props.url, fileName: props.fileName });
+    return { default: FallbackViewer };
+  }
+});
 
 export function FileViewer() {
   const selectedFileId = useAppStore((s) => s.selectedFileId);
@@ -228,7 +252,23 @@ export function FileViewer() {
   // Render the appropriate viewer based on file type
   switch (fileType) {
     case 'pdf':
-      return <PDFViewer url={fileUrl} fileName={selectedFile.name} />;
+      return (
+        <Suspense
+          fallback={
+            <div className="flex h-full flex-col items-center justify-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+              <span className="text-xs text-surface-400">Loading viewer...</span>
+            </div>
+          }
+        >
+          <AnnotatablePDFViewer
+            url={fileUrl}
+            fileName={selectedFile.name}
+            fileId={selectedFile.id}
+            projectId={selectedFile.project_id}
+          />
+        </Suspense>
+      );
     case 'image':
       return <ImageViewer url={fileUrl} fileName={selectedFile.name} />;
     case 'audio':

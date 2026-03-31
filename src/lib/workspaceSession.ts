@@ -2,7 +2,7 @@ import type { FileRecord, Note, Project } from '@/types';
 
 const WORKSPACE_SESSION_KEY = 'clarity-hub-workspace-session-v1';
 
-export type WorkspaceCenterTab = 'overview' | 'editor' | 'exhibits' | 'timeline';
+export type WorkspaceCenterTab = 'overview' | 'editor' | 'exhibits' | 'timeline' | 'drafts';
 export type WorkspaceRightTab = 'viewer' | 'ai';
 
 export interface WorkspaceSession {

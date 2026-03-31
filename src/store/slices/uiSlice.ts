@@ -35,6 +35,11 @@ export interface UISlice {
   setProcessOnUpload: (enabled: boolean) => void;
   newNoteRequestNonce: number;
   requestNewNote: () => void;
+  // Cross-panel communication for PDF annotation → brief/chronology
+  pendingBriefInsertion: { text: string; fileId: string; fileName: string; page: number } | null;
+  setPendingBriefInsertion: (data: { text: string; fileId: string; fileName: string; page: number } | null) => void;
+  pendingChronologyEntry: { text: string; fileId: string; fileName: string; page: number; date?: string } | null;
+  setPendingChronologyEntry: (data: { text: string; fileId: string; fileName: string; page: number; date?: string } | null) => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -54,4 +59,8 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   newNoteRequestNonce: 0,
   requestNewNote: () =>
     set((state) => ({ newNoteRequestNonce: state.newNoteRequestNonce + 1 })),
+  pendingBriefInsertion: null,
+  setPendingBriefInsertion: (data) => set({ pendingBriefInsertion: data }),
+  pendingChronologyEntry: null,
+  setPendingChronologyEntry: (data) => set({ pendingChronologyEntry: data }),
 });

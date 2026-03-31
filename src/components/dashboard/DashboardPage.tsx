@@ -150,10 +150,10 @@ export function DashboardPage() {
         <FadeIn>
           <section
             className={cn(
-              'relative overflow-hidden rounded-2xl border p-5 sm:p-6',
-              'border-surface-200/80 bg-white',
+              'relative overflow-hidden rounded-2xl border border-l-[3px] p-5 sm:p-6',
+              'border-surface-200/80 border-l-primary-500 bg-white',
               'shadow-sm',
-              'dark:border-surface-800 dark:bg-surface-900'
+              'dark:border-surface-800 dark:border-l-primary-500 dark:bg-surface-900'
             )}
           >
             <div className="relative min-w-0">
@@ -379,16 +379,26 @@ function MetricCard({
   detail: string;
   tone?: string;
 }) {
+  const toneColors: Record<string, string> = {
+    primary: 'border-l-primary-500',
+    emerald: 'border-l-emerald-500',
+    neutral: 'border-l-surface-300 dark:border-l-surface-600',
+  };
+
   return (
-    <div className="flex min-w-0 flex-col rounded-2xl border border-translucent bg-white/90 p-4 shadow-sm dark:bg-surface-900/70">
-      <div className="flex items-center gap-2 text-sm font-medium text-current/80">
+    <div className={cn(
+      'flex min-w-0 flex-col rounded-2xl border border-surface-200/80 bg-white p-4 dark:border-surface-800 dark:bg-surface-900/70',
+      'border-l-[3px]',
+      toneColors[tone ?? 'neutral']
+    )}>
+      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-surface-400 dark:text-surface-500">
         {icon}
         <span>{label}</span>
       </div>
-      <p className="mt-2 font-heading text-2xl font-semibold tracking-tight [overflow-wrap:anywhere]">
+      <p className="mt-2 font-heading text-2xl font-semibold tracking-tight text-surface-900 dark:text-surface-100 [overflow-wrap:anywhere]">
         {value}
       </p>
-      <p className="mt-auto text-xs leading-5 text-current/70 [overflow-wrap:anywhere]">
+      <p className="mt-auto text-xs leading-5 text-surface-500 dark:text-surface-400 [overflow-wrap:anywhere]">
         {detail}
       </p>
     </div>

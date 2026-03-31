@@ -74,7 +74,7 @@ export function LoginPage() {
             <br />
             management,
             <br />
-            <span className="text-surface-400">reimagined.</span>
+            <span className="bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">reimagined.</span>
           </h1>
           <p className="text-sm text-surface-400 max-w-sm leading-relaxed">
             Organize evidence, annotate documents, draft legal filings, and build case theory with AI-powered intelligence.
@@ -114,9 +114,14 @@ export function LoginPage() {
           <h2 className="font-heading text-2xl font-semibold text-surface-900 dark:text-surface-100 mb-2">
             Welcome back
           </h2>
-          <p className="text-sm text-surface-500 dark:text-surface-400 mb-8">
+          <p className="text-sm text-surface-500 dark:text-surface-400 mb-1">
             Sign in to access your workspace
           </p>
+          <div className="mb-8 mt-3 flex gap-1">
+            <div className="h-1 w-8 rounded-full bg-primary-500" />
+            <div className="h-1 w-3 rounded-full bg-primary-300" />
+            <div className="h-1 w-1.5 rounded-full bg-primary-200" />
+          </div>
 
           {authError && (
             <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 dark:border-red-800/50 dark:bg-red-950/30">

@@ -5,31 +5,31 @@
 
 /* ── Design Tokens ─────────────────────────────────────── */
 @theme {
-  /* Primary - Ink blue */
-  --color-primary-50: #f3f6f8;
-  --color-primary-100: #e7edf2;
-  --color-primary-200: #d1dbe4;
-  --color-primary-300: #afbfcd;
-  --color-primary-400: #8498ab;
-  --color-primary-500: #62798f;
-  --color-primary-600: #4d6379;
-  --color-primary-700: #3b4f63;
-  --color-primary-800: #2c3d4f;
-  --color-primary-900: #1e2b39;
-  --color-primary-950: #111923;
+  /* Primary - Modern indigo */
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+  --color-primary-950: #1e1b4b;
 
-  /* Accent - Burnished copper */
-  --color-accent-50: #fbf7f1;
-  --color-accent-100: #f4ecdf;
-  --color-accent-200: #e8d6bc;
-  --color-accent-300: #d7b88e;
-  --color-accent-400: #c1945c;
-  --color-accent-500: #a5743f;
-  --color-accent-600: #875f33;
-  --color-accent-700: #694a29;
-  --color-accent-800: #533a21;
-  --color-accent-900: #412f1c;
-  --color-accent-950: #261a10;
+  /* Accent - Warm amber */
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #fbbf24;
+  --color-accent-500: #f59e0b;
+  --color-accent-600: #d97706;
+  --color-accent-700: #b45309;
+  --color-accent-800: #92400e;
+  --color-accent-900: #78350f;
+  --color-accent-950: #451a03;
 
   /* Surfaces - Zinc-based for modern neutral feel */
   --color-surface-50: #fafafa;
@@ -49,7 +49,7 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
-  --color-info: #4d6379;
+  --color-info: #6366f1;
 
   /* Radii */
   --radius-sm: 6px;
@@ -72,8 +72,8 @@
     0 4px 8px hsl(220 40% 2% / 0.04),
     0 8px 16px hsl(220 40% 2% / 0.05),
     0 16px 32px hsl(220 40% 2% / 0.06);
-  --shadow-glow-primary: 0 0 24px rgb(77 99 121 / 0.18);
-  --shadow-glow-accent: 0 0 20px rgb(135 95 51 / 0.14);
+  --shadow-glow-primary: 0 0 24px rgb(99 102 241 / 0.2);
+  --shadow-glow-accent: 0 0 20px rgb(245 158 11 / 0.18);
 
   /* Motion */
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);

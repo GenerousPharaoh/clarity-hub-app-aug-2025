@@ -513,7 +513,7 @@ export function AIChatPanel() {
             className={cn(
               'flex h-10 w-10 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg transition-all',
               input.trim() && !isLoading
-                ? 'bg-accent-600 text-white shadow-sm shadow-accent-500/25 hover:bg-accent-700 hover:shadow-md hover:shadow-accent-500/40 hover:shadow-[0_0_12px_rgba(165,116,63,0.3)] active:scale-95'
+                ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/25 hover:bg-primary-700 hover:shadow-md hover:shadow-primary-500/30 active:scale-95'
                 : 'bg-surface-200 text-surface-400 dark:bg-surface-700 dark:text-surface-500'
             )}
             title="Send message"

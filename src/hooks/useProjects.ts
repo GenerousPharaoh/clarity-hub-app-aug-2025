@@ -96,11 +96,12 @@ export function useCreateProject() {
   const addProject = useAppStore((s) => s.addProject);
 
   return useMutation({
-    mutationFn: async (input: { name: string; description?: string }) => {
+    mutationFn: async (input: { name: string; description?: string; goal_type?: string }) => {
       if (isDemoMode) {
         return createDemoProject({
           name: input.name,
           description: input.description,
+          goalType: input.goal_type,
           ownerId: user?.id ?? null,
         });
       }
@@ -109,6 +110,7 @@ export function useCreateProject() {
       const insert: TablesInsert<'projects'> = {
         name: input.name.trim(),
         description: input.description?.trim() || null,
+        goal_type: input.goal_type?.trim() || null,
         owner_id: user.id,
       };
 

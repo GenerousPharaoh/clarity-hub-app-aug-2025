@@ -3,10 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, FolderPlus, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+const MATTER_TYPES = [
+  'General',
+  'Employment',
+  'Civil Litigation',
+  'Human Rights',
+  'Contract',
+  'Regulatory',
+] as const;
+
 interface CreateProjectDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; description?: string }) => void;
+  onSubmit: (data: { name: string; description?: string; goal_type?: string }) => void;
   isLoading?: boolean;
 }
 
@@ -18,6 +27,7 @@ export function CreateProjectDialog({
 }: CreateProjectDialogProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [goalType, setGoalType] = useState('');
   const [nameTouched, setNameTouched] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,6 +38,7 @@ export function CreateProjectDialog({
     if (open) {
       setName('');
       setDescription('');
+      setGoalType('');
       setNameTouched(false);
       // Focus after animation
       setTimeout(() => nameInputRef.current?.focus(), 150);
@@ -49,7 +60,11 @@ export function CreateProjectDialog({
     setNameTouched(true);
     const trimmed = name.trim();
     if (!trimmed || isLoading) return;
-    onSubmit({ name: trimmed, description: description.trim() || undefined });
+    onSubmit({
+      name: trimmed,
+      description: description.trim() || undefined,
+      goal_type: goalType || undefined,
+    });
   };
 
   const isValid = name.trim().length > 0;
@@ -160,6 +175,42 @@ export function CreateProjectDialog({
                     {name.length}/120
                   </span>
                 </div>
+              </div>
+
+              {/* Matter type field */}
+              <div className="mb-4">
+                <label
+                  htmlFor="project-goal-type"
+                  className="mb-1.5 block text-sm font-medium text-surface-700 dark:text-surface-300"
+                >
+                  Matter type{' '}
+                  <span className="font-normal text-surface-400 dark:text-surface-500">
+                    (optional)
+                  </span>
+                </label>
+                <select
+                  id="project-goal-type"
+                  value={goalType}
+                  onChange={(e) => setGoalType(e.target.value)}
+                  disabled={isLoading}
+                  className={cn(
+                    'w-full rounded-lg border border-surface-200 px-3 py-2.5',
+                    'text-sm text-surface-900',
+                    'transition-colors',
+                    'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
+                    'disabled:cursor-not-allowed disabled:opacity-60',
+                    'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-100',
+                    'dark:focus:border-primary-400 dark:focus:ring-primary-400/20',
+                    !goalType && 'text-surface-400 dark:text-surface-500'
+                  )}
+                >
+                  <option value="">Select a type...</option>
+                  {MATTER_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Description field */}

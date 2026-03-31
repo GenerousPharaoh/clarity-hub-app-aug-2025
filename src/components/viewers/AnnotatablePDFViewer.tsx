@@ -36,12 +36,15 @@ import {
   FileSignature,
   Clock,
   Save,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
 import {
   useFileAnnotations,
   useCreateAnnotation,
+  useUpdateAnnotation,
   useDeleteAnnotation,
 } from '@/hooks/useAnnotations';
 import {
@@ -461,31 +464,13 @@ function PdfHighlighterInner({
 function HighlightContainer() {
   const {
     highlight,
-    viewportToScaled,
-    screenshot,
     isScrolledTo,
-    highlightBindings,
   } = useHighlightContainerContext<AnnotationHighlight>();
-
-  const { toggleEditInProgress } = usePdfHighlighterContext();
 
   const isTextHighlight = highlight.type !== 'area';
 
   const tipContent = (
-    <div className="rounded-lg border border-surface-200 bg-white px-3 py-2 shadow-lg dark:border-surface-700 dark:bg-surface-900">
-      {highlight.content?.text && (
-        <p className="max-w-[200px] text-xs leading-relaxed text-surface-600 dark:text-surface-300">
-          {highlight.content.text.length > 100
-            ? highlight.content.text.slice(0, 100) + '...'
-            : highlight.content.text}
-        </p>
-      )}
-      {('comment' in highlight) && (highlight as unknown as AnnotationHighlight).comment && (
-        <p className="mt-1 max-w-[200px] text-[11px] italic text-surface-400 dark:text-surface-500">
-          {highlight.comment}
-        </p>
-      )}
-    </div>
+    <HighlightActionPopover highlight={highlight} />
   );
 
   const highlightTip: Tip = {
@@ -517,6 +502,169 @@ function HighlightContainer() {
     </MonitoredHighlightContainer>
   );
 }
+
+/** Action popover shown when clicking an existing highlight on the PDF. */
+function HighlightActionPopover({ highlight: rawHighlight }: { highlight: unknown }) {
+  // Cast to a workable shape
+  const highlight = rawHighlight as { id: string; color: string; comment?: string; content?: { text?: string } };
+  const [editing, setEditing] = useState(false);
+  const [commentText, setCommentText] = useState(highlight.comment ?? '');
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const updateAnnotation = useUpdateAnnotation();
+  const deleteAnnotation = useDeleteAnnotation();
+  const { setTip } = usePdfHighlighterContext();
+
+  // The highlight.id is "annot-{uuid}" if from DB, or just the uuid
+  const annotationId = highlight.id.startsWith('annot-') ? highlight.id.slice(6) : highlight.id;
+
+  const handleDelete = useCallback(() => {
+    // We need fileId and projectId — get from the store
+    const state = useAppStore.getState();
+    const fileId = state.selectedFileId;
+    const projectId = state.selectedProjectId;
+    if (!fileId || !projectId) return;
+    deleteAnnotation.mutate({ id: annotationId, fileId, projectId });
+    setTip(null);
+  }, [annotationId, deleteAnnotation, setTip]);
+
+  const handleSaveComment = useCallback(() => {
+    updateAnnotation.mutate({ id: annotationId, comment: commentText.trim() || null });
+    setEditing(false);
+  }, [annotationId, commentText, updateAnnotation]);
+
+  const handleChangeColor = useCallback((newColor: string) => {
+    updateAnnotation.mutate({ id: annotationId, color: newColor });
+    setShowColorPicker(false);
+  }, [annotationId, updateAnnotation]);
+
+  const handleCopy = useCallback(() => {
+    if (highlight.content?.text) {
+      navigator.clipboard.writeText(highlight.content.text).catch(() => {});
+    }
+    setTip(null);
+  }, [highlight.content?.text, setTip]);
+
+  const handleAskAI = useCallback(() => {
+    if (highlight.content?.text) {
+      useAppStore.getState().setRightTab('ai');
+      useAppStore.getState().setRightPanel(true);
+    }
+    setTip(null);
+  }, [highlight.content?.text, setTip]);
+
+  if (editing) {
+    return (
+      <div className={cn(
+        'w-64 rounded-xl border border-surface-200 bg-white p-3 shadow-xl',
+        'dark:border-surface-700 dark:bg-surface-900',
+      )}>
+        <textarea
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
+          placeholder="Write a note..."
+          rows={3}
+          autoFocus
+          className="w-full resize-none rounded-lg border border-surface-200 px-2.5 py-2 text-xs text-surface-700 focus:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-300 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSaveComment(); }
+            if (e.key === 'Escape') setEditing(false);
+          }}
+        />
+        <div className="mt-2 flex justify-end gap-1">
+          <button onClick={() => setEditing(false)} className="rounded-md px-2.5 py-1 text-xs text-surface-400 hover:bg-surface-100">Cancel</button>
+          <button onClick={handleSaveComment} className="rounded-md bg-primary-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-primary-700">Save</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (showColorPicker) {
+    return (
+      <div className={cn(
+        'flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white p-2 shadow-xl',
+        'dark:border-surface-700 dark:bg-surface-900',
+      )}>
+        {HIGHLIGHT_COLORS.map((c) => (
+          <button
+            key={c.name}
+            onClick={() => handleChangeColor(c.value)}
+            className={cn(
+              'h-7 w-7 rounded-full transition-transform hover:scale-110',
+              highlight.color === c.value ? 'ring-2 ring-primary-500 ring-offset-1' : 'ring-1 ring-surface-200'
+            )}
+            style={{ backgroundColor: c.value }}
+            title={c.label}
+          />
+        ))}
+        <button onClick={() => setShowColorPicker(false)} className="ml-1 rounded-md p-1 text-surface-300 hover:bg-surface-100">
+          <XIcon className="h-3 w-3" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(
+      'rounded-xl border border-surface-200 bg-white shadow-xl overflow-hidden',
+      'dark:border-surface-700 dark:bg-surface-900',
+    )}>
+      {/* Text preview + comment */}
+      {(highlight.content?.text || ('comment' in highlight && highlight.comment)) && (
+        <div className="max-w-[240px] px-3 py-2 border-b border-surface-100 dark:border-surface-800">
+          {highlight.content?.text && (
+            <p className="line-clamp-2 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
+              "{highlight.content.text}"
+            </p>
+          )}
+          {highlight.comment && (
+            <div className="mt-1.5 rounded-md bg-blue-50 px-2 py-1 dark:bg-blue-900/20">
+              <p className="text-xs text-blue-800 dark:text-blue-200">
+                {highlight.comment}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex">
+        <button
+          onClick={() => setEditing(true)}
+          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
+          title="Edit note"
+        >
+          <Pencil className="h-3 w-3" />
+          Edit
+        </button>
+        <button
+          onClick={() => setShowColorPicker(true)}
+          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
+          title="Change color"
+        >
+          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: highlight.color }} />
+          Color
+        </button>
+        <button
+          onClick={handleCopy}
+          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
+          title="Copy text"
+        >
+          <Copy className="h-3 w-3" />
+          Copy
+        </button>
+        <button
+          onClick={handleDelete}
+          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+          title="Delete highlight"
+        >
+          <Trash2 className="h-3 w-3" />
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+}
+
 
 /**
  * Wrapper that reads the current selection from PdfHighlighter context

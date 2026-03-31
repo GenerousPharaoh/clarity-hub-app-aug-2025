@@ -119,7 +119,7 @@ export function DashboardPage() {
     });
   }, [fileCounts, projectQuery, projects, sortBy]);
 
-  const handleCreate = (data: { name: string; description?: string }) => {
+  const handleCreate = (data: { name: string; description?: string; goal_type?: string }) => {
     createProject.mutate(data, {
       onSuccess: (project) => {
         setDialogOpen(false);

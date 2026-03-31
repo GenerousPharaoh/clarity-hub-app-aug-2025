@@ -6,7 +6,7 @@ interface LoadingScreenProps {
 }
 
 /** Full-page loading screen for route transitions and initial app load */
-export function LoadingScreen({ message = 'Loading...' }: LoadingScreenProps) {
+export function LoadingScreen({ message = 'Loading your workspace...' }: LoadingScreenProps) {
   return (
     <motion.div
       initial={{ opacity: 1 }}

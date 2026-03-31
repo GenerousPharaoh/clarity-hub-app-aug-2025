@@ -348,6 +348,7 @@ export function getDemoProjectFileCounts(projectIds: string[]): Record<string, n
 export function createDemoProject(input: {
   name: string;
   description?: string;
+  goalType?: string;
   ownerId?: string | null;
 }): Project {
   return updateDemoState((state) => {
@@ -357,7 +358,7 @@ export function createDemoProject(input: {
       owner_id: input.ownerId ?? DEMO_USER_ID,
       name: input.name.trim(),
       description: input.description?.trim() || null,
-      goal_type: null,
+      goal_type: input.goalType?.trim() || null,
       created_at: now,
       updated_at: now,
     };

@@ -353,7 +353,7 @@ export function AIChatPanel() {
       </div>
 
       {/* Input area */}
-      <div className={cn('shrink-0 border-t border-surface-200 dark:border-surface-700', compact ? 'p-2' : 'p-3')}>
+      <div className={cn('shrink-0 border-t border-surface-200 dark:border-surface-700', compact ? 'p-2' : 'p-4')}>
         {isDemoMode && (
           <div className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800/50 dark:bg-amber-900/20">
             <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-300">
@@ -491,9 +491,9 @@ export function AIChatPanel() {
 
         <div
           className={cn(
-            'flex items-end gap-2 rounded-xl border p-2 transition-all',
-            'border border-translucent bg-white shadow-sm dark:bg-surface-800',
-            'focus-within:border-accent-300 focus-within:ring-2 focus-within:ring-accent-100 focus-within:shadow-md dark:focus-within:border-accent-600 dark:focus-within:ring-accent-900/30'
+            'flex items-end gap-2 rounded-2xl border p-3 transition-all',
+            'border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800',
+            'focus-within:border-accent-400 focus-within:ring-2 focus-within:ring-accent-100 focus-within:shadow-md dark:focus-within:border-accent-500 dark:focus-within:ring-accent-900/30'
           )}
         >
           <textarea
@@ -504,8 +504,8 @@ export function AIChatPanel() {
             rows={1}
             placeholder={compact ? 'Ask...' : 'Ask about your case...'}
             disabled={isLoading}
-            className="flex-1 resize-none bg-transparent text-sm text-surface-700 placeholder:text-surface-400 focus:outline-none disabled:opacity-50 dark:text-surface-200 dark:placeholder:text-surface-500"
-            style={{ minHeight: '24px', maxHeight: '120px' }}
+            className="flex-1 resize-none bg-transparent text-sm leading-relaxed text-surface-700 placeholder:text-surface-400 focus:outline-none disabled:opacity-50 dark:text-surface-200 dark:placeholder:text-surface-500"
+            style={{ minHeight: '28px', maxHeight: '140px' }}
           />
           <button
             onClick={() => handleSend()}

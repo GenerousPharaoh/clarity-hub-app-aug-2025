@@ -36,21 +36,20 @@ export function Header() {
   return (
     <header
       className={cn(
-        'glass surface-grain flex h-12 shrink-0 items-center justify-between gap-2 px-2 sm:px-4',
-        'border-b border-translucent',
-        'shadow-[0_1px_3px_0_rgb(0_0_0/0.04)]',
-        'dark:shadow-[0_1px_3px_0_rgb(0_0_0/0.3)]'
+        'glass flex h-14 shrink-0 items-center justify-between gap-3 px-4 sm:px-5',
+        'border-b border-surface-200/80',
+        'dark:border-surface-800'
       )}
     >
       {/* Left */}
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
         <Link to="/" className="group flex shrink-0 items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-accent-500 to-accent-600 shadow-sm transition-all group-hover:shadow-md group-hover:shadow-accent-500/25">
-            <Scale className="h-3.5 w-3.5 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-900 dark:bg-white transition-all group-hover:scale-105">
+            <Scale className="h-4 w-4 text-white dark:text-surface-900" />
           </div>
           {!isWorkspace && (
             <div className="flex items-center gap-2">
-              <span className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+              <span className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
                 Clarity Hub
               </span>
               {isDemoMode && (

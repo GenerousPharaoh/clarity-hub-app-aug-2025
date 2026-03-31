@@ -92,10 +92,10 @@ export function CenterPanel() {
   return (
     <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Tab bar */}
-      <div className="flex shrink-0 items-center justify-end border-b border-surface-200/80 bg-surface-50/70 px-3 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-850/70 sm:px-4">
+      <div className="flex shrink-0 items-center justify-end border-b border-surface-200/80 bg-white px-4 py-3 dark:border-surface-800 dark:bg-surface-900 sm:px-5">
         <div
           className={cn(
-            'flex items-center gap-1 rounded-2xl border border-surface-200/80 bg-white/85 p-1 shadow-sm dark:border-surface-700 dark:bg-surface-900/80',
+            'flex items-center gap-1 rounded-xl border border-surface-200 bg-surface-50 p-1 dark:border-surface-700 dark:bg-surface-800',
             ultraCompact && 'px-0.5'
           )}
           role="tablist"
@@ -220,18 +220,18 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-9 items-center justify-center gap-1.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all',
-        compact ? 'px-1.5' : 'px-3.5',
+        'relative flex h-9 items-center justify-center gap-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
+        compact ? 'px-2' : 'px-4',
         active
-          ? 'text-primary-700 dark:text-primary-300'
-          : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200'
+          ? 'text-surface-900 dark:text-surface-100'
+          : 'text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200'
       )}
       title={label}
     >
       {active && (
         <motion.span
           layoutId="center-tab-pill"
-          className="absolute inset-0 -z-10 rounded-xl bg-white/92 shadow-sm ring-1 ring-surface-200/70 dark:bg-surface-800 dark:ring-surface-700/60"
+          className="absolute inset-0 -z-10 rounded-lg bg-white shadow-sm dark:bg-surface-700"
           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}

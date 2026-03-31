@@ -42,11 +42,13 @@ interface ChatMessageProps {
 const MODEL_CONFIG = {
   gemini: {
     label: 'Gemini',
+    tooltip: 'Fast responses for general questions',
     className:
       'bg-primary-100 text-primary-700 ring-1 ring-primary-200/60 dark:bg-primary-900/40 dark:text-primary-300 dark:ring-primary-700/40',
   },
   gpt: {
     label: 'GPT-5.2',
+    tooltip: 'Deep reasoning for complex legal analysis',
     className:
       'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200/60 dark:bg-emerald-900/40 dark:text-emerald-300 dark:ring-emerald-700/40',
   },
@@ -303,6 +305,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                     'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
                     modelConfig.className
                   )}
+                  title={modelConfig.tooltip}
                 >
                   {modelConfig.label}
                 </span>

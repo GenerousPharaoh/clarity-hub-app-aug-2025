@@ -221,6 +221,11 @@ export function LeftPanel() {
     })();
   }, [selectedProjectId, selectedBatchFiles, perFileEstimates, processFile]);
 
+  // Clear search when the selected project changes
+  useEffect(() => {
+    setSearchQuery('');
+  }, [selectedProjectId, setSearchQuery]);
+
   // Debounced search: input updates immediately, filtering deferred by 150ms
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);

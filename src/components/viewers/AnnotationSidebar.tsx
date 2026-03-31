@@ -238,9 +238,9 @@ function AnnotationCard({
   return (
     <div
       className={cn(
-        'group relative rounded-lg px-2.5 py-2',
-        'transition-colors hover:bg-surface-50',
-        'dark:hover:bg-surface-800/60',
+        'group relative rounded-xl border border-transparent px-2.5 py-2.5',
+        'transition-all hover:border-surface-200 hover:bg-surface-50 hover:shadow-sm',
+        'dark:hover:border-surface-700 dark:hover:bg-surface-800/60',
       )}
     >
       <div className="flex items-start gap-2">
@@ -256,19 +256,19 @@ function AnnotationCard({
           {annotation.selected_text && (
             <p
               onClick={onScrollTo}
-              className="cursor-pointer line-clamp-3 text-xs leading-relaxed text-surface-600 dark:text-surface-300 hover:text-surface-800 dark:hover:text-surface-100"
+              className="cursor-pointer line-clamp-3 text-xs leading-relaxed text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200"
             >
               "{annotation.selected_text}"
             </p>
           )}
 
-          {/* Comment — editable */}
+          {/* Comment — editable, visually distinct */}
           {editing ? (
-            <div className="mt-1">
+            <div className="mt-1.5">
               <textarea
                 value={editComment}
                 onChange={(e) => setEditComment(e.target.value)}
-                className="w-full resize-none rounded border border-surface-200 px-2 py-1 text-[11px] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200"
+                className="w-full resize-none rounded-lg border border-primary-200 bg-primary-50/50 px-2.5 py-1.5 text-xs text-surface-700 dark:border-primary-700 dark:bg-primary-900/20 dark:text-surface-200"
                 rows={2}
                 autoFocus
                 onKeyDown={(e) => {
@@ -282,17 +282,23 @@ function AnnotationCard({
               </div>
             </div>
           ) : annotation.comment ? (
-            <p
+            <div
               onClick={() => setEditing(true)}
-              className="mt-1 cursor-pointer line-clamp-2 rounded px-1 text-[11px] italic leading-relaxed text-surface-400 hover:bg-surface-100 dark:text-surface-500 dark:hover:bg-surface-800"
+              className="mt-1.5 cursor-pointer rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 transition-colors hover:border-blue-300 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:border-blue-700 dark:hover:bg-blue-900/30"
               title="Click to edit"
             >
-              {annotation.comment}
-            </p>
+              <div className="flex items-center gap-1 mb-0.5">
+                <MessageSquare className="h-2.5 w-2.5 text-blue-500" />
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-blue-500">Note</span>
+              </div>
+              <p className="line-clamp-3 text-xs leading-relaxed text-blue-900 dark:text-blue-200">
+                {annotation.comment}
+              </p>
+            </div>
           ) : (
             <button
               onClick={() => setEditing(true)}
-              className="mt-1 flex items-center gap-1 text-[10px] text-surface-300 hover:text-surface-500 dark:text-surface-600 dark:hover:text-surface-400"
+              className="mt-1.5 flex items-center gap-1.5 rounded-md border border-dashed border-surface-200 px-2 py-1 text-[10px] text-surface-400 transition-colors hover:border-primary-300 hover:text-primary-500 dark:border-surface-700 dark:hover:border-primary-600 dark:hover:text-primary-400"
             >
               <Pencil className="h-2.5 w-2.5" />
               Add note

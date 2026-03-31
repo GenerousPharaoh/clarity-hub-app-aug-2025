@@ -82,9 +82,9 @@
   --duration-normal: 250ms;
   --duration-slow: 400ms;
 
-  /* Fonts */
-  --font-heading: 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  /* Fonts — Geist (Vercel) for headings, Switzer (Fontshare) for body */
+  --font-heading: 'Geist Sans', 'Geist', system-ui, sans-serif;
+  --font-body: 'Switzer', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 

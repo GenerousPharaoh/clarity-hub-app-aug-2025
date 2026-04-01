@@ -1,0 +1,120 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e89]:
+    - banner [ref=e90]:
+      - generic [ref=e91]:
+        - link [ref=e1745] [cursor=pointer]:
+          - /url: /
+          - img [ref=e94]
+        - navigation "Breadcrumb" [ref=e1746]:
+          - link [ref=e2147] [cursor=pointer]:
+            - /url: /
+            - img [ref=e1748]
+          - img [ref=e1754]
+          - generic [ref=e1759]: Raven Imports Termination QA
+      - generic [ref=e101]:
+        - button "Keyboard shortcuts" [ref=e1760] [cursor=pointer]:
+          - img [ref=e1761]
+        - button "Switch to system mode" [ref=e1679] [cursor=pointer]:
+          - img [ref=e1680]
+        - link "Settings" [ref=e105] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e106]
+        - button "Sign out" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+    - main [ref=e113]:
+      - generic [ref=e1763]:
+        - generic [ref=e2493]:
+          - generic [ref=e2494]:
+            - heading "AI Chat" [level=2] [ref=e2496]
+            - tablist "Right panel tabs" [ref=e2497]:
+              - tab "Viewer" [ref=e2498] [cursor=pointer]:
+                - img [ref=e2499]
+                - generic [ref=e2502]: Viewer
+              - tab "AI Chat" [selected] [ref=e2503] [cursor=pointer]:
+                - img [ref=e2505]
+                - generic [ref=e2507]: AI Chat
+          - tabpanel "ai" [ref=e2508]:
+            - generic [ref=e2510]:
+              - log "Chat messages" [ref=e2511]:
+                - generic [ref=e2512]:
+                  - generic [ref=e2513]:
+                    - button "Export" [ref=e2515] [cursor=pointer]:
+                      - img [ref=e2516]
+                    - button "Clear conversation" [ref=e2519] [cursor=pointer]:
+                      - img [ref=e2520]
+                  - generic [ref=e2524]:
+                    - generic [ref=e2525]:
+                      - generic [ref=e2526]: Summarize the key facts, dates, and parties in "Termination Letter.txt".
+                      - generic [ref=e2527]: 10:40 PM
+                    - img [ref=e2529]
+                  - generic [ref=e2533]:
+                    - img [ref=e2535]
+                    - generic [ref=e2537]:
+                      - generic [ref=e2538]:
+                        - generic "Deep reasoning for complex legal analysis" [ref=e2539]: GPT-5.2
+                        - generic [ref=e2540]: Fast
+                      - generic [ref=e2541]:
+                        - button "Copy to clipboard" [ref=e2542] [cursor=pointer]:
+                          - img [ref=e2543]
+                        - generic [ref=e2546]:
+                          - paragraph [ref=e2547]: "Demo review of \"Termination Letter.txt\": Termination without cause with four weeks of pay, immediate cutoff of systems access, and no mention of bonus treatment or benefits continuation."
+                          - paragraph [ref=e2548]: Open the viewer tab to inspect the source directly, then ask a narrower question if you want to pressure-test a fact pattern or chronology.
+                      - generic [ref=e2549]: 10:40 PM
+                      - generic [ref=e2551]:
+                        - button "What is the strongest fact in this file?" [ref=e2552] [cursor=pointer]:
+                          - img [ref=e2553]
+                          - generic [ref=e2555]: What is the strongest fact in this file?
+                        - button "How would you use this as an exhibit?" [ref=e2556] [cursor=pointer]:
+                          - img [ref=e2557]
+                          - generic [ref=e2559]: How would you use this as an exhibit?
+                        - button "What follow-up evidence should I look for next?" [ref=e2560] [cursor=pointer]:
+                          - img [ref=e2561]
+                          - generic [ref=e2563]: What follow-up evidence should I look for next?
+              - generic [ref=e2564]:
+                - paragraph [ref=e2566]: Demo mode keeps AI responses local to the seeded workspace. Use it to explore the flow, then sign in for live model-backed analysis.
+                - generic [ref=e2567]:
+                  - generic [ref=e2568]:
+                    - paragraph [ref=e2569]: 1 file selected
+                    - button "Clear all" [ref=e2570] [cursor=pointer]
+                  - generic [ref=e2572]:
+                    - img [ref=e2573]
+                    - generic [ref=e2576]: Termination Letter.txt
+                    - button [ref=e2577] [cursor=pointer]:
+                      - img [ref=e2578]
+                - button "Add more files" [ref=e2582] [cursor=pointer]:
+                  - img [ref=e2583]
+                  - text: Add more files
+                - generic [ref=e2586]:
+                  - button "Fast" [ref=e2587] [cursor=pointer]:
+                    - img [ref=e2588]
+                    - text: Fast
+                  - button "Thinking" [ref=e2590] [cursor=pointer]:
+                    - img [ref=e2591]
+                    - text: Thinking
+                  - button "Web" [ref=e2602] [cursor=pointer]:
+                    - img [ref=e2603]
+                    - text: Web
+                - generic [ref=e2606]:
+                  - textbox "Ask about your case..." [ref=e2607]
+                  - button "Send message" [disabled] [ref=e2608]:
+                    - img [ref=e2609]
+                - generic [ref=e2612]:
+                  - generic [ref=e2613]: Enter to send/Shift+Enter new line
+                  - generic [ref=e2614]: Not legal advice
+        - navigation [ref=e2272]:
+          - button "2 Files" [ref=e2273] [cursor=pointer]:
+            - generic [ref=e2274]:
+              - img [ref=e2275]
+              - generic [ref=e2277]: "2"
+            - generic [ref=e2278]: Files
+          - button "2 Content" [ref=e2279] [cursor=pointer]:
+            - generic [ref=e2280]:
+              - img [ref=e2281]
+              - generic [ref=e2284]: "2"
+            - generic [ref=e2285]: Content
+          - button "Viewer" [active] [ref=e2286] [cursor=pointer]:
+            - img [ref=e2289]
+            - generic [ref=e2291]: Viewer
+  - region "Notifications alt+T"

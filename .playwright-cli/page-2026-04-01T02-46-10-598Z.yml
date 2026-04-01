@@ -1,0 +1,71 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e89]:
+    - banner [ref=e90]:
+      - generic [ref=e91]:
+        - link [ref=e1745] [cursor=pointer]:
+          - /url: /
+          - img [ref=e94]
+        - navigation "Breadcrumb" [ref=e1746]:
+          - link [ref=e2147] [cursor=pointer]:
+            - /url: /
+            - img [ref=e1748]
+          - img [ref=e1754]
+          - generic [ref=e1759]: Raven Imports Termination QA
+      - generic [ref=e101]:
+        - button "Keyboard shortcuts" [ref=e1760] [cursor=pointer]:
+          - img [ref=e1761]
+        - button "Switch to system mode" [ref=e1679] [cursor=pointer]:
+          - img [ref=e1680]
+        - link "Settings" [ref=e105] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e106]
+        - button "Sign out" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+    - main [ref=e113]:
+      - generic [ref=e1763]:
+        - generic [ref=e2493]:
+          - generic [ref=e2494]:
+            - heading "Viewer" [level=2] [ref=e2616]
+            - tablist "Right panel tabs" [ref=e2497]:
+              - tab "Viewer" [active] [selected] [ref=e2498] [cursor=pointer]:
+                - img [ref=e2499]
+                - generic [ref=e2502]: Viewer
+              - tab "AI Chat" [ref=e2503] [cursor=pointer]:
+                - img [ref=e2505]
+                - generic [ref=e2507]: AI Chat
+          - tabpanel "viewer" [ref=e2618]:
+            - generic [ref=e2620]:
+              - generic [ref=e2621]:
+                - img [ref=e2622]
+                - generic "Termination Letter.txt" [ref=e2625]
+                - generic [ref=e2626]: 10 lines
+              - generic [ref=e2628]:
+                - generic [ref=e2629]:
+                  - generic [ref=e2630]: "1"
+                  - generic [ref=e2631]: "2"
+                  - generic [ref=e2632]: "3"
+                  - generic [ref=e2633]: "4"
+                  - generic [ref=e2634]: "5"
+                  - generic [ref=e2635]: "6"
+                  - generic [ref=e2636]: "7"
+                  - generic [ref=e2637]: "8"
+                  - generic [ref=e2638]: "9"
+                  - generic [ref=e2639]: "10"
+                - code [ref=e2641]: March 1, 2026 Private and confidential This letter confirms that Raven Imports is ending your employment without cause, effective immediately. You will receive four weeks of pay in lieu of notice, less required deductions. Your health benefits will continue during the minimum statutory period only. Please return your laptop, access card, and any confidential materials by March 3, 2026. Your access to internal systems has been disabled today. We thank you for your service and wish you well in your future endeavors.
+        - navigation [ref=e2272]:
+          - button "2 Files" [ref=e2273] [cursor=pointer]:
+            - generic [ref=e2274]:
+              - img [ref=e2275]
+              - generic [ref=e2277]: "2"
+            - generic [ref=e2278]: Files
+          - button "2 Content" [ref=e2279] [cursor=pointer]:
+            - generic [ref=e2280]:
+              - img [ref=e2281]
+              - generic [ref=e2284]: "2"
+            - generic [ref=e2285]: Content
+          - button "Viewer" [ref=e2286] [cursor=pointer]:
+            - img [ref=e2289]
+            - generic [ref=e2291]: Viewer
+  - region "Notifications alt+T"

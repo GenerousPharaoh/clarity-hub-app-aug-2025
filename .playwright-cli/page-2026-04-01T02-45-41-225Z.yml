@@ -1,0 +1,105 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e89]:
+    - banner [ref=e90]:
+      - generic [ref=e91]:
+        - link [ref=e1745] [cursor=pointer]:
+          - /url: /
+          - img [ref=e94]
+        - navigation "Breadcrumb" [ref=e1746]:
+          - link [ref=e2147] [cursor=pointer]:
+            - /url: /
+            - img [ref=e1748]
+          - img [ref=e1754]
+          - generic [ref=e1759]: Raven Imports Termination QA
+      - generic [ref=e101]:
+        - button "Keyboard shortcuts" [ref=e1760] [cursor=pointer]:
+          - img [ref=e1761]
+        - button "Switch to system mode" [ref=e1679] [cursor=pointer]:
+          - img [ref=e1680]
+        - link "Settings" [ref=e105] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e106]
+        - button "Sign out" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+    - main [ref=e113]:
+      - generic [ref=e1763]:
+        - generic [ref=e2386]:
+          - tablist "Content tabs" [ref=e2388]:
+            - tab "Overview" [ref=e2389] [cursor=pointer]:
+              - img [ref=e2390]
+            - tab "Docs" [selected] [ref=e2393] [cursor=pointer]:
+              - img [ref=e2395]
+            - tab "Exhibits" [ref=e2397] [cursor=pointer]:
+              - img [ref=e2398]
+            - tab "Timeline" [ref=e2401] [cursor=pointer]:
+              - img [ref=e2402]
+            - tab "Drafts" [ref=e2405] [cursor=pointer]:
+              - img [ref=e2406]
+          - tabpanel "editor" [ref=e2409]:
+            - generic [ref=e2411]:
+              - generic [ref=e2413]:
+                - generic [ref=e2414]:
+                  - generic [ref=e2415]:
+                    - heading "Documents" [level=2] [ref=e2416]
+                    - generic [ref=e2417]:
+                      - generic [ref=e2418]: 2 docs
+                      - generic [ref=e2419]: Edited 2 minutes ago
+                  - generic [ref=e2420]:
+                    - button "Create document" [ref=e2421] [cursor=pointer]:
+                      - img [ref=e2422]
+                    - button "Export" [ref=e2424] [cursor=pointer]:
+                      - img [ref=e2425]
+                    - button "Delete note" [ref=e2428] [cursor=pointer]:
+                      - img [ref=e2429]
+                - generic [ref=e2433]:
+                  - textbox "Document title" [ref=e2434]:
+                    - /placeholder: Untitled
+                    - text: QA Note
+                  - button "Open document list" [ref=e2435] [cursor=pointer]:
+                    - img [ref=e2436]
+              - generic [ref=e2439]:
+                - generic [ref=e2440]:
+                  - generic [ref=e2441]:
+                    - generic [ref=e2442]:
+                      - button "Undo (⌘Z)" [ref=e2443] [cursor=pointer]:
+                        - img [ref=e2444]
+                      - button "Redo (⌘⇧Z)" [disabled] [ref=e2447]:
+                        - img [ref=e2448]
+                    - generic [ref=e2452]:
+                      - button "Bold (⌘B)" [ref=e2453] [cursor=pointer]:
+                        - img [ref=e2454]
+                      - button "Italic (⌘I)" [ref=e2456] [cursor=pointer]:
+                        - img [ref=e2457]
+                      - button "Underline (⌘U)" [ref=e2459] [cursor=pointer]:
+                        - img [ref=e2460]
+                      - button "Strikethrough" [ref=e2462] [cursor=pointer]:
+                        - img [ref=e2463]
+                      - button "Inline Code" [ref=e2466] [cursor=pointer]:
+                        - img [ref=e2467]
+                      - button "H" [ref=e2470] [cursor=pointer]:
+                        - generic [ref=e2471]: H
+                  - button "More tools" [ref=e2474] [cursor=pointer]:
+                    - img [ref=e2475]
+                - generic [ref=e2481]:
+                  - generic [ref=e2483]: Document body
+                  - paragraph [ref=e2486]: Start drafting your document - use "/" for commands...
+                - generic [ref=e2488]:
+                  - generic [ref=e2489]: 0 words
+                  - generic [ref=e2490]: 1 min read
+        - navigation [ref=e2272]:
+          - button "2 Files" [ref=e2273] [cursor=pointer]:
+            - generic [ref=e2274]:
+              - img [ref=e2275]
+              - generic [ref=e2277]: "2"
+            - generic [ref=e2278]: Files
+          - button "2 Content" [ref=e2279] [cursor=pointer]:
+            - generic [ref=e2280]:
+              - img [ref=e2281]
+              - generic [ref=e2284]: "2"
+            - generic [ref=e2285]: Content
+          - button "Viewer" [ref=e2286] [cursor=pointer]:
+            - img [ref=e2289]
+            - generic [ref=e2291]: Viewer
+  - region "Notifications alt+T"

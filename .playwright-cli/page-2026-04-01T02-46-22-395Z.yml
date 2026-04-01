@@ -1,0 +1,33 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e2644]:
+    - generic [ref=e2645]:
+      - img [ref=e2647]
+      - generic [ref=e2651]: Clarity Hub
+    - heading "Sign in" [level=2] [ref=e2652]
+    - paragraph [ref=e2653]: Access your legal workspace
+    - generic [ref=e2654]:
+      - button "Continue with Google" [ref=e2655] [cursor=pointer]:
+        - img [ref=e2656]
+        - text: Continue with Google
+        - img [ref=e2661]
+      - button "Explore Demo" [ref=e2664] [cursor=pointer]:
+        - img [ref=e2665]
+        - text: Explore Demo
+    - generic [ref=e2668]:
+      - paragraph [ref=e2669]: Included
+      - generic [ref=e2670]:
+        - generic [ref=e2671]:
+          - img [ref=e2672]
+          - paragraph [ref=e2675]: Upload and annotate PDFs with highlights and notes
+        - generic [ref=e2676]:
+          - img [ref=e2677]
+          - paragraph [ref=e2680]: AI analysis across all your case documents
+        - generic [ref=e2681]:
+          - img [ref=e2682]
+          - paragraph [ref=e2685]: Draft legal filings with Ontario law context
+        - generic [ref=e2686]:
+          - img [ref=e2687]
+          - paragraph [ref=e2690]: Build exhibit books and chronologies
+  - region "Notifications alt+T"

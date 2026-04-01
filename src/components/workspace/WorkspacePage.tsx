@@ -230,7 +230,7 @@ export function WorkspacePage() {
             active={mobileTab === 'viewer'}
             icon={<PanelRight className="h-5 w-5" />}
             label="Viewer"
-            onClick={() => setMobileTab('viewer')}
+            onClick={() => { setMobileTab('viewer'); setRightTab('viewer'); }}
           />
         </nav>
 

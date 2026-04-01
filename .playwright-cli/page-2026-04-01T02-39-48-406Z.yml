@@ -1,0 +1,259 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e89]:
+    - banner [ref=e90]:
+      - generic [ref=e91]:
+        - link [ref=e373] [cursor=pointer]:
+          - /url: /
+          - img [ref=e94]
+        - navigation "Breadcrumb" [ref=e374]:
+          - link "Dashboard" [ref=e375] [cursor=pointer]:
+            - /url: /
+            - img [ref=e376]
+            - generic [ref=e381]: Dashboard
+          - img [ref=e382]
+          - generic [ref=e384]: Demo
+          - img [ref=e385]
+          - generic [ref=e387]: Raven Imports Termination QA
+      - generic [ref=e101]:
+        - button "Keyboard shortcuts" [ref=e388] [cursor=pointer]:
+          - img [ref=e389]
+        - button "Switch to light mode" [ref=e102] [cursor=pointer]:
+          - img [ref=e103]
+        - link "Settings" [ref=e105] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e106]
+        - button "Sign out" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+    - main [ref=e113]:
+      - generic [ref=e391]:
+        - button "Open file browser" [ref=e393] [cursor=pointer]:
+          - img [ref=e394]
+        - generic [ref=e396]:
+          - generic [ref=e398]:
+            - generic [ref=e399]:
+              - generic [ref=e400]:
+                - paragraph [ref=e401]: Files
+                - button "Collapse file browser" [ref=e402] [cursor=pointer]:
+                  - img [ref=e403]
+              - paragraph [ref=e405]: 2 files · 2 indexed
+              - generic [ref=e407]:
+                - img [ref=e408]
+                - textbox "Search files..." [ref=e411]
+              - generic [ref=e412]:
+                - button "All" [ref=e413] [cursor=pointer]
+                - button "Court" [ref=e414] [cursor=pointer]
+                - button "Employment" [ref=e415] [cursor=pointer]
+                - button "Financial" [ref=e416] [cursor=pointer]
+                - button "Correspondence" [ref=e417] [cursor=pointer]
+                - button "Other" [ref=e418] [cursor=pointer]
+              - generic [ref=e420]:
+                - generic [ref=e421] [cursor=pointer]:
+                  - button "Choose File" [ref=e422]
+                  - generic [ref=e423]:
+                    - paragraph [ref=e424]: Drop files
+                    - button "Uploads disabled in demo" [disabled] [ref=e425]:
+                      - img [ref=e426]
+                      - text: Uploads disabled in demo
+                - paragraph [ref=e429]: Demo workspaces include seeded files only. Sign in with Google to upload and process your own documents.
+            - generic [ref=e431]:
+              - button "Completed (AI-ready) Termination Letter.txt Mar 1, 2026 AI-ready Details for Termination Letter.txt Actions for Termination Letter.txt Termination without cause with four weeks of pay, immediate cutoff of systems access, and no mention of bonus treatment or benefits continuation." [ref=e434] [cursor=pointer]:
+                - generic [ref=e435]:
+                  - generic "Text file" [ref=e436]:
+                    - img [ref=e437]
+                  - generic "Completed (AI-ready)" [ref=e440]
+                - generic [ref=e441]:
+                  - generic [ref=e442]:
+                    - generic [ref=e443]:
+                      - paragraph [ref=e444]: Termination Letter.txt
+                      - generic [ref=e445]:
+                        - 'generic "Added: 2026-03-01T09:15:00.000Z" [ref=e446]': Mar 1, 2026
+                        - generic "Completed (AI-ready)" [ref=e447]:
+                          - img [ref=e448]
+                          - text: AI-ready
+                    - generic [ref=e451]:
+                      - button "Details for Termination Letter.txt" [ref=e452]:
+                        - img [ref=e453]
+                      - button "Actions for Termination Letter.txt" [ref=e455]:
+                        - img [ref=e456]
+                  - paragraph [ref=e460]: Termination without cause with four weeks of pay, immediate cutoff of systems access, and no mention of bonus treatment or benefits continuation.
+              - button "Completed (AI-ready) Manager Follow-up Email.txt Mar 2, 2026 AI-ready Details for Manager Follow-up Email.txt Actions for Manager Follow-up Email.txt Internal email frames the departure as a quick leadership reset and suggests limiting transition messaging, which may be relevant to bad-faith conduct." [ref=e463] [cursor=pointer]:
+                - generic [ref=e464]:
+                  - generic "Text file" [ref=e465]:
+                    - img [ref=e466]
+                  - generic "Completed (AI-ready)" [ref=e469]
+                - generic [ref=e470]:
+                  - generic [ref=e471]:
+                    - generic [ref=e472]:
+                      - paragraph [ref=e473]: Manager Follow-up Email.txt
+                      - generic [ref=e474]:
+                        - 'generic "Added: 2026-03-02T13:05:00.000Z" [ref=e475]': Mar 2, 2026
+                        - generic "Completed (AI-ready)" [ref=e476]:
+                          - img [ref=e477]
+                          - text: AI-ready
+                    - generic [ref=e480]:
+                      - button "Details for Manager Follow-up Email.txt" [ref=e481]:
+                        - img [ref=e482]
+                      - button "Actions for Manager Follow-up Email.txt" [ref=e484]:
+                        - img [ref=e485]
+                  - paragraph [ref=e489]: Internal email frames the departure as a quick leadership reset and suggests limiting transition messaging, which may be relevant to bad-faith conduct.
+            - generic [ref=e491]: 2 files
+          - separator [ref=e492] [cursor=pointer]:
+            - img [ref=e496]
+          - generic [ref=e504]:
+            - tablist "Content tabs" [ref=e506]:
+              - tab "Overview" [ref=e507] [cursor=pointer]:
+                - img [ref=e508]
+                - generic [ref=e511]: Overview
+              - tab "Docs" [selected] [ref=e512] [cursor=pointer]:
+                - img [ref=e514]
+                - generic [ref=e516]: Docs
+              - tab "Exhibits" [ref=e517] [cursor=pointer]:
+                - img [ref=e518]
+                - generic [ref=e521]: Exhibits
+              - tab "Timeline" [ref=e522] [cursor=pointer]:
+                - img [ref=e523]
+                - generic [ref=e526]: Timeline
+              - tab "Drafts" [ref=e527] [cursor=pointer]:
+                - img [ref=e528]
+                - generic [ref=e531]: Drafts
+            - tabpanel "editor" [ref=e532]:
+              - generic [ref=e534]:
+                - generic [ref=e536]:
+                  - generic [ref=e537]:
+                    - generic [ref=e538]:
+                      - heading "Documents" [level=2] [ref=e539]
+                      - generic [ref=e540]:
+                        - generic [ref=e541]: 1 doc
+                        - generic [ref=e542]: Edited 28 days ago
+                    - generic [ref=e543]:
+                      - button "New document" [ref=e544] [cursor=pointer]:
+                        - img [ref=e545]
+                        - text: New document
+                      - button "Export" [ref=e547] [cursor=pointer]:
+                        - img [ref=e548]
+                        - generic [ref=e551]: Export
+                      - button "Delete note" [ref=e552] [cursor=pointer]:
+                        - img [ref=e553]
+                  - generic [ref=e557]:
+                    - textbox "Document title" [ref=e558]:
+                      - /placeholder: Untitled
+                      - text: Settlement strategy
+                    - button "Open document list" [ref=e559] [cursor=pointer]:
+                      - img [ref=e560]
+                - generic [ref=e563]:
+                  - generic [ref=e564]:
+                    - generic [ref=e565]:
+                      - generic [ref=e566]:
+                        - button "Undo (⌘Z)" [disabled] [ref=e567]:
+                          - img [ref=e568]
+                        - button "Redo (⌘⇧Z)" [disabled] [ref=e571]:
+                          - img [ref=e572]
+                      - generic [ref=e576]:
+                        - button "Bold (⌘B)" [ref=e577] [cursor=pointer]:
+                          - img [ref=e578]
+                        - button "Italic (⌘I)" [ref=e580] [cursor=pointer]:
+                          - img [ref=e581]
+                        - button "Underline (⌘U)" [ref=e583] [cursor=pointer]:
+                          - img [ref=e584]
+                        - button "Strikethrough" [ref=e586] [cursor=pointer]:
+                          - img [ref=e587]
+                        - button "Inline Code" [ref=e590] [cursor=pointer]:
+                          - img [ref=e591]
+                        - button "H" [ref=e594] [cursor=pointer]:
+                          - generic [ref=e595]: H
+                      - generic [ref=e597]:
+                        - button "Heading 1" [ref=e598] [cursor=pointer]:
+                          - img [ref=e599]
+                        - button "Heading 2" [ref=e601] [cursor=pointer]:
+                          - img [ref=e602]
+                        - button "Heading 3" [ref=e604] [cursor=pointer]:
+                          - img [ref=e605]
+                    - button "More tools" [ref=e610] [cursor=pointer]:
+                      - img [ref=e611]
+                  - generic [ref=e617]:
+                    - generic [ref=e618]:
+                      - generic [ref=e619]: Document body
+                      - generic [ref=e620]: "Tip: Type \"/\" for commands"
+                    - paragraph [ref=e623]: "# Objectives - Preserve the bad-faith narrative. - Quantify notice using role, tenure, and compensation structure. - Use the follow-up email as leverage for a stronger opening demand. ## Next steps 1. Confirm bonus language. 2. Pull comparable notice cases. 3. Draft demand letter with exhibit references."
+                  - generic [ref=e625]:
+                    - generic [ref=e626]: 47 words
+                    - generic [ref=e627]: 305 chars
+                    - generic [ref=e628]: 1 min read
+                    - generic [ref=e629]: Type "/" for commands
+          - separator [ref=e630] [cursor=pointer]:
+            - img [ref=e634]
+          - generic [ref=e642]:
+            - generic [ref=e643]:
+              - generic [ref=e644]:
+                - heading "AI Chat" [level=2] [ref=e725]
+                - button "Collapse viewer panel" [ref=e646] [cursor=pointer]:
+                  - img [ref=e647]
+              - tablist "Right panel tabs" [ref=e649]:
+                - tab "Viewer" [ref=e650] [cursor=pointer]:
+                  - img [ref=e652]
+                  - generic [ref=e655]: Viewer
+                - tab "AI Chat" [selected] [ref=e656] [cursor=pointer]:
+                  - img [ref=e657]
+                  - generic [ref=e659]: AI Chat
+            - tabpanel "ai" [ref=e727]:
+              - generic [ref=e729]:
+                - log "Chat messages" [ref=e730]:
+                  - generic [ref=e732]:
+                    - img [ref=e734]
+                    - heading "Legal Research Assistant" [level=3] [ref=e736]
+                    - paragraph [ref=e737]: Ask about Ontario employment law, case analysis, or your documents.
+                    - paragraph [ref=e738]: "Tip: Select a file in the sidebar to ask questions about it."
+                    - generic [ref=e739]:
+                      - paragraph [ref=e740]: Suggestions for selected file
+                      - generic [ref=e741]:
+                        - button "Summarize" [ref=e742] [cursor=pointer]:
+                          - img [ref=e744]
+                          - generic [ref=e747]: Summarize
+                        - button "Legal Issues" [ref=e748] [cursor=pointer]:
+                          - img [ref=e750]
+                          - generic [ref=e754]: Legal Issues
+                        - button "Timeline" [ref=e755] [cursor=pointer]:
+                          - img [ref=e757]
+                          - generic [ref=e760]: Timeline
+                        - button "Contradictions" [ref=e761] [cursor=pointer]:
+                          - img [ref=e763]
+                          - generic [ref=e766]: Contradictions
+                - generic [ref=e767]:
+                  - paragraph [ref=e769]: Demo mode keeps AI responses local to the seeded workspace. Use it to explore the flow, then sign in for live model-backed analysis.
+                  - generic [ref=e770]:
+                    - generic [ref=e771]:
+                      - paragraph [ref=e772]: 1 file selected
+                      - button "Clear all" [ref=e773] [cursor=pointer]
+                    - generic [ref=e775]:
+                      - img [ref=e776]
+                      - generic [ref=e779]: Termination Letter.txt
+                      - button [ref=e780] [cursor=pointer]:
+                        - img [ref=e781]
+                  - button "Add more files" [ref=e785] [cursor=pointer]:
+                    - img [ref=e786]
+                    - text: Add more files
+                  - generic [ref=e789]:
+                    - button "Fast" [ref=e790] [cursor=pointer]:
+                      - img [ref=e791]
+                      - text: Fast
+                    - button "Thinking" [ref=e793] [cursor=pointer]:
+                      - img [ref=e794]
+                      - text: Thinking
+                    - button "Web" [ref=e805] [cursor=pointer]:
+                      - img [ref=e806]
+                      - text: Web
+                  - generic [ref=e809]:
+                    - textbox "Ask about your case..." [active] [ref=e810]: Summarize the key facts, dates, and parties in "Termination Letter.txt".
+                    - button "Send message" [ref=e811] [cursor=pointer]:
+                      - img [ref=e812]
+                  - generic [ref=e815]:
+                    - generic [ref=e816]: Enter to send/Shift+Enter new line
+                    - generic [ref=e817]: Not legal advice
+        - generic [ref=e690]:
+          - button "Open file viewer" [ref=e691] [cursor=pointer]:
+            - img [ref=e692]
+          - button "Open AI assistant" [ref=e695] [cursor=pointer]:
+            - img [ref=e696]
+  - region "Notifications alt+T"

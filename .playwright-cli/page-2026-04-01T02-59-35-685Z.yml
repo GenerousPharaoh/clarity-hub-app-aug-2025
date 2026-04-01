@@ -1,0 +1,337 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - link [ref=e372] [cursor=pointer]:
+          - /url: /
+          - img [ref=e9]
+        - navigation "Breadcrumb" [ref=e373]:
+          - link "Dashboard" [ref=e374] [cursor=pointer]:
+            - /url: /
+            - img [ref=e375]
+            - generic [ref=e380]: Dashboard
+          - img [ref=e381]
+          - generic [ref=e383]: test
+      - generic [ref=e15]:
+        - button "Keyboard shortcuts" [ref=e384] [cursor=pointer]:
+          - img [ref=e385]
+        - button "Switch to dark mode" [ref=e242] [cursor=pointer]:
+          - img [ref=e243]
+        - link "Settings" [ref=e19] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e20]
+        - button "Sign out" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+    - main [ref=e27]:
+      - generic [ref=e387]:
+        - button "Open file browser" [ref=e389] [cursor=pointer]:
+          - img [ref=e390]
+        - generic [ref=e392]:
+          - generic [ref=e394]:
+            - generic [ref=e395]:
+              - generic [ref=e396]:
+                - paragraph [ref=e397]: Files
+                - button "Collapse file browser" [ref=e398] [cursor=pointer]:
+                  - img [ref=e399]
+              - paragraph [ref=e401]: 5 files · 5 indexed
+              - generic [ref=e403]:
+                - img [ref=e404]
+                - textbox "Search files..." [ref=e407]
+              - generic [ref=e408]:
+                - button "All" [ref=e409] [cursor=pointer]
+                - button "Court" [ref=e410] [cursor=pointer]
+                - button "Employment" [ref=e411] [cursor=pointer]
+                - button "Financial" [ref=e412] [cursor=pointer]
+                - button "Correspondence" [ref=e413] [cursor=pointer]
+                - button "Other" [ref=e414] [cursor=pointer]
+              - generic [ref=e417] [cursor=pointer]:
+                - button "Choose File" [ref=e418]
+                - generic [ref=e419]:
+                  - paragraph [ref=e420]: Drop files
+                  - button "Choose files" [ref=e421]:
+                    - img [ref=e422]
+                    - text: Choose files
+            - generic [ref=e426]:
+              - button [ref=e429] [cursor=pointer]:
+                - generic [ref=e430]:
+                  - generic "Other file" [ref=e431]:
+                    - img [ref=e432]
+                  - generic "Completed (AI-ready)" [ref=e435]
+                - generic [ref=e436]:
+                  - generic [ref=e437]:
+                    - generic [ref=e438]:
+                      - paragraph [ref=e439]: Record Before College Dispute.md
+                      - generic [ref=e440]:
+                        - generic "Investigation Report - Regulatory" [ref=e441]: Investigation Report
+                        - 'generic "Added: 2026-03-29T01:59:35.212498+00:00" [ref=e442]': Mar 28, 2026
+                        - generic "Completed (AI-ready)" [ref=e443]:
+                          - img [ref=e444]
+                          - text: AI-ready
+                    - generic [ref=e447]:
+                      - button "Details for Record Before College Dispute.md" [ref=e448]:
+                        - img [ref=e449]
+                      - button "Actions for Record Before College Dispute.md" [ref=e451]:
+                        - img [ref=e452]
+                  - paragraph [ref=e456]: This internal draft investigation report (Revised March 17, 2026) critiques the College's ICRC decision regarding a professional complaint filed under HPARB Board File 25-CRV-0875, highlighting that critical documentary evidence and witness testimony were disregarded. The report details alleged misconduct by a registrant from April to October 2024, including coercion, economic harm, and obstruction, and notes procedural irregularities such as investigator conflicts and scope compression directed by the respondent. It situates these issues within the applicable regulatory framework, including the Professional Misconduct Regulation, the Regulated Health Professions Act, the Human Rights Code, and the College’s Code of Ethical Conduct, emphasizing concerns of discrimination and failure to properly investigate and address the complaint.
+              - button [ref=e459] [cursor=pointer]:
+                - generic [ref=e460]:
+                  - generic "Other file" [ref=e461]:
+                    - img [ref=e462]
+                  - generic "Completed (AI-ready)" [ref=e465]
+                - generic [ref=e466]:
+                  - generic [ref=e467]:
+                    - generic [ref=e468]:
+                      - paragraph [ref=e469]: internal-draft-ICRC submission.md
+                      - generic [ref=e470]:
+                        - generic "Professional Complaint - Regulatory" [ref=e471]: Professional Complaint
+                        - 'generic "Added: 2026-03-29T01:59:01.930138+00:00" [ref=e472]': Mar 28, 2026
+                        - generic "Completed (AI-ready)" [ref=e473]:
+                          - img [ref=e474]
+                          - text: AI-ready
+                    - generic [ref=e477]:
+                      - button "Details for internal-draft-ICRC submission.md" [ref=e478]:
+                        - img [ref=e479]
+                      - button "Actions for internal-draft-ICRC submission.md" [ref=e481]:
+                        - img [ref=e482]
+                  - paragraph [ref=e486]: This internal working draft, prepared by Kareem Hassanein, presents a detailed legal submission to the Investigations, Complaints and Reports Committee (ICRC) regarding a professional complaint filed against him by a patient and related parties at a physiotherapy clinic. The document, dated between October 2024 and September 2025, argues for dismissal of the complaint on grounds including lack of jurisdiction, unreliable and racially biased evidence, and failure to meet the regulatory definition of a healthcare service interaction. It also challenges the College's handling of the case as discriminatory and calls for scrutiny of the opposing party's conduct and the College's compliance with human rights and equity obligations.
+              - button "Completed (AI-ready) production-demands.pdf Legal Correspondence Mar 28, 2026 AI-ready Details for production-demands.pdf Actions for production-demands.pdf This legal correspondence dated March 20, 2026, from Wise Health Law to Ms. Lauren Coyle, Investigator at the College of Physiotherapists of Ontario, concerns the complaint file of Kareem Hassanein (CPO File No. 2025-0298). The letter requests the College to obtain and provide missing documents and communications related to the investigation, including audit logs, work schedules, and communications involving several individuals from July 2024 to December 2025, as well as unaltered audio recordings. It also seeks clarification on discrepancies and redactions in previously disclosed materials and requests production of any additional notes or responses relevant to the complaint." [active] [ref=e489] [cursor=pointer]:
+                - generic [ref=e490]:
+                  - generic "Pdf file" [ref=e491]:
+                    - img [ref=e492]
+                  - generic "Completed (AI-ready)" [ref=e495]
+                - generic [ref=e496]:
+                  - generic [ref=e497]:
+                    - generic [ref=e498]:
+                      - paragraph [ref=e499]: production-demands.pdf
+                      - generic [ref=e500]:
+                        - generic "Legal Correspondence - Correspondence" [ref=e501]: Legal Correspondence
+                        - 'generic "Added: 2026-03-29T01:58:27.96716+00:00" [ref=e502]': Mar 28, 2026
+                        - generic "Completed (AI-ready)" [ref=e503]:
+                          - img [ref=e504]
+                          - text: AI-ready
+                    - generic [ref=e507]:
+                      - button "Details for production-demands.pdf" [ref=e508]:
+                        - img [ref=e509]
+                      - button "Actions for production-demands.pdf" [ref=e511]:
+                        - img [ref=e512]
+                  - paragraph [ref=e516]: This legal correspondence dated March 20, 2026, from Wise Health Law to Ms. Lauren Coyle, Investigator at the College of Physiotherapists of Ontario, concerns the complaint file of Kareem Hassanein (CPO File No. 2025-0298). The letter requests the College to obtain and provide missing documents and communications related to the investigation, including audit logs, work schedules, and communications involving several individuals from July 2024 to December 2025, as well as unaltered audio recordings. It also seeks clarification on discrepancies and redactions in previously disclosed materials and requests production of any additional notes or responses relevant to the complaint.
+              - button "Completed (AI-ready) Gmail - Draft Letter to Registrar for Review.pdf Legal Correspondence Mar 28, 2026 AI-ready Details for Gmail - Draft Letter to Registrar for Review.pdf Actions for Gmail - Draft Letter to Registrar for Review.pdf The document is an email dated March 28, 2026, from Kareem Hassanein to legal colleagues Mina Karabit and Anita Balsingh regarding a draft letter to a Registrar in response to a Deputy Registrar's email. Kareem discusses plans to promptly issue a Claim addressing workplace discrimination and human rights violations allegedly perpetuated by the College's exclusionary processes, referencing section 47(2). The email seeks input on whether the letter should be sent jointly by both law firms to emphasize the institutional nature of the concerns spanning civil and regulatory matters." [ref=e519] [cursor=pointer]:
+                - generic [ref=e520]:
+                  - generic "Pdf file" [ref=e521]:
+                    - img [ref=e522]
+                  - generic "Completed (AI-ready)" [ref=e525]
+                - generic [ref=e526]:
+                  - generic [ref=e527]:
+                    - generic [ref=e528]:
+                      - paragraph [ref=e529]: Gmail - Draft Letter to Registrar for Review.pdf
+                      - generic [ref=e530]:
+                        - generic "Legal Correspondence - Correspondence" [ref=e531]: Legal Correspondence
+                        - 'generic "Added: 2026-03-29T01:58:27.290818+00:00" [ref=e532]': Mar 28, 2026
+                        - generic "Completed (AI-ready)" [ref=e533]:
+                          - img [ref=e534]
+                          - text: AI-ready
+                    - generic [ref=e537]:
+                      - button "Details for Gmail - Draft Letter to Registrar for Review.pdf" [ref=e538]:
+                        - img [ref=e539]
+                      - button "Actions for Gmail - Draft Letter to Registrar for Review.pdf" [ref=e541]:
+                        - img [ref=e542]
+                  - paragraph [ref=e546]: The document is an email dated March 28, 2026, from Kareem Hassanein to legal colleagues Mina Karabit and Anita Balsingh regarding a draft letter to a Registrar in response to a Deputy Registrar's email. Kareem discusses plans to promptly issue a Claim addressing workplace discrimination and human rights violations allegedly perpetuated by the College's exclusionary processes, referencing section 47(2). The email seeks input on whether the letter should be sent jointly by both law firms to emphasize the institutional nature of the concerns spanning civil and regulatory matters.
+              - button [ref=e549] [cursor=pointer]:
+                - generic [ref=e550]:
+                  - generic "Pdf file" [ref=e551]:
+                    - img [ref=e552]
+                  - generic "Completed (AI-ready)" [ref=e555]
+                - generic [ref=e556]:
+                  - generic [ref=e557]:
+                    - generic [ref=e558]:
+                      - paragraph [ref=e559]: draft-letter-to-registrar-2026.pdf
+                      - generic [ref=e560]:
+                        - generic "Legal Correspondence - Correspondence" [ref=e561]: Legal Correspondence
+                        - 'generic "Added: 2026-03-29T01:58:26.644511+00:00" [ref=e562]': Mar 28, 2026
+                        - generic "Completed (AI-ready)" [ref=e563]:
+                          - img [ref=e564]
+                          - text: AI-ready
+                    - generic [ref=e567]:
+                      - button "Details for draft-letter-to-registrar-2026.pdf" [ref=e568]:
+                        - img [ref=e569]
+                      - button "Actions for draft-letter-to-registrar-2026.pdf" [ref=e571]:
+                        - img [ref=e572]
+                  - paragraph [ref=e576]: This March 27, 2026 letter from counsel to Craig Roxborough, Registrar and CEO of the College of Physiotherapists of Ontario, raises urgent human rights concerns on behalf of Kareem Hassanein, a Muslim Arab registrant alleging workplace discrimination and reprisal under the Ontario Human Rights Code. The letter asserts that existing College complaint processes are inadequate and potentially biased, requests the appointment of an independent institutional pathway to assess new evidence of discrimination and reprisal before further procedural steps, and warns that failure to act may compel external legal recourse. The correspondence emphasizes the College's legal obligations to prevent systemic discrimination and protect registrants' rights, referencing multiple related files dating back to 2024.
+            - generic [ref=e578]: 5 files
+          - separator [ref=e579] [cursor=pointer]:
+            - img [ref=e583]
+          - generic [ref=e591]:
+            - tablist "Content tabs" [ref=e593]:
+              - tab "Overview" [ref=e594] [cursor=pointer]:
+                - img [ref=e595]
+                - generic [ref=e598]: Overview
+              - tab "Docs" [selected] [ref=e599] [cursor=pointer]:
+                - img [ref=e601]
+                - generic [ref=e603]: Docs
+              - tab "Exhibits" [ref=e604] [cursor=pointer]:
+                - img [ref=e605]
+                - generic [ref=e608]: Exhibits
+              - tab "Timeline" [ref=e609] [cursor=pointer]:
+                - img [ref=e610]
+                - generic [ref=e613]: Timeline
+              - tab "Drafts" [ref=e614] [cursor=pointer]:
+                - img [ref=e615]
+                - generic [ref=e618]: Drafts
+            - tabpanel "editor" [ref=e619]:
+              - generic [ref=e621]:
+                - generic [ref=e623]:
+                  - generic [ref=e624]:
+                    - generic [ref=e625]:
+                      - heading "Documents" [level=2] [ref=e626]
+                      - generic [ref=e627]:
+                        - generic [ref=e628]: 2 docs
+                        - generic [ref=e629]: Edited about 3 hours ago
+                    - generic [ref=e630]:
+                      - button "New document" [ref=e631] [cursor=pointer]:
+                        - img [ref=e632]
+                        - text: New document
+                      - button "Export" [ref=e634] [cursor=pointer]:
+                        - img [ref=e635]
+                        - generic [ref=e638]: Export
+                      - button "Delete note" [ref=e639] [cursor=pointer]:
+                        - img [ref=e640]
+                  - generic [ref=e644]:
+                    - textbox "Document title" [ref=e645]:
+                      - /placeholder: Untitled
+                      - text: Untitled
+                    - button "Open document list" [ref=e646] [cursor=pointer]:
+                      - img [ref=e647]
+                - generic [ref=e650]:
+                  - generic [ref=e651]:
+                    - generic [ref=e652]:
+                      - generic [ref=e653]:
+                        - button "Undo (⌘Z)" [disabled] [ref=e654]:
+                          - img [ref=e655]
+                        - button "Redo (⌘⇧Z)" [disabled] [ref=e658]:
+                          - img [ref=e659]
+                      - generic [ref=e663]:
+                        - button "Bold (⌘B)" [ref=e664] [cursor=pointer]:
+                          - img [ref=e665]
+                        - button "Italic (⌘I)" [ref=e667] [cursor=pointer]:
+                          - img [ref=e668]
+                        - button "Underline (⌘U)" [ref=e670] [cursor=pointer]:
+                          - img [ref=e671]
+                        - button "Strikethrough" [ref=e673] [cursor=pointer]:
+                          - img [ref=e674]
+                        - button "Inline Code" [ref=e677] [cursor=pointer]:
+                          - img [ref=e678]
+                        - button "H" [ref=e681] [cursor=pointer]:
+                          - generic [ref=e682]: H
+                      - generic [ref=e684]:
+                        - button "Heading 1" [ref=e685] [cursor=pointer]:
+                          - img [ref=e686]
+                        - button "Heading 2" [ref=e688] [cursor=pointer]:
+                          - img [ref=e689]
+                        - button "Heading 3" [ref=e691] [cursor=pointer]:
+                          - img [ref=e692]
+                    - button "More tools" [ref=e697] [cursor=pointer]:
+                      - img [ref=e698]
+                  - generic [ref=e704]:
+                    - generic [ref=e705]:
+                      - generic [ref=e706]: Document body
+                      - generic [ref=e707]: "Tip: Type \"/\" for commands"
+                    - paragraph [ref=e710]: Start drafting your document - use "/" for commands...
+                  - generic [ref=e712]:
+                    - generic [ref=e713]: 0 words
+                    - generic [ref=e714]: 0 chars
+                    - generic [ref=e715]: 1 min read
+                    - generic [ref=e716]: Type "/" for commands
+          - separator [ref=e717] [cursor=pointer]:
+            - img [ref=e721]
+          - generic [ref=e729]:
+            - generic [ref=e730]:
+              - generic [ref=e731]:
+                - heading "Viewer" [level=2] [ref=e732]
+                - button "Collapse viewer panel" [ref=e733] [cursor=pointer]:
+                  - img [ref=e734]
+              - tablist "Right panel tabs" [ref=e736]:
+                - tab "Viewer" [selected] [ref=e737] [cursor=pointer]:
+                  - img [ref=e739]
+                  - generic [ref=e742]: Viewer
+                - tab "AI Chat" [ref=e743] [cursor=pointer]:
+                  - img [ref=e744]
+                  - generic [ref=e746]: AI Chat
+            - tabpanel "viewer" [ref=e747]:
+              - generic [ref=e791]:
+                - generic [ref=e792]:
+                  - generic [ref=e793]:
+                    - img [ref=e794]
+                    - generic "production-demands.pdf" [ref=e797]
+                  - generic [ref=e798]:
+                    - button "Previous page" [disabled] [ref=e799]:
+                      - img [ref=e800]
+                    - generic [ref=e802]: 1 / 2
+                    - button "Next page" [ref=e803] [cursor=pointer]:
+                      - img [ref=e804]
+                    - button "Zoom out" [ref=e807] [cursor=pointer]:
+                      - img [ref=e808]
+                    - button "Zoom in" [ref=e811] [cursor=pointer]:
+                      - img [ref=e812]
+                  - generic [ref=e815]:
+                    - button "Toggle annotations sidebar" [ref=e816] [cursor=pointer]:
+                      - img [ref=e817]
+                    - button "Download PDF" [ref=e819] [cursor=pointer]:
+                      - img [ref=e820]
+                    - button "Open in new tab" [ref=e823] [cursor=pointer]:
+                      - img [ref=e824]
+                - generic [ref=e828]:
+                  - generic [ref=e829]:
+                    - button "Read" [ref=e830] [cursor=pointer]
+                    - button "Annotate" [ref=e831] [cursor=pointer]:
+                      - img [ref=e832]
+                      - text: Annotate
+                  - button "Notes" [ref=e836] [cursor=pointer]:
+                    - img [ref=e837]
+                    - text: Notes
+                  - generic [ref=e839]: Select text to copy
+                - generic [ref=e840]:
+                  - generic [ref=e842]:
+                    - region "Page ⁨1⁩" [ref=e843]:
+                      - generic [ref=e844]:
+                        - generic [ref=e845]: Our File No. 427-001
+                        - generic [ref=e846]: March 20, 2026
+                        - generic [ref=e847]: BY EMAIL
+                        - generic [ref=e848]: lcoyle@collegept.org
+                        - generic [ref=e849]: Ms. Lauren Coyle Investigator
+                        - generic [ref=e850]: College of Physiotherapists of Ontario
+                        - generic [ref=e851]: 375 University Ave, Suite 800
+                        - generic [ref=e852]: Toronto, Ontario
+                        - generic [ref=e853]: M5G 2J5
+                        - generic [ref=e854]: "Dear Ms. Coyle:"
+                        - generic [ref=e855]: "Re:"
+                        - generic [ref=e856]: Kareem Hassanein re CPO Complaint CPO File No. 2025-0298
+                        - generic [ref=e857]: We are in receipt of the “additional disclosure” provided January 8, 2026 and February 20, 2026. We have reviewed the documents and note that several are missing. We are therefore writing to request that the College take steps to obtain and provide these documents. Our client will respond within 30 days after receiving these missing items.
+                        - generic [ref=e858]: It appears that Movement Solutions and Mr. Blair Purvis have not complied with the Summons dated January 9, 2026, at Tab 13. It is not clear why the College has not followed up on the missing items or sought confirmation of their existence. For example, no audit trail or activity log (item (j) of Schedule A to the Summons) has been provided at all , when Movement Solutions specifically uses the JaneApp. No items have been provided with respect to the communications listed at paragraph (i) of Schedule A of the Summons. Given Mr. Purvis’ failure to comply with the Summons and the history between him and our client, we respectfully ask that the College conduct an unannounced visit to Movement Solutions and retrieve all items related to the Summons and the below items.
+                        - generic [ref=e859]: "Additionally, please ensure that the following are also retrieved:"
+                        - generic [ref=e860]: •
+                        - generic [ref=e861]: Jane App activity log for Andrea Macina, Blair Purvis, Dana Bennett, Shauna Bennett, and Kim Foley from July 2024 to December 2024 and July 2025 to December 2025.
+                        - generic [ref=e862]: •
+                        - generic [ref=e863]: A printout of Ms. Dana Bennett’s work schedule at Movement Solutions from July 2024 to December 2024, and from July 2025 to December 2025.
+                        - generic [ref=e864]: •
+                        - generic [ref=e865]: All communications (email, texts, etc) between Ms. Dana Bennett and Mr. Blair Purvis with respect to Ms. Bennett’s allegations, including from July 2024 to December 2024.
+                      - generic [ref=e867]: "Reply To: Mina Karabit Phone: 416-915-4234 1-844-451-1804 Email: mkarabit@wisehealthlaw.ca"
+                    - region "Page ⁨2⁩" [ref=e868]
+                  - generic [ref=e870]:
+                    - generic [ref=e871]:
+                      - generic [ref=e872]:
+                        - img [ref=e873]
+                        - generic [ref=e875]: Annotations
+                        - generic [ref=e876]: "0"
+                      - button [ref=e878] [cursor=pointer]:
+                        - img [ref=e879]
+                    - generic [ref=e883]:
+                      - img [ref=e885]
+                      - paragraph [ref=e888]: No annotations yet. Select text in the PDF to create highlights.
+        - generic [ref=e783]:
+          - button "Open file viewer" [ref=e784] [cursor=pointer]:
+            - img [ref=e785]
+          - button "Open AI assistant" [ref=e788] [cursor=pointer]:
+            - img [ref=e789]
+  - region "Notifications alt+T"

@@ -1,0 +1,58 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img [ref=e8]
+        - generic [ref=e12]: Clarity Hub
+      - generic [ref=e13]:
+        - heading "The workspace your legal practice deserves." [level=1] [ref=e14]:
+          - text: The workspace
+          - text: your legal practice
+          - text: deserves.
+        - paragraph [ref=e15]: Upload documents, annotate PDFs, build timelines, draft filings, and prepare case strategy. Powered by AI that understands Ontario law.
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e19]
+            - generic [ref=e22]:
+              - paragraph [ref=e23]: Document Intelligence
+              - paragraph [ref=e24]: OCR, classification, and searchable evidence across every file
+          - generic [ref=e25]:
+            - img [ref=e27]
+            - generic [ref=e37]:
+              - paragraph [ref=e38]: AI Case Analysis
+              - paragraph [ref=e39]: Cross-document reasoning with Ontario legal knowledge built in
+          - generic [ref=e40]:
+            - img [ref=e42]
+            - generic [ref=e44]:
+              - paragraph [ref=e45]: Court-Ready Output
+              - paragraph [ref=e46]: Exhibit books, chronologies, and legal drafts you can file
+      - paragraph [ref=e47]: Clarity Hub
+    - generic [ref=e49]:
+      - heading "Sign in" [level=2] [ref=e50]
+      - paragraph [ref=e51]: Access your legal workspace
+      - generic [ref=e52]:
+        - button "Continue with Google" [ref=e53] [cursor=pointer]:
+          - img [ref=e54]
+          - text: Continue with Google
+          - img [ref=e59]
+        - button "Explore Demo" [ref=e62] [cursor=pointer]:
+          - img [ref=e63]
+          - text: Explore Demo
+      - generic [ref=e66]:
+        - paragraph [ref=e67]: Included
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - img [ref=e70]
+            - paragraph [ref=e73]: Upload and annotate PDFs with highlights and notes
+          - generic [ref=e74]:
+            - img [ref=e75]
+            - paragraph [ref=e78]: AI analysis across all your case documents
+          - generic [ref=e79]:
+            - img [ref=e80]
+            - paragraph [ref=e83]: Draft legal filings with Ontario law context
+          - generic [ref=e84]:
+            - img [ref=e85]
+            - paragraph [ref=e88]: Build exhibit books and chronologies
+  - region "Notifications alt+T"

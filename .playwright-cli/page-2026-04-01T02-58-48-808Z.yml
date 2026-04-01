@@ -1,0 +1,106 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - link "Clarity Hub" [active] [ref=e7] [cursor=pointer]:
+        - /url: /
+        - img [ref=e9]
+        - generic [ref=e14]: Clarity Hub
+      - generic [ref=e15]:
+        - button "Switch to dark mode" [ref=e242] [cursor=pointer]:
+          - img [ref=e243]
+        - link "Settings" [ref=e19] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e20]
+        - button "Sign out" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+    - main [ref=e27]:
+      - generic [ref=e252]:
+        - generic [ref=e253]:
+          - generic [ref=e256]:
+            - generic [ref=e257]:
+              - paragraph [ref=e258]: Good evening, Kareem
+              - heading "Your Matters" [level=1] [ref=e259]
+              - paragraph [ref=e260]: 2 active matters / 6 files uploaded
+            - button "New matter" [ref=e262] [cursor=pointer]:
+              - img [ref=e263]
+              - text: New matter
+          - generic [ref=e264]:
+            - generic [ref=e265]:
+              - img [ref=e267]
+              - paragraph [ref=e270]: "2"
+              - paragraph [ref=e271]: Active matters
+              - paragraph [ref=e272]: Open records
+            - generic [ref=e273]:
+              - img [ref=e275]
+              - paragraph [ref=e278]: "6"
+              - paragraph [ref=e279]: Source files
+              - paragraph [ref=e280]: Uploaded evidence
+            - generic [ref=e281]:
+              - img [ref=e283]
+              - paragraph [ref=e286]: Feb 16
+              - paragraph [ref=e287]: Latest update
+              - paragraph [ref=e288]: test
+        - generic [ref=e290]:
+          - generic [ref=e291]:
+            - heading "All Matters" [level=2] [ref=e292]
+            - generic [ref=e293]: "2"
+          - generic [ref=e294]:
+            - generic [ref=e295]:
+              - img
+              - textbox "Search..." [ref=e296]
+            - generic [ref=e297]:
+              - img [ref=e298]
+              - combobox [ref=e301] [cursor=pointer]:
+                - option "Recent" [selected]
+                - option "Name"
+                - option "Files"
+        - generic [ref=e303]:
+          - link "General matter Developed test Project options test2 5 files about 1 month ago last activity Open" [ref=e305] [cursor=pointer]:
+            - generic [ref=e307]:
+              - generic [ref=e308]:
+                - generic [ref=e309]:
+                  - img [ref=e311]
+                  - generic [ref=e313]:
+                    - generic [ref=e314]:
+                      - generic [ref=e315]: General matter
+                      - generic [ref=e316]: Developed
+                    - heading "test" [level=3] [ref=e318]
+                - button "Project options" [ref=e320]:
+                  - img [ref=e321]
+              - paragraph [ref=e325]: test2
+              - generic [ref=e326]:
+                - generic [ref=e327]:
+                  - paragraph [ref=e328]: "5"
+                  - paragraph [ref=e329]: files
+                - generic [ref=e331]:
+                  - paragraph [ref=e332]: about 1 month ago
+                  - paragraph [ref=e333]: last activity
+              - generic [ref=e335]:
+                - text: Open
+                - img [ref=e336]
+          - link "General matter In review test Project options test 1 file about 1 month ago last activity Open" [ref=e339] [cursor=pointer]:
+            - generic [ref=e341]:
+              - generic [ref=e342]:
+                - generic [ref=e343]:
+                  - img [ref=e345]
+                  - generic [ref=e347]:
+                    - generic [ref=e348]:
+                      - generic [ref=e349]: General matter
+                      - generic [ref=e350]: In review
+                    - heading "test" [level=3] [ref=e352]
+                - button "Project options" [ref=e354]:
+                  - img [ref=e355]
+              - paragraph [ref=e359]: test
+              - generic [ref=e360]:
+                - generic [ref=e361]:
+                  - paragraph [ref=e362]: "1"
+                  - paragraph [ref=e363]: file
+                - generic [ref=e365]:
+                  - paragraph [ref=e366]: about 1 month ago
+                  - paragraph [ref=e367]: last activity
+              - generic [ref=e369]:
+                - text: Open
+                - img [ref=e370]
+  - region "Notifications alt+T"

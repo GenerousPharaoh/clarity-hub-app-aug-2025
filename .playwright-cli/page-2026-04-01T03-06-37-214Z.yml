@@ -1,0 +1,140 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - link [ref=e372] [cursor=pointer]:
+          - /url: /
+          - img [ref=e9]
+        - navigation "Breadcrumb" [ref=e373]:
+          - link [ref=e1764] [cursor=pointer]:
+            - /url: /
+            - img [ref=e375]
+          - img [ref=e381]
+          - generic [ref=e383]: test
+      - generic [ref=e15]:
+        - button "Keyboard shortcuts" [ref=e384] [cursor=pointer]:
+          - img [ref=e385]
+        - button "Switch to dark mode" [ref=e242] [cursor=pointer]:
+          - img [ref=e243]
+        - link "Settings" [ref=e19] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e20]
+        - button "Sign out" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+    - main [ref=e27]:
+      - generic [ref=e387]:
+        - generic [ref=e1767]:
+          - generic [ref=e1768]:
+            - heading "AI Chat" [level=2] [ref=e1770]
+            - tablist "Right panel tabs" [ref=e1771]:
+              - tab "Viewer" [ref=e1772] [cursor=pointer]:
+                - img [ref=e1773]
+                - generic [ref=e1776]: Viewer
+              - tab "AI Chat" [selected] [ref=e1777] [cursor=pointer]:
+                - img [ref=e1779]
+                - generic [ref=e1781]: AI Chat
+          - tabpanel "ai" [ref=e1782]:
+            - generic [ref=e1784]:
+              - log "Chat messages" [ref=e1785]:
+                - generic [ref=e1786]:
+                  - generic [ref=e1787]:
+                    - button "Export" [ref=e1789] [cursor=pointer]:
+                      - img [ref=e1790]
+                    - button "Clear conversation" [ref=e1793] [cursor=pointer]:
+                      - img [ref=e1794]
+                  - generic [ref=e1798]:
+                    - generic [ref=e1799]:
+                      - generic [ref=e1800]: carefully analyze these files
+                      - generic [ref=e1801]: 11:51 PM
+                    - img [ref=e1803]
+                  - generic [ref=e1807]:
+                    - img [ref=e1809]
+                    - generic [ref=e1811]:
+                      - paragraph [ref=e1947]: "AI error: AI request timed out after 60 seconds"
+                      - button "Retry" [ref=e1815] [cursor=pointer]:
+                        - img [ref=e1816]
+                        - text: Retry
+                      - generic [ref=e1819]: 11:52 PM
+                  - generic [ref=e1821]:
+                    - generic [ref=e1822]:
+                      - generic [ref=e1823]: carefully analyze these files
+                      - generic [ref=e1824]: 11:54 PM
+                    - img [ref=e1826]
+                  - generic [ref=e1830]:
+                    - img [ref=e1832]
+                    - generic [ref=e1834]:
+                      - generic [ref=e1835]:
+                        - generic "Deep reasoning for complex legal analysis" [ref=e1836]: GPT-5.2
+                        - generic [ref=e1837]: Fast
+                      - button "Copy to clipboard" [ref=e1839] [cursor=pointer]:
+                        - img [ref=e1840]
+                      - button "Show 1 source" [ref=e1845] [cursor=pointer]:
+                        - generic [ref=e1846]: Show 1 source
+                      - generic [ref=e1847]: 11:54 PM
+                  - generic [ref=e1849]:
+                    - generic [ref=e1850]:
+                      - generic [ref=e1851]: Summarize the selected document in 2 bullet points.
+                      - generic [ref=e1852]: 11:00 PM
+                    - img [ref=e1854]
+                  - generic [ref=e1858]:
+                    - img [ref=e1860]
+                    - generic [ref=e1862]:
+                      - generic [ref=e1863]:
+                        - generic "Deep reasoning for complex legal analysis" [ref=e1864]: GPT-5.2
+                        - generic [ref=e1865]: Fast
+                      - generic [ref=e1866]:
+                        - button "Copy to clipboard" [ref=e1867] [cursor=pointer]:
+                          - img [ref=e1868]
+                        - list [ref=e1948]:
+                          - listitem [ref=e1949]:
+                            - paragraph [ref=e1950]: Wise Health Law (for Kareem Hassanein) writes to the College investigator (re CPO File No. 2025-0298) stating that the “additional disclosure” is incomplete, asserting Movement Solutions/Mr. Purvis have not complied with the January 9, 2026 Summons, and requesting the College take steps (including an unannounced visit) to obtain missing materials; the client will respond within 30 days after receipt.
+                          - listitem [ref=e1951]:
+                            - paragraph [ref=e1952]: The letter specifies the missing/required production (JaneApp audit/activity logs; work schedules; communications among identified individuals about the allegations; complete unaltered audio recordings), and seeks explanations/production regarding inconsistencies (memo date vs call date), possible investigator notes, unexplained redactions (Tabs 5 and 11), and any missing reply to a November 11, 2025 email.
+                      - generic [ref=e1877]: 11:00 PM
+              - generic [ref=e1878]:
+                - generic [ref=e1879]:
+                  - generic [ref=e1880]:
+                    - paragraph [ref=e1881]: 1 file selected
+                    - button "Clear all" [ref=e1882] [cursor=pointer]
+                  - generic [ref=e1884]:
+                    - img [ref=e1885]
+                    - generic [ref=e1888]: production-demands.pdf
+                    - button [ref=e1889] [cursor=pointer]:
+                      - img [ref=e1890]
+                - button "Add more files" [ref=e1894] [cursor=pointer]:
+                  - img [ref=e1895]
+                  - text: Add more files
+                - generic [ref=e1898]:
+                  - button "Fast" [ref=e1899] [cursor=pointer]:
+                    - img [ref=e1900]
+                    - text: Fast
+                  - button "Thinking" [ref=e1902] [cursor=pointer]:
+                    - img [ref=e1903]
+                    - text: Thinking
+                  - button "Web" [ref=e1914] [cursor=pointer]:
+                    - img [ref=e1915]
+                    - text: Web
+                - generic [ref=e1918]:
+                  - textbox "Ask about your case..." [ref=e1919]
+                  - button "Send message" [disabled] [ref=e1920]:
+                    - img [ref=e1921]
+                - generic [ref=e1924]:
+                  - generic [ref=e1925]: Enter to send/Shift+Enter new line
+                  - generic [ref=e1926]: Not legal advice
+        - navigation [ref=e1927]:
+          - button "5 Files" [ref=e1928] [cursor=pointer]:
+            - generic [ref=e1929]:
+              - img [ref=e1930]
+              - generic [ref=e1932]: "5"
+            - generic [ref=e1933]: Files
+          - button "2 Content" [ref=e1934] [cursor=pointer]:
+            - generic [ref=e1935]:
+              - img [ref=e1936]
+              - generic [ref=e1939]: "2"
+            - generic [ref=e1940]: Content
+          - button "Viewer" [active] [ref=e1941] [cursor=pointer]:
+            - img [ref=e1944]
+            - generic [ref=e1946]: Viewer
+  - region "Notifications alt+T"

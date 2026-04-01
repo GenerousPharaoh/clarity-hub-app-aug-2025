@@ -1,0 +1,140 @@
+- generic [ref=e2]:
+  - link "Skip to main content" [ref=e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e89]:
+    - banner [ref=e90]:
+      - link "Clarity Hub Demo" [ref=e92] [cursor=pointer]:
+        - /url: /
+        - img [ref=e94]
+        - generic [ref=e98]:
+          - generic [ref=e99]: Clarity Hub
+          - generic [ref=e100]: Demo
+      - generic [ref=e101]:
+        - button "Switch to light mode" [ref=e102] [cursor=pointer]:
+          - img [ref=e103]
+        - link "Settings" [ref=e105] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e106]
+        - button "Sign out" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+    - main [ref=e113]:
+      - generic [ref=e114]:
+        - generic [ref=e115]:
+          - generic [ref=e116]:
+            - generic [ref=e119]:
+              - generic [ref=e120]:
+                - paragraph [ref=e121]: Good evening, Demo
+                - heading "Your Matters" [level=1] [ref=e122]
+                - paragraph [ref=e123]: 2 active matters / 4 files uploaded
+              - button "New matter" [ref=e125] [cursor=pointer]:
+                - img [ref=e126]
+                - text: New matter
+            - generic [ref=e127]:
+              - generic [ref=e128]:
+                - img [ref=e130]
+                - paragraph [ref=e133]: "2"
+                - paragraph [ref=e134]: Active matters
+                - paragraph [ref=e135]: Open records
+              - generic [ref=e136]:
+                - img [ref=e138]
+                - paragraph [ref=e141]: "4"
+                - paragraph [ref=e142]: Source files
+                - paragraph [ref=e143]: Uploaded evidence
+              - generic [ref=e144]:
+                - img [ref=e146]
+                - paragraph [ref=e149]: Mar 31
+                - paragraph [ref=e150]: Latest update
+                - paragraph [ref=e151]: Raven Imports Termination QA
+          - generic [ref=e153]:
+            - generic [ref=e154]:
+              - heading "All Matters" [level=2] [ref=e155]
+              - generic [ref=e156]: "2"
+            - generic [ref=e157]:
+              - generic [ref=e158]:
+                - img
+                - textbox "Search..." [ref=e159]
+              - generic [ref=e160]:
+                - img [ref=e161]
+                - combobox [ref=e164] [cursor=pointer]:
+                  - option "Recent"
+                  - option "Name" [selected]
+                  - option "Files"
+          - generic [ref=e166]:
+            - link "Accommodation In review North Shore Accommodation Project options An accommodation file tracking the timeline, internal communications, and the strongest exhibits for a human-rights focused claim. 2 files 29 days ago last activity Open" [ref=e202] [cursor=pointer]:
+              - generic [ref=e204]:
+                - generic [ref=e205]:
+                  - generic [ref=e206]:
+                    - img [ref=e208]
+                    - generic [ref=e210]:
+                      - generic [ref=e211]:
+                        - generic [ref=e212]: Accommodation
+                        - generic [ref=e213]: In review
+                      - heading "North Shore Accommodation" [level=3] [ref=e215]
+                  - button "Project options" [ref=e217]:
+                    - img [ref=e218]
+                - paragraph [ref=e222]: An accommodation file tracking the timeline, internal communications, and the strongest exhibits for a human-rights focused claim.
+                - generic [ref=e223]:
+                  - generic [ref=e224]:
+                    - paragraph [ref=e225]: "2"
+                    - paragraph [ref=e226]: files
+                  - generic [ref=e228]:
+                    - paragraph [ref=e229]: 29 days ago
+                    - paragraph [ref=e230]: last activity
+                - generic [ref=e232]:
+                  - text: Open
+                  - img [ref=e233]
+            - link "Employment In review Raven Imports Termination QA Project options A wrongful dismissal matter focused on notice entitlement, bad-faith termination conduct, and preserving the key documentary record. 2 files less than a minute ago last activity Open" [ref=e251] [cursor=pointer]:
+              - generic [ref=e253]:
+                - generic [ref=e254]:
+                  - generic [ref=e255]:
+                    - img [ref=e257]
+                    - generic [ref=e259]:
+                      - generic [ref=e260]:
+                        - generic [ref=e261]: Employment
+                        - generic [ref=e262]: In review
+                      - heading "Raven Imports Termination QA" [level=3] [ref=e264]
+                  - button "Project options" [ref=e266]:
+                    - img [ref=e267]
+                - paragraph [ref=e271]: A wrongful dismissal matter focused on notice entitlement, bad-faith termination conduct, and preserving the key documentary record.
+                - generic [ref=e272]:
+                  - generic [ref=e273]:
+                    - paragraph [ref=e274]: "2"
+                    - paragraph [ref=e275]: files
+                  - generic [ref=e277]:
+                    - paragraph [ref=e278]: less than a minute ago
+                    - paragraph [ref=e279]: last activity
+                - generic [ref=e281]:
+                  - text: Open
+                  - img [ref=e282]
+        - dialog "New Project" [ref=e286]:
+          - generic [ref=e287]:
+            - generic [ref=e288]:
+              - img [ref=e290]
+              - heading "New Project" [level=2] [ref=e292]
+            - button "Close dialog" [ref=e293] [cursor=pointer]:
+              - img [ref=e294]
+          - generic [ref=e297]:
+            - generic [ref=e298]:
+              - generic [ref=e299] [cursor=pointer]: Project name *
+              - textbox "Project name *" [active] [ref=e300]:
+                - /placeholder: e.g., Smith v. Jones
+                - text: QA Stress Matter
+              - generic [ref=e302]: 16/120
+            - generic [ref=e303]:
+              - generic [ref=e304] [cursor=pointer]: Matter type (optional)
+              - combobox "Matter type (optional)" [ref=e305] [cursor=pointer]:
+                - option "Select a type..."
+                - option "General" [selected]
+                - option "Employment"
+                - option "Civil Litigation"
+                - option "Human Rights"
+                - option "Contract"
+                - option "Regulatory"
+            - generic [ref=e306]:
+              - generic [ref=e307] [cursor=pointer]: Description (optional)
+              - textbox "Description (optional)" [ref=e308]:
+                - /placeholder: Brief summary of the case...
+            - generic [ref=e309]:
+              - button "Cancel" [ref=e310] [cursor=pointer]
+              - button "Create Project" [ref=e311] [cursor=pointer]
+  - region "Notifications alt+T"

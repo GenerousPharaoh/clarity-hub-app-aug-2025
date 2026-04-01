@@ -324,6 +324,57 @@ export async function generateCompendium(
           rgb(0.5, 0.5, 0.5)
         );
       }
+    } else if (entry.fileType === 'text' || entry.fileType === 'document') {
+      // Text-based files (.md, .txt, .csv, .docx rendered as text)
+      try {
+        const textContent = await entry.fileBlob.text();
+        const lines = textContent.split('\n');
+        let currentPage = mergedPdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+        let y = PAGE_HEIGHT - MARGIN;
+        const lineHeight = 13;
+        const fontSize = 10;
+
+        for (const line of lines) {
+          if (y < MARGIN + lineHeight) {
+            // Start new page
+            currentPage = mergedPdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+            y = PAGE_HEIGHT - MARGIN;
+          }
+
+          // Truncate very long lines
+          const displayLine = line.length > 100 ? line.slice(0, 100) + '...' : line;
+
+          if (displayLine.trim()) {
+            currentPage.drawText(displayLine, {
+              x: MARGIN,
+              y,
+              size: fontSize,
+              font: helvetica,
+              color: rgb(0.1, 0.1, 0.1),
+              maxWidth: CONTENT_WIDTH,
+            });
+          }
+          y -= lineHeight;
+        }
+      } catch (err) {
+        const errorPage = mergedPdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+        drawCenteredText(
+          errorPage,
+          'This text document could not be rendered.',
+          PAGE_HEIGHT / 2 + 20,
+          helveticaBold,
+          14,
+          rgb(0.6, 0.1, 0.1)
+        );
+        drawCenteredText(
+          errorPage,
+          entry.displayTitle,
+          PAGE_HEIGHT / 2 - 10,
+          helvetica,
+          11,
+          rgb(0.4, 0.4, 0.4)
+        );
+      }
     } else if (entry.fileType === 'image') {
       try {
         const imageBytes = await entry.fileBlob.arrayBuffer();
@@ -370,6 +421,28 @@ export async function generateCompendium(
           11,
           rgb(0.4, 0.4, 0.4)
         );
+      }
+    } else {
+      // Unsupported file type — try to render as text, or show placeholder
+      try {
+        const textContent = await entry.fileBlob.text();
+        if (textContent && textContent.trim().length > 0) {
+          const page = mergedPdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+          const truncated = textContent.slice(0, 3000);
+          const wrappedLines = wrapText(truncated, helvetica, 10, CONTENT_WIDTH);
+          let y = PAGE_HEIGHT - MARGIN;
+          for (const line of wrappedLines.slice(0, 50)) {
+            page.drawText(line, { x: MARGIN, y, size: 10, font: helvetica, color: rgb(0.1, 0.1, 0.1) });
+            y -= 13;
+          }
+        } else {
+          const page = mergedPdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+          drawCenteredText(page, `File type not supported for embedding: ${entry.fileType}`, PAGE_HEIGHT / 2, helvetica, 11, rgb(0.5, 0.5, 0.5));
+        }
+      } catch {
+        const page = mergedPdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+        drawCenteredText(page, 'This file could not be included.', PAGE_HEIGHT / 2 + 10, helveticaBold, 14, rgb(0.6, 0.1, 0.1));
+        drawCenteredText(page, entry.displayTitle, PAGE_HEIGHT / 2 - 15, helvetica, 11, rgb(0.4, 0.4, 0.4));
       }
     }
 

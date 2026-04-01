@@ -236,6 +236,15 @@ export async function processFile(
     // 7. Chunk text hierarchically
     const chunks = chunkText(extractedText);
 
+    // Sanitize chunk content — remove null bytes and invalid Unicode escapes
+    // that PostgreSQL rejects with "unsupported Unicode escape sequence"
+    for (const chunk of chunks) {
+      chunk.content = chunk.content
+        .replace(/\0/g, '')
+        .replace(/\\u0000/g, '')
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+    }
+
     // 8. Generate embeddings in batches
     const chunkTexts = chunks.map((c) => c.content);
     const embeddings = await embedBatch(chunkTexts);

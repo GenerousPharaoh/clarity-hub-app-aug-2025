@@ -145,12 +145,13 @@ export function ExportButton({
       </button>
 
       {open && (
+        <>
+        <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
         <div
           className={cn(
             'absolute right-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-xl',
             'border border-surface-200 bg-white shadow-lg',
             'dark:border-surface-700 dark:bg-surface-850',
-            'animate-in fade-in-0 zoom-in-95 duration-100'
           )}
         >
           {FORMATS.map((format) => (
@@ -175,6 +176,7 @@ export function ExportButton({
             </button>
           ))}
         </div>
+        </>
       )}
     </div>
   );

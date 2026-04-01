@@ -11,7 +11,6 @@ export function useAutoSave(noteId: string, projectId: string) {
 
   const triggerSave = useCallback(
     (content: string) => {
-      setSaveStatus('saving');
       pendingContent.current = content;
 
       if (debounceTimer.current) {
@@ -19,6 +18,7 @@ export function useAutoSave(noteId: string, projectId: string) {
       }
 
       debounceTimer.current = setTimeout(() => {
+        setSaveStatus('saving');
         pendingContent.current = null;
         updateNote.mutate(
           { id: noteId, projectId, content },
@@ -27,7 +27,7 @@ export function useAutoSave(noteId: string, projectId: string) {
             onError: () => setSaveStatus('error'),
           }
         );
-      }, 1000);
+      }, 500);
     },
     [noteId, projectId, updateNote]
   );

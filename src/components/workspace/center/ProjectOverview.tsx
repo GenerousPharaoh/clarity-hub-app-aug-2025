@@ -1020,11 +1020,11 @@ function CaseAnalysisCard({
         return;
       }
 
-      // Build structured evidence summary for the AI
-      const evidenceSummary = files.map((f) => {
+      // Build evidence summary — use ai_summary for all files, full text only for top 3
+      const evidenceSummary = files.map((f, i) => {
         const docType = f.document_type ? ` [${f.document_type.replace(/_/g, ' ')}]` : '';
-        const text = f.extracted_text
-          ? f.extracted_text.slice(0, 3000) // First 3K chars per file
+        const text = i < 3 && f.extracted_text
+          ? f.extracted_text.slice(0, 1500)
           : f.ai_summary || 'No content available';
         return `=== ${f.name}${docType} ===\n${text}`;
       }).join('\n\n');

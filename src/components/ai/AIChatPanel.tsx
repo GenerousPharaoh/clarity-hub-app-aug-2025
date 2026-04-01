@@ -133,6 +133,9 @@ export function AIChatPanel() {
     const content = (messageContent ?? input).trim();
     if (!content || isLoading) return;
 
+    // Close file picker if open
+    setShowFilePicker(false);
+
     // Reset scroll tracking on new message
     userHasScrolledRef.current = false;
     setShowJumpToLatest(false);

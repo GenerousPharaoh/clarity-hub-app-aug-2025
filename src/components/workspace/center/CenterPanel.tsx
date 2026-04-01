@@ -601,6 +601,8 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
             {/* Dropdown list */}
             <AnimatePresence>
               {dropdownOpen && (
+                <>
+                <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
                 <motion.div
                   initial={{ opacity: 0, y: -4, scale: 0.97 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -657,6 +659,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                     </button>
                   </div>
                 </motion.div>
+                </>
               )}
             </AnimatePresence>
           </div>

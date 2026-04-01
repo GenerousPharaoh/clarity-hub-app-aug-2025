@@ -74,6 +74,29 @@ export function TipTapEditor({
   // Cleanup debounce timer on unmount
   useEffect(() => cleanup, [cleanup]);
 
+  // Handle clicks on exhibit references in the editor
+  useEffect(() => {
+    const handleEditorClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const exhibitLink = target.closest('[data-file-id]') as HTMLElement | null;
+      if (exhibitLink) {
+        e.preventDefault();
+        const fileId = exhibitLink.getAttribute('data-file-id');
+        if (fileId) {
+          import('@/store').then(({ default: store }) => {
+            store.getState().setSelectedFile(fileId);
+            store.getState().setRightPanel(true);
+            store.getState().setRightTab('viewer');
+          });
+        }
+      }
+    };
+
+    const editorEl = editor?.view?.dom;
+    editorEl?.addEventListener('click', handleEditorClick);
+    return () => editorEl?.removeEventListener('click', handleEditorClick);
+  }, [editor]);
+
   // Link insertion handler
   const handleInsertLink = useCallback(() => {
     if (!editor) return;
@@ -88,6 +111,12 @@ export function TipTapEditor({
   const handleInsertImage = useCallback(() => {
     setDialogInitialValue('');
     setDialogType('image');
+  }, []);
+
+  // Exhibit insertion handler
+  const [showExhibitPicker, setShowExhibitPicker] = useState(false);
+  const handleInsertExhibit = useCallback(() => {
+    setShowExhibitPicker(true);
   }, []);
 
   const handleDialogSubmit = useCallback(
@@ -130,7 +159,7 @@ export function TipTapEditor({
       {/* Scrollable document canvas */}
       <div className="flex-1 overflow-y-auto bg-gradient-to-b from-surface-100/90 via-surface-50 to-surface-100/70 dark:from-surface-950/70 dark:via-surface-900 dark:to-surface-950/70">
         <BubbleToolbar editor={editor} onInsertLink={handleInsertLink} />
-        <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} onInsertLink={handleInsertLink} />
+        <SlashCommandMenu editor={editor} onInsertImage={handleInsertImage} onInsertLink={handleInsertLink} onInsertExhibit={handleInsertExhibit} />
 
         {/* Paper canvas */}
         <div className="mx-auto w-full max-w-[1080px] px-3 py-4 md:px-6 md:py-8">
@@ -191,6 +220,101 @@ export function TipTapEditor({
         onSubmit={handleDialogSubmit}
         onCancel={handleDialogCancel}
       />
+
+      {/* Exhibit picker */}
+      {showExhibitPicker && (
+        <ExhibitPickerDialog
+          projectId={projectId}
+          onSelect={(exhibitId, fileId) => {
+            if (editor) {
+              // Insert as a styled inline reference that opens the file on click
+              const exhibitRef = `[Exhibit ${exhibitId}]`;
+              editor.chain().focus().insertContent(
+                `<a href="#exhibit-${fileId}" data-exhibit-id="${exhibitId}" data-file-id="${fileId}" class="exhibit-ref">${exhibitRef}</a>`
+              ).run();
+            }
+            setShowExhibitPicker(false);
+          }}
+          onCancel={() => {
+            setShowExhibitPicker(false);
+            editor?.commands.focus();
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+/** Inline exhibit picker dialog */
+function ExhibitPickerDialog({
+  projectId,
+  onSelect,
+  onCancel,
+}: {
+  projectId: string;
+  onSelect: (exhibitId: string, fileId: string) => void;
+  onCancel: () => void;
+}) {
+  const [exhibits, setExhibits] = useState<Array<{ exhibit_id: string; file_id: string | null; description: string | null }>>([]);
+
+  useEffect(() => {
+    import('@/lib/supabase').then(({ supabase }) => {
+      supabase
+        .from('exhibit_markers')
+        .select('exhibit_id, file_id, description')
+        .eq('project_id', projectId)
+        .order('exhibit_id')
+        .then(({ data }) => setExhibits(data ?? []));
+    });
+  }, [projectId]);
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 bg-black/20" onClick={onCancel} />
+      <div className="fixed left-1/2 top-1/2 z-50 w-80 -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-surface-200 bg-white p-4 shadow-xl dark:border-surface-700 dark:bg-surface-800">
+        <h3 className="font-heading text-sm font-bold text-surface-800 dark:text-surface-100">
+          Insert Exhibit Reference
+        </h3>
+        <p className="mt-1 text-xs text-surface-400">
+          Select an exhibit to insert a clickable reference.
+        </p>
+        {exhibits.length === 0 ? (
+          <p className="mt-4 text-center text-sm text-surface-400">
+            No exhibits yet. Create exhibits in the Exhibits tab first.
+          </p>
+        ) : (
+          <div className="mt-3 max-h-48 overflow-y-auto space-y-1">
+            {exhibits.map((ex) => (
+              <button
+                key={ex.exhibit_id}
+                onClick={() => ex.file_id && onSelect(ex.exhibit_id, ex.file_id)}
+                disabled={!ex.file_id}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors',
+                  ex.file_id
+                    ? 'hover:bg-accent-50 dark:hover:bg-accent-900/20'
+                    : 'opacity-40 cursor-not-allowed'
+                )}
+              >
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-100 font-heading text-sm font-bold text-accent-700 dark:bg-accent-900/30 dark:text-accent-400">
+                  {ex.exhibit_id}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm text-surface-600 dark:text-surface-300">
+                  {ex.description || (ex.file_id ? 'Linked file' : 'No file linked')}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="mt-3 flex justify-end">
+          <button
+            onClick={onCancel}
+            className="rounded-lg px-3 py-1.5 text-xs text-surface-500 hover:bg-surface-100 dark:hover:bg-surface-700"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

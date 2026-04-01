@@ -18,12 +18,14 @@ import {
   Link,
   Sparkles,
   MessageSquare,
+  Bookmark,
 } from 'lucide-react';
 
 interface SlashCommandMenuProps {
   editor: Editor;
   onInsertImage?: () => void;
   onInsertLink?: () => void;
+  onInsertExhibit?: () => void;
 }
 
 interface CommandItem {
@@ -34,7 +36,7 @@ interface CommandItem {
   action: () => void;
 }
 
-export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashCommandMenuProps) {
+export function SlashCommandMenu({ editor, onInsertImage, onInsertLink, onInsertExhibit }: SlashCommandMenuProps) {
   const [active, setActive] = useState(false);
   const [query, setQuery] = useState('');
   const [slashRange, setSlashRange] = useState<{ from: number; to: number }>({ from: 0, to: 0 });
@@ -141,6 +143,13 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink }: SlashC
         icon: <Link className="h-4 w-4" />,
         group: 'Insert',
         action: () => onInsertLink?.(),
+      },
+      {
+        title: 'Exhibit',
+        description: 'Insert exhibit reference [Exhibit A]',
+        icon: <Bookmark className="h-4 w-4" />,
+        group: 'Insert',
+        action: () => onInsertExhibit?.(),
       },
       // ── AI ──
       {

@@ -405,3 +405,32 @@
 .tiptap .ProseMirror-gapcursor:after {
   border-top: 1px solid var(--color-surface-500);
 }
+
+/* ── Exhibit References ─────────────────────────────────── */
+.ProseMirror a.exhibit-ref,
+.ProseMirror [data-exhibit-id] {
+  display: inline;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background-color: rgba(20, 184, 166, 0.1);
+  color: #0d9488;
+  font-weight: 600;
+  font-size: 0.9em;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid rgba(20, 184, 166, 0.2);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.ProseMirror a.exhibit-ref:hover,
+.ProseMirror [data-exhibit-id]:hover {
+  background-color: rgba(20, 184, 166, 0.2);
+  border-color: rgba(20, 184, 166, 0.4);
+}
+
+.dark .ProseMirror a.exhibit-ref,
+.dark .ProseMirror [data-exhibit-id] {
+  background-color: rgba(20, 184, 166, 0.1);
+  color: #5eead4;
+  border-color: rgba(20, 184, 166, 0.15);
+}

@@ -529,10 +529,10 @@ export function FileListItem({
         <div
           ref={detailsRef}
           className={cn(
-            'absolute left-3 right-3 top-[calc(100%+4px)] z-50 overflow-hidden rounded-2xl',
+            'absolute left-0 right-0 top-full mt-1 z-50 overflow-hidden rounded-2xl',
             'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
             'dark:border-surface-700 dark:bg-surface-800 dark:shadow-surface-950/30',
-            'animate-in fade-in-0 zoom-in-95 duration-100'
+            'transition-all duration-100'
           )}
         >
           {/* Header */}
@@ -678,7 +678,7 @@ export function FileListItem({
             'absolute right-3 top-[calc(100%-0.35rem)] z-50 min-w-[160px] overflow-hidden rounded-2xl',
             'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
             'dark:border-surface-700 dark:bg-surface-800 dark:shadow-surface-950/30',
-            'animate-in fade-in-0 zoom-in-95 duration-100'
+            'transition-all duration-100'
           )}
         >
           <button

@@ -266,14 +266,14 @@ export function AIChatPanel() {
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-50 dark:bg-accent-900/30">
                 <Sparkles className="h-6 w-6 text-accent-500 dark:text-accent-400" />
               </div>
-              <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+              <h3 className="mt-4 font-heading text-base font-bold text-surface-800 dark:text-surface-100">
                 Legal Research Assistant
               </h3>
-              <p className={cn('mt-1.5 text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
-                Ask about Ontario employment law, case analysis, or your documents.
+              <p className={cn('mt-2 text-center text-sm leading-relaxed text-surface-500 dark:text-surface-400', compact ? 'max-w-[80%]' : 'max-w-xs')}>
+                Ask about your documents, Ontario employment law, or case strategy.
               </p>
-              <p className={cn('mt-1 mb-6 text-center text-xs text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
-                Tip: Select a file in the sidebar to ask questions about it.
+              <p className={cn('mt-1.5 mb-6 text-center text-xs text-surface-400 dark:text-surface-500', compact ? 'max-w-[80%]' : 'max-w-xs')}>
+                Select files below for targeted analysis, or ask general questions.
               </p>
 
               {/* Suggested prompts -- adapt to selected file */}

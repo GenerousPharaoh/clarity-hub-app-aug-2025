@@ -272,10 +272,10 @@ export function LeftPanel() {
   }, [setSearchQuery]);
 
   return (
-    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900 surface-grain">
+    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       <div className="shrink-0 border-b border-surface-200/80 px-4 py-4 dark:border-surface-800">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-surface-900 dark:text-surface-100">Files</p>
+          <p className="text-base font-bold text-surface-900 dark:text-surface-100">Files</p>
           {!isMobile && (
             <button
               onClick={toggleLeft}

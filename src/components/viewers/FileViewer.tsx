@@ -140,10 +140,10 @@ export function FileViewer() {
             <FileSearch className="h-6 w-6 text-surface-400 dark:text-surface-500" />
           </div>
           <h3 className="mt-4 font-heading text-lg font-semibold text-surface-800 dark:text-surface-100">
-            Viewer awaiting source
+            Select a file to view
           </h3>
           <p className="mt-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
-            Select a file from the evidence lane to preview the source record here. PDFs, images, documents, audio, and video are supported.
+            Click any file in the left panel to open it here. Supports PDFs, images, audio, video, and text files.
           </p>
           {recentProjectFiles.length > 0 && (
             <div className="mt-5 rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-3 text-left dark:border-surface-800 dark:bg-surface-950/35">

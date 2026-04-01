@@ -53,11 +53,11 @@ export function RightPanel() {
   const panelLabel = activeTab === 'viewer' ? 'Viewer' : 'AI Chat';
 
   return (
-    <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-surface-50/70 dark:bg-surface-900 surface-grain">
+    <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Header with tabs and collapse */}
-      <div className="shrink-0 border-b border-surface-200/80 bg-surface-50/80 px-3 py-3 dark:border-surface-800 dark:bg-surface-850/60">
+      <div className="shrink-0 border-b border-surface-200/80 bg-white px-4 py-3 dark:border-surface-800 dark:bg-surface-900">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="min-w-0 truncate text-sm font-semibold text-surface-700 dark:text-surface-200">
+          <h2 className="min-w-0 truncate text-base font-bold text-surface-800 dark:text-surface-100">
             {panelLabel}
           </h2>
           {!isMobile && !ultraCompact && (
@@ -79,7 +79,7 @@ export function RightPanel() {
 
         <div
           className={cn(
-            'mt-3 flex items-center gap-1 rounded-2xl border border-surface-200/80 bg-white/85 p-1 shadow-sm dark:border-surface-700 dark:bg-surface-900/80',
+            'mt-3 flex items-center gap-1 rounded-xl border border-surface-200 bg-surface-50 p-1 dark:border-surface-700 dark:bg-surface-800',
             ultraCompact && 'px-0.5'
           )}
           role="tablist"

@@ -110,7 +110,7 @@ export function SettingsPage() {
   return (
     <FadeIn className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6">
       {/* ── Page title ──────────────────────────────────────── */}
-      <h1 className="font-heading text-2xl font-bold text-surface-900 dark:text-surface-100">
+      <h1 className="font-heading text-3xl font-bold text-surface-900 dark:text-surface-100">
         Settings
       </h1>
       <p className="mt-1 text-sm text-surface-500 dark:text-surface-400">
@@ -119,9 +119,9 @@ export function SettingsPage() {
 
       <div className="mt-8 flex flex-col gap-6">
         {/* ── Profile ───────────────────────────────────────── */}
-        <section className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
           <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
-            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+            <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
               Profile
             </h2>
           </div>
@@ -157,9 +157,9 @@ export function SettingsPage() {
         </section>
 
         {/* ── Appearance ────────────────────────────────────── */}
-        <section className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
           <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
-            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+            <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
               Appearance
             </h2>
           </div>
@@ -223,9 +223,9 @@ export function SettingsPage() {
         </section>
 
         {/* ── AI Processing ────────────────────────────────── */}
-        <section className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
           <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
-            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+            <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
               AI Processing
             </h2>
           </div>
@@ -281,9 +281,9 @@ export function SettingsPage() {
         </section>
 
         {/* ── Account ───────────────────────────────────────── */}
-        <section className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
           <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
-            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+            <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
               Account
             </h2>
           </div>
@@ -343,9 +343,9 @@ export function SettingsPage() {
         </section>
 
         {/* ── About ─────────────────────────────────────────── */}
-        <section className="overflow-hidden rounded-xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
           <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
-            <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
+            <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
               About
             </h2>
           </div>

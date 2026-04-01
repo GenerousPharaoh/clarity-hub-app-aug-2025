@@ -149,17 +149,9 @@ export function CenterPanel() {
         </div>
       </div>
 
-      {/* Content area */}
+      {/* Content area — no AnimatePresence to avoid flash on first lazy load */}
       <div className="relative flex flex-1 overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-            className="flex h-full w-full min-w-0"
-          >
+          <div className="flex h-full w-full min-w-0">
             {activeTab === 'overview' ? (
               <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as CenterTab)} />
             ) : activeTab === 'editor' ? (
@@ -187,8 +179,7 @@ export function CenterPanel() {
             ) : (
               <ExhibitsTab />
             )}
-          </motion.div>
-        </AnimatePresence>
+          </div>
       </div>
     </div>
   );

@@ -109,15 +109,7 @@ export function RightPanel() {
 
       {/* Content */}
       <div className="relative flex flex-1 flex-col overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-            className="flex h-full flex-col"
-          >
+          <div className="flex h-full flex-col">
             {activeTab === 'viewer' ? (
               <FileViewer />
             ) : (
@@ -131,8 +123,8 @@ export function RightPanel() {
                 <AIChatPanel />
               </Suspense>
             )}
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        
       </div>
     </div>
   );

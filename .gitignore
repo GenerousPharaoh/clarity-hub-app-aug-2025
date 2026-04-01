@@ -106,3 +106,5 @@ test-results/
 # Old source backup
 src-old/
 .claude/worktrees/
+.playwright-cli/
+output/

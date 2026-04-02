@@ -38,6 +38,45 @@ export interface ClassificationResult {
   metadata: Record<string, unknown>;
 }
 
+function stripControlChars(text: string): string {
+  let sanitized = '';
+
+  for (const char of text) {
+    const code = char.charCodeAt(0);
+    const isControlChar =
+      (code >= 0 && code <= 8) ||
+      code === 11 ||
+      code === 12 ||
+      (code >= 14 && code <= 31) ||
+      code === 127;
+
+    if (!isControlChar) sanitized += char;
+  }
+
+  return sanitized;
+}
+
+function sanitizeTextForStorage(text: string): string {
+  if (!text) return '';
+
+  let sanitized = text
+    .replace(/\0/g, '')
+    .replace(/\\u0000/gi, '')
+    .replace(/\\x00/gi, '')
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, '')
+    .replace(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
+
+  sanitized = stripControlChars(sanitized);
+
+  try {
+    sanitized = sanitized.normalize('NFC');
+  } catch {
+    // Keep the cleaned text even if Unicode normalization fails.
+  }
+
+  return sanitized;
+}
+
 /**
  * Classify a legal document using GPT-4.1-mini.
  * Identifies document type, extracts key metadata (dates, parties, amounts),
@@ -150,8 +189,9 @@ export async function processFile(
     // 3. Extract text based on file type
     const fileType = file.file_type || detectFileType(file.name);
     const extractedText = await extractText(fileData, fileType, file.name);
+    const sanitizedExtractedText = sanitizeTextForStorage(extractedText);
 
-    if (!extractedText || extractedText.trim().length === 0) {
+    if (!sanitizedExtractedText.trim().length) {
       const { error: emptyResultError } = await supabase
         .from('files')
         .update({
@@ -174,14 +214,14 @@ export async function processFile(
     // 4. Classify document (before summary for better context)
     let classification: ClassificationResult = { documentType: 'other', confidence: 0, metadata: {} };
     try {
-      classification = await classifyDocument(extractedText, file.name);
+      classification = await classifyDocument(sanitizedExtractedText, file.name);
     } catch (classifyError) {
       console.error('Document classification failed (non-fatal):', classifyError);
     }
 
     // 5. Generate AI summary (with classification context)
     const summary = await generateSummary(
-      extractedText,
+      sanitizedExtractedText,
       file.name,
       classification.documentType !== 'other' ? classification.documentType : undefined
     );
@@ -190,7 +230,7 @@ export async function processFile(
     let timelineEventsInserted = 0;
     try {
       const openai = getOpenAI();
-      const timelineEvents = await extractTimelineEvents(extractedText, file.name, fileId, openai);
+      const timelineEvents = await extractTimelineEvents(sanitizedExtractedText, file.name, fileId, openai);
 
       if (timelineEvents.length > 0) {
         // Delete existing AI-extracted events for this file (idempotent)
@@ -234,16 +274,12 @@ export async function processFile(
     }
 
     // 7. Chunk text hierarchically
-    const chunks = chunkText(extractedText);
-
-    // Sanitize chunk content — remove null bytes and invalid Unicode escapes
-    // that PostgreSQL rejects with "unsupported Unicode escape sequence"
-    for (const chunk of chunks) {
-      chunk.content = chunk.content
-        .replace(/\0/g, '')
-        .replace(/\\u0000/g, '')
-        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
-    }
+    const chunks = chunkText(sanitizedExtractedText)
+      .map((chunk) => ({
+        ...chunk,
+        content: sanitizeTextForStorage(chunk.content),
+      }))
+      .filter((chunk) => chunk.content.trim().length > 0);
 
     // 8. Generate embeddings in batches
     const chunkTexts = chunks.map((c) => c.content);
@@ -336,7 +372,7 @@ export async function processFile(
         processing_status: 'completed',
         processed_at: new Date().toISOString(),
         ai_summary: summary,
-        extracted_text: extractedText.slice(0, 50000), // Cap stored text
+        extracted_text: sanitizedExtractedText.slice(0, 50000), // Cap stored text
         chunk_count: chunks.length,
         processing_error: null,
         // Classification fields

@@ -61,12 +61,12 @@ export function TipTapEditor({
     }
   }, [noteId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Focus editor after mount
+  // Focus editor after mount — only on desktop (mobile keyboard is disruptive)
   useEffect(() => {
-    if (editor) {
+    if (editor && window.innerWidth > 768) {
       const timer = setTimeout(() => {
         editor.commands.focus('end');
-      }, 100);
+      }, 200);
       return () => clearTimeout(timer);
     }
   }, [editor]);
@@ -74,28 +74,21 @@ export function TipTapEditor({
   // Cleanup debounce timer on unmount
   useEffect(() => cleanup, [cleanup]);
 
-  // Handle clicks on exhibit references in the editor
-  useEffect(() => {
-    const handleEditorClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const exhibitLink = target.closest('[data-file-id]') as HTMLElement | null;
-      if (exhibitLink) {
-        e.preventDefault();
-        const fileId = exhibitLink.getAttribute('data-file-id');
-        if (fileId) {
-          import('@/store').then(({ default: store }) => {
-            store.getState().setSelectedFile(fileId);
-            store.getState().setRightPanel(true);
-            store.getState().setRightTab('viewer');
-          });
-        }
-      }
-    };
+  const handleEditorClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const exhibitLink = target.closest('[data-file-id]') as HTMLElement | null;
+    if (!exhibitLink) return;
 
-    const editorEl = editor?.view?.dom;
-    editorEl?.addEventListener('click', handleEditorClick);
-    return () => editorEl?.removeEventListener('click', handleEditorClick);
-  }, [editor]);
+    e.preventDefault();
+    const fileId = exhibitLink.getAttribute('data-file-id');
+    if (!fileId) return;
+
+    import('@/store').then(({ default: store }) => {
+      store.getState().setSelectedFile(fileId);
+      store.getState().setRightPanel(true);
+      store.getState().setRightTab('viewer');
+    });
+  }, []);
 
   // Link insertion handler
   const handleInsertLink = useCallback(() => {
@@ -171,7 +164,9 @@ export function TipTapEditor({
             </div>
 
             {/* Editor content */}
-            <EditorContent editor={editor} className="min-h-[62vh]" />
+            <div onClick={handleEditorClick}>
+              <EditorContent editor={editor} className="min-h-[62vh]" />
+            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Search, X, FileText, AlertCircle, RefreshCw, Loader2, Zap } from 'lucide-react';
+import { ChevronLeft, Search, X, FileText, AlertCircle, AlertTriangle, RefreshCw, Loader2, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn, formatFileSize } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -44,6 +44,11 @@ export function LeftPanel() {
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
 
   const processableFiles = useMemo(() => files.filter(isProcessable), [files]);
+  const failedFiles = useMemo(
+    () => files.filter((file) => file.processing_status === 'failed'),
+    [files]
+  );
+  const failedCount = failedFiles.length;
   const processedCount = useMemo(
     () => files.filter((file) => file.processing_status === 'completed').length,
     [files]
@@ -135,6 +140,30 @@ export function LeftPanel() {
 
     setProcessConfirmFileId(null);
   }, [selectedProjectId, fileToProcess, perFileEstimates, processFile]);
+
+  const handleRetryFailedFiles = useCallback(() => {
+    if (!selectedProjectId || failedFiles.length === 0) return;
+
+    if (failedFiles.length === 1) {
+      handleProcess(failedFiles[0].id);
+      return;
+    }
+
+    const totalBytes = failedFiles.reduce((sum, file) => {
+      return sum + (perFileEstimates.get(file.id)?.bytes ?? estimateFileBytesByType(file.file_type));
+    }, 0);
+
+    const budget = checkProcessingBudgetBatch(failedFiles.length, totalBytes);
+    if (!budget.allowed) {
+      toast.error('Processing budget reached', {
+        description: budget.reason,
+      });
+      return;
+    }
+
+    setSelectedBatchIds(failedFiles.map((file) => file.id));
+    setBatchConfirmOpen(true);
+  }, [selectedProjectId, failedFiles, handleProcess, perFileEstimates]);
 
   const selectedBatchIdSet = useMemo(() => new Set(selectedBatchIds), [selectedBatchIds]);
 
@@ -302,6 +331,28 @@ export function LeftPanel() {
             <Loader2 className="h-3 w-3 animate-spin" />
             Processing {processingCount} file{processingCount !== 1 ? 's' : ''}...
           </p>
+        )}
+        {failedCount > 0 && (
+          <div className="mt-3 rounded-2xl border border-red-200/80 bg-red-50/75 px-3 py-3 dark:border-red-900/40 dark:bg-red-950/25">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-red-700 dark:text-red-300">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  {failedCount} file{failedCount === 1 ? ' needs' : 's need'} attention
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-red-600/85 dark:text-red-300/80">
+                  Retry failed indexing to bring those files back into search, timeline, and drafting workflows.
+                </p>
+              </div>
+              <button
+                onClick={handleRetryFailedFiles}
+                className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-red-200 bg-white px-2.5 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:border-red-800/60 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50"
+              >
+                <Zap className="h-3.5 w-3.5" />
+                Retry
+              </button>
+            </div>
+          </div>
         )}
 
         <div className="mt-3">
@@ -566,4 +617,3 @@ export function LeftPanel() {
     </div>
   );
 }
-

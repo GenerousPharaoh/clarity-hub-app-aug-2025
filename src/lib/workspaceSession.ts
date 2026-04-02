@@ -29,7 +29,7 @@ function createDefaultSession(projectId: string): WorkspaceSession {
     fileName: null,
     noteId: null,
     noteTitle: null,
-    centerTab: 'editor',
+    centerTab: 'overview',
     rightTab: 'viewer',
     visitedAt: new Date().toISOString(),
   };

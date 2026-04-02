@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Clock,
@@ -20,9 +20,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { buildTextTable } from '@/lib/export-utils';
+import { estimateFileBytesByType } from '@/lib/processingBudget';
 import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { ProcessingRecoveryBanner } from '@/components/workspace/ProcessingRecoveryBanner';
 import { toast } from 'sonner';
 import {
   useTimelineEvents,
@@ -33,6 +35,9 @@ import {
 } from '@/hooks/useTimeline';
 import type { TimelineEvent } from '@/hooks/useTimeline';
 import { useChronologyEntries, useImportFromTimeline, useDeleteChronologyEntry, useCreateChronologyEntry, useUpdateChronologyEntry } from '@/hooks/useChronology';
+import { useProcessFile } from '@/hooks/useProcessFile';
+import { useIsMobile } from '@/hooks/useMediaQuery';
+import type { FileRecord } from '@/types';
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   employment: {
@@ -101,11 +106,14 @@ function getConfidenceLabel(confidence: string | null): string {
 
 export function TimelineTab() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const files = useAppStore((s) => s.files);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
+  const setLeftPanel = useAppStore((s) => s.setLeftPanel);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
   const setMobileTab = useAppStore((s) => s.setMobileTab);
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const {
     data: events,
@@ -117,6 +125,7 @@ export function TimelineTab() {
   const updateEvent = useUpdateTimelineEvent();
   const deleteEvent = useDeleteTimelineEvent();
   const extractTimeline = useExtractTimeline();
+  const { processFile, getState: getProcessState } = useProcessFile();
 
   const [viewMode, setViewMode] = useState<'events' | 'chronology'>('events');
   const [eventToDelete, setEventToDelete] = useState<TimelineEvent | null>(null);
@@ -125,6 +134,19 @@ export function TimelineTab() {
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newCategory, setNewCategory] = useState('');
+
+  const projectFiles = useMemo(
+    () => files.filter((file) => file.project_id === selectedProjectId && !file.is_deleted),
+    [files, selectedProjectId]
+  );
+  const aiReadyFiles = useMemo(
+    () => projectFiles.filter((file) => file.processing_status === 'completed'),
+    [projectFiles]
+  );
+  const failedFiles = useMemo(
+    () => projectFiles.filter((file) => file.processing_status === 'failed'),
+    [projectFiles]
+  );
 
   const handleExtract = useCallback(async () => {
     if (!selectedProjectId) return;
@@ -202,6 +224,34 @@ export function TimelineTab() {
     [setSelectedFile, setRightPanel, setRightTab, setMobileTab]
   );
 
+  const handleOpenFiles = useCallback(() => {
+    if (isMobile) {
+      setMobileTab('files');
+      return;
+    }
+
+    setLeftPanel(true);
+  }, [isMobile, setLeftPanel, setMobileTab]);
+
+  const handleRetryFile = useCallback(
+    async (file: FileRecord) => {
+      if (!selectedProjectId) return;
+
+      try {
+        await processFile(file.id, selectedProjectId, {
+          fileSizeBytes: estimateFileBytesByType(file.file_type),
+          source: 'manual',
+        });
+        toast.success('File indexed for timeline extraction');
+      } catch (err) {
+        toast.error('Retry failed', {
+          description: err instanceof Error ? err.message : 'Unknown error',
+        });
+      }
+    },
+    [processFile, selectedProjectId]
+  );
+
   // --- No project selected ---
   if (!selectedProjectId) {
     return (
@@ -274,6 +324,10 @@ export function TimelineTab() {
 
   const eventCount = events?.length ?? 0;
   const verifiedCount = events?.filter((e) => e.is_verified).length ?? 0;
+  const firstFailedFile = failedFiles[0] ?? null;
+  const isRetryingFailedFile = firstFailedFile
+    ? getProcessState(firstFailedFile.id).isProcessing
+    : false;
 
   return (
     <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
@@ -359,6 +413,20 @@ export function TimelineTab() {
           </div>
         </div>
       </div>
+
+      {firstFailedFile && (
+        <div className="shrink-0 border-b border-translucent px-3 py-3 sm:px-4">
+          <ProcessingRecoveryBanner
+            title={`${failedFiles.length} file${failedFiles.length === 1 ? '' : 's'} still need AI indexing`}
+            description="Timeline extraction skips failed files. Retry indexing so events and chronology entries can be generated from the full record."
+            failedCount={failedFiles.length}
+            fileName={firstFailedFile.name}
+            isRetrying={isRetryingFailedFile}
+            onOpenFile={() => handleSourceClick(firstFailedFile.id)}
+            onRetry={() => void handleRetryFile(firstFailedFile)}
+          />
+        </div>
+      )}
 
       {/* Add event form */}
       <AnimatePresence>
@@ -475,22 +543,79 @@ export function TimelineTab() {
 
       {/* Chronology view */}
       {viewMode === 'chronology' && (
-        <ChronologyView projectId={selectedProjectId} />
+        <ChronologyView projectId={selectedProjectId} eventCount={eventCount} />
       )}
 
       {/* Timeline events list */}
       {viewMode === 'events' && <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
         {eventCount === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-dashed border-surface-300 bg-white/80 px-4 py-12 text-center surface-grain dark:border-surface-700 dark:bg-surface-900/60">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
-              <Calendar className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+          <div className="flex flex-1 items-center justify-center">
+            <div className="w-full rounded-[28px] border border-dashed border-surface-300 bg-white/88 px-5 py-12 text-center shadow-sm surface-grain dark:border-surface-700 dark:bg-surface-900/70">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-surface-100 dark:bg-surface-800">
+                <Calendar className="h-5 w-5 text-surface-400 dark:text-surface-500" />
+              </div>
+              <h3 className="mt-4 text-center font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+                No timeline events yet
+              </h3>
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-surface-500 dark:text-surface-400">
+                {projectFiles.length === 0
+                  ? 'Upload case materials from the files rail, or start your chronology manually while the record is still thin.'
+                  : aiReadyFiles.length > 0
+                    ? `You already have ${aiReadyFiles.length} AI-ready file${aiReadyFiles.length === 1 ? '' : 's'}. Extract a first pass, then refine the sequence manually.`
+                    : 'Your files are uploaded, but none are AI-ready yet. Retry indexing or add key events manually so the timeline can start taking shape.'}
+              </p>
+
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <span className="rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                  {projectFiles.length} file{projectFiles.length === 1 ? '' : 's'} uploaded
+                </span>
+                {aiReadyFiles.length > 0 && (
+                  <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">
+                    {aiReadyFiles.length} AI-ready
+                  </span>
+                )}
+                {failedFiles.length > 0 && (
+                  <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
+                    {failedFiles.length} need retry
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-6 flex flex-wrap justify-center gap-2">
+                <button
+                  onClick={handleExtract}
+                  disabled={extractTimeline.isPending || aiReadyFiles.length === 0}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+                    'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-700',
+                    'disabled:cursor-not-allowed disabled:opacity-50'
+                  )}
+                >
+                  {extractTimeline.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  Extract Timeline
+                </button>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white px-4 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Event Manually
+                </button>
+                {(projectFiles.length === 0 || aiReadyFiles.length === 0) && (
+                  <button
+                    onClick={handleOpenFiles}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white px-4 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Open Files
+                  </button>
+                )}
+              </div>
             </div>
-            <h3 className="mt-3 text-center font-heading text-xs font-semibold text-surface-700 dark:text-surface-200">
-              No timeline events
-            </h3>
-            <p className="mt-1 max-w-xs text-center text-xs text-surface-400 dark:text-surface-500">
-              Add events manually or extract from files with AI.
-            </p>
           </div>
         ) : (
           <div className="relative">
@@ -689,7 +814,7 @@ function TimelineEventCard({
 
 /* ── Chronology view ──────────────────────────────────── */
 
-function ChronologyView({ projectId }: { projectId: string }) {
+function ChronologyView({ projectId, eventCount }: { projectId: string; eventCount: number }) {
   const { data: entries, isLoading } = useChronologyEntries(projectId);
   const importTimeline = useImportFromTimeline();
   const deleteEntry = useDeleteChronologyEntry();
@@ -766,6 +891,14 @@ function ChronologyView({ projectId }: { projectId: string }) {
     }
   }, [pendingEntry, projectId, createEntry, clearPendingEntry]);
 
+  const handleCreateEntry = useCallback(() => {
+    createEntry.mutate({
+      project_id: projectId,
+      date_display: new Date().toLocaleDateString('en-CA'),
+      description: 'New entry',
+    });
+  }, [createEntry, projectId]);
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Pending entry from PDF viewer */}
@@ -814,13 +947,7 @@ function ChronologyView({ projectId }: { projectId: string }) {
           <Copy className="h-3 w-3" /> Copy Table
         </button>
         <button
-          onClick={() => {
-            createEntry.mutate({
-              project_id: projectId,
-              date_display: new Date().toLocaleDateString('en-CA'),
-              description: 'New entry',
-            });
-          }}
+          onClick={handleCreateEntry}
           className="flex items-center gap-1 rounded-lg border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-300"
         >
           <Plus className="h-3 w-3" /> Add Entry
@@ -831,33 +958,44 @@ function ChronologyView({ projectId }: { projectId: string }) {
         {isLoading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-surface-400" /></div>
         ) : !entries?.length ? (
-          <div className="flex flex-col items-center justify-center py-12 px-8 text-center">
+          <div className="flex flex-col items-center justify-center px-8 py-12 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
               <Table2 className="h-5 w-5 text-surface-400 dark:text-surface-500" />
             </div>
             <h3 className="mt-3 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-              No Chronology Entries
+              Chronology is empty
             </h3>
-            <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-              Import events from the timeline, or add entries manually.
+            <p className="mt-1.5 max-w-md text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+              {eventCount > 0
+                ? `Import ${eventCount} timeline event${eventCount === 1 ? '' : 's'} to create a filing-ready chronology, or add a manual entry for facts that are not document-backed yet.`
+                : 'Create events first or add a manual chronology entry to start structuring the case narrative.'}
             </p>
-            <button
-              onClick={handleImport}
-              disabled={importTimeline.isPending}
-              className={cn(
-                'mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2',
-                'bg-primary-600 text-sm font-medium text-white',
-                'transition-colors hover:bg-primary-700',
-                'disabled:opacity-50'
-              )}
-            >
-              {importTimeline.isPending ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Import className="h-3.5 w-3.5" />
-              )}
-              Import from Timeline
-            </button>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <button
+                onClick={handleImport}
+                disabled={importTimeline.isPending || eventCount === 0}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-xl px-4 py-2',
+                  'bg-primary-600 text-sm font-medium text-white',
+                  'transition-colors hover:bg-primary-700',
+                  'disabled:cursor-not-allowed disabled:opacity-50'
+                )}
+              >
+                {importTimeline.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Import className="h-3.5 w-3.5" />
+                )}
+                Import from Timeline
+              </button>
+              <button
+                onClick={handleCreateEntry}
+                className="flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white px-4 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Entry
+              </button>
+            </div>
           </div>
         ) : (
           <table className="min-w-full text-sm">

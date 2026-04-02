@@ -119,9 +119,39 @@ const typeIconMap: Record<string, React.ElementType> = {
   other: File,
 };
 
+function getProcessingFailureInfo(error: string | null | undefined) {
+  const technical = error?.trim() || null;
+
+  if (!technical) {
+    return {
+      summary: 'AI indexing failed. Retry to include this file in search, timeline, and drafting workflows.',
+      technical: null,
+    };
+  }
+
+  if (/unsupported Unicode escape sequence/i.test(technical)) {
+    return {
+      summary: 'AI indexing hit malformed text in this file. Retry indexing to bring it back into search, timeline, and exhibit workflows.',
+      technical,
+    };
+  }
+
+  if (/budget reached/i.test(technical)) {
+    return {
+      summary: 'Daily indexing limits were reached. Retry later to make this file available to AI workflows.',
+      technical,
+    };
+  }
+
+  return {
+    summary: 'AI indexing failed. Retry to include this file in search, timeline, and drafting workflows.',
+    technical,
+  };
+}
+
 function getFileSummary(file: FileRecord) {
   if (file.processing_status === 'failed' && file.processing_error) {
-    return file.processing_error;
+    return getProcessingFailureInfo(file.processing_error).summary;
   }
 
   if (file.ai_summary) {
@@ -206,6 +236,10 @@ export function FileListItem({
   const summary = getFileSummary(file);
   const statusDotColor = getStatusDotColor(file.processing_status, processingState?.isProcessing);
   const statusTooltip = getStatusLabel(file.processing_status, processingState?.isProcessing);
+  const failureInfo =
+    file.processing_status === 'failed'
+      ? getProcessingFailureInfo(file.processing_error)
+      : null;
 
   // Close menu when clicking outside or pressing Escape
   useEffect(() => {
@@ -473,10 +507,14 @@ export function FileListItem({
                     'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-sm font-medium transition-all',
                     processingState?.isProcessing
                       ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
-                      : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',
-                    !processingState?.isProcessing && 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+                      : file.processing_status === 'failed'
+                        ? 'border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50'
+                        : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',
+                    !processingState?.isProcessing &&
+                      file.processing_status !== 'failed' &&
+                      'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
                   )}
-                  title={file.processing_status === 'failed' ? 'Retry processing' : 'Index'}
+                  title={file.processing_status === 'failed' ? 'Retry indexing' : 'Index'}
                   aria-label={`Process ${file.name}`}
                 >
                   {processingState?.isProcessing ? (
@@ -514,13 +552,33 @@ export function FileListItem({
             </div>
           </div>
 
-          {/* Summary with tooltip for full text */}
-          <p
-            className="mt-3 line-clamp-2 text-xs leading-5 text-surface-500 dark:text-surface-400"
-            title={summary}
-          >
-            {summary}
-          </p>
+          {failureInfo ? (
+            <div className="mt-3 rounded-2xl border border-red-200/80 bg-red-50/75 px-3 py-2.5 dark:border-red-900/40 dark:bg-red-950/25">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500 dark:text-red-400" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium leading-5 text-red-700 dark:text-red-300">
+                    {failureInfo.summary}
+                  </p>
+                  {failureInfo.technical && (
+                    <p
+                      className="mt-1 line-clamp-1 text-[10px] leading-4 text-red-500/85 dark:text-red-400/80"
+                      title={failureInfo.technical}
+                    >
+                      Technical detail: {failureInfo.technical}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p
+              className="mt-3 line-clamp-2 text-xs leading-5 text-surface-500 dark:text-surface-400"
+              title={summary}
+            >
+              {summary}
+            </p>
+          )}
         </div>
       </div>
 
@@ -558,10 +616,10 @@ export function FileListItem({
             {/* AI Summary */}
             <div>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                AI Summary
+                {failureInfo ? 'Indexing Note' : 'AI Summary'}
               </span>
               <p className="mt-0.5 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
-                {file.ai_summary || 'No summary available'}
+                {failureInfo?.summary || file.ai_summary || 'No summary available'}
               </p>
             </div>
 
@@ -625,9 +683,12 @@ export function FileListItem({
                   Processed: {formatDate(file.processed_at)}
                 </p>
               )}
-              {file.processing_error && (
-                <p className="mt-0.5 text-[10px] text-red-500 dark:text-red-400">
-                  Error: {file.processing_error}
+              {failureInfo?.technical && (
+                <p
+                  className="mt-1 rounded-lg bg-red-50 px-2 py-1 text-[10px] leading-relaxed text-red-600 dark:bg-red-950/30 dark:text-red-300"
+                  title={failureInfo.technical}
+                >
+                  Technical detail: {failureInfo.technical}
                 </p>
               )}
             </div>

@@ -28,6 +28,18 @@ export function DraftsTab() {
   const pendingInsertion = useAppStore((s) => s.pendingBriefInsertion);
   const clearPendingInsertion = useAppStore((s) => s.setPendingBriefInsertion);
 
+  useEffect(() => {
+    if (showTemplates) return;
+
+    if (!drafts || drafts.length === 0) {
+      if (activeDraftId !== null) setActiveDraftId(null);
+      return;
+    }
+
+    if (activeDraftId && drafts.some((draft) => draft.id === activeDraftId)) return;
+    setActiveDraftId(drafts[0].id);
+  }, [activeDraftId, drafts, showTemplates]);
+
   const activeDraft = drafts?.find((d) => d.id === activeDraftId) ?? null;
 
   const handleCreate = useCallback(async (template: BriefTemplate) => {

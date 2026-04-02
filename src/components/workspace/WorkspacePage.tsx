@@ -109,19 +109,25 @@ export function WorkspacePage() {
       setCenterTab(session.centerTab);
       setRightTab(session.rightTab);
       setSelectedFile(session.fileId);
-      if (session.fileId || session.rightTab === 'ai') {
-        setRightPanel(true);
-        if (isMobile) setMobileTab('viewer');
-      } else if (isMobile) {
-        setMobileTab('content');
+
+      if (isMobile) {
+        if (session.fileId) setMobileTab('viewer');
+        else setMobileTab('content');
+      } else {
+        setRightPanel(Boolean(session.fileId) || session.rightTab === 'ai');
       }
       return;
     }
 
-    setCenterTab('editor');
+    setCenterTab('overview');
     setRightTab('viewer');
     setSelectedFile(null);
-    if (isMobile) setMobileTab('content');
+    if (isMobile) {
+        setMobileTab('content');
+      return;
+      }
+
+    setRightPanel(false);
   }, [projectId, isMobile, setCenterTab, setMobileTab, setRightPanel, setRightTab, setSelectedFile]);
 
   useEffect(() => {

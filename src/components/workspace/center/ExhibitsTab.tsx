@@ -15,7 +15,9 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { estimateFileBytesByType } from '@/lib/processingBudget';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { ProcessingRecoveryBanner } from '@/components/workspace/ProcessingRecoveryBanner';
 import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -26,6 +28,8 @@ import {
   useDeleteExhibit,
   getNextExhibitId,
 } from '@/hooks/useExhibits';
+import { useProcessFile } from '@/hooks/useProcessFile';
+import { useIsMobile } from '@/hooks/useMediaQuery';
 import type { ExhibitMarker, FileRecord } from '@/types';
 
 const CompendiumBuilderModal = lazy(() =>
@@ -44,15 +48,18 @@ export function ExhibitsTab() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const files = useAppStore((s) => s.files);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
+  const setLeftPanel = useAppStore((s) => s.setLeftPanel);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
   const setMobileTab = useAppStore((s) => s.setMobileTab);
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const { data: exhibits, isLoading, isError, refetch } = useExhibits(selectedProjectId);
   const createExhibit = useCreateExhibit();
   const updateExhibit = useUpdateExhibit();
   const deleteExhibit = useDeleteExhibit();
+  const { processFile, getState: getProcessState } = useProcessFile();
   const [exhibitToDelete, setExhibitToDelete] = useState<ExhibitMarker | null>(null);
   const [showCompendiumBuilder, setShowCompendiumBuilder] = useState(false);
 
@@ -88,10 +95,50 @@ export function ExhibitsTab() {
     setExhibitToDelete(null);
   }, []);
 
+  const handleOpenFiles = useCallback(() => {
+    if (isMobile) {
+      setMobileTab('files');
+      return;
+    }
+
+    setLeftPanel(true);
+  }, [isMobile, setLeftPanel, setMobileTab]);
+
+  const handleRetryFile = useCallback(
+    async (file: FileRecord) => {
+      if (!selectedProjectId) return;
+
+      try {
+        await processFile(file.id, selectedProjectId, {
+          fileSizeBytes: estimateFileBytesByType(file.file_type),
+          source: 'manual',
+        });
+        toast.success('File indexed for exhibit work');
+      } catch (err) {
+        toast.error('Retry failed', {
+          description: err instanceof Error ? err.message : 'Unknown error',
+        });
+      }
+    },
+    [processFile, selectedProjectId]
+  );
+
   // Show "Build Book" only when at least 1 exhibit has a linked file
   const hasLinkedFiles = useMemo(
     () => (exhibits ?? []).some((e) => e.file_id),
     [exhibits]
+  );
+  const linkedCount = useMemo(
+    () => (exhibits ?? []).filter((e) => e.file_id).length,
+    [exhibits]
+  );
+  const aiReadyFiles = useMemo(
+    () => projectFiles.filter((file) => file.processing_status === 'completed'),
+    [projectFiles]
+  );
+  const failedFiles = useMemo(
+    () => projectFiles.filter((file) => file.processing_status === 'failed'),
+    [projectFiles]
   );
 
   if (!selectedProjectId) {
@@ -159,13 +206,32 @@ export function ExhibitsTab() {
     );
   }
 
+  const firstFailedFile = failedFiles[0] ?? null;
+  const isRetryingFailedFile = firstFailedFile
+    ? getProcessState(firstFailedFile.id).isProcessing
+    : false;
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Header */}
       <div className="flex shrink-0 items-center justify-between border-b border-surface-200/80 px-4 py-3 dark:border-surface-800">
-        <h2 className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
-          Exhibit Markers ({exhibits?.length ?? 0})
-        </h2>
+        <div className="min-w-0">
+          <h2 className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+            Exhibit Markers ({exhibits?.length ?? 0})
+          </h2>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {linkedCount > 0 && (
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">
+                {linkedCount} linked
+              </span>
+            )}
+            {projectFiles.length > 0 && (
+              <span className="rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                {projectFiles.length} file{projectFiles.length === 1 ? '' : 's'} available
+              </span>
+            )}
+          </div>
+        </div>
         <div className="flex items-center gap-1">
           {hasLinkedFiles && (
             <button
@@ -200,12 +266,61 @@ export function ExhibitsTab() {
         </div>
       </div>
 
+      {firstFailedFile && (
+        <div className="shrink-0 border-b border-surface-200/80 px-4 py-3 dark:border-surface-800">
+          <ProcessingRecoveryBanner
+            title={`${failedFiles.length} file${failedFiles.length === 1 ? '' : 's'} still need AI indexing`}
+            description="Failed indexing can hide details you want when linking exhibits or generating a compendium. Retry the file so the workspace reflects the full record."
+            failedCount={failedFiles.length}
+            fileName={firstFailedFile.name}
+            isRetrying={isRetryingFailedFile}
+            onOpenFile={() => {
+              setSelectedFile(firstFailedFile.id);
+              setRightPanel(true);
+              setRightTab('viewer');
+              setMobileTab('viewer');
+            }}
+            onRetry={() => void handleRetryFile(firstFailedFile)}
+          />
+        </div>
+      )}
+
       {/* Exhibit list */}
       <div className="flex-1 overflow-y-auto p-4">
         {(!exhibits || exhibits.length === 0) ? (
-          <EmptyState onCreateFirst={handleCreate} isCreating={createExhibit.isPending} />
+          <EmptyState
+            onCreateFirst={handleCreate}
+            onOpenFiles={handleOpenFiles}
+            isCreating={createExhibit.isPending}
+            fileCount={projectFiles.length}
+            readyCount={aiReadyFiles.length}
+            failedCount={failedFiles.length}
+          />
         ) : (
           <div className="space-y-3">
+            {!hasLinkedFiles && (
+              <div className="rounded-[22px] border border-dashed border-surface-300 bg-white/80 px-4 py-4 text-sm text-surface-500 shadow-sm dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-medium text-surface-700 dark:text-surface-200">
+                      Link files to turn markers into a usable exhibit book
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed">
+                      {projectFiles.length > 0
+                        ? 'Your markers exist, but none are attached to documents yet. Link a file to any exhibit to enable Build Book.'
+                        : 'Upload case files first, then attach them to exhibit markers so the book can be assembled.'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOpenFiles}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Open Files
+                  </button>
+                </div>
+              </div>
+            )}
             {exhibits.map((exhibit) => (
               <ExhibitCard
                 key={exhibit.id}
@@ -262,39 +377,73 @@ export function ExhibitsTab() {
 
 function EmptyState({
   onCreateFirst,
+  onOpenFiles,
   isCreating,
+  fileCount,
+  readyCount,
+  failedCount,
 }: {
   onCreateFirst: () => void;
+  onOpenFiles: () => void;
   isCreating: boolean;
+  fileCount: number;
+  readyCount: number;
+  failedCount: number;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center px-8 py-12">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+    <div className="flex flex-col items-center justify-center px-8 py-12 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-surface-100 dark:bg-surface-800">
         <Tag className="h-5 w-5 text-surface-400 dark:text-surface-500" />
       </div>
       <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-        No Exhibits Yet
+        No exhibit markers yet
       </h3>
-      <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-        Create exhibit markers and link them to uploaded files to build your exhibit book.
+      <p className="mt-1.5 max-w-md text-sm leading-relaxed text-surface-500 dark:text-surface-400">
+        {fileCount === 0
+          ? 'Upload case files from the files rail, then create your first exhibit marker and attach it to the right document.'
+          : `You already have ${fileCount} uploaded file${fileCount === 1 ? '' : 's'}. Start with Exhibit E1, then link each marker to the supporting record.`}
       </p>
-      <button
-        onClick={onCreateFirst}
-        disabled={isCreating}
-        className={cn(
-          'mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2',
-          'bg-primary-600 text-sm font-medium text-white',
-          'transition-colors hover:bg-primary-700',
-          'disabled:opacity-50'
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
+        <span className="rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+          {fileCount} file{fileCount === 1 ? '' : 's'} uploaded
+        </span>
+        {readyCount > 0 && (
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">
+            {readyCount} AI-ready
+          </span>
         )}
-      >
-        {isCreating ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        ) : (
-          <Plus className="h-3.5 w-3.5" />
+        {failedCount > 0 && (
+          <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
+            {failedCount} need retry
+          </span>
         )}
-        New Exhibit
-      </button>
+      </div>
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        <button
+          onClick={onOpenFiles}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white px-4 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700"
+        >
+          <FileText className="h-3.5 w-3.5" />
+          Open Files
+        </button>
+        <button
+          onClick={onCreateFirst}
+          disabled={isCreating}
+          className={cn(
+            'flex items-center gap-1.5 rounded-xl px-4 py-2',
+            'bg-primary-600 text-sm font-medium text-white',
+            'transition-colors hover:bg-primary-700',
+            'disabled:opacity-50'
+          )}
+        >
+          {isCreating ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Plus className="h-3.5 w-3.5" />
+          )}
+          Create Exhibit
+        </button>
+      </div>
     </div>
   );
 }

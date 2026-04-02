@@ -40,9 +40,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="flex min-h-screen items-center justify-center bg-surface-50 dark:bg-surface-900 p-6">
-          <div className="w-full max-w-md text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/20">
-              <AlertTriangle className="h-8 w-8 text-red-500 dark:text-red-400" />
+          <div className="w-full max-w-sm text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30">
+              <AlertTriangle className="h-6 w-6 text-red-500 dark:text-red-400" />
             </div>
             <h2 className="mb-2 font-heading text-xl font-semibold text-surface-900 dark:text-surface-100">
               Something went wrong

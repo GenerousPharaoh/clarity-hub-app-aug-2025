@@ -165,7 +165,7 @@ export function DashboardPage() {
 
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0 max-w-2xl">
-                <p className="text-sm font-medium text-accent-400 mb-3">
+                <p className="text-sm font-medium text-surface-400 mb-3">
                   {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}{firstName ? `, ${firstName}` : ''}
                 </p>
                 <h1 className="font-heading text-4xl font-bold tracking-tight text-white sm:text-5xl">

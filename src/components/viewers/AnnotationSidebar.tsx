@@ -237,8 +237,8 @@ export function AnnotationSidebar({
             );
           })}
         </div>
-          <p className="mt-2 text-[10px] text-surface-400 dark:text-surface-500">
-            Filter by highlight color or export everything as Markdown.
+          <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
+            Filter by color or export as Markdown.
           </p>
         </div>
       )}

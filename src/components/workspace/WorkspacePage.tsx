@@ -294,7 +294,7 @@ export function WorkspacePage() {
         </div>
 
         {/* Bottom tab bar */}
-        <nav className="flex shrink-0 border-t border-surface-200 bg-white dark:border-surface-800 dark:bg-surface-900">
+        <nav className="flex shrink-0 border-t border-surface-200 bg-white pb-[env(safe-area-inset-bottom)] dark:border-surface-800 dark:bg-surface-900">
           <MobileTabButton
             active={mobileTab === 'files'}
             icon={<FolderOpen className="h-5 w-5" />}
@@ -475,7 +475,7 @@ function MobileTabButton({
     <button
       onClick={onClick}
       className={cn(
-        'relative flex flex-1 flex-col items-center gap-1 py-3 min-h-[48px] transition-colors',
+        'relative flex flex-1 flex-col items-center gap-1 py-3 min-h-[52px] transition-colors',
         active
           ? 'text-primary-600 dark:text-primary-400'
           : 'text-surface-400 dark:text-surface-500'

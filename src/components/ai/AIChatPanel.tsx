@@ -526,7 +526,7 @@ export function AIChatPanel() {
             onClick={() => handleSend()}
             disabled={!input.trim() || isLoading}
             className={cn(
-              'flex h-10 w-10 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg transition-all',
+              'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all',
               input.trim() && !isLoading
                 ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/25 hover:bg-primary-700 hover:shadow-md hover:shadow-primary-500/30 active:scale-95'
                 : 'bg-surface-200 text-surface-400 dark:bg-surface-700 dark:text-surface-500'

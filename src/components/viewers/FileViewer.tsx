@@ -210,7 +210,7 @@ export function FileViewer() {
           </p>
           <button
             onClick={handleRetry}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-950/40"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Retry

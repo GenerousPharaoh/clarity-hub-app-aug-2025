@@ -560,7 +560,7 @@ function OverviewMetricCard({
       onClick={onClick}
       className={cn(
         'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white/78 p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/45',
-        onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
+        onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-400 hover:shadow-md dark:hover:border-primary-600'
       )}
     >
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">

@@ -92,10 +92,10 @@ export function CenterPanel() {
   return (
     <div ref={containerRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Tab bar */}
-      <div className="flex shrink-0 items-center justify-end border-b border-surface-200/80 bg-white px-4 py-3 dark:border-surface-800 dark:bg-surface-900 sm:px-5">
+      <div className="flex shrink-0 items-center justify-end border-b border-surface-200/80 bg-white px-3 py-2 dark:border-surface-800 dark:bg-surface-900 sm:px-4">
         <div
           className={cn(
-            'flex items-center gap-1 rounded-xl border border-surface-200 bg-surface-50 p-1 dark:border-surface-700 dark:bg-surface-800',
+            'flex items-center gap-0.5 rounded-lg border border-surface-200 bg-surface-50 p-0.5 dark:border-surface-700 dark:bg-surface-800',
             ultraCompact && 'px-0.5'
           )}
           role="tablist"
@@ -211,8 +211,8 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-9 items-center justify-center gap-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
-        compact ? 'px-2' : 'px-4',
+        'relative flex h-8 items-center justify-center gap-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all',
+        compact ? 'px-1.5' : 'px-3',
         active
           ? 'text-surface-900 dark:text-surface-100'
           : 'text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200'
@@ -222,7 +222,7 @@ function TabButton({
       {active && (
         <motion.span
           layoutId="center-tab-pill"
-          className="absolute inset-0 -z-10 rounded-lg bg-white shadow-sm dark:bg-surface-700"
+          className="absolute inset-0 -z-10 rounded-md bg-white shadow-sm dark:bg-surface-700"
           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}

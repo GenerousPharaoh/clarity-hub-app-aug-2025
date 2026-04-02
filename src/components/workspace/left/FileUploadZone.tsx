@@ -23,7 +23,6 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[], rejections: FileRejection[]) => {
-      // Handle rejected files
       for (const rejection of rejections) {
         const reasons = rejection.errors.map((e) => e.message).join(', ');
         toast.error(`Rejected: ${rejection.file.name}`, {
@@ -31,13 +30,10 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         });
       }
 
-      // Upload accepted files sequentially
       for (const file of acceptedFiles) {
         try {
           setUploadingFile(file.name);
-
           const fileRecord = await uploadFile.mutateAsync({ file, projectId });
-
           toast.success(`Uploaded ${file.name}`, {
             icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
           });
@@ -51,13 +47,14 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
                 toast.success(`Processed ${file.name} for AI search`);
               })
               .catch((err) => {
-                const description = err instanceof Error ? err.message : 'Processing skipped';
-                toast.error(`Uploaded ${file.name}, but processing was skipped`, {
-                  description,
-                });
+                const description =
+                  err instanceof Error ? err.message : 'Processing skipped';
+                toast.error(
+                  `Uploaded ${file.name}, but processing was skipped`,
+                  { description }
+                );
               });
           }
-
           setUploadingFile(null);
         } catch (err) {
           setUploadingFile(null);
@@ -77,92 +74,66 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
     onDrop,
     accept: ACCEPTED_FILE_TYPES,
     maxSize: MAX_FILE_SIZE,
-    noClick: true, // We use a separate button for click-to-upload
+    noClick: true,
     noKeyboard: false,
   });
 
   return (
-    <div className="shrink-0">
-      {/* Drop zone overlay */}
-      <div
-        {...getRootProps()}
-        className={cn(
-          'relative overflow-hidden rounded-2xl border border-dashed transition-all duration-200',
-          isDragActive
-            ? 'border-primary-400 bg-white/92 shadow-overlay ring-1 ring-primary-500/12 dark:border-primary-500 dark:bg-surface-900/82 dark:ring-primary-400/18'
-            : 'border-surface-200/90 bg-surface-50/80 dark:border-surface-700/80 dark:bg-surface-950/30'
-        )}
-      >
-        <input {...getInputProps()} />
+    <div {...getRootProps()} className="shrink-0">
+      <input {...getInputProps()} />
 
-        {/* Drag active state */}
-        {isDragActive && (
-          <div className="flex flex-col items-center gap-2 px-4 py-7 text-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-100/85 dark:bg-primary-900/30">
-              <Upload className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-            </div>
-            <p className="text-sm font-semibold text-primary-700 dark:text-primary-300">
-              Drop files here
-            </p>
-            <p className="max-w-[16rem] text-xs leading-5 text-primary-600/80 dark:text-primary-300/70">
-              Max {formatFileSize(MAX_FILE_SIZE)} per file
-            </p>
-          </div>
-        )}
-
-        {/* Upload progress */}
-        {!isDragActive && uploadingFile && (
-          <div className="flex items-center gap-3 px-3 py-3.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary-50 dark:bg-primary-900/20">
-              <Loader2 className="h-4 w-4 animate-spin text-primary-500" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-surface-700 dark:text-surface-200" title={uploadingFile || ""}>
-                {uploadingFile}
-              </p>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface-100 dark:bg-surface-700">
-                <div className="h-full w-1/3 animate-[indeterminate_1.5s_ease-in-out_infinite] rounded-full bg-primary-500" />
-              </div>
-            </div>
-            <span className="shrink-0 rounded-full bg-surface-100 px-2 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:bg-surface-800 dark:text-surface-300">
-              Uploading
-            </span>
-          </div>
-        )}
-
-        {/* Upload button (persistent, always visible when not dragging and not uploading) */}
-        {!isDragActive && !uploadingFile && (
-          <div className="p-3">
-            <p className="mb-2 text-center text-xs text-surface-400 dark:text-surface-500">
-              Drop files
-            </p>
-
-            <button
-              type="button"
-              onClick={isDemoMode ? undefined : open}
-              disabled={isDemoMode}
-              className={cn(
-                'flex w-full items-center justify-center gap-2 rounded-2xl px-3 py-2.5',
-                'border border-dashed border-surface-300 bg-white text-sm font-medium text-surface-600 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
-                'transition-all duration-150',
-                'hover:border-primary-400 hover:bg-surface-50 hover:text-primary-700',
-                'dark:hover:border-primary-500 dark:hover:bg-surface-900 dark:hover:text-primary-300',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1',
-                'dark:focus-visible:ring-offset-surface-900',
-                isDemoMode && 'cursor-not-allowed opacity-60 hover:border-surface-300 hover:bg-white hover:text-surface-600 dark:hover:border-surface-700 dark:hover:bg-surface-900 dark:hover:text-surface-300'
-              )}
+      {/* Drag active overlay */}
+      {isDragActive ? (
+        <div className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-primary-400 bg-primary-50/60 px-3 py-3 text-center dark:border-primary-500 dark:bg-primary-900/15">
+          <Upload className="h-3.5 w-3.5 text-primary-600 dark:text-primary-400" />
+          <span className="text-xs font-medium text-primary-700 dark:text-primary-300">
+            Drop files here
+          </span>
+          <span className="text-[10px] text-primary-500 dark:text-primary-400">
+            (max {formatFileSize(MAX_FILE_SIZE)})
+          </span>
+        </div>
+      ) : uploadingFile ? (
+        /* Upload progress — compact bar */
+        <div className="flex items-center gap-2 rounded-lg border border-surface-200 bg-surface-50 px-2.5 py-2 dark:border-surface-700 dark:bg-surface-800">
+          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary-500" />
+          <div className="min-w-0 flex-1">
+            <p
+              className="truncate text-[11px] font-medium text-surface-700 dark:text-surface-200"
+              title={uploadingFile}
             >
-              <Upload className="h-3.5 w-3.5" />
-              {isDemoMode ? 'Uploads disabled in demo' : 'Choose files'}
-            </button>
+              {uploadingFile}
+            </p>
+            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-surface-200 dark:bg-surface-700">
+              <div className="h-full w-1/3 animate-[indeterminate_1.5s_ease-in-out_infinite] rounded-full bg-primary-500" />
+            </div>
           </div>
-        )}
-      </div>
-
-      {isDemoMode && (
-        <p className="mt-2 px-1 text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-          Demo workspaces include seeded files only. Sign in with Google to upload and process your own documents.
-        </p>
+          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider text-surface-400">
+            Uploading
+          </span>
+        </div>
+      ) : (
+        /* Idle — single compact upload button */
+        <button
+          type="button"
+          onClick={isDemoMode ? undefined : open}
+          disabled={isDemoMode}
+          className={cn(
+            'flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed px-3 py-1.5',
+            'text-xs font-medium transition-all duration-100',
+            isDemoMode
+              ? 'border-surface-200 text-surface-400 dark:border-surface-700 dark:text-surface-500'
+              : 'border-surface-300 text-surface-500 hover:border-primary-400 hover:bg-primary-50/50 hover:text-primary-700 dark:border-surface-700 dark:text-surface-400 dark:hover:border-primary-600 dark:hover:bg-primary-950/20 dark:hover:text-primary-300'
+          )}
+          title={
+            isDemoMode
+              ? 'Uploads disabled in demo'
+              : 'Click to choose files or drag & drop'
+          }
+        >
+          <Upload className="h-3 w-3" />
+          {isDemoMode ? 'Uploads disabled' : 'Upload or drop files'}
+        </button>
       )}
     </div>
   );

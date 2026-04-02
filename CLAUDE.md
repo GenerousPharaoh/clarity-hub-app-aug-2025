@@ -17,7 +17,7 @@ npm run typecheck    # TypeScript only
 
 **Deployment:** Vercel auto-deploy on push to `main`. API routes in `api/` directory as Vercel serverless functions.
 
-**Layout:** Three resizable panels — Left (files), Center (overview/documents/exhibits/timeline), Right (viewer/AI chat). Each panel has ResizeObserver-based compact/ultraCompact modes.
+**Layout:** Three resizable panels — Left (files), Center (overview/docs/exhibits/timeline/drafts), Right (viewer/AI chat). Width-adaptive layouts: compact (<1180px), standard, wide (>1480px). Each panel has ResizeObserver-based compact/ultraCompact modes.
 
 ### Authentication
 - Google OAuth only (PKCE flow via Supabase Auth)
@@ -162,7 +162,7 @@ src/
 
 ## Code Quality
 
-- Zero `as any` casts in the codebase
+- Minimal `as any` — only in `useTimeline.ts` where DB types are outdated
 - Zero `@ts-ignore` / `@ts-expect-error` directives
 - All Supabase queries fully typed
 - ESLint: 0 errors in `src/` (edge function lint errors are non-blocking)
@@ -190,8 +190,16 @@ src/
 - **CanLII** (`api/canlii.ts` + `src/services/canliiService.ts`): Browse Ontario courts/tribunals, fetch case metadata, build citation graphs (cited/citing cases), search legislation.
 - **Tavily** (`api/legal-web-search.ts`): Real-time web search focused on Canadian legal sources. Integrated into ai-chat via `enableWebSearch` flag.
 
-**Embedding Migration (March 2026):**
-- Switched from OpenAI text-embedding-3-small (1536-dim) to Voyage AI voyage-law-2 (1024-dim)
-- Migration: `switch_embeddings_to_voyage_law_2_1024_dims`
-- `search_documents` RPC updated to cast `vector(1024)`
-- Re-embedding endpoint: `POST /api/reembed { table: 'legal_knowledge_chunks' }`
+**Embeddings (current):** OpenAI text-embedding-3-small (1536-dim). Voyage AI voyage-law-2 code exists but is disabled — requires payment method for usable rate limits. Set `VOYAGE_API_KEY` env var to re-enable (requires DB migration to 1024-dim).
+
+## Gotchas & Constraints
+
+- **Vercel Hobby plan: max 12 serverless functions.** `api/_lib/` uses underscore prefix so Vercel ignores those files. Currently 9 of 12 used.
+- **`.npmrc` has `legacy-peer-deps=true`** — required for `react-pdf-highlighter-extended-extended` (React 18 peer dep with React 19).
+- **Geist font is self-hosted** in `public/fonts/` with `@font-face` in `index.css`. Do NOT use jsDelivr CDN — blocked by Chromium ORB.
+- **`database.ts` types are outdated for `timeline_events`** — actual DB has `extraction_method`, `event_type`, `significance`, `source_quote`, `page_reference` etc. that aren't in the types. Use `as any` cast or raw queries for timeline inserts.
+- **`search_documents` RPC** — the RRF score must be cast to `::double precision` or PostgREST returns 400.
+- **`GEMINI_API_KEY` (without VITE_ prefix) must exist on Vercel** for server-side Gemini routing. `VITE_GEMINI_API_KEY` only reaches the client bundle, not serverless functions. Without it, all AI queries route to GPT-5.2.
+- **Don't auto-focus editor on mobile** — triggers keyboard. Guard with `window.innerWidth > 768`.
+- **Don't use `AnimatePresence mode="wait"` on tab content** — causes 3-state flash with lazy-loaded Suspense components. Use instant switching.
+- **PDF annotation uses `react-pdf-highlighter-extended-extended`** (SantaFe React 19 fork) with pdfjs-dist v5. Worker served from `public/pdf.worker.min.mjs`.

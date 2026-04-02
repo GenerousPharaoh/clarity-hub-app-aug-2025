@@ -86,7 +86,7 @@ export function Header() {
                     <ChevronRight className="hidden h-3.5 w-3.5 shrink-0 text-surface-300 transition-colors dark:text-surface-600 sm:block" />
                   </>
                 )}
-                <span className="min-w-0 max-w-[10rem] truncate font-medium text-surface-700 sm:max-w-[240px] dark:text-surface-200">
+                <span className="min-w-0 max-w-[10rem] truncate font-medium text-surface-700 sm:max-w-[240px] dark:text-surface-200" title={projectName}>
                   {projectName}
                 </span>
               </>

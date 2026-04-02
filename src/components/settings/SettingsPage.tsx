@@ -141,10 +141,10 @@ export function SettingsPage() {
             )}
 
             <div className="min-w-0">
-              <p className="truncate text-base font-medium text-surface-900 dark:text-surface-100">
+              <p className="truncate text-base font-medium text-surface-900 dark:text-surface-100" title={displayName}>
                 {displayName}
               </p>
-              <p className="mt-0.5 truncate text-sm text-surface-500 dark:text-surface-400">
+              <p className="mt-0.5 truncate text-sm text-surface-500 dark:text-surface-400"title={email}>
                 {email}
               </p>
               {createdAt && (

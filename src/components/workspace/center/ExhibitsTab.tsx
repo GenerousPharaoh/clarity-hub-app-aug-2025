@@ -565,7 +565,7 @@ function ExhibitCard({
               className="flex items-center gap-1.5 rounded-md bg-surface-50 px-2 py-1 text-xs text-primary-600 transition-colors hover:bg-primary-50 dark:bg-surface-700 dark:text-primary-400 dark:hover:bg-primary-900/20"
             >
               <FileText className="h-3 w-3" />
-              <span className="max-w-[60%] truncate">{linkedFile.name}</span>
+              <span className="max-w-[60%] truncate" title={linkedFile.name}>{linkedFile.name}</span>
             </button>
             <button
               onClick={() => onUpdate({ fileId: null })}
@@ -662,7 +662,7 @@ function FilePicker({
                 className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-xs text-surface-600 transition-colors hover:bg-surface-100 dark:text-surface-300 dark:hover:bg-surface-700"
               >
                 <FileText className="h-3 w-3 shrink-0 text-surface-400" />
-                <span className="truncate">{f.name}</span>
+                <span className="truncate" title={f.name}>{f.name}</span>
               </button>
             ))
           )}

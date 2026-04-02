@@ -264,7 +264,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
             </div>
           </div>
 
-          <p className="mt-4 line-clamp-2 text-sm leading-relaxed text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
+          <p title={project.description || ""} className="mt-4 line-clamp-2 text-sm leading-relaxed text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
             {project.description || 'No description yet'}
           </p>
 

@@ -43,7 +43,7 @@ export function ProcessingRecoveryBanner({
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
               <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-white/80 px-2.5 py-1 font-medium text-amber-700 dark:border-amber-800/60 dark:bg-surface-900/70 dark:text-amber-200">
                 <FileText className="h-3 w-3" />
-                <span className="max-w-[240px] truncate">{fileName}</span>
+                <span className="max-w-[240px] truncate" title={fileName}>{fileName}</span>
               </span>
               {failedCount > 1 && (
                 <span className="rounded-full border border-amber-200 bg-white/70 px-2.5 py-1 font-medium text-amber-700 dark:border-amber-800/60 dark:bg-surface-900/70 dark:text-amber-200">

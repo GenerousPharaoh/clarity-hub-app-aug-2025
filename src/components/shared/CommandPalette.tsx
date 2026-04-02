@@ -404,7 +404,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                           )}>
                             {item.icon}
                           </span>
-                          <span className="truncate">{item.label}</span>
+                          <span className="truncate" title={item.label}>{item.label}</span>
                         </button>
                       );
                     })}

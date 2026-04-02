@@ -6,6 +6,7 @@ import {
   RotateCw,
   Download,
   Maximize,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -158,16 +159,16 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
   if (hasError) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
-          <ImageOff className="h-7 w-7 text-red-400" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30">
+          <ImageOff className="h-6 w-6 text-red-400" />
         </div>
-        <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-          Failed to Load Image
+        <h3 className="mt-3 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+          Failed to load image
         </h3>
-        <p className="mt-1.5 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-          The image could not be loaded. It may have been moved or deleted.
+        <p className="mt-1 max-w-xs text-xs leading-relaxed text-surface-400 dark:text-surface-500">
+          The image may have been moved or deleted.
         </p>
-        <p className="mt-1 max-w-full truncate font-mono text-xs text-surface-500">
+        <p className="mt-1 max-w-full truncate font-mono text-xs text-surface-500 dark:text-surface-400" title={fileName}>
           {fileName}
         </p>
       </div>
@@ -230,8 +231,8 @@ export function ImageViewer({ url, fileName }: ImageViewerProps) {
         }}
       >
         {isLoading && (
-          <div className="flex h-full items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-surface-200 border-t-primary-500" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
           </div>
         )}
         <div

@@ -23,7 +23,7 @@ export function ProcessingRecoveryBanner({
   return (
     <div
       className={cn(
-        'rounded-[24px] border px-4 py-4 shadow-sm',
+        'rounded-2xl border px-4 py-4 shadow-sm',
         'border-amber-200/80 bg-gradient-to-br from-amber-50/95 to-white',
         'dark:border-amber-900/40 dark:from-amber-950/30 dark:to-surface-900/90'
       )}

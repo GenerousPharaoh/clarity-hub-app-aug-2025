@@ -522,7 +522,7 @@ export function LeftPanel() {
             ))}
           </div>
         ) : isError ? (
-          <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-red-200/80 bg-red-50/70 px-4 py-12 dark:border-red-900/40 dark:bg-red-950/20">
+          <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-red-200/80 bg-red-50/70 px-4 py-12 dark:border-red-900/40 dark:bg-red-950/20">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-950/40">
               <AlertCircle className="h-5 w-5 text-red-400" />
             </div>
@@ -542,7 +542,7 @@ export function LeftPanel() {
           </div>
         ) : filteredFiles.length === 0 ? (
           // Empty state
-          <div className="flex flex-1 flex-col items-center justify-center rounded-[24px] border border-dashed border-surface-300 bg-white/80 px-4 py-12 text-center dark:border-surface-700 dark:bg-surface-900/60">
+          <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-surface-300 bg-white/80 px-4 py-12 text-center dark:border-surface-700 dark:bg-surface-900/60">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
               <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
             </div>

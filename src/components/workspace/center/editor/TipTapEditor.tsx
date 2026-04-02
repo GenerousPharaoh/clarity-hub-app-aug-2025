@@ -156,7 +156,7 @@ export function TipTapEditor({
 
         {/* Paper canvas */}
         <div className="mx-auto w-full max-w-[1080px] px-3 py-4 md:px-6 md:py-8">
-          <div className="relative overflow-hidden rounded-[24px] border border-surface-200/90 bg-white shadow-[0_24px_56px_-36px_rgba(15,23,42,0.5)] ring-1 ring-white/80 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/45">
+          <div className="relative overflow-hidden rounded-2xl border border-surface-200/90 bg-white shadow-[0_24px_56px_-36px_rgba(15,23,42,0.5)] ring-1 ring-white/80 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/45">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-primary-50/60 to-transparent dark:from-primary-900/20" />
             <div className="mx-auto flex max-w-[800px] items-center justify-between px-6 pt-4 text-sm font-medium uppercase tracking-[0.08em] text-surface-400 dark:text-surface-500 md:px-12 md:pt-5">
               <span>Document body</span>

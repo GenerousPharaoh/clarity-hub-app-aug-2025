@@ -559,7 +559,7 @@ function OverviewMetricCard({
     <Component
       onClick={onClick}
       className={cn(
-        'flex h-full min-w-0 flex-col rounded-[22px] border border-surface-200/80 bg-white/78 p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/45',
+        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white/78 p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/45',
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
@@ -594,7 +594,7 @@ function AnchorCard({
     <Component
       onClick={onClick}
       className={cn(
-        'flex h-full min-w-0 flex-col rounded-[22px] border border-surface-200/80 bg-white/76 px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/45',
+        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white/76 px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/45',
         onClick && 'transition-colors hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
@@ -636,7 +636,7 @@ function MatterStageCard({
         : 'bg-primary-500';
 
   return (
-    <div className={cn('rounded-[28px] border p-5 shadow-sm', toneClasses)}>
+    <div className={cn('rounded-2xl border p-5 shadow-sm', toneClasses)}>
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-400">
         <ShieldCheck className="h-4 w-4" />
         Status
@@ -648,7 +648,7 @@ function MatterStageCard({
         {stage.description}
       </p>
 
-      <div className="mt-5 rounded-[22px] border border-white/60 bg-white/70 p-4 dark:border-white/5 dark:bg-surface-950/35">
+      <div className="mt-5 rounded-xl border border-white/60 bg-white/70 p-4 dark:border-white/5 dark:bg-surface-950/35">
         <div className="flex flex-col gap-1 text-xs text-surface-500 dark:text-surface-400 sm:flex-row sm:items-center sm:justify-between">
           <span>AI-ready coverage</span>
           <span>{readinessPercent}%</span>
@@ -672,14 +672,14 @@ function NextStepsCard({
   }>;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <Sparkles className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Next steps
       </div>
       <div className="mt-4 flex flex-1 flex-col space-y-3">
         {actions.map((action) => (
-          <div key={action.title} className="flex flex-col rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
+          <div key={action.title} className="flex flex-col rounded-xl border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
             <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
               {action.title}
             </h3>
@@ -740,14 +740,14 @@ function FileTypeBreakdown({
   };
 
   return (
-    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <FileText className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Evidence profile
       </div>
       <div className="mt-4 flex-1 space-y-3">
         {entries.map(([type, count]) => (
-          <div key={type} className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
+          <div key={type} className="rounded-xl border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
             <div className="flex items-center gap-2">
               {iconMap[type] || iconMap.other}
               <span className="min-w-0 flex-1 truncate text-sm font-medium capitalize text-surface-700 dark:text-surface-200" title={type}>
@@ -814,7 +814,7 @@ function RecentActivity({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <Clock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Recent activity
@@ -824,7 +824,7 @@ function RecentActivity({
           <button
             key={item.id}
             onClick={item.onClick}
-            className="flex w-full flex-col gap-2 rounded-[22px] border border-surface-200/80 bg-surface-50/75 px-4 py-3 text-left transition-colors hover:border-primary-300 dark:border-surface-800 dark:bg-surface-950/35 dark:hover:border-primary-700 sm:flex-row sm:items-start"
+            className="flex w-full flex-col gap-2 rounded-xl border border-surface-200/80 bg-surface-50/75 px-4 py-3 text-left transition-colors hover:border-primary-300 dark:border-surface-800 dark:bg-surface-950/35 dark:hover:border-primary-700 sm:flex-row sm:items-start"
           >
             <span className="flex min-w-0 flex-1 items-start gap-3">
               <span className="mt-0.5 shrink-0">{item.icon}</span>
@@ -861,7 +861,7 @@ function MatterDetailsCard({
   exhibitCount: number;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <FolderOpen className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Matter details
@@ -892,7 +892,7 @@ function SignalEmptyState({
   description: string;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-[28px] border border-dashed border-surface-300 bg-white/82 p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/60">
+    <div className="flex h-full flex-col rounded-2xl border border-dashed border-surface-300 bg-white/82 p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/60">
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
         <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
       </div>
@@ -937,7 +937,7 @@ function QuickActions() {
   const acceptStr = Object.keys(ACCEPTED_FILE_TYPES).join(',');
 
   return (
-    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <input
         ref={fileInputRef}
         type="file"
@@ -968,7 +968,7 @@ function QuickActions() {
         <span className="hidden sm:inline">{isDemoMode ? 'Uploads require sign-in' : 'Upload files'}</span>
       </button>
 
-      <div className="mt-4 rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 text-sm text-surface-500 dark:border-surface-800 dark:bg-surface-950/35 dark:text-surface-400">
+      <div className="mt-4 rounded-xl border border-surface-200/80 bg-surface-50/75 p-4 text-sm text-surface-500 dark:border-surface-800 dark:bg-surface-950/35 dark:text-surface-400">
         {isDemoMode
           ? 'Demo: view, draft, and manage exhibits.'
           : ''}
@@ -1094,7 +1094,7 @@ Base your analysis ONLY on the documents provided. Do not fabricate facts. If in
   }, [analysis]);
 
   return (
-    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
@@ -1291,7 +1291,7 @@ function HighlightsSummaryCard({ projectId }: { projectId: string | null }) {
   };
 
   return (
-    <div className="rounded-[28px] border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">

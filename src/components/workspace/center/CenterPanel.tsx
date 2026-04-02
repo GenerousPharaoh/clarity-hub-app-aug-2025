@@ -600,7 +600,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                   exit={{ opacity: 0, y: -4, scale: 0.97 }}
                   transition={{ duration: 0.12 }}
                   className={cn(
-                    'absolute left-0 top-full z-50 mt-2 max-h-[70vh] min-w-[18rem] max-w-[28rem] overflow-hidden rounded-[22px]',
+                    'absolute left-0 top-full z-50 mt-2 max-h-[70vh] min-w-[18rem] max-w-[28rem] overflow-hidden rounded-xl',
                     'border border-surface-200 bg-white shadow-overlay',
                     'dark:border-surface-700 dark:bg-surface-850 dark:shadow-surface-950/30'
                   )}

@@ -284,7 +284,7 @@ export function TimelineTab() {
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="rounded-[22px] border border-translucent bg-white/88 p-4 dark:bg-surface-900/78"
+              className="rounded-xl border border-translucent bg-white/88 p-4 dark:bg-surface-900/78"
             >
               <div className="space-y-2">
                 <div className="h-3 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
@@ -550,8 +550,8 @@ export function TimelineTab() {
       {viewMode === 'events' && <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
         {eventCount === 0 ? (
           <div className="flex flex-1 items-center justify-center">
-            <div className="w-full rounded-[28px] border border-dashed border-surface-300 bg-white/88 px-5 py-12 text-center shadow-sm surface-grain dark:border-surface-700 dark:bg-surface-900/70">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-surface-100 dark:bg-surface-800">
+            <div className="w-full rounded-2xl border border-dashed border-surface-300 bg-white/88 px-5 py-12 text-center shadow-sm surface-grain dark:border-surface-700 dark:bg-surface-900/70">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-800">
                 <Calendar className="h-5 w-5 text-surface-400 dark:text-surface-500" />
               </div>
               <h3 className="mt-4 text-center font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
@@ -691,7 +691,7 @@ function TimelineEventCard({
       {/* Card */}
       <div
         className={cn(
-          'mb-2 min-w-0 flex-1 rounded-[22px] border px-4 py-3 transition-all',
+          'mb-2 min-w-0 flex-1 rounded-xl border px-4 py-3 transition-all',
           'border-translucent bg-white/88 shadow-sm',
           'hover:shadow-md',
           'dark:bg-surface-900/78'

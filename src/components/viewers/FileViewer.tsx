@@ -131,26 +131,22 @@ export function FileViewer() {
   if (!selectedFile) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-[26px] border border-surface-200/80 bg-white/88 p-5 text-center shadow-sm dark:border-surface-800 dark:bg-surface-900/78">
-          <div className="inline-flex items-center gap-2 rounded-full border border-surface-200/80 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
-            <FileSearch className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
-            Evidence viewer
-          </div>
-          <div className="mx-auto mt-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
+        <div className="w-full max-w-sm rounded-2xl border border-surface-200/80 bg-white p-5 text-center shadow-sm dark:border-surface-800 dark:bg-surface-900">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-800">
             <FileSearch className="h-6 w-6 text-surface-400 dark:text-surface-500" />
           </div>
-          <h3 className="mt-4 font-heading text-lg font-semibold text-surface-800 dark:text-surface-100">
+          <h3 className="mt-4 font-heading text-base font-semibold text-surface-800 dark:text-surface-100">
             Select a file to view
           </h3>
-          <p className="mt-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
-            Click any file in the left panel to open it here. Supports PDFs, images, audio, video, and text files.
+          <p className="mt-1.5 text-sm leading-relaxed text-surface-500 dark:text-surface-400">
+            Click any file in the left panel to open it here.
           </p>
           {recentProjectFiles.length > 0 && (
-            <div className="mt-5 rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-3 text-left dark:border-surface-800 dark:bg-surface-950/35">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-surface-400 dark:text-surface-500">
-                Jump back in
+            <div className="mt-4 rounded-xl border border-surface-200/80 bg-surface-50 p-3 text-left dark:border-surface-800 dark:bg-surface-950/40">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
+                Recent files
               </p>
-              <div className="mt-3 divide-y divide-surface-100 dark:divide-surface-800">
+              <div className="mt-2 space-y-1">
                 {recentProjectFiles.map((file) => (
                   <button
                     key={file.id}
@@ -160,12 +156,12 @@ export function FileViewer() {
                       setRightTab('viewer');
                       setMobileTab('viewer');
                     }}
-                    className="flex w-full items-center justify-between rounded-2xl border border-surface-200/80 bg-white px-3 py-2 text-left transition-colors hover:border-primary-300 hover:bg-primary-50/60 dark:border-surface-700 dark:bg-surface-900 dark:hover:border-primary-700 dark:hover:bg-primary-900/20"
+                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
                   >
-                    <span className="truncate pr-3 text-sm font-medium text-surface-700 dark:text-surface-200">
+                    <span className="truncate pr-3 text-sm font-medium text-surface-700 dark:text-surface-200" title={file.name}>
                       {file.name}
                     </span>
-                    <span className="shrink-0 text-xs text-surface-400 dark:text-surface-500">
+                    <span className="shrink-0 text-[10px] text-surface-400 dark:text-surface-500">
                       {file.file_type ?? 'file'}
                     </span>
                   </button>
@@ -177,10 +173,10 @@ export function FileViewer() {
                   setRightTab('ai');
                   setMobileTab('viewer');
                 }}
-                className="mt-3 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-900/20"
+                className="mt-2 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-900/20"
               >
-                <MessageSquareText className="h-3.5 w-3.5" />
-                Open AI chat instead
+                <MessageSquareText className="h-3 w-3" />
+                Open AI chat
               </button>
             </div>
           )}
@@ -202,24 +198,19 @@ export function FileViewer() {
   if (error || !fileUrl) {
     return (
       <div className="flex h-full items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-[26px] border border-red-300 bg-red-50/80 p-5 text-center shadow-sm dark:border-red-800/60 dark:bg-red-950/20">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 dark:bg-red-950/30">
+        <div className="w-full max-w-sm rounded-2xl border border-red-200 bg-red-50 p-5 text-center shadow-sm dark:border-red-900/50 dark:bg-red-950/30">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white dark:bg-red-950/40">
             <FileSearch className="h-6 w-6 text-red-400" />
           </div>
-          <h3 className="mt-4 font-heading text-lg font-semibold text-surface-800 dark:text-surface-100">
+          <h3 className="mt-3 font-heading text-base font-semibold text-surface-800 dark:text-surface-100">
             File unavailable
           </h3>
-          <p className="mt-2 text-sm leading-6 text-surface-500 dark:text-surface-400">
+          <p className="mt-1.5 text-sm leading-relaxed text-surface-500 dark:text-surface-400">
             {error || 'Could not load this file. It may have been moved or deleted.'}
           </p>
           <button
             onClick={handleRetry}
-            className={cn(
-              'mt-4 inline-flex items-center gap-1.5 rounded-xl px-3 py-2',
-              'text-sm font-medium text-red-600',
-              'transition-colors hover:bg-white/70',
-              'dark:text-red-300 dark:hover:bg-red-950/30'
-            )}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-950/40"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Retry

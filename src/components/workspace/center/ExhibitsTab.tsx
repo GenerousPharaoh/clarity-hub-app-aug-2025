@@ -299,7 +299,7 @@ export function ExhibitsTab() {
         ) : (
           <div className="space-y-3">
             {!hasLinkedFiles && (
-              <div className="rounded-[22px] border border-dashed border-surface-300 bg-white/80 px-4 py-4 text-sm text-surface-500 shadow-sm dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400">
+              <div className="rounded-xl border border-dashed border-surface-300 bg-white/80 px-4 py-4 text-sm text-surface-500 shadow-sm dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-surface-700 dark:text-surface-200">
@@ -392,7 +392,7 @@ function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center px-8 py-12 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-surface-100 dark:bg-surface-800">
+      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-800">
         <Tag className="h-5 w-5 text-surface-400 dark:text-surface-500" />
       </div>
       <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">

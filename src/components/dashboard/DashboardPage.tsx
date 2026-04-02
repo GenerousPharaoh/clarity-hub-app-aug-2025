@@ -143,6 +143,39 @@ export function DashboardPage() {
     });
   };
 
+  // Full-page skeleton on initial load — prevents flash of 0s in hero/metrics
+  if (isLoading) {
+    return (
+      <div className="relative min-h-full overflow-hidden bg-white dark:bg-surface-950">
+        <div className="relative z-10 mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+          {/* Skeleton hero */}
+          <div className="rounded-3xl bg-surface-950 px-8 py-10 sm:px-12 sm:py-14 dark:bg-surface-900">
+            <div className="h-3 w-36 animate-pulse rounded bg-surface-800" />
+            <div className="mt-4 h-10 w-56 animate-pulse rounded-lg bg-surface-800 sm:w-72" />
+            <div className="mt-4 h-4 w-44 animate-pulse rounded bg-surface-800" />
+          </div>
+          {/* Skeleton metrics */}
+          <div className="mt-6 grid gap-4 grid-cols-1 sm:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="rounded-xl border border-surface-200/80 bg-white p-4 dark:border-surface-800 dark:bg-surface-900">
+                <div className="h-3 w-20 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                <div className="mt-3 h-8 w-12 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                <div className="mt-2 h-3 w-28 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+              </div>
+            ))}
+          </div>
+          {/* Skeleton heading + cards */}
+          <div className="mt-10 h-7 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+          <div className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative min-h-full overflow-hidden bg-white dark:bg-surface-950">
 
@@ -296,14 +329,6 @@ export function DashboardPage() {
               </button>
             </div>
           </>
-        )}
-
-        {isLoading && (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-          </div>
         )}
 
         {!isLoading && !error && !hasProjects && (

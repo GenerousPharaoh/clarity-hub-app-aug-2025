@@ -157,7 +157,7 @@ export function LoginPage() {
               disabled={signingIn || enteringDemo}
               className={cn(
                 'flex w-full items-center justify-center gap-3 rounded-2xl',
-                'border-2 border-surface-200 px-6 py-4',
+                'border-2 border-surface-200 px-6 py-[18px]',
                 'text-[15px] font-medium text-surface-600',
                 'transition-all duration-200',
                 'hover:border-accent-400 hover:text-accent-700 hover:bg-accent-50/50',
@@ -204,7 +204,7 @@ export function LoginPage() {
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
     <div className="group flex items-start gap-4 rounded-xl bg-white/[0.05] px-5 py-4 ring-1 ring-white/[0.08] transition-all duration-300 hover:bg-white/[0.08] hover:ring-accent-500/30">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500/10 text-accent-400 transition-colors group-hover:bg-accent-500/20">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500/10 text-accent-400 transition-colors group-hover:bg-accent-500/20 group-hover:text-accent-500">
         {icon}
       </div>
       <div>

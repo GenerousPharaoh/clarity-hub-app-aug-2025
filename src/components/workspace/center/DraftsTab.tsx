@@ -557,7 +557,7 @@ Return ONLY the section content — no section heading (it will be added automat
       {/* Draft header with progress + actions */}
       <div className="rounded-2xl border border-surface-200/80 bg-white p-4 shadow-sm dark:border-surface-700 dark:bg-surface-800">
         <div className="flex items-center justify-between">
-          <h3 className="font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">{draft.title}</h3>
+          <h3 className="truncate font-heading text-sm font-semibold text-surface-700 dark:text-surface-200" title={draft.title}>{draft.title}</h3>
           <div className="flex items-center gap-2">
             {completedCount < totalCount && (
               <button
@@ -567,7 +567,7 @@ Return ONLY the section content — no section heading (it will be added automat
                   'flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
                   generatingAll || generatingSection
                     ? 'bg-surface-100 text-surface-400 dark:bg-surface-800'
-                    : 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
+                    : 'bg-accent-600 text-white hover:bg-accent-700 shadow-sm dark:bg-accent-500 dark:hover:bg-accent-400'
                 )}
               >
                 {generatingAll ? (
@@ -588,19 +588,19 @@ Return ONLY the section content — no section heading (it will be added automat
               </button>
               {showExportMenu && (
                 <div className="absolute right-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-xl border border-surface-200 bg-white shadow-lg dark:border-surface-700 dark:bg-surface-850">
-                  <button onClick={() => handleExportDraft('clipboard')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                  <button onClick={() => handleExportDraft('clipboard')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700">
                     <Copy className="h-3.5 w-3.5" /> Copy to clipboard
                   </button>
-                  <button onClick={() => handleExportDraft('pdf')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                  <button onClick={() => handleExportDraft('pdf')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700">
                     <FileText className="h-3.5 w-3.5" /> Download PDF
                   </button>
-                  <button onClick={() => handleExportDraft('docx')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                  <button onClick={() => handleExportDraft('docx')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700">
                     <FileType className="h-3.5 w-3.5" /> Download DOCX
                   </button>
-                  <button onClick={() => handleExportDraft('md')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                  <button onClick={() => handleExportDraft('md')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700">
                     <FileDown className="h-3.5 w-3.5" /> Download Markdown
                   </button>
-                  <button onClick={() => handleExportDraft('txt')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800">
+                  <button onClick={() => handleExportDraft('txt')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700">
                     <FileDown className="h-3.5 w-3.5" /> Download Plain Text
                   </button>
                 </div>

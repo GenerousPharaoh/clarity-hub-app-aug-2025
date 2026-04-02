@@ -263,7 +263,7 @@ export function AIChatPanel() {
           <div className="flex h-full flex-col">
             {/* Welcome section */}
             <div className={cn('flex flex-1 flex-col items-center justify-center pb-4', narrow ? 'px-3' : 'px-6')}>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-50 dark:bg-accent-900/30">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-50 dark:bg-accent-900/30">
                 <Sparkles className="h-6 w-6 text-accent-500 dark:text-accent-400" />
               </div>
               <h3 className="mt-4 font-heading text-base font-bold text-surface-800 dark:text-surface-100">

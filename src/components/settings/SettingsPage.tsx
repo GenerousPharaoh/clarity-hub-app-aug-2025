@@ -178,7 +178,7 @@ export function SettingsPage() {
                     key={opt.value}
                     onClick={() => setTheme(opt.value)}
                     aria-pressed={active}
-                    className={`group relative flex h-full flex-col items-center gap-2 rounded-lg border-2 px-3 py-4 text-center transition-all
+                    className={`group relative flex h-full min-h-[120px] flex-col items-center justify-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all
                       ${
                         active
                           ? 'border-primary-600 bg-primary-50 dark:border-primary-500 dark:bg-primary-950/30'

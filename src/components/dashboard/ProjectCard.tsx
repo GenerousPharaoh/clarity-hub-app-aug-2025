@@ -157,10 +157,10 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           'group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border p-6',
           'border-surface-200 bg-white',
           'shadow-sm transition-all duration-300',
-          'hover:shadow-xl hover:shadow-surface-200/60 hover:-translate-y-1 hover:border-surface-300',
+          'hover:shadow-lg hover:shadow-surface-200/50 hover:-translate-y-0.5 hover:border-surface-300',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2',
           'dark:border-surface-800 dark:bg-surface-900',
-          'dark:hover:shadow-xl dark:hover:shadow-surface-950/60 dark:hover:border-surface-700'
+          'dark:hover:shadow-lg dark:hover:shadow-surface-950/40 dark:hover:border-surface-700'
         )}
       >
         <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', accent)} />
@@ -177,11 +177,11 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
               </div>
 
               <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-sm font-medium text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                <div className="flex flex-wrap items-start gap-1.5">
+                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2 py-0.5 text-xs font-medium text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                     {goalType}
                   </span>
-                  <span className={cn('max-w-full rounded-full border px-2.5 py-1.5 text-sm font-medium [overflow-wrap:anywhere]', status.chip)}>
+                  <span className={cn('max-w-full rounded-full border px-2 py-0.5 text-xs font-medium [overflow-wrap:anywhere]', status.chip)}>
                     {status.label}
                   </span>
                 </div>
@@ -196,7 +196,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                       onKeyDown={handleRenameKeyDown}
                       onClick={(e) => e.stopPropagation()}
                       className={cn(
-                        'w-full rounded-xl border border-primary-300 bg-white px-3 py-2',
+                        'w-full rounded-2xl border border-primary-300 bg-white px-3 py-2',
                         'font-heading text-lg font-semibold tracking-tight text-surface-900',
                         'outline-none focus:ring-2 focus:ring-primary-500/25',
                         'dark:border-primary-700 dark:bg-surface-800 dark:text-surface-100'

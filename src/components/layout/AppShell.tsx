@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { Header } from './Header';
 import { CommandPalette } from '@/components/shared/CommandPalette';
 import { useProjects } from '@/hooks/useProjects';
@@ -29,7 +30,15 @@ export function AppShell() {
     <div className="flex h-screen flex-col bg-surface-50 dark:bg-surface-950">
       <Header />
       <main id="main-content" className="flex-1 overflow-auto">
-        <Outlet />
+        <Suspense
+          fallback={
+            <div className="flex h-full items-center justify-center">
+              <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
+            </div>
+          }
+        >
+          <Outlet />
+        </Suspense>
       </main>
       <CommandPalette
         open={showCommandPalette}

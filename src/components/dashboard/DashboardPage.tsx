@@ -15,7 +15,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { FadeIn } from '@/components/shared/FadeIn';
+// FadeIn removed — instant rendering avoids flash-of-placeholder on route transitions
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ProjectCard } from './ProjectCard';
 import { CreateProjectDialog } from './CreateProjectDialog';
@@ -147,7 +147,7 @@ export function DashboardPage() {
     <div className="relative min-h-full overflow-hidden bg-white dark:bg-surface-950">
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
-        <FadeIn>
+        <>
           {/* Hero section — big, bold, spacious */}
           <section className="relative overflow-hidden rounded-3xl bg-surface-950 px-8 py-10 sm:px-12 sm:py-14 dark:bg-surface-900">
             {/* Background texture */}
@@ -229,9 +229,9 @@ export function DashboardPage() {
               tone="neutral"
             />
           </div>
-        </FadeIn>
+        </>
 
-        <FadeIn delay={0.06}>
+        <>
           <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <h2 className="font-heading text-2xl font-bold text-surface-900 dark:text-surface-100">
@@ -269,10 +269,10 @@ export function DashboardPage() {
               </div>
             </div>
           </div>
-        </FadeIn>
+        </>
 
         {error && (
-          <FadeIn>
+          <>
             <div className="mt-5 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50/80 p-5 dark:border-red-800/50 dark:bg-red-950/30 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-100 dark:bg-red-950/50">
@@ -295,7 +295,7 @@ export function DashboardPage() {
                 Retry
               </button>
             </div>
-          </FadeIn>
+          </>
         )}
 
         {isLoading && (
@@ -307,7 +307,7 @@ export function DashboardPage() {
         )}
 
         {!isLoading && !error && !hasProjects && (
-          <FadeIn delay={0.1}>
+          <>
             <div className="mt-4 rounded-2xl border border-dashed border-surface-300 bg-white/85 py-6 shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
               <EmptyState
                 icon={<Scale className="h-6 w-6" />}
@@ -327,13 +327,13 @@ export function DashboardPage() {
                 }
               />
             </div>
-          </FadeIn>
+          </>
         )}
 
         {!isLoading && !error && hasProjects && (
           <div className="mt-4">
             {visibleProjects.length === 0 ? (
-              <FadeIn delay={0.1}>
+              <>
                 <div className="rounded-2xl border border-dashed border-surface-300 bg-white/80 px-6 py-10 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
                   <Search className="mx-auto h-5 w-5 text-surface-400 dark:text-surface-500" />
                   <h3 className="mt-3 text-sm font-semibold text-surface-700 dark:text-surface-200">
@@ -349,7 +349,7 @@ export function DashboardPage() {
                     Clear search
                   </button>
                 </div>
-              </FadeIn>
+              </>
             ) : (
               <div className="grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {visibleProjects.map((project, index) => (

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
@@ -7,7 +7,6 @@ import { LoginPage } from './components/auth/LoginPage';
 import { AuthCallback } from './components/auth/AuthCallback';
 import { AppShell } from './components/layout/AppShell';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
-import { LoadingScreen } from './components/shared/LoadingScreen';
 import useAppStore from './store';
 
 /**
@@ -95,22 +94,20 @@ export default function App() {
       </a>
       <BrowserRouter>
         <AuthProvider>
-          <Suspense fallback={<LoadingScreen />}>
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
 
-              <Route element={<ProtectedRoute />}>
-                <Route element={<AppShell />}>
-                  <Route path="/" element={<DashboardPage />} />
-                  <Route path="/project/:projectId" element={<WorkspacePage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                </Route>
+            <Route element={<ProtectedRoute />}>
+              <Route element={<AppShell />}>
+                <Route path="/" element={<DashboardPage />} />
+                <Route path="/project/:projectId" element={<WorkspacePage />} />
+                <Route path="/settings" element={<SettingsPage />} />
               </Route>
+            </Route>
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </AuthProvider>
       </BrowserRouter>
 

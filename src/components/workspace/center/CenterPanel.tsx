@@ -617,7 +617,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                         )}
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200">
+                          <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200" title={note.title || 'Untitled'}>
                             {note.title || 'Untitled'}
                           </p>
                           <p className="mt-0.5 text-xs text-surface-400 dark:text-surface-500">

@@ -153,9 +153,9 @@ export function SuggestedPrompts({
             <div className="mt-0.5 shrink-0 text-surface-400 transition-colors group-hover:text-accent-500 dark:text-surface-500 dark:group-hover:text-accent-400">
               {prompt.icon}
             </div>
-            <span className={compact
-              ? 'line-clamp-2 text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'
-              : 'line-clamp-2 text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200'}
+            <span
+              className="line-clamp-2 text-xs leading-snug text-surface-600 transition-colors group-hover:text-surface-800 dark:text-surface-400 dark:group-hover:text-surface-200"
+              title={prompt.label}
             >
               {prompt.label}
             </span>

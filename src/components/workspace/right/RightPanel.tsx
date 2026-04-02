@@ -73,7 +73,7 @@ export function RightPanel() {
       >
         <div className={cn('flex gap-3', stackedHeader ? 'flex-col' : 'items-start justify-between')}>
           <div className="min-w-0">
-            <h2 className="min-w-0 truncate text-base font-bold text-surface-800 dark:text-surface-100">
+            <h2 className="min-w-0 truncate text-base font-bold text-surface-800 dark:text-surface-100" title={panelLabel}>
               {panelLabel}
             </h2>
             <p className="mt-1 truncate text-xs text-surface-500 dark:text-surface-400" title={panelSubtitle}>

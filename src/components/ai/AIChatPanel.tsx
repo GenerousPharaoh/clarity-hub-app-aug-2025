@@ -398,7 +398,7 @@ export function AIChatPanel() {
                   className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-2 py-0.5 text-xs text-primary-700 dark:bg-primary-800/40 dark:text-primary-300"
                 >
                   <FileContextIcon type={f.file_type} />
-                  <span className="max-w-[120px] truncate">{f.name}</span>
+                  <span className="max-w-[120px] truncate" title={f.name}>{f.name}</span>
                   <button
                     onClick={() => setSelectedFileIds((prev) => { const next = new Set(prev); next.delete(f.id); return next; })}
                     className="ml-0.5 text-primary-400 hover:text-primary-600"
@@ -447,7 +447,7 @@ export function AIChatPanel() {
                         )}
                       >
                         <FileContextIcon type={f.file_type} />
-                        <span className="min-w-0 flex-1 truncate">{f.name}</span>
+                        <span className="min-w-0 flex-1 truncate" title={f.name}>{f.name}</span>
                         {isSelected && <span className="text-primary-500 text-xs">&#10003;</span>}
                       </button>
                     );

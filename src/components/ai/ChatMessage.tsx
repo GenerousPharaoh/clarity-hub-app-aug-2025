@@ -572,10 +572,10 @@ function WebSourcesList({ webSources }: { webSources: WebSource[] }) {
             >
               <Globe className="h-3 w-3 shrink-0 text-blue-400" />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-blue-600 dark:text-blue-300">
+                <p className="truncate text-sm font-medium text-blue-600 dark:text-blue-300" title={ws.title}>
                   [{ws.index}] {ws.title}
                 </p>
-                <p className="truncate text-xs text-blue-400 dark:text-blue-500">
+                <p className="truncate text-xs text-blue-400 dark:text-blue-500" title={ws.url}>
                   {ws.url}
                 </p>
               </div>

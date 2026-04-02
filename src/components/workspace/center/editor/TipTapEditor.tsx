@@ -294,7 +294,7 @@ function ExhibitPickerDialog({
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-100 font-heading text-sm font-bold text-accent-700 dark:bg-accent-900/30 dark:text-accent-400">
                   {ex.exhibit_id}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-sm text-surface-600 dark:text-surface-300">
+                <span className="min-w-0 flex-1 truncate text-sm text-surface-600 dark:text-surface-300" title={ex.description || (ex.file_id ? 'Linked file' : 'No file linked')}>
                   {ex.description || (ex.file_id ? 'Linked file' : 'No file linked')}
                 </span>
               </button>

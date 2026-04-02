@@ -439,7 +439,7 @@ function EditableProjectHeader({
         </div>
       ) : (
         <div className="group flex min-w-0 items-start gap-2">
-          <h1 className="min-w-0 truncate font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
+          <h1 className="min-w-0 truncate font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50" title={project.name}>
             {project.name}
           </h1>
           <button
@@ -534,7 +534,7 @@ function OverviewBadge({
           : 'border-surface-200 bg-white/80 text-surface-500 dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400';
 
   return (
-    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-sm font-medium', toneClasses)}>
+    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-sm font-medium', toneClasses)} title={typeof children === 'string' ? children : undefined}>
       {children}
     </span>
   );
@@ -750,7 +750,7 @@ function FileTypeBreakdown({
           <div key={type} className="rounded-[22px] border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
             <div className="flex items-center gap-2">
               {iconMap[type] || iconMap.other}
-              <span className="min-w-0 flex-1 truncate text-sm font-medium capitalize text-surface-700 dark:text-surface-200">
+              <span className="min-w-0 flex-1 truncate text-sm font-medium capitalize text-surface-700 dark:text-surface-200" title={type}>
                 {type}
               </span>
               <span className="text-xs text-surface-400 dark:text-surface-500">
@@ -829,10 +829,10 @@ function RecentActivity({
             <span className="flex min-w-0 flex-1 items-start gap-3">
               <span className="mt-0.5 shrink-0">{item.icon}</span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-surface-400 dark:text-surface-500">
+                <span className="block truncate text-sm font-medium text-surface-400 dark:text-surface-500" title={item.kind}>
                   {item.kind}
                 </span>
-                <span className="mt-1 block truncate text-sm font-medium text-surface-800 dark:text-surface-100">
+                <span className="mt-1 block truncate text-sm font-medium text-surface-800 dark:text-surface-100" title={item.label}>
                   {item.label}
                 </span>
               </span>

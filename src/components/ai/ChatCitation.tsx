@@ -144,7 +144,7 @@ function SourceListItem({ source }: { source: ChatSource }) {
     >
       <IconComponent className="h-3 w-3 shrink-0 text-surface-400" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-surface-600 dark:text-surface-300">
+        <p className="truncate text-sm font-medium text-surface-600 dark:text-surface-300" title={source.fileName}>
           [{source.sourceIndex}] {source.fileName}
         </p>
         {(source.pageNumber || source.sectionHeading) && (

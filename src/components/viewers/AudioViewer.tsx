@@ -199,7 +199,7 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
       </div>
 
       {/* File name */}
-      <h3 className="mb-6 max-w-full truncate text-center font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+      <h3 className="mb-6 max-w-full truncate text-center font-heading text-sm font-semibold text-surface-700 dark:text-surface-200" title={fileName}>
         {fileName}
       </h3>
 

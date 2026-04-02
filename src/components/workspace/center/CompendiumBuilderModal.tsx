@@ -456,10 +456,10 @@ function StepSelect({
                     onClick={() => setEditingIdx(idx)}
                     className="w-full text-left"
                   >
-                    <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200">
+                    <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200" title={item.displayTitle}>
                       {item.displayTitle}
                     </p>
-                    <p className="truncate text-xs text-surface-400">
+                    <p className="truncate text-xs text-surface-400" title={`${item.exhibitId} · ${item.fileName}`}>
                       {item.exhibitId} &middot; {item.fileName}
                     </p>
                   </button>

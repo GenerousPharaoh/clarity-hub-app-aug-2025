@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import useAppStore from '@/store';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,9 @@ export function RightPanel() {
   const isMobile = useIsMobile();
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelWidth, setPanelWidth] = useState(0);
+  const selectedFile = selectedFileId
+    ? files.find((file) => file.id === selectedFileId) ?? null
+    : null;
 
   useEffect(() => {
     const el = panelRef.current;
@@ -48,18 +51,35 @@ export function RightPanel() {
     saveWorkspaceView({ projectId: selectedProjectId, rightTab: activeTab });
   }, [activeTab, selectedProjectId]);
 
-  const compact = panelWidth > 0 && panelWidth < 240;
-  const ultraCompact = panelWidth > 0 && panelWidth < 210;
+  const compact = panelWidth > 0 && panelWidth < 320;
+  const ultraCompact = panelWidth > 0 && panelWidth < 260;
+  const stackedHeader = panelWidth > 0 && panelWidth < 360;
   const panelLabel = activeTab === 'viewer' ? 'Viewer' : 'AI Chat';
+  const panelSubtitle =
+    activeTab === 'viewer'
+      ? selectedFile?.name ?? 'Open a file from the left panel'
+      : selectedFile?.name
+        ? `Using ${selectedFile.name} as context`
+        : 'Ask questions about this workspace';
 
   return (
     <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Header with tabs and collapse */}
-      <div className="shrink-0 border-b border-surface-200/80 bg-white px-4 py-3 dark:border-surface-800 dark:bg-surface-900">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="min-w-0 truncate text-base font-bold text-surface-800 dark:text-surface-100">
-            {panelLabel}
-          </h2>
+      <div
+        className={cn(
+          'shrink-0 border-b border-surface-200/80 bg-white dark:border-surface-800 dark:bg-surface-900',
+          compact ? 'px-3 py-2.5' : 'px-4 py-3'
+        )}
+      >
+        <div className={cn('flex gap-3', stackedHeader ? 'flex-col' : 'items-start justify-between')}>
+          <div className="min-w-0">
+            <h2 className="min-w-0 truncate text-base font-bold text-surface-800 dark:text-surface-100">
+              {panelLabel}
+            </h2>
+            <p className="mt-1 truncate text-xs text-surface-500 dark:text-surface-400" title={panelSubtitle}>
+              {panelSubtitle}
+            </p>
+          </div>
           {!isMobile && !ultraCompact && (
             <button
               onClick={toggleRight}
@@ -80,6 +100,7 @@ export function RightPanel() {
         <div
           className={cn(
             'mt-3 flex items-center gap-1 rounded-xl border border-surface-200 bg-surface-50 p-1 dark:border-surface-700 dark:bg-surface-800',
+            stackedHeader && 'w-full',
             ultraCompact && 'px-0.5'
           )}
           role="tablist"
@@ -161,7 +182,7 @@ function TabButton({
       onClick={onClick}
       className={cn(
         'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium transition-all',
-        compact ? 'px-2' : 'px-2.5',
+        compact ? 'px-2 text-xs' : 'px-2.5',
         active
           ? activeColor
           : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200'

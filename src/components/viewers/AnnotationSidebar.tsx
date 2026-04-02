@@ -10,7 +10,10 @@ import type { AnnotationHighlight } from '@/types/annotations';
 interface AnnotationSidebarProps {
   annotations: PdfAnnotation[];
   isOpen: boolean;
+  compact?: boolean;
+  highlightMode?: boolean;
   onClose: () => void;
+  onStartHighlighting?: () => void;
   onScrollTo: (highlight: AnnotationHighlight) => void;
   onDelete: (annotation: PdfAnnotation) => void;
   /** Name of the file being annotated, included in exports for context. */
@@ -20,7 +23,10 @@ interface AnnotationSidebarProps {
 export function AnnotationSidebar({
   annotations,
   isOpen,
+  compact = false,
+  highlightMode = false,
   onClose,
+  onStartHighlighting,
   onScrollTo,
   onDelete,
   fileName,
@@ -40,7 +46,16 @@ export function AnnotationSidebar({
       if (!map.has(page)) map.set(page, []);
       map.get(page)!.push(a);
     }
-    return Array.from(map.entries()).sort(([a], [b]) => a - b);
+    return Array.from(map.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([page, items]) => [
+        page,
+        [...items].sort(
+          (a, b) =>
+            new Date(b.updated_at ?? b.created_at).getTime() -
+            new Date(a.updated_at ?? a.created_at).getTime()
+        ),
+      ] as const);
   }, [filtered]);
 
   const handleScrollTo = useCallback(
@@ -130,46 +145,67 @@ export function AnnotationSidebar({
   return (
     <div
       className={cn(
-        'absolute right-0 top-0 z-20 flex h-full w-72 flex-col',
-        'border-l border-surface-200 bg-white shadow-lg',
+        'absolute z-30 flex w-full flex-col bg-white shadow-lg',
         'transition-transform duration-200 ease-out',
-        'dark:border-surface-700 dark:bg-surface-900',
-        isOpen ? 'translate-x-0' : 'translate-x-full',
+        'dark:bg-surface-900',
+        compact
+          ? 'inset-x-0 bottom-0 h-[min(72%,34rem)] max-w-none rounded-t-[1.75rem] border-t border-surface-200 dark:border-surface-700'
+          : 'inset-y-0 right-0 h-full max-w-[24rem] border-l border-surface-200 dark:border-surface-700',
+        compact
+          ? (isOpen ? 'translate-y-0' : 'translate-y-full')
+          : (isOpen ? 'translate-x-0' : 'translate-x-full'),
       )}
     >
       {/* Header */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-700">
-        <div className="flex items-center gap-1.5">
-          <MessageSquare className="h-3.5 w-3.5 text-primary-500" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
-            Annotations
-          </span>
-          <span className="ml-1 rounded-full bg-surface-100 px-1.5 py-0.5 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
-            {filtered.length}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          {annotations.length > 0 && (
+      <div className="shrink-0 border-b border-surface-200 px-3 py-3 dark:border-surface-700">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <MessageSquare className="h-3.5 w-3.5 text-primary-500" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
+                Annotations
+              </span>
+              <span className="ml-1 rounded-full bg-surface-100 px-1.5 py-0.5 text-[10px] font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400">
+                {filtered.length}
+              </span>
+            </div>
+            {fileName && (
+              <p className="mt-1 truncate text-[11px] font-medium text-surface-500 dark:text-surface-400" title={fileName}>
+                {fileName}
+              </p>
+            )}
+            <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500">
+              {filtered.length > 0
+                ? 'Click a note to jump back to the source.'
+                : highlightMode
+                  ? 'Select text in the PDF to create your first highlight.'
+                  : 'Switch to annotate mode to start highlighting and commenting.'}
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            {annotations.length > 0 && (
+              <button
+                onClick={handleExportAll}
+                className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
+                title="Export all highlights"
+              >
+                <Download className="h-3 w-3" />
+              </button>
+            )}
             <button
-              onClick={handleExportAll}
+              onClick={onClose}
               className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
-              title="Export all highlights"
             >
-              <Download className="h-3 w-3" />
+              <X className="h-3.5 w-3.5" />
             </button>
-          )}
-          <button
-            onClick={onClose}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
+          </div>
         </div>
       </div>
 
       {/* Color filter */}
       {annotations.length > 0 && (
-        <div className="flex items-center gap-1.5 border-b border-surface-100 px-3 py-2 dark:border-surface-800">
+        <div className="border-b border-surface-100 px-3 py-2 dark:border-surface-800">
+          <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setColorFilter(null)}
             className={cn(
@@ -201,6 +237,10 @@ export function AnnotationSidebar({
             );
           })}
         </div>
+          <p className="mt-2 text-[10px] text-surface-400 dark:text-surface-500">
+            Filter by highlight color or export everything as Markdown.
+          </p>
+        </div>
       )}
 
       {/* Content */}
@@ -211,8 +251,30 @@ export function AnnotationSidebar({
               <FileText className="h-5 w-5 text-surface-400" />
             </div>
             <p className="mt-3 text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-              {colorFilter ? 'No annotations with this color.' : 'No annotations yet. Select text in the PDF to create highlights.'}
+              {colorFilter
+                ? 'No annotations match this color filter.'
+                : highlightMode
+                  ? 'No annotations yet. Select text in the PDF to create highlights.'
+                  : 'No annotations yet. Turn on annotate mode, then select text in the PDF to create highlights.'}
             </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              {colorFilter && (
+                <button
+                  onClick={() => setColorFilter(null)}
+                  className="rounded-full border border-surface-200 px-3 py-1.5 text-xs font-medium text-surface-600 transition-colors hover:bg-surface-100 dark:border-surface-700 dark:text-surface-300 dark:hover:bg-surface-800"
+                >
+                  Clear filter
+                </button>
+              )}
+              {!highlightMode && onStartHighlighting && (
+                <button
+                  onClick={onStartHighlighting}
+                  className="rounded-full bg-primary-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-700"
+                >
+                  Start annotating
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="py-1">
@@ -225,9 +287,10 @@ export function AnnotationSidebar({
                 </div>
                 <div className="space-y-0.5 px-1.5">
                   {items.map((a) => (
-                    <AnnotationCard
+                  <AnnotationCard
                       key={a.id}
                       annotation={a}
+                      page={page}
                       onScrollTo={() => handleScrollTo(a)}
                       onDelete={() => onDelete(a)}
                     />
@@ -244,10 +307,12 @@ export function AnnotationSidebar({
 
 function AnnotationCard({
   annotation,
+  page,
   onScrollTo,
   onDelete,
 }: {
   annotation: PdfAnnotation;
+  page: number;
   onScrollTo: () => void;
   onDelete: () => void;
 }) {
@@ -273,15 +338,32 @@ function AnnotationCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      onClick={onScrollTo}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onScrollTo();
+        }
+      }}
       className={cn(
-        'group relative rounded-xl border border-transparent px-2.5 py-2.5',
+        'group relative rounded-xl border border-transparent px-2.5 py-2.5 text-left',
         'transition-all hover:border-surface-200 hover:bg-surface-50 hover:shadow-sm',
+        'focus-visible:border-primary-200 focus-visible:bg-surface-50 focus-visible:shadow-sm focus-visible:outline-none dark:focus-visible:border-primary-800',
         'dark:hover:border-surface-700 dark:hover:bg-surface-800/60',
       )}
     >
       <div className="flex items-start gap-2">
         {/* Color dot — click to scroll */}
-        <button onClick={onScrollTo} className="mt-0.5 shrink-0" title="Jump to highlight">
+        <button
+          onClick={(event) => {
+            event.stopPropagation();
+            onScrollTo();
+          }}
+          className="mt-0.5 shrink-0"
+          title="Jump to highlight"
+        >
           <span
             className="block h-3 w-3 rounded-full ring-1 ring-surface-200 transition-transform hover:scale-125 dark:ring-surface-700"
             style={{ backgroundColor: annotation.color ?? '#FFEB3B' }}
@@ -291,8 +373,8 @@ function AnnotationCard({
           {/* Selected text */}
           {annotation.selected_text && (
             <p
-              onClick={onScrollTo}
-              className="cursor-pointer line-clamp-3 text-xs leading-relaxed text-surface-500 dark:text-surface-400 hover:text-surface-700 dark:hover:text-surface-200"
+              className="line-clamp-4 text-xs leading-relaxed text-surface-500 dark:text-surface-400 group-hover:text-surface-700 dark:group-hover:text-surface-200"
+              title={annotation.selected_text}
             >
               "{annotation.selected_text}"
             </p>
@@ -304,6 +386,7 @@ function AnnotationCard({
               <textarea
                 value={editComment}
                 onChange={(e) => setEditComment(e.target.value)}
+                onClick={(event) => event.stopPropagation()}
                 className="w-full resize-none rounded-lg border border-primary-200 bg-primary-50/50 px-2.5 py-1.5 text-xs text-surface-700 dark:border-primary-700 dark:bg-primary-900/20 dark:text-surface-200"
                 rows={2}
                 autoFocus
@@ -313,17 +396,36 @@ function AnnotationCard({
                 }}
               />
               <div className="mt-1 flex justify-end gap-1">
-                <button onClick={() => setEditing(false)} className="rounded px-2 py-0.5 text-[10px] text-surface-400 hover:bg-surface-100">Cancel</button>
-                <button onClick={handleSaveComment} className="rounded bg-primary-600 px-2 py-0.5 text-[10px] text-white hover:bg-primary-700">Save</button>
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setEditing(false);
+                  }}
+                  className="rounded px-2 py-0.5 text-[10px] text-surface-400 hover:bg-surface-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleSaveComment();
+                  }}
+                  className="rounded bg-primary-600 px-2 py-0.5 text-[10px] text-white hover:bg-primary-700"
+                >
+                  Save
+                </button>
               </div>
             </div>
           ) : annotation.comment ? (
             <div
-              onClick={() => setEditing(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditing(true);
+              }}
               className="mt-1.5 cursor-pointer rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 transition-colors hover:border-blue-300 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:border-blue-700 dark:hover:bg-blue-900/30"
-              title="Click to edit"
+              title={annotation.comment}
             >
-              <div className="flex items-center gap-1 mb-0.5">
+              <div className="mb-0.5 flex items-center gap-1">
                 <MessageSquare className="h-2.5 w-2.5 text-blue-500" />
                 <span className="text-[9px] font-semibold uppercase tracking-wider text-blue-500">Note</span>
               </div>
@@ -333,20 +435,26 @@ function AnnotationCard({
             </div>
           ) : (
             <button
-              onClick={() => setEditing(true)}
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditing(true);
+              }}
               className="mt-1.5 flex items-center gap-1.5 rounded-md border border-dashed border-surface-200 px-2 py-1 text-[10px] text-surface-400 transition-colors hover:border-primary-300 hover:text-primary-500 dark:border-surface-700 dark:hover:border-primary-600 dark:hover:text-primary-400"
             >
               <Pencil className="h-2.5 w-2.5" />
               Add note
             </button>
           )}
+          <p className="mt-2 text-[10px] font-medium uppercase tracking-[0.14em] text-surface-300 dark:text-surface-600">
+            Page {page}
+          </p>
         </div>
       </div>
 
-      {/* Action buttons — visible on hover */}
+      {/* Action buttons — always visible on touch, hover/focus on larger screens */}
       <div className={cn(
         'absolute right-1 top-1 flex items-center gap-0.5',
-        'opacity-0 transition-all group-hover:opacity-100',
+        'opacity-100 transition-all sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100',
       )}>
         {annotation.selected_text && (
           <button

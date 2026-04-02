@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   Panel,
@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { readWorkspaceSession, clearWorkspaceSession, saveWorkspaceProject } from '@/lib/workspaceSession';
 import { FolderOpen, Eye, Sparkles, LayoutList, PanelRight } from 'lucide-react';
 
-const COLLAPSE_THRESHOLD = 8; // percent — auto-collapse when shrunk below this
+const COLLAPSE_THRESHOLD = 12; // percent — auto-collapse when shrunk below this
 
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -37,6 +37,7 @@ export function WorkspacePage() {
   const setRightTab = useAppStore((s) => s.setRightTab);
   const mobileTab = useAppStore((s) => s.mobileTab);
   const setMobileTab = useAppStore((s) => s.setMobileTab);
+  const selectedFileId = useAppStore((s) => s.selectedFileId);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const requestNewNote = useAppStore((s) => s.requestNewNote);
 
@@ -67,6 +68,8 @@ export function WorkspacePage() {
   const setShowShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
 
   const isMobile = useIsMobile();
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  const [workspaceWidth, setWorkspaceWidth] = useState(0);
 
   const leftRef = useRef<ImperativePanelHandle>(null);
   const rightRef = useRef<ImperativePanelHandle>(null);
@@ -75,6 +78,57 @@ export function WorkspacePage() {
   // Track previous panel sizes so we can auto-collapse only when SHRINKING
   const prevLeftSize = useRef(20);
   const prevRightSize = useRef(35);
+
+  useEffect(() => {
+    const el = workspaceRef.current;
+    if (!el) return;
+
+    const update = () => setWorkspaceWidth(el.clientWidth);
+    update();
+
+    const ro = new ResizeObserver(() => update());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const desktopLayout = useMemo(() => {
+    if (workspaceWidth > 0 && workspaceWidth < 1180) {
+      return {
+        mode: 'compact',
+        autoSaveId: 'clarity-hub-workspace-compact',
+        leftDefaultSize: 24,
+        leftMinSize: 18,
+        centerDefaultSize: 52,
+        centerMinSize: 38,
+        rightDefaultSize: 24,
+        rightMinSize: 22,
+      };
+    }
+
+    if (workspaceWidth > 0 && workspaceWidth >= 1480) {
+      return {
+        mode: 'wide',
+        autoSaveId: 'clarity-hub-workspace-wide',
+        leftDefaultSize: 18,
+        leftMinSize: 14,
+        centerDefaultSize: 46,
+        centerMinSize: 32,
+        rightDefaultSize: 36,
+        rightMinSize: 24,
+      };
+    }
+
+    return {
+      mode: 'standard',
+      autoSaveId: 'clarity-hub-workspace-standard',
+      leftDefaultSize: 20,
+      leftMinSize: 16,
+      centerDefaultSize: 45,
+      centerMinSize: 32,
+      rightDefaultSize: 35,
+      rightMinSize: 24,
+    };
+  }, [workspaceWidth]);
 
   const handleLayout = useCallback((sizes: number[]) => {
     const leftSize = typeof sizes[0] === 'number' ? sizes[0] : prevLeftSize.current;
@@ -134,6 +188,24 @@ export function WorkspacePage() {
     if (!projectId || !projectName) return;
     saveWorkspaceProject({ id: projectId, name: projectName });
   }, [projectId, projectName]);
+
+  useEffect(() => {
+    didNormalizeInitialLayout.current = false;
+  }, [desktopLayout.autoSaveId]);
+
+  useEffect(() => {
+    if (
+      isMobile ||
+      desktopLayout.mode !== 'compact' ||
+      !isRightOpen ||
+      selectedFileId ||
+      rightTab === 'ai'
+    ) {
+      return;
+    }
+
+    setRightPanel(false);
+  }, [desktopLayout.mode, isMobile, isRightOpen, rightTab, selectedFileId, setRightPanel]);
 
   // Sync Zustand → panel imperative API (desktop only)
   useEffect(() => {
@@ -250,7 +322,7 @@ export function WorkspacePage() {
 
   // ── Desktop Layout ─────────────────────────────────────
   return (
-    <div className="flex h-full">
+    <div ref={workspaceRef} className="flex h-full min-w-0">
       {/* Left collapsed strip — outside PanelGroup */}
       <CollapsedStrip side="left" visible={!isLeftOpen}>
         <button
@@ -264,17 +336,22 @@ export function WorkspacePage() {
 
       {/* Main panel group */}
       <PanelGroup
+        key={desktopLayout.autoSaveId}
         direction="horizontal"
-        autoSaveId="clarity-hub-workspace"
+        autoSaveId={desktopLayout.autoSaveId}
         onLayout={handleLayout}
-        className="h-full flex-1"
+        className={cn(
+          'h-full flex-1',
+          desktopLayout.mode === 'compact' && 'workspace-panels-compact',
+          desktopLayout.mode === 'wide' && 'workspace-panels-wide'
+        )}
       >
         <Panel
           ref={leftRef}
           id="left"
           order={1}
-          defaultSize={20}
-          minSize={1}
+          defaultSize={desktopLayout.leftDefaultSize}
+          minSize={desktopLayout.leftMinSize}
           collapsible
           collapsedSize={0}
           className="overflow-hidden"
@@ -300,7 +377,13 @@ export function WorkspacePage() {
 
         <PanelGrip id="grip-left" />
 
-        <Panel id="center" order={2} defaultSize={45} minSize={30} className="overflow-hidden">
+        <Panel
+          id="center"
+          order={2}
+          defaultSize={desktopLayout.centerDefaultSize}
+          minSize={desktopLayout.centerMinSize}
+          className="overflow-hidden"
+        >
           <CenterPanel />
         </Panel>
 
@@ -310,8 +393,8 @@ export function WorkspacePage() {
           ref={rightRef}
           id="right"
           order={3}
-          defaultSize={35}
-          minSize={1}
+          defaultSize={desktopLayout.rightDefaultSize}
+          minSize={desktopLayout.rightMinSize}
           collapsible
           collapsedSize={0}
           className="overflow-hidden"
@@ -338,14 +421,20 @@ export function WorkspacePage() {
       {/* Right collapsed strip — outside PanelGroup */}
       <CollapsedStrip side="right" visible={!isRightOpen}>
         <button
-          onClick={() => setRightPanel(true)}
+          onClick={() => {
+            setRightTab('viewer');
+            setRightPanel(true);
+          }}
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800 dark:hover:text-surface-300"
           title="Open file viewer"
         >
           <Eye className="h-4 w-4" />
         </button>
         <button
-          onClick={() => setRightPanel(true)}
+          onClick={() => {
+            setRightTab('ai');
+            setRightPanel(true);
+          }}
           className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-accent-500 transition-colors hover:bg-accent-50 hover:text-accent-600 dark:hover:bg-accent-900/30 dark:hover:text-accent-400"
           title="Open AI assistant"
         >

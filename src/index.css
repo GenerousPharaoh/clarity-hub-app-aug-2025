@@ -310,6 +310,18 @@ body.dark {
   background-color: var(--color-primary-500);
 }
 
+.workspace-panels-compact > [data-panel] {
+  min-width: 0;
+}
+
+.workspace-panels-compact > [data-panel="center"] {
+  min-width: 380px;
+}
+
+.workspace-panels-wide > [data-panel="right"] {
+  max-width: 46%;
+}
+
 /* ── Subtle Grain Texture ─────────────────────────────── */
 .surface-grain {
   position: relative;

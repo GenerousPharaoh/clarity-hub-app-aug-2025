@@ -29,6 +29,7 @@ function isProcessable(file: FileRecord): boolean {
 }
 
 export function LeftPanel() {
+  const panelRef = useRef<HTMLDivElement>(null);
   const toggleLeft = useAppStore((s) => s.toggleLeftPanel);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const isMobile = useIsMobile();
@@ -42,6 +43,7 @@ export function LeftPanel() {
   const [selectedBatchIds, setSelectedBatchIds] = useState<string[]>([]);
   const [batchConfirmOpen, setBatchConfirmOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [panelWidth, setPanelWidth] = useState(0);
 
   const processableFiles = useMemo(() => files.filter(isProcessable), [files]);
   const failedFiles = useMemo(
@@ -84,6 +86,18 @@ export function LeftPanel() {
 
     return map;
   }, [processableFiles]);
+
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+
+    const update = () => setPanelWidth(el.clientWidth);
+    update();
+
+    const ro = new ResizeObserver(() => update());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const validIds = new Set(processableFiles.map((f) => f.id));
@@ -300,9 +314,16 @@ export function LeftPanel() {
     setDebouncedQuery('');
   }, [setSearchQuery]);
 
+  const compactPanel = panelWidth > 0 && panelWidth < 320;
+
   return (
-    <div className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
-      <div className="shrink-0 border-b border-surface-200/80 px-4 py-4 dark:border-surface-800">
+    <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
+      <div
+        className={cn(
+          'shrink-0 border-b border-surface-200/80 dark:border-surface-800',
+          compactPanel ? 'px-3 py-3.5' : 'px-4 py-4'
+        )}
+      >
         <div className="flex items-center justify-between">
           <p className="text-base font-bold text-surface-900 dark:text-surface-100">Files</p>
           {!isMobile && (
@@ -407,7 +428,8 @@ export function LeftPanel() {
                 key={label}
                 onClick={() => setTypeFilter(key)}
                 className={cn(
-                  'rounded-full px-2.5 py-1.5 text-sm font-medium transition-colors',
+                  'rounded-full font-medium transition-colors',
+                  compactPanel ? 'px-2.5 py-1 text-xs' : 'px-2.5 py-1.5 text-sm',
                   typeFilter === key
                     ? 'bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-950/30 dark:text-primary-300 dark:border-primary-700'
                     : 'bg-surface-100 text-surface-500 hover:bg-surface-200 hover:text-surface-700 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300'
@@ -493,7 +515,7 @@ export function LeftPanel() {
       </div>
 
       {/* ── File list ─────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-3 py-3">
+      <div className={cn('flex-1 overflow-y-auto', compactPanel ? 'px-2.5 py-2.5' : 'px-3 py-3')}>
         {isLoading ? (
           // Skeleton loading
           <div className="space-y-2">
@@ -560,6 +582,7 @@ export function LeftPanel() {
                   >
                     <FileListItem
                       file={file}
+                      compact={compactPanel}
                       onProcess={handleProcess}
                       processingState={getProcessState(file.id)}
                       showBatchSelector={batchSelectionMode && isProcessable(file)}

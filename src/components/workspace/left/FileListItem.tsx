@@ -103,6 +103,7 @@ interface FileListItemProps {
   file: FileRecord;
   onProcess?: (fileId: string) => void;
   processingState?: { isProcessing: boolean; error: string | null };
+  compact?: boolean;
   showBatchSelector?: boolean;
   isBatchSelected?: boolean;
   onToggleBatchSelection?: (fileId: string) => void;
@@ -208,6 +209,7 @@ export function FileListItem({
   file,
   onProcess,
   processingState,
+  compact = false,
   showBatchSelector = false,
   isBatchSelected = false,
   onToggleBatchSelection,
@@ -240,6 +242,10 @@ export function FileListItem({
     file.processing_status === 'failed'
       ? getProcessingFailureInfo(file.processing_error)
       : null;
+  const showUtilityButtons = compact;
+  const hoverPreview = failureInfo
+    ? `${file.name}\n\n${failureInfo.summary}${failureInfo.technical ? `\n\nTechnical detail: ${failureInfo.technical}` : ''}`
+    : `${file.name}\n\n${summary}`;
 
   // Close menu when clicking outside or pressing Escape
   useEffect(() => {
@@ -368,6 +374,8 @@ export function FileListItem({
             : 'border-translucent bg-white/80 interactive-lift hover:bg-white dark:bg-surface-900/70 dark:hover:bg-surface-900',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900'
         )}
+        aria-label={`Open ${file.name}`}
+        title={hoverPreview}
       >
         {/* Batch select checkbox */}
         {showBatchSelector && onToggleBatchSelection && (
@@ -419,7 +427,8 @@ export function FileListItem({
             <div className="min-w-0 flex-1">
               <p
                 className={cn(
-                  'text-sm font-semibold truncate',
+                  'line-clamp-2 font-semibold leading-5 [overflow-wrap:anywhere]',
+                  compact ? 'text-[13px]' : 'text-sm',
                   isSelected
                     ? 'text-primary-700 dark:text-primary-300'
                     : 'text-surface-800 dark:text-surface-100'
@@ -428,7 +437,7 @@ export function FileListItem({
               >
                 {file.name}
               </p>
-              <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5 overflow-hidden max-h-7">
+              <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5">
                 {/* Document type badge */}
                 {(() => {
                   if (docType && docType !== 'other') {
@@ -441,7 +450,7 @@ export function FileListItem({
                     return (
                       <span
                         className={cn(
-                          'rounded-full px-2 py-1 text-sm font-medium truncate max-w-[140px]',
+                          'max-w-full rounded-full px-2 py-1 text-xs font-medium',
                           style.bg,
                           style.text,
                           isUncertain && `border ${style.border} border-dashed`
@@ -456,7 +465,7 @@ export function FileListItem({
                 })()}
                 {file.added_at && (
                   <span
-                    className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400"
+                    className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400"
                     title={`Added: ${file.added_at}`}
                   >
                     {formatDate(file.added_at)}
@@ -485,7 +494,9 @@ export function FileListItem({
                   'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors',
                   showDetails
                     ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300'
-                    : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
+                    : showUtilityButtons
+                      ? 'text-surface-400 opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800'
+                      : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
                   'focus-visible:opacity-100 focus-visible:outline-none'
                 )}
                 title="View file details"
@@ -505,6 +516,7 @@ export function FileListItem({
                   disabled={processingState?.isProcessing}
                   className={cn(
                     'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-sm font-medium transition-all',
+                    compact && 'px-2 text-xs',
                     processingState?.isProcessing
                       ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
                       : file.processing_status === 'failed'
@@ -512,6 +524,7 @@ export function FileListItem({
                         : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',
                     !processingState?.isProcessing &&
                       file.processing_status !== 'failed' &&
+                      !showUtilityButtons &&
                       'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
                   )}
                   title={file.processing_status === 'failed' ? 'Retry indexing' : 'Index'}
@@ -522,7 +535,9 @@ export function FileListItem({
                   ) : (
                     <Zap className="h-3.5 w-3.5" />
                   )}
-                  <span className="hidden sm:inline">{file.processing_status === 'failed' ? 'Retry' : 'Index'}</span>
+                  <span className={cn(compact ? 'hidden' : 'hidden sm:inline')}>
+                    {file.processing_status === 'failed' ? 'Retry' : 'Index'}
+                  </span>
                 </button>
               )}
               {file.processing_status === 'processing' && !processingState?.isProcessing && (
@@ -541,7 +556,9 @@ export function FileListItem({
                   'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors',
                   showMenu
                     ? 'bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300'
-                    : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
+                    : showUtilityButtons
+                      ? 'text-surface-400 opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800'
+                      : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
                   'focus-visible:opacity-100 focus-visible:outline-none'
                 )}
                 title="File actions"
@@ -557,12 +574,15 @@ export function FileListItem({
               <div className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500 dark:text-red-400" />
                 <div className="min-w-0">
-                  <p className="text-xs font-medium leading-5 text-red-700 dark:text-red-300">
+                  <p
+                    className="text-xs font-medium leading-5 text-red-700 dark:text-red-300"
+                    title={failureInfo.summary}
+                  >
                     {failureInfo.summary}
                   </p>
                   {failureInfo.technical && (
                     <p
-                      className="mt-1 line-clamp-1 text-[10px] leading-4 text-red-500/85 dark:text-red-400/80"
+                      className="mt-1 line-clamp-2 text-[10px] leading-4 text-red-500/85 [overflow-wrap:anywhere] dark:text-red-400/80"
                       title={failureInfo.technical}
                     >
                       Technical detail: {failureInfo.technical}
@@ -573,7 +593,7 @@ export function FileListItem({
             </div>
           ) : (
             <p
-              className="mt-3 line-clamp-2 text-xs leading-5 text-surface-500 dark:text-surface-400"
+              className="mt-3 line-clamp-3 text-xs leading-5 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400"
               title={summary}
             >
               {summary}

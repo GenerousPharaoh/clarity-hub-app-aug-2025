@@ -78,11 +78,13 @@ export function AnnotatablePDFViewer({
   fileId,
   projectId,
 }: AnnotatablePDFViewerProps) {
+  const viewerRef = useRef<HTMLDivElement>(null);
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [scale, setScale] = useState<PdfScaleValue>('auto');
+  const [viewerWidth, setViewerWidth] = useState(0);
 
   // Annotation data
   const { data: annotations = [] } = useFileAnnotations(fileId);
@@ -162,133 +164,169 @@ export function AnnotatablePDFViewer({
 
   const [highlightMode, setHighlightMode] = useState(false);
   const annotationCount = annotations.length;
+  const compactToolbar = viewerWidth > 0 && viewerWidth < 520;
+  const narrowToolbar = viewerWidth > 0 && viewerWidth < 760;
+  const compactSidebar = viewerWidth > 0 && viewerWidth < 840;
+
+  useEffect(() => {
+    const el = viewerRef.current;
+    if (!el) return;
+
+    const update = () => setViewerWidth(el.clientWidth);
+    update();
+
+    const ro = new ResizeObserver(() => update());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!highlightMode) return;
+    setSidebarOpen(true);
+  }, [highlightMode]);
 
   return (
-    <div className="relative flex h-full flex-col">
+    <div ref={viewerRef} className="relative flex h-full min-w-0 flex-col">
       {/* Toolbar */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 bg-white px-2 dark:border-surface-700 dark:bg-surface-900">
+      <div
+        className={cn(
+          'shrink-0 border-b border-surface-200 bg-white px-2 dark:border-surface-700 dark:bg-surface-900',
+          narrowToolbar ? 'py-2' : 'h-10'
+        )}
+      >
         {/* File name */}
-        <div className="flex min-w-0 items-center gap-2">
-          <FileText className="h-3.5 w-3.5 shrink-0 text-red-500" />
-          <span
-            className="truncate text-sm font-medium text-surface-600 dark:text-surface-300 max-w-[120px]"
-            title={fileName}
-          >
-            {fileName}
-          </span>
-        </div>
+        <div className={cn('flex items-center justify-between gap-2', narrowToolbar && 'flex-wrap')}>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <FileText className="h-3.5 w-3.5 shrink-0 text-red-500" />
+            <span
+              className={cn(
+                'truncate text-sm font-medium text-surface-600 dark:text-surface-300',
+                compactToolbar ? 'max-w-[11rem]' : 'max-w-[18rem]'
+              )}
+              title={fileName}
+            >
+              {fileName}
+            </span>
+          </div>
 
-        {/* Center: page nav + zoom */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage <= 1}
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-md',
-              'text-surface-400 transition-colors',
-              'hover:bg-surface-100 hover:text-surface-600',
-              'disabled:opacity-30 disabled:hover:bg-transparent',
-              'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-            )}
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </button>
+          {/* Center: page nav + zoom */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md',
+                'text-surface-400 transition-colors',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'disabled:opacity-30 disabled:hover:bg-transparent',
+                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
 
-          <span className="min-w-[4rem] text-center text-xs text-surface-500 dark:text-surface-400">
-            {totalPages > 0 ? `${currentPage} / ${totalPages}` : '--'}
-          </span>
+            <span className="min-w-[4rem] text-center text-xs text-surface-500 dark:text-surface-400">
+              {totalPages > 0 ? `${currentPage} / ${totalPages}` : '--'}
+            </span>
 
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage >= totalPages}
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-md',
-              'text-surface-400 transition-colors',
-              'hover:bg-surface-100 hover:text-surface-600',
-              'disabled:opacity-30 disabled:hover:bg-transparent',
-              'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-            )}
-            aria-label="Next page"
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md',
+                'text-surface-400 transition-colors',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'disabled:opacity-30 disabled:hover:bg-transparent',
+                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              aria-label="Next page"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
 
-          <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+            <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
 
-          <button
-            onClick={handleZoomOut}
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-md',
-              'text-surface-400 transition-colors',
-              'hover:bg-surface-100 hover:text-surface-600',
-              'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-            )}
-            aria-label="Zoom out"
-          >
-            <ZoomOut className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={handleZoomIn}
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-md',
-              'text-surface-400 transition-colors',
-              'hover:bg-surface-100 hover:text-surface-600',
-              'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-            )}
-            aria-label="Zoom in"
-          >
-            <ZoomIn className="h-3.5 w-3.5" />
-          </button>
-        </div>
+            <button
+              onClick={handleZoomOut}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md',
+                'text-surface-400 transition-colors',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              aria-label="Zoom out"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={handleZoomIn}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md',
+                'text-surface-400 transition-colors',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              aria-label="Zoom in"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+          </div>
 
-        {/* Right: annotations sidebar toggle + download + open in tab */}
-        <div className="flex items-center gap-1 rounded-lg bg-surface-100/80 p-0.5 dark:bg-surface-800/60">
-          <button
-            onClick={() => setSidebarOpen((s) => !s)}
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-md',
-              'transition-colors',
-              sidebarOpen
-                ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
-                : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300',
-            )}
-            title="Toggle annotations"
-            aria-label="Toggle annotations sidebar"
-          >
-            <MessageSquare className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={handleDownload}
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-md',
-              'text-surface-400 transition-colors',
-              'hover:bg-surface-100 hover:text-surface-600',
-              'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-            )}
-            title="Download PDF"
-            aria-label="Download PDF"
-          >
-            <Download className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={handleOpenInTab}
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-md',
-              'text-surface-400 transition-colors',
-              'hover:bg-surface-100 hover:text-surface-600',
-              'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-            )}
-            title="Open in new tab"
-            aria-label="Open in new tab"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-          </button>
+          {/* Right: annotations sidebar toggle + download + open in tab */}
+          <div className="flex items-center gap-1 rounded-lg bg-surface-100/80 p-0.5 dark:bg-surface-800/60">
+            <button
+              onClick={() => setSidebarOpen((s) => !s)}
+              className={cn(
+                'flex h-7 items-center justify-center gap-1 rounded-md px-2',
+                'transition-colors',
+                sidebarOpen
+                  ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                  : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              title="Toggle annotations"
+              aria-label="Toggle annotations sidebar"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+              {!compactToolbar && <span className="text-xs font-medium">{annotationCount || 'No'} notes</span>}
+            </button>
+            <button
+              onClick={handleDownload}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md',
+                'text-surface-400 transition-colors',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              title="Download PDF"
+              aria-label="Download PDF"
+            >
+              <Download className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={handleOpenInTab}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md',
+                'text-surface-400 transition-colors',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              title="Open in new tab"
+              aria-label="Open in new tab"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Annotation toolbar */}
-      <div className="flex h-9 shrink-0 items-center gap-1.5 border-b border-surface-100 bg-surface-50/80 px-3 dark:border-surface-800 dark:bg-surface-850">
+      <div
+        className={cn(
+          'shrink-0 border-b border-surface-100 bg-surface-50/80 px-3 py-2 dark:border-surface-800 dark:bg-surface-850',
+          narrowToolbar ? 'space-y-2' : 'flex h-9 items-center gap-1.5'
+        )}
+      >
         {/* Mode toggle */}
         <div className="flex items-center rounded-lg border border-surface-200 bg-white p-0.5 dark:border-surface-700 dark:bg-surface-800">
           <button
@@ -330,10 +368,15 @@ export function AnnotatablePDFViewer({
           <MessageSquare className="h-3 w-3" />
           {annotationCount > 0 ? `${annotationCount} note${annotationCount > 1 ? 's' : ''}` : 'Notes'}
         </button>
-
-        <span className="ml-auto text-[10px] text-surface-300 dark:text-surface-600">
-          {highlightMode ? 'Select text to annotate' : 'Select text to copy'}
-        </span>
+        <div
+          className={cn(
+            'text-[10px] text-surface-400 dark:text-surface-500',
+            narrowToolbar ? 'flex flex-wrap items-center gap-x-3 gap-y-1' : 'ml-auto flex items-center gap-3'
+          )}
+        >
+          <span>{highlightMode ? 'Select text to annotate' : 'Select text to copy'}</span>
+          {highlightMode && <span>Tip: hold Alt while dragging to mark an area.</span>}
+        </div>
       </div>
 
       {/* PDF viewer area */}
@@ -368,6 +411,7 @@ export function AnnotatablePDFViewer({
               highlights={highlights}
               highlighterUtilsRef={highlighterUtilsRef}
               fileId={fileId}
+              fileName={fileName}
               projectId={projectId}
               createAnnotation={createAnnotation}
               onTotalPagesChange={setTotalPages}
@@ -377,14 +421,29 @@ export function AnnotatablePDFViewer({
           )}
         </PdfLoader>
 
+        {compactSidebar && sidebarOpen && (
+          <button
+            type="button"
+            className="absolute inset-0 z-20 bg-surface-950/20 backdrop-blur-[1px]"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close annotations sidebar"
+          />
+        )}
+
         {/* Annotations sidebar overlay */}
         <AnnotationSidebar
           annotations={annotations}
           isOpen={sidebarOpen}
+          highlightMode={highlightMode}
           onClose={() => setSidebarOpen(false)}
+          onStartHighlighting={() => {
+            setHighlightMode(true);
+            setSidebarOpen(true);
+          }}
           onScrollTo={handleScrollToHighlight}
           onDelete={(a) => handleDeleteAnnotation(a)}
           fileName={fileName}
+          compact={compactSidebar}
         />
       </div>
     </div>
@@ -402,6 +461,7 @@ function PdfHighlighterInner({
   highlights,
   highlighterUtilsRef,
   fileId,
+  fileName,
   projectId,
   createAnnotation,
   onTotalPagesChange,
@@ -413,6 +473,7 @@ function PdfHighlighterInner({
   highlights: AnnotationHighlight[];
   highlighterUtilsRef: React.MutableRefObject<PdfHighlighterUtils | null>;
   fileId: string;
+  fileName: string;
   projectId: string;
   createAnnotation: ReturnType<typeof useCreateAnnotation>;
   onTotalPagesChange: (pages: number) => void;
@@ -438,6 +499,7 @@ function PdfHighlighterInner({
         highlightMode ? (
           <SelectionTipFromContext
             fileId={fileId}
+            fileName={fileName}
             projectId={projectId}
             createAnnotation={createAnnotation}
           />
@@ -668,10 +730,12 @@ function HighlightActionPopover({ highlight: rawHighlight }: { highlight: unknow
  */
 function SelectionTipFromContext({
   fileId,
+  fileName,
   projectId,
   createAnnotation,
 }: {
   fileId: string;
+  fileName: string;
   projectId: string;
   createAnnotation: ReturnType<typeof useCreateAnnotation>;
 }) {
@@ -688,6 +752,7 @@ function SelectionTipFromContext({
       selectedText={selectedText}
       ghost={ghost}
       fileId={fileId}
+      fileName={fileName}
       projectId={projectId}
       onSave={() => {
         setTip(null);
@@ -709,6 +774,7 @@ function SelectionTip({
   selectedText,
   ghost,
   fileId,
+  fileName,
   projectId,
   onSave,
   createAnnotation,
@@ -716,6 +782,7 @@ function SelectionTip({
   selectedText: string | null;
   ghost: GhostHighlight;
   fileId: string;
+  fileName: string;
   projectId: string;
   onSave: () => void;
   createAnnotation: ReturnType<typeof useCreateAnnotation>;
@@ -774,42 +841,52 @@ function SelectionTip({
     useAppStore.getState().setRightTab('ai');
     useAppStore.getState().setRightPanel(true);
     // Store the text so the AI chat can pick it up
-    const event = new CustomEvent('ask-ai-about-text', { detail: { text: selectedText, fileName: fileId } });
+    const event = new CustomEvent('ask-ai-about-text', { detail: { text: selectedText, fileName } });
     window.dispatchEvent(event);
     onSave();
-  }, [selectedText, fileId, onSave]);
+  }, [selectedText, fileName, onSave]);
 
   const handleAddToBrief = useCallback(() => {
     if (!selectedText) return;
     useAppStore.getState().setPendingBriefInsertion({
       text: selectedText,
       fileId,
-      fileName: fileId, // Will be resolved by the drafter
+      fileName,
       page: ghost.position.boundingRect.pageNumber,
     });
     useAppStore.getState().setCenterTab('drafts');
     onSave();
-  }, [selectedText, fileId, ghost.position, onSave]);
+  }, [selectedText, fileId, fileName, ghost.position, onSave]);
 
   const handleAddToChronology = useCallback(() => {
     if (!selectedText) return;
     useAppStore.getState().setPendingChronologyEntry({
       text: selectedText,
       fileId,
-      fileName: fileId,
+      fileName,
       page: ghost.position.boundingRect.pageNumber,
     });
     useAppStore.getState().setCenterTab('timeline');
     onSave();
-  }, [selectedText, fileId, ghost.position, onSave]);
+  }, [selectedText, fileId, fileName, ghost.position, onSave]);
 
   // Initial menu: actions grid
   if (mode === 'menu') {
     return (
       <div className={cn(
-        'rounded-xl border border-surface-200 bg-white shadow-xl overflow-hidden',
+        'max-w-[22rem] overflow-hidden rounded-xl border border-surface-200 bg-white shadow-xl',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
+        {selectedText && (
+          <div className="border-b border-surface-100 px-3 py-2 dark:border-surface-800">
+            <p className="line-clamp-3 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
+              "{selectedText}"
+            </p>
+            <p className="mt-1 text-[10px] text-surface-400 dark:text-surface-500">
+              Choose what to do with this passage.
+            </p>
+          </div>
+        )}
         {/* Primary actions row */}
         <div className="flex border-b border-surface-100 dark:border-surface-800">
           <button
@@ -875,6 +952,11 @@ function SelectionTip({
         'flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white p-2 shadow-xl',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
+        {selectedText && (
+          <p className="mr-2 max-w-[10rem] truncate text-[10px] text-surface-400 dark:text-surface-500" title={selectedText}>
+            {selectedText}
+          </p>
+        )}
         <span className="text-[10px] font-medium text-surface-400 mr-1">Color:</span>
         {HIGHLIGHT_COLORS.map((c) => (
           <button
@@ -902,6 +984,13 @@ function SelectionTip({
       'w-72 rounded-xl border border-surface-200 bg-white p-3 shadow-xl',
       'dark:border-surface-700 dark:bg-surface-900',
     )}>
+      {selectedText && (
+        <div className="mb-2 rounded-lg bg-surface-50 px-2.5 py-2 dark:bg-surface-800/80">
+          <p className="line-clamp-3 text-xs leading-relaxed text-surface-500 dark:text-surface-300">
+            "{selectedText}"
+          </p>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400">Color</span>

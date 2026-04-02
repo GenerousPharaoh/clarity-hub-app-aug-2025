@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 import useAppStore from '@/store';
 import { useNotes } from '@/hooks/useNotes';
 import { useUpdateProject } from '@/hooks/useProjects';
-import { useUploadFile } from '@/hooks/useFiles';
+import { useUploadFile, useFiles } from '@/hooks/useFiles';
 import { useExhibits } from '@/hooks/useExhibits';
 import {
   formatDate,
@@ -104,8 +104,10 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   const files = useAppStore((s) => s.files);
 
   const project = projects.find((p) => p.id === selectedProjectId) ?? null;
-  const { data: notes } = useNotes(selectedProjectId);
+  const { isLoading: filesLoading } = useFiles(selectedProjectId);
+  const { data: notes, isLoading: notesLoading } = useNotes(selectedProjectId);
   const { data: exhibits } = useExhibits(selectedProjectId);
+  const isInitialLoad = filesLoading || notesLoading;
 
   const projectFiles = files.filter(
     (file) => file.project_id === selectedProjectId && !file.is_deleted
@@ -212,6 +214,44 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
         >
           &larr; Back to dashboard
         </button>
+      </div>
+    );
+  }
+
+  // Skeleton while files/notes are loading — prevents flash of 0s
+  if (isInitialLoad) {
+    return (
+      <div className="flex-1 overflow-y-auto bg-surface-50/60 dark:bg-surface-950/30">
+        <div className="mx-auto max-w-5xl space-y-5 p-4 sm:p-6">
+          {/* Header skeleton */}
+          <div className="rounded-2xl border border-surface-200/80 bg-white p-5 dark:border-surface-800 dark:bg-surface-900">
+            <div className="flex gap-2">
+              <div className="h-5 w-20 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
+              <div className="h-5 w-24 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
+            </div>
+            <div className="mt-4 h-8 w-48 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="rounded-xl border border-surface-200/80 bg-surface-50 p-4 dark:border-surface-800 dark:bg-surface-950/40">
+                  <div className="h-3 w-12 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
+                  <div className="mt-3 h-7 w-8 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Card skeletons */}
+          <div className="grid gap-5 sm:grid-cols-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-2xl border border-surface-200/80 bg-white p-5 dark:border-surface-800 dark:bg-surface-900">
+                <div className="h-4 w-28 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                <div className="mt-4 space-y-2">
+                  <div className="h-3 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

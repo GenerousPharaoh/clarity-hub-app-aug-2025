@@ -368,11 +368,11 @@ export function FileListItem({
           }
         }}
         className={cn(
-          'group flex w-full items-start gap-3 rounded-[22px] border px-3 py-3 text-left shadow-sm transition-all duration-150',
+          'group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-all duration-100',
           isSelected
-            ? 'border-primary-400 bg-white/94 shadow-[0_18px_38px_-26px_rgba(30,43,57,0.34)] ring-1 ring-primary-500/10 dark:border-primary-700 dark:bg-surface-900/88 dark:ring-primary-400/15'
-            : 'border-translucent bg-white/80 interactive-lift hover:bg-white dark:bg-surface-900/70 dark:hover:bg-surface-900',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-900'
+            ? 'bg-primary-50 dark:bg-primary-900/20'
+            : 'hover:bg-surface-100 dark:hover:bg-surface-800',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500'
         )}
         aria-label={`Open ${file.name}`}
         title={hoverPreview}
@@ -398,23 +398,21 @@ export function FileListItem({
           </button>
         )}
 
-        {/* File type icon with distinct color per type */}
-        <div className="relative mt-0.5 shrink-0">
+        {/* File icon — compact */}
+        <div className="relative shrink-0">
           <div
             className={cn(
-              'flex h-10 w-10 items-center justify-center rounded-2xl',
+              'flex h-7 w-7 items-center justify-center rounded-lg',
               isSelected
-                ? 'bg-primary-100/85 dark:bg-primary-900/35'
+                ? 'bg-primary-100 dark:bg-primary-900/30'
                 : iconBgClass
             )}
-            title={`${fileType.charAt(0).toUpperCase() + fileType.slice(1)} file`}
           >
-            <IconComponent className={cn('h-4 w-4', colorClass)} />
+            <IconComponent className={cn('h-3.5 w-3.5', colorClass)} />
           </div>
-          {/* Status dot overlay */}
           <span
             className={cn(
-              'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-white dark:ring-surface-900',
+              'absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full ring-[1.5px] ring-white dark:ring-surface-900',
               statusDotColor
             )}
             title={statusTooltip}
@@ -427,8 +425,7 @@ export function FileListItem({
             <div className="min-w-0 flex-1">
               <p
                 className={cn(
-                  'line-clamp-2 font-semibold leading-5 [overflow-wrap:anywhere]',
-                  compact ? 'text-[13px]' : 'text-sm',
+                  'truncate text-sm font-medium',
                   isSelected
                     ? 'text-primary-700 dark:text-primary-300'
                     : 'text-surface-800 dark:text-surface-100'
@@ -437,7 +434,7 @@ export function FileListItem({
               >
                 {file.name}
               </p>
-              <div className="mt-2 flex min-w-0 flex-wrap items-center gap-1.5">
+              <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
                 {/* Document type badge */}
                 {(() => {
                   if (docType && docType !== 'other') {
@@ -450,10 +447,9 @@ export function FileListItem({
                     return (
                       <span
                         className={cn(
-                          'max-w-full rounded-full px-2 py-1 text-xs font-medium',
+                          'max-w-[120px] truncate rounded-full px-1.5 py-0.5 text-[10px] font-medium',
                           style.bg,
-                          style.text,
-                          isUncertain && `border ${style.border} border-dashed`
+                          style.text
                         )}
                         title={tooltipText}
                       >
@@ -465,45 +461,33 @@ export function FileListItem({
                 })()}
                 {file.added_at && (
                   <span
-                    className="rounded-full bg-surface-100 px-2 py-1 text-xs font-medium text-surface-500 dark:bg-surface-800 dark:text-surface-400"
+                    className="text-[10px] text-surface-400 dark:text-surface-500"
                     title={`Added: ${file.added_at}`}
                   >
                     {formatDate(file.added_at)}
                   </span>
                 )}
-                <span
-                  className={cn(
-                    'inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs font-semibold uppercase tracking-[0.12em]',
-                    statusBadge.className
-                  )}
-                  title={statusTooltip}
-                >
-                  {statusBadge.icon}
-                  {statusBadge.label}
-                </span>
               </div>
             </div>
 
             <div className="flex min-w-0 shrink-0 items-center gap-1">
-              {/* Info/details toggle button */}
+              {/* Info/details toggle */}
               <button
                 ref={detailsBtnRef}
                 type="button"
                 onClick={handleDetailsToggle}
                 className={cn(
-                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors',
                   showDetails
                     ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300'
-                    : showUtilityButtons
-                      ? 'text-surface-400 opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800'
-                      : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
+                    : 'text-surface-400 opacity-0 group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
                   'focus-visible:opacity-100 focus-visible:outline-none'
                 )}
                 title="View file details"
                 aria-label={`Details for ${file.name}`}
                 aria-expanded={showDetails}
               >
-                <Info className="h-3.5 w-3.5" />
+                <Info className="h-3 w-3" />
               </button>
 
               {onProcess && canProcess && (

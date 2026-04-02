@@ -515,19 +515,19 @@ export function LeftPanel() {
       </div>
 
       {/* ── File list ─────────────────────────────────────── */}
-      <div className={cn('flex-1 overflow-y-auto', compactPanel ? 'px-2.5 py-2.5' : 'px-3 py-3')}>
+      <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          // Skeleton loading
-          <div className="space-y-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="rounded-[22px] border border-surface-200/80 bg-white/80 p-3 dark:border-surface-800 dark:bg-surface-900/70">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 shrink-0 animate-pulse rounded-2xl bg-surface-100 dark:bg-surface-800" />
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-                    <div className="h-2.5 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-                    <div className="h-2.5 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-                  </div>
+          // Skeleton loading — compact rows
+          <div>
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2.5 border-b border-surface-100 px-3 py-2.5 dark:border-surface-800/50"
+              >
+                <div className="h-6 w-8 shrink-0 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                  <div className="h-2.5 w-2/5 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
                 </div>
               </div>
             ))}
@@ -569,28 +569,28 @@ export function LeftPanel() {
             </p>
           </div>
         ) : (
-          // File list
-          <div className="space-y-2">
+          // File list — tight rows, no gaps
+          <div>
             <AnimatePresence initial={false}>
               {filteredFiles.map((file) => (
-                  <motion.div
-                    key={file.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <FileListItem
-                      file={file}
-                      compact={compactPanel}
-                      onProcess={handleProcess}
-                      processingState={getProcessState(file.id)}
-                      showBatchSelector={batchSelectionMode && isProcessable(file)}
-                      isBatchSelected={selectedBatchIdSet.has(file.id)}
-                      onToggleBatchSelection={handleToggleBatchSelection}
-                    />
-                  </motion.div>
-                ))}
+                <motion.div
+                  key={file.id}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <FileListItem
+                    file={file}
+                    compact={compactPanel}
+                    onProcess={handleProcess}
+                    processingState={getProcessState(file.id)}
+                    showBatchSelector={batchSelectionMode && isProcessable(file)}
+                    isBatchSelected={selectedBatchIdSet.has(file.id)}
+                    onToggleBatchSelection={handleToggleBatchSelection}
+                  />
+                </motion.div>
+              ))}
             </AnimatePresence>
           </div>
         )}

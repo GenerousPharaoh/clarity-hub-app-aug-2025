@@ -1,104 +1,113 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import {
-  FileText,
-  Image,
-  Music,
-  Video,
-  FileSpreadsheet,
-  File,
   Trash2,
   MoreVertical,
   Zap,
   Loader2,
-  CheckCircle2,
-  AlertTriangle,
   Info,
   X,
+  AlertTriangle,
 } from 'lucide-react';
-import { cn, formatDate, getFileExtension, getFileTypeFromExtension } from '@/lib/utils';
-import { FILE_TYPE_COLORS } from '@/lib/constants';
+import { cn, formatDate, getFileExtension } from '@/lib/utils';
 import { getDocumentTypeLabel, getDocumentTypeCategoryLabel } from '@/lib/documentTypes';
 import useAppStore from '@/store';
 import { useDeleteFile } from '@/hooks/useFiles';
 import type { FileRecord } from '@/types';
 
-// ── Document type badge colors ──────────────────────────────────────
-const DOC_TYPE_BADGE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  court: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    text: 'text-blue-700 dark:text-blue-300',
-    border: 'border-blue-200 dark:border-blue-900/40',
-  },
-  employment: {
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    text: 'text-amber-700 dark:text-amber-300',
-    border: 'border-amber-200 dark:border-amber-900/40',
-  },
-  financial: {
-    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-    text: 'text-emerald-700 dark:text-emerald-300',
-    border: 'border-emerald-200 dark:border-emerald-900/40',
-  },
-  regulatory: {
-    bg: 'bg-purple-50 dark:bg-purple-900/20',
-    text: 'text-purple-700 dark:text-purple-300',
-    border: 'border-purple-200 dark:border-purple-900/40',
-  },
-  correspondence: {
-    bg: 'bg-gray-50 dark:bg-gray-800/40',
-    text: 'text-gray-600 dark:text-gray-300',
-    border: 'border-gray-200 dark:border-gray-700',
-  },
-  medical: {
-    bg: 'bg-rose-50 dark:bg-rose-900/20',
-    text: 'text-rose-700 dark:text-rose-300',
-    border: 'border-rose-200 dark:border-rose-900/40',
-  },
-};
-
-function getDocTypeBadgeStyle(docType: string) {
-  return DOC_TYPE_BADGE_COLORS[docType] || DOC_TYPE_BADGE_COLORS.correspondence;
+// ── Extension badge colors ──────────────────────────────────────────
+function getExtStyle(ext: string): string {
+  switch (ext) {
+    case 'pdf':
+      return 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400';
+    case 'doc':
+    case 'docx':
+      return 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400';
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'gif':
+    case 'webp':
+    case 'svg':
+      return 'bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400';
+    case 'mp3':
+    case 'wav':
+    case 'm4a':
+    case 'ogg':
+    case 'flac':
+      return 'bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400';
+    case 'mp4':
+    case 'mov':
+    case 'webm':
+    case 'avi':
+      return 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400';
+    case 'csv':
+    case 'xls':
+    case 'xlsx':
+      return 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400';
+    case 'txt':
+    case 'md':
+    case 'rtf':
+      return 'bg-surface-500/10 text-surface-600 dark:bg-surface-500/15 dark:text-surface-400';
+    default:
+      return 'bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400';
+  }
 }
 
-// ── Processing status dot colors ────────────────────────────────────
-const STATUS_DOT_COLORS: Record<string, string> = {
+// ── Document type accent text colors ────────────────────────────────
+const DOC_TYPE_TEXT: Record<string, string> = {
+  court: 'text-blue-600 dark:text-blue-400',
+  employment: 'text-amber-600 dark:text-amber-400',
+  financial: 'text-emerald-600 dark:text-emerald-400',
+  regulatory: 'text-violet-600 dark:text-violet-400',
+  correspondence: 'text-surface-500 dark:text-surface-400',
+  medical: 'text-rose-600 dark:text-rose-400',
+};
+
+// ── Processing status ───────────────────────────────────────────────
+const STATUS_DOT: Record<string, string> = {
   completed: 'bg-emerald-500',
   processing: 'bg-amber-400 animate-pulse',
   failed: 'bg-red-500',
   pending: 'bg-surface-300 dark:bg-surface-600',
 };
 
-function getStatusDotColor(status: string | null, isProcessing?: boolean) {
-  if (isProcessing) return STATUS_DOT_COLORS.processing;
-  return STATUS_DOT_COLORS[status || 'pending'] || STATUS_DOT_COLORS.pending;
-}
-
-function getStatusLabel(status: string | null, isProcessing?: boolean): string {
-  if (isProcessing) return 'Processing (indexing for AI search)';
-  switch (status) {
-    case 'completed':
-      return 'Completed (AI-ready)';
-    case 'processing':
-      return 'Processing (indexing for AI search)';
-    case 'failed':
-      return 'Failed (retry needed)';
-    default:
-      return 'Pending (not yet indexed)';
-  }
-}
-
-// ── File type icon background colors ────────────────────────────────
-const FILE_TYPE_ICON_BG: Record<string, string> = {
-  pdf: 'bg-red-100 dark:bg-red-900/30',
-  image: 'bg-blue-100 dark:bg-blue-900/30',
-  audio: 'bg-purple-100 dark:bg-purple-900/30',
-  video: 'bg-orange-100 dark:bg-orange-900/30',
-  document: 'bg-sky-100 dark:bg-sky-900/30',
-  spreadsheet: 'bg-green-100 dark:bg-green-900/30',
-  text: 'bg-slate-100 dark:bg-slate-800/50',
-  other: 'bg-surface-100 dark:bg-surface-800/70',
+const STATUS_LABEL: Record<string, string> = {
+  completed: 'Indexed',
+  processing: 'Indexing...',
+  failed: 'Failed',
+  pending: 'Not indexed',
 };
 
+function getProcessingFailureInfo(error: string | null | undefined) {
+  const technical = error?.trim() || null;
+  if (!technical) {
+    return {
+      summary:
+        'AI indexing failed. Retry to include this file in search, timeline, and drafting.',
+      technical: null,
+    };
+  }
+  if (/unsupported Unicode escape sequence/i.test(technical)) {
+    return {
+      summary:
+        'AI indexing hit malformed text. Retry to bring it back into workflows.',
+      technical,
+    };
+  }
+  if (/budget reached/i.test(technical)) {
+    return {
+      summary: 'Daily indexing limits reached. Retry later.',
+      technical,
+    };
+  }
+  return {
+    summary:
+      'AI indexing failed. Retry to include this file in search, timeline, and drafting.',
+    technical,
+  };
+}
+
+// ── Component ───────────────────────────────────────────────────────
 interface FileListItemProps {
   file: FileRecord;
   onProcess?: (fileId: string) => void;
@@ -109,233 +118,129 @@ interface FileListItemProps {
   onToggleBatchSelection?: (fileId: string) => void;
 }
 
-const typeIconMap: Record<string, React.ElementType> = {
-  pdf: FileText,
-  image: Image,
-  audio: Music,
-  video: Video,
-  document: FileText,
-  spreadsheet: FileSpreadsheet,
-  text: FileText,
-  other: File,
-};
-
-function getProcessingFailureInfo(error: string | null | undefined) {
-  const technical = error?.trim() || null;
-
-  if (!technical) {
-    return {
-      summary: 'AI indexing failed. Retry to include this file in search, timeline, and drafting workflows.',
-      technical: null,
-    };
-  }
-
-  if (/unsupported Unicode escape sequence/i.test(technical)) {
-    return {
-      summary: 'AI indexing hit malformed text in this file. Retry indexing to bring it back into search, timeline, and exhibit workflows.',
-      technical,
-    };
-  }
-
-  if (/budget reached/i.test(technical)) {
-    return {
-      summary: 'Daily indexing limits were reached. Retry later to make this file available to AI workflows.',
-      technical,
-    };
-  }
-
-  return {
-    summary: 'AI indexing failed. Retry to include this file in search, timeline, and drafting workflows.',
-    technical,
-  };
-}
-
-function getFileSummary(file: FileRecord) {
-  if (file.processing_status === 'failed' && file.processing_error) {
-    return getProcessingFailureInfo(file.processing_error).summary;
-  }
-
-  if (file.ai_summary) {
-    return file.ai_summary;
-  }
-
-  if (file.content) {
-    return file.content.replace(/\s+/g, ' ').trim();
-  }
-
-  return 'No summary available';
-}
-
-function getProcessingBadge(
-  file: FileRecord,
-  processingState?: { isProcessing: boolean; error: string | null }
-) {
-  if (processingState?.isProcessing || file.processing_status === 'processing') {
-    return {
-      label: 'Indexing',
-      className:
-        'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-900/40 dark:bg-primary-950/30 dark:text-primary-300',
-      icon: <Loader2 className="h-3.5 w-3.5 animate-spin" />,
-    };
-  }
-
-  if (file.processing_status === 'completed') {
-    return {
-      label: 'AI-ready',
-      className:
-        'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300',
-      icon: <CheckCircle2 className="h-3.5 w-3.5" />,
-    };
-  }
-
-  if (file.processing_status === 'failed') {
-    return {
-      label: 'Retry needed',
-      className:
-        'border-red-200 bg-red-50 text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300',
-      icon: <AlertTriangle className="h-3.5 w-3.5" />,
-    };
-  }
-
-  return {
-    label: 'Pending',
-    className:
-      'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300',
-    icon: <Zap className="h-3.5 w-3.5" />,
-  };
-}
-
 export function FileListItem({
   file,
   onProcess,
   processingState,
-  compact = false,
   showBatchSelector = false,
   isBatchSelected = false,
   onToggleBatchSelection,
 }: FileListItemProps) {
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
+  const setRightPanel = useAppStore((s) => s.setRightPanel);
+  const setRightTab = useAppStore((s) => s.setRightTab);
+  const setMobileTab = useAppStore((s) => s.setMobileTab);
   const deleteFile = useDeleteFile();
+
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
-  const detailsBtnRef = useRef<HTMLButtonElement>(null);
 
   const isSelected = selectedFileId === file.id;
   const ext = getFileExtension(file.name);
-  const fileType = file.file_type || getFileTypeFromExtension(ext);
-  const IconComponent = typeIconMap[fileType] || File;
-  const colorClass = FILE_TYPE_COLORS[fileType] || FILE_TYPE_COLORS.other;
-  const iconBgClass = FILE_TYPE_ICON_BG[fileType] || FILE_TYPE_ICON_BG.other;
+  const isProcessing =
+    processingState?.isProcessing || file.processing_status === 'processing';
+  const status = isProcessing
+    ? 'processing'
+    : file.processing_status || 'pending';
   const canProcess =
-    !file.processing_status ||
-    file.processing_status === 'pending' ||
-    file.processing_status === 'failed';
-  const statusBadge = getProcessingBadge(file, processingState);
-  const summary = getFileSummary(file);
-  const statusDotColor = getStatusDotColor(file.processing_status, processingState?.isProcessing);
-  const statusTooltip = getStatusLabel(file.processing_status, processingState?.isProcessing);
-  const failureInfo =
-    file.processing_status === 'failed'
-      ? getProcessingFailureInfo(file.processing_error)
-      : null;
-  const showUtilityButtons = compact;
-  const hoverPreview = failureInfo
-    ? `${file.name}\n\n${failureInfo.summary}${failureInfo.technical ? `\n\nTechnical detail: ${failureInfo.technical}` : ''}`
-    : `${file.name}\n\n${summary}`;
+    !isProcessing &&
+    (!file.processing_status ||
+      file.processing_status === 'pending' ||
+      file.processing_status === 'failed');
+  const isFailed = file.processing_status === 'failed';
+  const failureInfo = isFailed
+    ? getProcessingFailureInfo(file.processing_error)
+    : null;
 
-  // Close menu when clicking outside or pressing Escape
+  const docType = file.document_type;
+  const docTypeLabel =
+    docType && docType !== 'other' ? getDocumentTypeLabel(docType) : null;
+  const docCategoryLabel = docType
+    ? getDocumentTypeCategoryLabel(docType)
+    : null;
+  const confidence = file.classification_confidence;
+
+  const summary =
+    file.ai_summary ||
+    (file.content
+      ? file.content.replace(/\s+/g, ' ').trim().slice(0, 200)
+      : null);
+
+  const tooltip = failureInfo
+    ? `${file.name}\n${failureInfo.summary}`
+    : summary
+      ? `${file.name}\n${summary}`
+      : file.name;
+
+  // ── Click-outside & Escape ──────────────────────────────────────
   useEffect(() => {
     if (!showMenu) return;
-    function handleClickOutside(e: MouseEvent) {
+    const onClick = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setShowMenu(false);
         setShowConfirm(false);
       }
-    }
-    function handleKeyDown(e: KeyboardEvent) {
+    };
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setShowMenu(false);
         setShowConfirm(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
     };
   }, [showMenu]);
 
-  // Close details popover when clicking outside or pressing Escape
   useEffect(() => {
     if (!showDetails) return;
-    function handleClickOutside(e: MouseEvent) {
+    const onClick = (e: MouseEvent) => {
       if (
         detailsRef.current &&
-        !detailsRef.current.contains(e.target as Node) &&
-        detailsBtnRef.current &&
-        !detailsBtnRef.current.contains(e.target as Node)
+        !detailsRef.current.contains(e.target as Node)
       ) {
         setShowDetails(false);
       }
-    }
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        setShowDetails(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowDetails(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
     };
   }, [showDetails]);
 
-  const setRightPanel = useAppStore((s) => s.setRightPanel);
-  const setRightTab = useAppStore((s) => s.setRightTab);
-  const setMobileTab = useAppStore((s) => s.setMobileTab);
-
+  // ── Handlers ────────────────────────────────────────────────────
   const handleClick = useCallback(() => {
     setSelectedFile(file.id);
-    // Desktop: open right panel + viewer tab
     setRightPanel(true);
     setRightTab('viewer');
-    // Mobile: navigate to viewer tab
     setMobileTab('viewer');
   }, [file.id, setSelectedFile, setRightPanel, setRightTab, setMobileTab]);
 
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      setShowMenu(true);
-    },
-    []
-  );
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowMenu(true);
+  }, []);
 
-  const handleMenuToggle = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setShowMenu((prev) => !prev);
-      setShowConfirm(false);
-    },
-    []
-  );
-
-  const handleDetailsToggle = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      setShowDetails((prev) => !prev);
-    },
-    []
-  );
+  const handleMenuToggle = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMenu((p) => !p);
+    setShowConfirm(false);
+  }, []);
 
   const handleDelete = useCallback(
-    async (e: React.MouseEvent) => {
+    (e: React.MouseEvent) => {
       e.stopPropagation();
       if (!showConfirm) {
         setShowConfirm(true);
@@ -348,14 +253,8 @@ export function FileListItem({
     [showConfirm, file, deleteFile]
   );
 
-  // Build detail items for the popover
-  const docType = file.document_type;
-  const confidence = file.classification_confidence;
-  const docTypeLabel = docType ? getDocumentTypeLabel(docType) : null;
-  const docCategoryLabel = docType ? getDocumentTypeCategoryLabel(docType) : null;
-
   return (
-    <div className="relative">
+    <div className="relative border-b border-surface-100 dark:border-surface-800/50">
       <div
         role="button"
         tabIndex={0}
@@ -368,16 +267,22 @@ export function FileListItem({
           }
         }}
         className={cn(
-          'group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-all duration-100',
+          'group relative flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors duration-75',
           isSelected
-            ? 'bg-primary-50 dark:bg-primary-900/20'
-            : 'hover:bg-surface-100 dark:hover:bg-surface-800',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500'
+            ? 'bg-primary-50/70 dark:bg-primary-900/15'
+            : 'hover:bg-surface-50 dark:hover:bg-surface-800/40',
+          isFailed && !isSelected && 'bg-red-50/30 dark:bg-red-950/8',
+          'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-500'
         )}
+        title={tooltip}
         aria-label={`Open ${file.name}`}
-        title={hoverPreview}
       >
-        {/* Batch select checkbox */}
+        {/* Selected accent bar */}
+        {isSelected && (
+          <div className="absolute bottom-2 left-0 top-2 w-[3px] rounded-full bg-primary-500" />
+        )}
+
+        {/* Batch checkbox */}
         {showBatchSelector && onToggleBatchSelection && (
           <button
             type="button"
@@ -389,107 +294,97 @@ export function FileListItem({
               'mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
               isBatchSelected
                 ? 'border-primary-500 bg-primary-500 text-white'
-                : 'border-surface-300 bg-white text-transparent hover:border-primary-400 dark:border-surface-600 dark:bg-surface-800'
+                : 'border-surface-300 bg-white hover:border-primary-400 dark:border-surface-600 dark:bg-surface-800'
             )}
-            aria-label={isBatchSelected ? `Deselect ${file.name}` : `Select ${file.name}`}
-            title={isBatchSelected ? 'Deselect file' : 'Select file'}
+            aria-label={
+              isBatchSelected
+                ? `Deselect ${file.name}`
+                : `Select ${file.name}`
+            }
           >
-            <span className="text-xs leading-none">&#10003;</span>
+            <span className="text-[10px] leading-none">&#10003;</span>
           </button>
         )}
 
-        {/* File icon — compact */}
-        <div className="relative shrink-0">
+        {/* Extension badge with status dot */}
+        <div className="relative mt-0.5 shrink-0">
           <div
             className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-lg',
-              isSelected
-                ? 'bg-primary-100 dark:bg-primary-900/30'
-                : iconBgClass
+              'flex h-6 items-center justify-center rounded px-1.5 text-[10px] font-bold uppercase leading-none tracking-wider',
+              getExtStyle(ext)
             )}
           >
-            <IconComponent className={cn('h-3.5 w-3.5', colorClass)} />
+            {ext.slice(0, 4) || '?'}
           </div>
           <span
             className={cn(
-              'absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full ring-[1.5px] ring-white dark:ring-surface-900',
-              statusDotColor
+              'absolute -bottom-0.5 -right-0.5 h-[6px] w-[6px] rounded-full ring-[1.5px]',
+              isSelected
+                ? 'ring-primary-50 dark:ring-[hsl(222,20%,12%)]'
+                : isFailed && !isSelected
+                  ? 'ring-red-50 dark:ring-[hsl(0,20%,8%)]'
+                  : 'ring-white dark:ring-surface-900',
+              STATUS_DOT[status] || STATUS_DOT.pending
             )}
-            title={statusTooltip}
+            title={STATUS_LABEL[status] || 'Not indexed'}
           />
         </div>
 
-        {/* File info */}
+        {/* Content */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <p
-                className={cn(
-                  'truncate text-sm font-medium',
-                  isSelected
-                    ? 'text-primary-700 dark:text-primary-300'
+          {/* Line 1: name + actions */}
+          <div className="flex items-center gap-1">
+            <p
+              className={cn(
+                'min-w-0 flex-1 truncate text-[13px] font-medium leading-5',
+                isSelected
+                  ? 'text-primary-700 dark:text-primary-200'
+                  : isFailed
+                    ? 'text-red-700 dark:text-red-300'
                     : 'text-surface-800 dark:text-surface-100'
-                )}
-                title={file.name}
-              >
-                {file.name}
-              </p>
-              <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
-                {/* Document type badge */}
-                {(() => {
-                  if (docType && docType !== 'other') {
-                    const style = getDocTypeBadgeStyle(docType);
-                    const isUncertain = typeof confidence === 'number' && confidence < 0.7;
-                    const fullLabel = getDocumentTypeLabel(docType);
-                    const tooltipText = isUncertain
-                      ? `${fullLabel} (low confidence: ${Math.round((confidence ?? 0) * 100)}%)`
-                      : `${fullLabel} - ${docCategoryLabel ?? 'Unknown category'}`;
-                    return (
-                      <span
-                        className={cn(
-                          'max-w-[120px] truncate rounded-full px-1.5 py-0.5 text-[10px] font-medium',
-                          style.bg,
-                          style.text
-                        )}
-                        title={tooltipText}
-                      >
-                        {fullLabel}
-                      </span>
-                    );
-                  }
-                  return null;
-                })()}
-                {file.added_at && (
-                  <span
-                    className="text-[10px] text-surface-400 dark:text-surface-500"
-                    title={`Added: ${file.added_at}`}
-                  >
-                    {formatDate(file.added_at)}
-                  </span>
-                )}
-              </div>
-            </div>
+              )}
+              title={file.name}
+            >
+              {file.name}
+            </p>
 
-            <div className="flex min-w-0 shrink-0 items-center gap-1">
-              {/* Info/details toggle */}
+            {/* Always-visible processing spinner */}
+            {isProcessing && (
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center text-amber-500">
+                <Loader2 className="h-3 w-3 animate-spin" />
+              </div>
+            )}
+
+            {/* Hover action buttons */}
+            <div
+              className={cn(
+                'flex shrink-0 items-center transition-opacity duration-75',
+                showMenu || showDetails
+                  ? 'opacity-100'
+                  : 'max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100'
+              )}
+            >
+              {/* Details toggle */}
               <button
-                ref={detailsBtnRef}
                 type="button"
-                onClick={handleDetailsToggle}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDetails((p) => !p);
+                }}
                 className={cn(
-                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors',
+                  'flex h-6 w-6 items-center justify-center rounded transition-colors',
                   showDetails
                     ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300'
-                    : 'text-surface-400 opacity-0 group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
-                  'focus-visible:opacity-100 focus-visible:outline-none'
+                    : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300'
                 )}
-                title="View file details"
-                aria-label={`Details for ${file.name}`}
+                title="File details"
+                aria-label="Details"
                 aria-expanded={showDetails}
               >
                 <Info className="h-3 w-3" />
               </button>
 
+              {/* Index / Retry button */}
               {onProcess && canProcess && (
                 <button
                   type="button"
@@ -497,110 +392,89 @@ export function FileListItem({
                     e.stopPropagation();
                     onProcess(file.id);
                   }}
-                  disabled={processingState?.isProcessing}
                   className={cn(
-                    'inline-flex h-8 items-center gap-1.5 rounded-xl border px-2.5 text-sm font-medium transition-all',
-                    compact && 'px-2 text-xs',
-                    processingState?.isProcessing
-                      ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-900/40 dark:bg-accent-900/20 dark:text-accent-300'
-                      : file.processing_status === 'failed'
-                        ? 'border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 dark:hover:border-red-800 dark:hover:bg-red-950/50'
-                        : 'border-surface-200 bg-white text-surface-600 hover:border-accent-300 hover:bg-accent-50 hover:text-accent-700 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:border-accent-800 dark:hover:bg-accent-900/20 dark:hover:text-accent-300',
-                    !processingState?.isProcessing &&
-                      file.processing_status !== 'failed' &&
-                      !showUtilityButtons &&
-                      'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+                    'flex h-6 w-6 items-center justify-center rounded transition-colors',
+                    isFailed
+                      ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30'
+                      : 'text-surface-400 hover:bg-surface-100 hover:text-accent-600 dark:hover:bg-surface-700 dark:hover:text-accent-400'
                   )}
-                  title={file.processing_status === 'failed' ? 'Retry indexing' : 'Index'}
-                  aria-label={`Process ${file.name}`}
+                  title={isFailed ? 'Retry indexing' : 'Index for AI'}
+                  aria-label={isFailed ? 'Retry' : 'Index'}
                 >
-                  {processingState?.isProcessing ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Zap className="h-3.5 w-3.5" />
-                  )}
-                  <span className={cn(compact ? 'hidden' : 'hidden sm:inline')}>
-                    {file.processing_status === 'failed' ? 'Retry' : 'Index'}
-                  </span>
+                  <Zap className="h-3 w-3" />
                 </button>
               )}
-              {file.processing_status === 'processing' && !processingState?.isProcessing && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700 dark:bg-accent-900/20 dark:text-accent-300">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                </div>
-              )}
 
-              {/* Menu button (shows on hover or when menu is open) */}
+              {/* Menu */}
               <button
                 type="button"
                 onClick={handleMenuToggle}
-                aria-haspopup="true"
-                aria-expanded={showMenu}
                 className={cn(
-                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors',
+                  'flex h-6 w-6 items-center justify-center rounded transition-colors',
                   showMenu
                     ? 'bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300'
-                    : showUtilityButtons
-                      ? 'text-surface-400 opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800'
-                      : 'text-surface-400 max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-surface-100 dark:hover:bg-surface-800',
-                  'focus-visible:opacity-100 focus-visible:outline-none'
+                    : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700'
                 )}
-                title="File actions"
-                aria-label={`Actions for ${file.name}`}
+                title="Actions"
+                aria-label="Actions"
+                aria-haspopup="true"
+                aria-expanded={showMenu}
               >
-                <MoreVertical className="h-3.5 w-3.5" />
+                <MoreVertical className="h-3 w-3" />
               </button>
             </div>
           </div>
 
-          {failureInfo ? (
-            <div className="mt-3 rounded-2xl border border-red-200/80 bg-red-50/75 px-3 py-2.5 dark:border-red-900/40 dark:bg-red-950/25">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500 dark:text-red-400" />
-                <div className="min-w-0">
-                  <p
-                    className="text-xs font-medium leading-5 text-red-700 dark:text-red-300"
-                    title={failureInfo.summary}
-                  >
-                    {failureInfo.summary}
-                  </p>
-                  {failureInfo.technical && (
-                    <p
-                      className="mt-1 line-clamp-2 text-[10px] leading-4 text-red-500/85 [overflow-wrap:anywhere] dark:text-red-400/80"
-                      title={failureInfo.technical}
-                    >
-                      Technical detail: {failureInfo.technical}
-                    </p>
+          {/* Line 2: metadata */}
+          <div className="mt-0.5 flex items-center gap-1 text-[11px] leading-4">
+            {docTypeLabel && (
+              <>
+                <span
+                  className={cn(
+                    'max-w-[140px] truncate font-medium',
+                    DOC_TYPE_TEXT[docType!] || 'text-surface-500'
                   )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p
-              className="mt-3 line-clamp-3 text-xs leading-5 text-surface-500 [overflow-wrap:anywhere] dark:text-surface-400"
-              title={summary}
-            >
-              {summary}
-            </p>
-          )}
+                  title={
+                    docCategoryLabel
+                      ? `${docTypeLabel} (${docCategoryLabel})`
+                      : docTypeLabel
+                  }
+                >
+                  {docTypeLabel}
+                </span>
+                {file.added_at && (
+                  <span className="text-surface-300 dark:text-surface-600">
+                    &middot;
+                  </span>
+                )}
+              </>
+            )}
+            {file.added_at && (
+              <span
+                className="text-surface-400 dark:text-surface-500"
+                title={file.added_at}
+              >
+                {formatDate(file.added_at)}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ── Details popover ──────────────────────────────────── */}
+      {/* ── Details popover ───────────────────────────────────── */}
       {showDetails && (
         <div
           ref={detailsRef}
+          onClick={(e) => e.stopPropagation()}
           className={cn(
-            'absolute left-0 right-0 top-full mt-1 z-50 overflow-hidden rounded-2xl',
-            'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
-            'dark:border-surface-700 dark:bg-surface-800 dark:shadow-surface-950/30',
-            'transition-all duration-100'
+            'absolute left-2 right-2 top-full z-50 mt-1 overflow-hidden rounded-xl',
+            'border border-surface-200 bg-white shadow-lg shadow-surface-900/8',
+            'dark:border-surface-700 dark:bg-surface-900 dark:shadow-surface-950/25'
           )}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-surface-100 px-3 py-2 dark:border-surface-700">
-            <span className="text-xs font-semibold text-surface-700 dark:text-surface-200">
-              File Details
+          <div className="flex items-center justify-between border-b border-surface-100 px-3 py-1.5 dark:border-surface-700/60">
+            <span className="text-[11px] font-semibold text-surface-600 dark:text-surface-300">
+              Details
             </span>
             <button
               type="button"
@@ -608,47 +482,55 @@ export function FileListItem({
                 e.stopPropagation();
                 setShowDetails(false);
               }}
-              className="flex h-5 w-5 items-center justify-center rounded-full text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
-              title="Close details"
-              aria-label="Close details"
+              className="flex h-5 w-5 items-center justify-center rounded text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700"
+              title="Close"
             >
               <X className="h-3 w-3" />
             </button>
           </div>
-
-          <div className="space-y-2 px-3 py-2.5">
-            {/* AI Summary */}
+          <div className="space-y-2.5 px-3 py-2.5 text-xs">
+            {/* AI Summary / Failure */}
             <div>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                {failureInfo ? 'Indexing Note' : 'AI Summary'}
+                {failureInfo ? 'Issue' : 'AI Summary'}
               </span>
-              <p className="mt-0.5 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
-                {failureInfo?.summary || file.ai_summary || 'No summary available'}
+              <p className="mt-0.5 leading-relaxed text-surface-600 dark:text-surface-300">
+                {failureInfo?.summary || summary || 'No summary available'}
               </p>
+              {failureInfo?.technical && (
+                <div className="mt-1.5 flex items-start gap-1.5 rounded-lg bg-red-50 px-2 py-1.5 dark:bg-red-950/30">
+                  <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-red-500 dark:text-red-400" />
+                  <p
+                    className="text-[10px] leading-relaxed text-red-600 [overflow-wrap:anywhere] dark:text-red-300"
+                    title={failureInfo.technical}
+                  >
+                    {failureInfo.technical}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Document Type & Classification */}
-            {docType && docType !== 'other' && (
+            {/* Document type */}
+            {docTypeLabel && (
               <div>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                  Document Type
+                  Type
                 </span>
-                <div className="mt-0.5 flex items-center gap-2">
-                  <span className="text-xs font-medium text-surface-700 dark:text-surface-200">
-                    {docTypeLabel}
-                  </span>
+                <p className="mt-0.5 text-surface-600 dark:text-surface-300">
+                  {docTypeLabel}
                   {docCategoryLabel && (
-                    <span className="text-xs text-surface-400 dark:text-surface-500">
+                    <span className="text-surface-400 dark:text-surface-500">
+                      {' '}
                       ({docCategoryLabel})
                     </span>
                   )}
-                </div>
+                </p>
                 {typeof confidence === 'number' && (
                   <div className="mt-1 flex items-center gap-2">
                     <div className="h-1 flex-1 rounded-full bg-surface-100 dark:bg-surface-700">
                       <div
                         className={cn(
-                          'h-1 rounded-full transition-all',
+                          'h-1 rounded-full',
                           confidence >= 0.7
                             ? 'bg-emerald-500'
                             : confidence >= 0.4
@@ -658,7 +540,7 @@ export function FileListItem({
                         style={{ width: `${Math.round(confidence * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] tabular-nums text-surface-400 dark:text-surface-500">
+                    <span className="text-[10px] tabular-nums text-surface-400">
                       {Math.round(confidence * 100)}%
                     </span>
                   </div>
@@ -666,98 +548,79 @@ export function FileListItem({
               </div>
             )}
 
-            {/* Processing Status */}
+            {/* Processing status */}
             <div>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                Processing Status
+                Status
               </span>
               <div className="mt-0.5 flex items-center gap-1.5">
                 <span
                   className={cn(
-                    'inline-block h-2 w-2 rounded-full',
-                    statusDotColor
+                    'h-2 w-2 rounded-full',
+                    STATUS_DOT[status] || STATUS_DOT.pending
                   )}
                 />
-                <span className="text-xs text-surface-600 dark:text-surface-300">
-                  {statusTooltip}
+                <span className="text-surface-600 dark:text-surface-300">
+                  {STATUS_LABEL[status] || 'Not indexed'}
                 </span>
               </div>
               {file.processed_at && (
-                <p className="mt-0.5 text-[10px] text-surface-400 dark:text-surface-500">
+                <p className="mt-0.5 text-[10px] text-surface-400">
                   Processed: {formatDate(file.processed_at)}
                 </p>
               )}
-              {failureInfo?.technical && (
-                <p
-                  className="mt-1 rounded-lg bg-red-50 px-2 py-1 text-[10px] leading-relaxed text-red-600 dark:bg-red-950/30 dark:text-red-300"
-                  title={failureInfo.technical}
-                >
-                  Technical detail: {failureInfo.technical}
-                </p>
-              )}
             </div>
 
-            {/* Chunk Count */}
+            {/* Chunks */}
             {typeof file.chunk_count === 'number' && file.chunk_count > 0 && (
               <div>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                  Chunks
+                  Index
                 </span>
-                <p className="mt-0.5 text-xs text-surface-600 dark:text-surface-300">
-                  {file.chunk_count} indexed chunk{file.chunk_count !== 1 ? 's' : ''}
+                <p className="mt-0.5 text-surface-600 dark:text-surface-300">
+                  {file.chunk_count} chunk
+                  {file.chunk_count !== 1 ? 's' : ''}
                 </p>
               </div>
             )}
 
-            {/* File type & extension */}
+            {/* File info */}
             <div>
               <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                File Type
+                File
               </span>
-              <p className="mt-0.5 text-xs text-surface-600 dark:text-surface-300">
-                {fileType.charAt(0).toUpperCase() + fileType.slice(1)}
-                {ext ? ` (.${ext})` : ''}
+              <p className="mt-0.5 text-surface-600 dark:text-surface-300">
+                {ext ? `.${ext}` : 'Unknown'}
+                {file.added_at && ` · Added ${formatDate(file.added_at)}`}
               </p>
             </div>
-
-            {/* Date added */}
-            {file.added_at && (
-              <div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                  Added
-                </span>
-                <p className="mt-0.5 text-xs text-surface-600 dark:text-surface-300">
-                  {formatDate(file.added_at)}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       )}
 
-      {/* Context menu */}
+      {/* ── Context menu ──────────────────────────────────────── */}
       {showMenu && (
         <div
           ref={menuRef}
+          onClick={(e) => e.stopPropagation()}
           className={cn(
-            'absolute right-3 top-[calc(100%-0.35rem)] z-50 min-w-[160px] overflow-hidden rounded-2xl',
-            'border border-surface-200 bg-white shadow-lg shadow-surface-900/10',
-            'dark:border-surface-700 dark:bg-surface-800 dark:shadow-surface-950/30',
-            'transition-all duration-100'
+            'absolute right-2 top-full z-50 mt-0.5 min-w-[140px] overflow-hidden rounded-lg',
+            'border border-surface-200 bg-white shadow-lg shadow-surface-900/8',
+            'dark:border-surface-700 dark:bg-surface-900 dark:shadow-surface-950/25'
           )}
         >
           <button
             type="button"
             onClick={handleDelete}
             className={cn(
-              'flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors',
+              'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors',
               showConfirm
                 ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-                : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700'
+                : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700/60'
             )}
           >
-            <Trash2 className="h-3.5 w-3.5" />
-            {showConfirm ? 'Click again to confirm' : 'Delete file'}
+            <Trash2 className="h-3 w-3" />
+            {showConfirm ? 'Confirm delete' : 'Delete'}
           </button>
         </div>
       )}

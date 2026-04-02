@@ -264,7 +264,7 @@ export function AIWritingMenu({ editor, onClose }: AIWritingMenuProps) {
 
       {/* Error */}
       {error && (
-        <div className="mb-3 rounded-lg bg-red-50 p-2.5 text-xs text-red-600 dark:bg-red-900/20 dark:text-red-400">
+        <div className="mb-3 rounded-lg bg-red-50 p-2.5 text-xs text-red-600 dark:bg-red-950/30 dark:text-red-400">
           {error}
         </div>
       )}

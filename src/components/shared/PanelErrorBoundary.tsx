@@ -40,7 +40,7 @@ export class PanelErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex h-full w-full items-center justify-center p-6">
           <div className="flex max-w-xs flex-col items-center text-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30">
               <AlertTriangle className="h-5 w-5 text-red-500 dark:text-red-400" />
             </div>
             <p className="mt-3 text-sm font-medium text-surface-700 dark:text-surface-200">

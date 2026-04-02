@@ -615,7 +615,7 @@ export function FileListItem({
             className={cn(
               'flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors',
               showConfirm
-                ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
                 : 'text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700/60'
             )}
           >

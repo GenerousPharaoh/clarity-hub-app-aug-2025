@@ -241,11 +241,21 @@ export function DraftsTab() {
         {/* Draft sidebar */}
         <div className="w-56 shrink-0 overflow-y-auto border-r border-surface-200 dark:border-surface-700">
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-4 w-4 animate-spin text-surface-400" />
+            <div className="space-y-0">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="border-b border-surface-100 px-3 py-3 dark:border-surface-800">
+                  <div className="h-3.5 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                  <div className="mt-1.5 h-2.5 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                </div>
+              ))}
+            </div>
+          ) : !drafts || drafts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
+              <FileSignature className="h-5 w-5 text-surface-300 dark:text-surface-600" />
+              <p className="mt-2 text-xs text-surface-400 dark:text-surface-500">No drafts yet</p>
             </div>
           ) : (
-            drafts?.map((draft) => (
+            drafts.map((draft) => (
               <div
                 key={draft.id}
                 className={cn(

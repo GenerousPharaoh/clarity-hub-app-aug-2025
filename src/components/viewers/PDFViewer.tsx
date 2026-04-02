@@ -95,8 +95,8 @@ export function PDFViewer({ url, fileName }: PDFViewerProps) {
         </div>
 
         <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/20">
-            <FileText className="h-8 w-8 text-red-400" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30">
+            <FileText className="h-6 w-6 text-red-400" />
           </div>
           <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
             {fileName}

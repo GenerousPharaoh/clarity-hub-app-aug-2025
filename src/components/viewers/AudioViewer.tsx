@@ -172,8 +172,8 @@ export function AudioViewer({ url, fileName }: AudioViewerProps) {
   if (hasError) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-6">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/20">
-          <Music className="h-8 w-8 text-red-400" />
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30">
+          <Music className="h-6 w-6 text-red-400" />
         </div>
         <p className="text-sm font-medium text-surface-700 dark:text-surface-200">
           Unable to play audio

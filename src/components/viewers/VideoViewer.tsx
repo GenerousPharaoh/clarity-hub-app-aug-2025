@@ -213,8 +213,8 @@ export function VideoViewer({ url, fileName }: VideoViewerProps) {
   if (hasError) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-8 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-50 dark:bg-red-900/20">
-          <VideoOff className="h-7 w-7 text-red-400" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30">
+          <VideoOff className="h-6 w-6 text-red-400" />
         </div>
         <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
           Failed to Load Video

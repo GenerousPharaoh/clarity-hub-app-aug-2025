@@ -358,7 +358,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
             className={cn(
               'group/msg relative rounded-2xl rounded-tl-md px-3 py-2 shadow-sm',
               isError
-                ? 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-900/20 dark:ring-red-800/50'
+                ? 'bg-red-50 ring-1 ring-red-200/80 dark:bg-red-950/30 dark:ring-red-800/50'
                 : 'bg-white border border-translucent border-l-2 border-l-accent-400/30 dark:bg-surface-800 dark:border-l-accent-500/25'
             )}
           >

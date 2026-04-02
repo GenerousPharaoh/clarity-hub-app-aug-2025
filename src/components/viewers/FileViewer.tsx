@@ -189,30 +189,11 @@ export function FileViewer() {
     );
   }
 
-  // Loading URL — skeleton preview
+  // Loading URL — minimal spinner (no layout-shifting skeleton)
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col">
-        {/* Skeleton toolbar */}
-        <div className="flex h-10 shrink-0 items-center justify-between border-b border-surface-200 px-3 dark:border-surface-800">
-          <div className="h-3 w-40 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="flex gap-1.5">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-6 w-6 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-            ))}
-          </div>
-        </div>
-        {/* Skeleton content area */}
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8">
-          <div className={cn(
-            'flex h-16 w-16 animate-pulse items-center justify-center rounded-xl',
-            'bg-surface-100 dark:bg-surface-800'
-          )}>
-            <FileSearch className="h-7 w-7 text-surface-300 dark:text-surface-600" />
-          </div>
-          <div className="h-3 w-32 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-          <div className="h-2.5 w-20 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-        </div>
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
       </div>
     );
   }
@@ -252,7 +233,7 @@ export function FileViewer() {
   switch (fileType) {
     case 'pdf':
       return (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" /></div>}>
           <AnnotatablePDFViewer
             url={fileUrl}
             fileName={selectedFile.name}

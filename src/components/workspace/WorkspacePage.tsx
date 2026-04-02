@@ -194,6 +194,11 @@ export function WorkspacePage() {
   }, [desktopLayout.autoSaveId]);
 
   useEffect(() => {
+    if (isMobile || !selectedFileId) return;
+    setRightPanel(true);
+  }, [desktopLayout.autoSaveId, isMobile, selectedFileId, setRightPanel]);
+
+  useEffect(() => {
     if (
       isMobile ||
       desktopLayout.mode !== 'compact' ||

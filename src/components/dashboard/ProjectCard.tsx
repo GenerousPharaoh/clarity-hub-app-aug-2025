@@ -154,7 +154,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           }
         }}
         className={cn(
-          'group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border p-6',
+          'group relative flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border px-5 pb-4 pt-5',
           'border-surface-200 bg-white',
           'shadow-sm transition-all duration-300',
           'hover:shadow-lg hover:shadow-surface-200/50 hover:-translate-y-0.5 hover:border-surface-300',
@@ -169,7 +169,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 items-start gap-3">
               <div className={cn(
-                'mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl',
+                'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
                 'bg-gradient-to-br text-white shadow-sm',
                 accent
               )}>
@@ -178,15 +178,15 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-start gap-1.5">
-                  <span className="max-w-full rounded-full border border-surface-200 bg-surface-50 px-2 py-0.5 text-xs font-medium text-surface-500 [overflow-wrap:anywhere] dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+                  <span title={goalType} className="max-w-full truncate rounded-full border border-surface-200 bg-surface-50 px-2 py-0.5 text-xs font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                     {goalType}
                   </span>
-                  <span className={cn('max-w-full rounded-full border px-2 py-0.5 text-xs font-medium [overflow-wrap:anywhere]', status.chip)}>
+                  <span title={status.label} className={cn('max-w-full rounded-full border px-2 py-0.5 text-xs font-medium', status.chip)}>
                     {status.label}
                   </span>
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-2">
                   {renaming ? (
                     <input
                       ref={renameInputRef}
@@ -196,14 +196,14 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                       onKeyDown={handleRenameKeyDown}
                       onClick={(e) => e.stopPropagation()}
                       className={cn(
-                        'w-full rounded-2xl border border-primary-300 bg-white px-3 py-2',
-                        'font-heading text-lg font-semibold tracking-tight text-surface-900',
+                        'w-full rounded-xl border border-primary-300 bg-white px-2.5 py-1',
+                        'font-heading text-lg font-bold tracking-tight text-surface-900',
                         'outline-none focus:ring-2 focus:ring-primary-500/25',
                         'dark:border-primary-700 dark:bg-surface-800 dark:text-surface-100'
                       )}
                     />
                   ) : (
-                    <h3 className="line-clamp-2 font-heading text-xl font-bold tracking-tight text-surface-900 [overflow-wrap:anywhere] dark:text-surface-100">
+                    <h3 title={project.name} className="line-clamp-2 font-heading text-lg font-bold tracking-tight text-surface-900 [overflow-wrap:anywhere] dark:text-surface-100">
                       {project.name}
                     </h3>
                   )}
@@ -234,13 +234,15 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
 
               {menuOpen && (
                 <div
+                  role="menu"
                   className={cn(
-                    'absolute right-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-2xl',
+                    'absolute right-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-xl',
                     'border border-surface-200 bg-white py-1 shadow-lg',
                     'dark:border-surface-700 dark:bg-surface-800'
                   )}
                 >
                   <button
+                    role="menuitem"
                     onClick={handleStartRename}
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-surface-600 transition-colors hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-700"
                   >
@@ -248,6 +250,7 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                     Rename
                   </button>
                   <button
+                    role="menuitem"
                     onClick={handleDelete}
                     className={cn(
                       'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
@@ -257,39 +260,26 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                     )}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    {confirmDelete ? 'Confirm' : 'Delete'}
+                    {confirmDelete ? 'Confirm delete?' : 'Delete'}
                   </button>
                 </div>
               )}
             </div>
           </div>
 
-          <p title={project.description || ""} className="mt-4 line-clamp-2 text-sm leading-relaxed text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
+          <p title={project.description || ""} className="mt-3 line-clamp-2 text-sm leading-relaxed text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
             {project.description || 'No description yet'}
           </p>
 
-          <div className="mt-auto flex items-center gap-6 border-t border-surface-100 pt-5 dark:border-surface-800">
-            <div>
-              <p className="font-heading text-2xl font-bold text-surface-900 dark:text-surface-100">
-                {fileCount ?? 0}
-              </p>
-              <p className="text-xs text-surface-500 dark:text-surface-400">
-                {fileCount === 1 ? 'file' : 'files'}
-              </p>
+          <div className="mt-auto flex items-center justify-between border-t border-surface-100 pt-3 dark:border-surface-800">
+            <div className="flex items-center gap-4 text-xs text-surface-500 dark:text-surface-400">
+              <span className="font-medium">
+                {fileCount ?? 0} {fileCount === 1 ? 'file' : 'files'}
+              </span>
+              <span className="text-surface-300 dark:text-surface-600">&middot;</span>
+              <span>{updatedLabel}</span>
             </div>
-            <div className="h-8 w-px bg-surface-200 dark:bg-surface-700" />
-            <div>
-              <p className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
-                {updatedLabel}
-              </p>
-              <p className="text-xs text-surface-500 dark:text-surface-400">
-                last activity
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 flex items-center justify-end">
-            <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-100 px-3 py-1.5 text-xs font-semibold text-surface-600 transition-all group-hover:bg-accent-500 group-hover:text-white dark:bg-surface-800 dark:text-surface-300 dark:group-hover:bg-accent-500 dark:group-hover:text-white">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-surface-100 px-2.5 py-1 text-xs font-semibold text-surface-600 transition-all group-hover:bg-accent-500 group-hover:text-white dark:bg-surface-800 dark:text-surface-300 dark:group-hover:bg-accent-500 dark:group-hover:text-white">
               Open
               <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>

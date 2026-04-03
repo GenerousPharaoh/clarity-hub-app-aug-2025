@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingScreen } from '@/components/shared/LoadingScreen';
-import { Scale, AlertCircle, PlayCircle, CheckCircle2, ArrowUpRight, FileText, Brain, Bookmark } from 'lucide-react';
+import { Scale, AlertCircle, PlayCircle, CheckCircle2, FileText, Brain, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function LoginPage() {
@@ -63,32 +63,32 @@ export function LoginPage() {
         {/* Main content — vertically centered */}
         <div className="relative z-10 flex flex-1 flex-col justify-center py-16">
           <h1 className="font-heading text-[2.75rem] font-bold leading-[1.15] tracking-tight text-white xl:text-5xl">
-            The workspace
+            Legal case
             <br />
-            your legal practice
+            management,
             <br />
-            deserves.
+            simplified.
           </h1>
           <p className="mt-6 max-w-md text-base leading-relaxed text-surface-300">
-            Upload documents, annotate PDFs, build timelines, draft filings, and prepare case strategy. Powered by AI that understands Ontario law.
+            Upload documents, annotate PDFs, build timelines, and draft filings with AI that understands Ontario law.
           </p>
 
           {/* Feature cards */}
           <div className="mt-10 grid gap-3 max-w-md">
             <FeatureCard
               icon={<FileText className="h-4 w-4" />}
-              title="Document Intelligence"
-              desc="OCR, classification, and searchable evidence across every file"
+              title="Document Processing"
+              desc="OCR, auto-classification, and full-text search across uploads"
             />
             <FeatureCard
               icon={<Brain className="h-4 w-4" />}
-              title="AI Case Analysis"
-              desc="Cross-document reasoning with Ontario legal knowledge built in"
+              title="AI Analysis"
+              desc="Ask questions across your documents with Ontario law context"
             />
             <FeatureCard
               icon={<Bookmark className="h-4 w-4" />}
-              title="Court-Ready Output"
-              desc="Exhibit books, chronologies, and legal drafts you can file"
+              title="Exhibit Builder"
+              desc="Compile exhibit books, chronologies, and filing-ready PDFs"
             />
           </div>
         </div>
@@ -131,7 +131,7 @@ export function LoginPage() {
               onClick={handleSignIn}
               disabled={signingIn || enteringDemo}
               className={cn(
-                'group flex w-full items-center justify-center gap-3 rounded-2xl',
+                'flex w-full items-center justify-center gap-3 rounded-2xl',
                 'bg-surface-950 px-6 py-[18px]',
                 'text-[15px] font-semibold text-white',
                 'shadow-lg shadow-surface-950/10 transition-all duration-200',
@@ -149,7 +149,6 @@ export function LoginPage() {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
               </svg>
               Continue with Google
-              <ArrowUpRight className="h-4 w-4 opacity-0 -translate-x-1 transition-all group-hover:opacity-60 group-hover:translate-x-0" />
             </button>
 
             <button
@@ -186,13 +185,13 @@ export function LoginPage() {
 
           <div className="mt-8 rounded-2xl border border-surface-200 bg-surface-50 p-5 dark:border-surface-800 dark:bg-surface-800/50">
             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-surface-500 dark:text-surface-400">
-              Included
+              What you get
             </p>
             <div className="mt-4 space-y-3">
-              <CheckItem>Upload and annotate PDFs with highlights and notes</CheckItem>
-              <CheckItem>AI analysis across all your case documents</CheckItem>
-              <CheckItem>Draft legal filings with Ontario law context</CheckItem>
-              <CheckItem>Build exhibit books and chronologies</CheckItem>
+              <CheckItem>PDF annotation with highlights, notes, and exhibit markers</CheckItem>
+              <CheckItem>AI chat grounded in your uploaded documents</CheckItem>
+              <CheckItem>Auto-generated timelines from case files</CheckItem>
+              <CheckItem>Exhibit book compilation with table of contents</CheckItem>
             </div>
           </div>
         </div>

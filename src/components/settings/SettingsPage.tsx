@@ -144,7 +144,7 @@ export function SettingsPage() {
               <p className="truncate text-base font-medium text-surface-900 dark:text-surface-100" title={displayName}>
                 {displayName}
               </p>
-              <p className="mt-0.5 truncate text-sm text-surface-500 dark:text-surface-400"title={email}>
+              <p className="mt-0.5 truncate text-sm text-surface-500 dark:text-surface-400" title={email}>
                 {email}
               </p>
               {createdAt && (
@@ -237,7 +237,7 @@ export function SettingsPage() {
                   Auto-process uploads
                 </p>
                 <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
-                  Off by default.
+                  Automatically extract text, classify, and embed files on upload.
                 </p>
               </div>
               <button
@@ -263,7 +263,7 @@ export function SettingsPage() {
             <div className="mt-4 rounded-lg bg-surface-50 p-3 dark:bg-surface-800/60">
               <div className="flex items-center justify-between gap-3">
                 <p className="text-xs text-surface-600 dark:text-surface-300">
-                  Daily safety limits (local): {PROCESSING_DAILY_FILE_LIMIT} files, {Math.round(PROCESSING_DAILY_MB_LIMIT_BYTES / (1024 * 1024))}MB.
+                  Daily limit: {PROCESSING_DAILY_FILE_LIMIT} files / {Math.round(PROCESSING_DAILY_MB_LIMIT_BYTES / (1024 * 1024))}MB
                 </p>
                 <button
                   onClick={refreshUsage}

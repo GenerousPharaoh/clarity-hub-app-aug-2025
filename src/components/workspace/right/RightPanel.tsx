@@ -53,30 +53,34 @@ export function RightPanel() {
 
   const compact = panelWidth > 0 && panelWidth < 320;
   const ultraCompact = panelWidth > 0 && panelWidth < 260;
-  const stackedHeader = panelWidth > 0 && panelWidth < 360;
-  const panelLabel = activeTab === 'viewer' ? 'Viewer' : 'AI Chat';
+  const panelLabel =
+    activeTab === 'viewer'
+      ? selectedFile?.name ?? 'Viewer'
+      : 'AI';
   const panelSubtitle =
     activeTab === 'viewer'
-      ? selectedFile?.name ?? 'Open a file from the left panel'
+      ? selectedFile
+        ? selectedFile.file_type ?? 'File'
+        : 'No file selected'
       : selectedFile?.name
-        ? `Using ${selectedFile.name} as context`
-        : 'Ask questions about this workspace';
+        ? `Context: ${selectedFile.name}`
+        : 'Project chat';
 
   return (
     <div ref={panelRef} className="flex h-full w-full min-w-0 flex-col overflow-hidden bg-white dark:bg-surface-900">
       {/* Header with tabs and collapse */}
       <div
         className={cn(
-          'shrink-0 border-b border-surface-200/80 bg-white dark:border-surface-800 dark:bg-surface-900',
-          compact ? 'px-3 py-2.5' : 'px-4 py-3'
+          'shrink-0 border-b border-surface-200/80 dark:border-surface-800',
+          compact ? 'px-3 py-2' : 'px-3 py-2.5'
         )}
       >
-        <div className={cn('flex gap-3', stackedHeader ? 'flex-col' : 'items-start justify-between')}>
+        <div className="flex items-center justify-between">
           <div className="min-w-0">
-            <h2 className="min-w-0 truncate text-base font-bold text-surface-800 dark:text-surface-100" title={panelLabel}>
+            <h2 className="min-w-0 truncate text-sm font-bold text-surface-900 dark:text-surface-100" title={panelLabel}>
               {panelLabel}
             </h2>
-            <p className="mt-1 truncate text-xs text-surface-500 dark:text-surface-400" title={panelSubtitle}>
+            <p className="mt-0.5 truncate text-xs text-surface-400 dark:text-surface-500" title={panelSubtitle}>
               {panelSubtitle}
             </p>
           </div>
@@ -99,8 +103,7 @@ export function RightPanel() {
 
         <div
           className={cn(
-            'mt-3 flex items-center gap-1 rounded-xl border border-surface-200 bg-surface-50 p-1 dark:border-surface-700 dark:bg-surface-800',
-            stackedHeader && 'w-full',
+            'mt-2 flex items-center gap-0.5 rounded-lg border border-surface-200 bg-surface-50 p-0.5 dark:border-surface-700 dark:bg-surface-800',
             ultraCompact && 'px-0.5'
           )}
           role="tablist"
@@ -172,7 +175,7 @@ function TabButton({
 }) {
   const activeColor = accent
     ? 'text-accent-600 dark:text-accent-400'
-    : 'text-primary-600 dark:text-primary-400';
+    : 'text-surface-900 dark:text-surface-100';
 
   return (
     <button
@@ -181,18 +184,18 @@ function TabButton({
       aria-controls={controls}
       onClick={onClick}
       className={cn(
-        'relative flex h-9 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium transition-all',
-        compact ? 'px-2 text-xs' : 'px-2.5',
+        'relative flex h-8 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-all',
+        compact ? 'px-1.5' : 'px-3',
         active
           ? activeColor
-          : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-200'
+          : 'text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200'
       )}
       title={label}
     >
       {active && (
-        <motion.div
+        <motion.span
           layoutId="right-tab-indicator"
-          className="absolute inset-0 -z-10 rounded-xl bg-white/92 shadow-elevated ring-1 ring-surface-200/70 dark:bg-surface-800 dark:ring-surface-700/60"
+          className="absolute inset-0 -z-10 rounded-md bg-white shadow-sm dark:bg-surface-700"
           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}

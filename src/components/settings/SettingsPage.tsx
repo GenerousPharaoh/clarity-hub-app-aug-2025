@@ -17,6 +17,8 @@ import {
   LogOut,
   Scale,
   RefreshCw,
+  ShieldCheck,
+  ExternalLink,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -79,6 +81,8 @@ export function SettingsPage() {
   const { themeMode, setTheme } = useAppStore();
   const processOnUpload = useAppStore((s) => s.processOnUpload);
   const setProcessOnUpload = useAppStore((s) => s.setProcessOnUpload);
+  const aiEnabled = useAppStore((s) => s.aiEnabled);
+  const setAIEnabled = useAppStore((s) => s.setAIEnabled);
   const storeUser = useAppStore((s) => s.user);
   const navigate = useNavigate();
   const [usage, setUsage] = useState(() => getProcessingUsage());
@@ -277,6 +281,116 @@ export function SettingsPage() {
                 Today: {usage.files} file{usage.files !== 1 ? 's' : ''} processed, {formatFileSize(usage.bytes)} of data.
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* ── Data & Privacy ───────────────────────────────── */}
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+          <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="h-4.5 w-4.5 text-primary-600 dark:text-primary-400" />
+              <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
+                Data &amp; Privacy
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-5 px-6 py-5">
+            {/* Storage location */}
+            <div>
+              <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+                Data storage
+              </p>
+              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                All files and project data are stored on Supabase infrastructure
+                in Canada (AWS ca-central-1, Montreal region).
+              </p>
+            </div>
+
+            {/* AI providers */}
+            <div>
+              <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+                AI data processors
+              </p>
+              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                When AI features are enabled, document content may be sent to:
+              </p>
+              <ul className="mt-2 space-y-1 text-xs text-surface-500 dark:text-surface-400">
+                <li className="flex items-baseline gap-2">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
+                  <span><span className="font-medium text-surface-700 dark:text-surface-300">OpenAI GPT</span> &mdash; chat, classification, summarization (US)</span>
+                </li>
+                <li className="flex items-baseline gap-2">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
+                  <span><span className="font-medium text-surface-700 dark:text-surface-300">Google Gemini</span> &mdash; chat, multimodal analysis (US/EU)</span>
+                </li>
+                <li className="flex items-baseline gap-2">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
+                  <span><span className="font-medium text-surface-700 dark:text-surface-300">Mistral OCR</span> &mdash; document text extraction (EU)</span>
+                </li>
+                <li className="flex items-baseline gap-2">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
+                  <span><span className="font-medium text-surface-700 dark:text-surface-300">Cohere Rerank</span> &mdash; search result ranking (US)</span>
+                </li>
+                <li className="flex items-baseline gap-2">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
+                  <span><span className="font-medium text-surface-700 dark:text-surface-300">Voyage AI</span> &mdash; legal document embeddings (US)</span>
+                </li>
+                <li className="flex items-baseline gap-2">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
+                  <span><span className="font-medium text-surface-700 dark:text-surface-300">Tavily</span> &mdash; web search for legal research (US)</span>
+                </li>
+              </ul>
+              <p className="mt-2 text-xs text-surface-500 dark:text-surface-400">
+                All providers are accessed via API-tier agreements. They do not
+                use your data to train their models.
+              </p>
+            </div>
+
+            {/* AI toggle */}
+            <div className="flex items-start justify-between gap-4 rounded-lg border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/60">
+              <div>
+                <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+                  Enable AI features
+                </p>
+                <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                  When disabled, no data is sent to third-party AI providers.
+                  File storage and manual features remain available.
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={aiEnabled}
+                onClick={() => setAIEnabled(!aiEnabled)}
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                  aiEnabled
+                    ? 'bg-primary-600'
+                    : 'bg-surface-300 dark:bg-surface-600'
+                }`}
+                title={aiEnabled ? 'AI features enabled' : 'AI features disabled'}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                    aiEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Cross-border notice */}
+            <p className="text-xs leading-relaxed text-surface-500 dark:text-surface-400">
+              Your data may be processed outside Canada. By using AI features,
+              you consent to cross-border data transfer as described in our{' '}
+              <a
+                href="/privacy"
+                className="inline-flex items-center gap-0.5 font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                Privacy Policy
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              .
+            </p>
           </div>
         </section>
 

@@ -1,4 +1,5 @@
 import type { StateCreator } from 'zustand';
+import { AI_ENABLED_KEY } from '../../lib/constants';
 
 const PROCESS_ON_UPLOAD_KEY = 'clarity-hub-process-on-upload';
 
@@ -22,6 +23,25 @@ function saveProcessOnUpload(enabled: boolean) {
   }
 }
 
+function loadAIEnabled(): boolean {
+  if (typeof window === 'undefined') return true;
+  try {
+    const stored = localStorage.getItem(AI_ENABLED_KEY);
+    return stored !== '0';
+  } catch {
+    return true;
+  }
+}
+
+function saveAIEnabled(enabled: boolean) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(AI_ENABLED_KEY, enabled ? '1' : '0');
+  } catch {
+    // ignore persistence failures
+  }
+}
+
 export interface UISlice {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -33,6 +53,8 @@ export interface UISlice {
   setShowCommandPalette: (show: boolean) => void;
   processOnUpload: boolean;
   setProcessOnUpload: (enabled: boolean) => void;
+  aiEnabled: boolean;
+  setAIEnabled: (enabled: boolean) => void;
   newNoteRequestNonce: number;
   requestNewNote: () => void;
   // Cross-panel communication for PDF annotation → brief/chronology
@@ -55,6 +77,11 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   setProcessOnUpload: (enabled) => {
     saveProcessOnUpload(enabled);
     set({ processOnUpload: enabled });
+  },
+  aiEnabled: loadAIEnabled(),
+  setAIEnabled: (enabled) => {
+    saveAIEnabled(enabled);
+    set({ aiEnabled: enabled });
   },
   newNoteRequestNonce: 0,
   requestNewNote: () =>

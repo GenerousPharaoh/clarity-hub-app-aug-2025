@@ -26,3 +26,5 @@ export const FILE_TYPE_COLORS: Record<string, string> = {
 
 export const PANEL_WIDTHS_KEY = 'clarity-hub-panel-widths';
 export const THEME_KEY = 'clarity-hub-theme';
+export const CONSENT_KEY = 'clarity-hub-consent-accepted';
+export const AI_ENABLED_KEY = 'clarity-hub-ai-enabled';

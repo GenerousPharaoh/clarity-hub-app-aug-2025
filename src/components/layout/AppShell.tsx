@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { Header } from './Header';
 import { CommandPalette } from '@/components/shared/CommandPalette';
+import { ConsentBanner } from '@/components/shared/ConsentBanner';
 import { useProjects } from '@/hooks/useProjects';
 import useAppStore from '@/store';
 
@@ -44,6 +45,7 @@ export function AppShell() {
         open={showCommandPalette}
         onClose={() => setShowCommandPalette(false)}
       />
+      <ConsentBanner />
     </div>
   );
 }

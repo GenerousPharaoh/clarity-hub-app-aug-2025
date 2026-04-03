@@ -44,6 +44,7 @@ import {
   Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import useAppStore from '@/store';
 import {
   useFileAnnotations,
@@ -765,7 +766,9 @@ function HighlightActionPopover({ highlight: rawHighlight }: { highlight: unknow
 
   const handleCopy = useCallback(() => {
     if (highlight.content?.text) {
-      navigator.clipboard.writeText(highlight.content.text).catch(() => {});
+      navigator.clipboard.writeText(highlight.content.text)
+        .then(() => toast.success('Copied to clipboard'))
+        .catch(() => {});
     }
     setTip(null);
   }, [highlight.content?.text, setTip]);
@@ -993,17 +996,19 @@ function SelectionTip({
 
   const handleCopy = useCallback(() => {
     if (selectedText) {
-      navigator.clipboard.writeText(selectedText).catch(() => {});
+      navigator.clipboard.writeText(selectedText)
+        .then(() => toast.success('Copied to clipboard'))
+        .catch(() => {});
     }
     onSave(); // dismiss tip
   }, [selectedText, onSave]);
 
   const handleAskAI = useCallback(() => {
     if (!selectedText) return;
-    // Switch to AI chat tab and pre-fill with the selected text
     useAppStore.getState().setRightTab('ai');
     useAppStore.getState().setRightPanel(true);
-    // Store the text so the AI chat can pick it up
+    useAppStore.getState().setMobileTab('viewer');
+    toast.success('Text sent to AI chat', { description: 'Ask your question in the chat panel.' });
     const event = new CustomEvent('ask-ai-about-text', { detail: { text: selectedText, fileName } });
     window.dispatchEvent(event);
     onSave();
@@ -1011,25 +1016,33 @@ function SelectionTip({
 
   const handleAddToBrief = useCallback(() => {
     if (!selectedText) return;
+    const page = ghost.position.boundingRect.pageNumber;
     useAppStore.getState().setPendingBriefInsertion({
       text: selectedText,
       fileId,
       fileName,
-      page: ghost.position.boundingRect.pageNumber,
+      page,
     });
     useAppStore.getState().setCenterTab('drafts');
+    toast.success('Text captured for draft', {
+      description: `From ${fileName}, page ${page}. Switch to Drafts tab to insert.`,
+    });
     onSave();
   }, [selectedText, fileId, fileName, ghost.position, onSave]);
 
   const handleAddToChronology = useCallback(() => {
     if (!selectedText) return;
+    const page = ghost.position.boundingRect.pageNumber;
     useAppStore.getState().setPendingChronologyEntry({
       text: selectedText,
       fileId,
       fileName,
-      page: ghost.position.boundingRect.pageNumber,
+      page,
     });
     useAppStore.getState().setCenterTab('timeline');
+    toast.success('Text captured for chronology', {
+      description: `From ${fileName}, page ${page}. Switch to Timeline tab to add.`,
+    });
     onSave();
   }, [selectedText, fileId, fileName, ghost.position, onSave]);
 

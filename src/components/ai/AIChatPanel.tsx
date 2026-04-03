@@ -387,6 +387,7 @@ export function AIChatPanel() {
               <button
                 onClick={() => { setSelectedFileIds(new Set()); useAppStore.getState().setSelectedFile(null); }}
                 className="text-xs text-primary-400 hover:text-primary-600 dark:hover:text-primary-300"
+                aria-label="Clear all selected files"
               >
                 Clear all
               </button>
@@ -402,6 +403,7 @@ export function AIChatPanel() {
                   <button
                     onClick={() => setSelectedFileIds((prev) => { const next = new Set(prev); next.delete(f.id); return next; })}
                     className="ml-0.5 text-primary-400 hover:text-primary-600"
+                    aria-label={`Remove ${f.name}`}
                   >
                     <X className="h-2.5 w-2.5" />
                   </button>

@@ -167,7 +167,7 @@ export function FileViewer() {
   switch (fileType) {
     case 'pdf':
       return (
-        <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" /></div>}>
+        <Suspense fallback={null}>
           <AnnotatablePDFViewer
             url={fileUrl}
             fileName={selectedFile.name}

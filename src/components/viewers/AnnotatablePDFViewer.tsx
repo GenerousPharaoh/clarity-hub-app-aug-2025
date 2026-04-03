@@ -549,11 +549,7 @@ export function AnnotatablePDFViewer({
         <PdfLoader
           document={url}
           workerSrc={PDF_WORKER_URL}
-          beforeLoad={() => (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
-            </div>
-          )}
+          beforeLoad={() => null}
           errorMessage={(error) => (
             <div className="flex h-full flex-col items-center justify-center px-8 text-center">
               <div className="w-full max-w-sm rounded-2xl border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-950/40">

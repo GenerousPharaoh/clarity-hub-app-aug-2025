@@ -246,7 +246,7 @@ export function AIChatPanel() {
   }
 
   return (
-    <div ref={panelRef} className="flex h-full min-w-0 flex-col surface-grain">
+    <div ref={panelRef} className="flex h-full min-w-0 flex-col">
       {/* Messages area */}
       <div
         ref={messagesContainerRef}

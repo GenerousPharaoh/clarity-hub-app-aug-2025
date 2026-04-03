@@ -550,7 +550,7 @@ export function TimelineTab() {
       {viewMode === 'events' && <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
         {eventCount === 0 ? (
           <div className="flex flex-1 items-center justify-center">
-            <div className="w-full rounded-2xl border border-dashed border-surface-300 bg-white/88 px-5 py-12 text-center shadow-sm surface-grain dark:border-surface-700 dark:bg-surface-900/70">
+            <div className="w-full rounded-2xl border border-dashed border-surface-300 bg-white px-5 py-12 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/70">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-800">
                 <Calendar className="h-5 w-5 text-surface-400 dark:text-surface-500" />
               </div>

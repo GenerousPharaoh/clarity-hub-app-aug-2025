@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import useAppStore from '@/store';
 import { getFileUrl, getSignedUrl } from '@/services/storageService';
-import { getFileType, cn } from '@/lib/utils';
-import { FileSearch, MessageSquareText, RefreshCw, Loader2 } from 'lucide-react';
+import { getFileType } from '@/lib/utils';
+import { FileSearch, RefreshCw, Loader2 } from 'lucide-react';
 import { ImageViewer } from './ImageViewer';
 import { AudioViewer } from './AudioViewer';
 import { VideoViewer } from './VideoViewer';
@@ -37,12 +37,7 @@ const AnnotatablePDFViewer = lazy(async () => {
 
 export function FileViewer() {
   const selectedFileId = useAppStore((s) => s.selectedFileId);
-  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const files = useAppStore((s) => s.files);
-  const setSelectedFile = useAppStore((s) => s.setSelectedFile);
-  const setRightTab = useAppStore((s) => s.setRightTab);
-  const setRightPanel = useAppStore((s) => s.setRightPanel);
-  const setMobileTab = useAppStore((s) => s.setMobileTab);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,14 +50,6 @@ export function FileViewer() {
   // Determine file type to pick URL strategy
   const fileType = selectedFile ? getFileType(selectedFile.name) : 'unsupported';
   const needsSignedUrl = fileType === 'pdf' || fileType === 'document';
-  const recentProjectFiles = files
-    .filter((file) => file.project_id === selectedProjectId && !file.is_deleted)
-    .sort(
-      (a, b) =>
-        new Date(b.last_modified ?? b.added_at ?? 0).getTime() -
-        new Date(a.last_modified ?? a.added_at ?? 0).getTime()
-    )
-    .slice(0, 4);
 
   useEffect(() => {
     if (!selectedFile?.file_path) {
@@ -130,56 +117,12 @@ export function FileViewer() {
   // No file selected
   if (!selectedFile) {
     return (
-      <div className="flex h-full items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl border border-surface-200/80 bg-white p-5 text-center shadow-sm dark:border-surface-800 dark:bg-surface-900">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-100 dark:bg-surface-800">
-            <FileSearch className="h-6 w-6 text-surface-400 dark:text-surface-500" />
-          </div>
-          <h3 className="mt-4 font-heading text-base font-semibold text-surface-800 dark:text-surface-100">
-            Select a file to view
-          </h3>
-          <p className="mt-1.5 text-sm leading-relaxed text-surface-500 dark:text-surface-400">
-            Click any file in the left panel to open it here.
+      <div className="flex h-full items-center justify-center p-6">
+        <div className="text-center">
+          <FileSearch className="mx-auto h-6 w-6 text-surface-300 dark:text-surface-600" />
+          <p className="mt-3 text-sm text-surface-500 dark:text-surface-400">
+            Select a file from the left panel to view it here.
           </p>
-          {recentProjectFiles.length > 0 && (
-            <div className="mt-4 rounded-xl border border-surface-200/80 bg-surface-50 p-3 text-left dark:border-surface-800 dark:bg-surface-950/40">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-surface-400 dark:text-surface-500">
-                Recent files
-              </p>
-              <div className="mt-2 space-y-1">
-                {recentProjectFiles.map((file) => (
-                  <button
-                    key={file.id}
-                    onClick={() => {
-                      setSelectedFile(file.id);
-                      setRightPanel(true);
-                      setRightTab('viewer');
-                      setMobileTab('viewer');
-                    }}
-                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/20"
-                  >
-                    <span className="truncate pr-3 text-sm font-medium text-surface-700 dark:text-surface-200" title={file.name}>
-                      {file.name}
-                    </span>
-                    <span className="shrink-0 text-[10px] text-surface-400 dark:text-surface-500">
-                      {file.file_type ?? 'file'}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => {
-                  setRightPanel(true);
-                  setRightTab('ai');
-                  setMobileTab('viewer');
-                }}
-                className="mt-2 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-50 dark:text-primary-400 dark:hover:bg-primary-900/20"
-              >
-                <MessageSquareText className="h-3 w-3" />
-                Open AI chat
-              </button>
-            </div>
-          )}
         </div>
       </div>
     );

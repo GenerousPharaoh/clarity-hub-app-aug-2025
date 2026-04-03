@@ -183,20 +183,7 @@ export function DashboardPage() {
         <>
           {/* Hero section — big, bold, spacious */}
           <section className="relative overflow-hidden rounded-3xl bg-surface-950 px-8 py-10 sm:px-12 sm:py-14 dark:bg-surface-900">
-            {/* Background texture */}
-            <div className="absolute inset-0 opacity-[0.04]"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
-                `,
-                backgroundSize: '48px 48px',
-              }}
-            />
-            {/* Accent glow */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-[400px] w-[400px] rounded-full bg-accent-500/10 blur-[100px]" />
-
-            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0 max-w-2xl">
                 <p className="text-sm font-medium text-surface-400 mb-3">
                   {new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 17 ? 'Good afternoon' : 'Good evening'}{firstName ? `, ${firstName}` : ''}
@@ -235,16 +222,14 @@ export function DashboardPage() {
           <div className="mt-6 grid items-stretch gap-4 grid-cols-1 sm:grid-cols-3">
             <MetricCard
               icon={<Briefcase className="h-4 w-4" />}
-              label="Active matters"
+              label="Matters"
               value={projects?.length ?? 0}
-              detail="Open records"
               tone="primary"
             />
             <MetricCard
               icon={<FileText className="h-4 w-4" />}
-              label="Source files"
+              label="Files"
               value={totalFiles}
-              detail="Uploaded evidence"
               tone="emerald"
             />
             <MetricCard
@@ -413,7 +398,7 @@ function MetricCard({
   icon: React.ReactNode;
   label: string;
   value: string | number;
-  detail: string;
+  detail?: string;
   tone?: string;
 }) {
   const toneStyles: Record<string, { icon: string; bg: string }> = {
@@ -447,9 +432,11 @@ function MetricCard({
       <p className="mt-1 text-sm font-medium text-surface-500 dark:text-surface-400">
         {label}
       </p>
-      <p className="mt-0.5 text-xs text-surface-400 dark:text-surface-500 [overflow-wrap:anywhere]">
-        {detail}
-      </p>
+      {detail && (
+        <p className="mt-0.5 text-xs text-surface-400 dark:text-surface-500 [overflow-wrap:anywhere]">
+          {detail}
+        </p>
+      )}
     </div>
   );
 }

@@ -34,7 +34,7 @@ import {
   getFileTypeFromExtension,
 } from '@/lib/utils';
 import { cn } from '@/lib/utils';
-import { FadeIn } from '@/components/shared/FadeIn';
+// FadeIn removed — instant render, no unnecessary animation
 import { ACCEPTED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/constants';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -257,14 +257,14 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   }
 
   return (
-    <FadeIn className="flex-1 overflow-y-auto bg-surface-50/60 @container dark:bg-surface-950/30">
+    <div className="flex-1 overflow-y-auto bg-surface-50/60 @container dark:bg-surface-950/30">
       <div className="mx-auto max-w-5xl space-y-5 p-4 @lg:p-6">
         <div className="space-y-5">
           <section className="min-w-0 overflow-hidden rounded-2xl border border-surface-200/80 bg-white/90 p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900/78 @lg:p-6">
             <div className="min-w-0">
               <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
                 <OverviewBadge tone={stage.tone}>{stage.label}</OverviewBadge>
-                <OverviewBadge tone="neutral">{readinessPercent}% AI-ready</OverviewBadge>
+                <OverviewBadge tone="neutral">{readinessPercent}% indexed</OverviewBadge>
               </div>
 
               <div className="mt-4">
@@ -387,7 +387,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
           />
         </div>
       </div>
-    </FadeIn>
+    </div>
   );
 }
 
@@ -690,7 +690,7 @@ function MatterStageCard({
 
       <div className="mt-5 rounded-xl border border-white/60 bg-white/70 p-4 dark:border-white/5 dark:bg-surface-950/35">
         <div className="flex flex-col gap-1 text-xs text-surface-500 dark:text-surface-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>AI-ready coverage</span>
+          <span>indexed coverage</span>
           <span>{readinessPercent}%</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-200 dark:bg-surface-800">

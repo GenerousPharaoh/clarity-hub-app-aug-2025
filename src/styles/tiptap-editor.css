@@ -4,7 +4,7 @@
 .tiptap {
   outline: none;
   padding: 1.75rem 1.5rem 8rem;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Switzer', system-ui, sans-serif;
   font-size: 15.5px;
   line-height: 1.85;
   color: var(--color-surface-800);
@@ -66,7 +66,7 @@
 
 /* ── Headings ─────────────────────────────────────────── */
 .tiptap h1 {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-family: 'Geist Sans', 'Geist', system-ui, sans-serif;
   font-size: 1.875em;
   font-weight: 700;
   color: var(--color-surface-900);
@@ -80,7 +80,7 @@
 }
 
 .tiptap h2 {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-family: 'Geist Sans', 'Geist', system-ui, sans-serif;
   font-size: 1.375em;
   font-weight: 600;
   color: var(--color-surface-900);
@@ -90,7 +90,7 @@
 }
 
 .tiptap h3 {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-family: 'Geist Sans', 'Geist', system-ui, sans-serif;
   font-size: 1.125em;
   font-weight: 600;
   color: var(--color-surface-800);
@@ -148,7 +148,7 @@
 
 .dark .tiptap .tiptap-blockquote {
   border-left-color: var(--color-primary-400);
-  background: rgb(79 70 229 / 0.08);
+  background: rgb(20 184 166 / 0.08);
   color: var(--color-surface-300);
 }
 
@@ -376,24 +376,24 @@
 }
 
 .dark .tiptap .tiptap-table tr:hover td {
-  background: rgb(79 70 229 / 0.08);
+  background: rgb(20 184 166 / 0.08);
 }
 
 .tiptap .tiptap-table .selectedCell {
-  background: rgb(79 70 229 / 0.08);
+  background: rgb(20 184 166 / 0.08);
 }
 
 .dark .tiptap .tiptap-table .selectedCell {
-  background: rgb(79 70 229 / 0.15);
+  background: rgb(20 184 166 / 0.15);
 }
 
 /* ── Selection ────────────────────────────────────────── */
 .tiptap ::selection {
-  background: rgb(79 70 229 / 0.15);
+  background: rgb(20 184 166 / 0.15);
 }
 
 .dark .tiptap ::selection {
-  background: rgb(79 70 229 / 0.35);
+  background: rgb(20 184 166 / 0.25);
 }
 
 /* ── Focus ring for contenteditable ───────────────────── */

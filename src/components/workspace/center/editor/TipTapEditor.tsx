@@ -27,6 +27,7 @@ export function TipTapEditor({
   const [dialogType, setDialogType] = useState<DialogType>(null);
   const [dialogInitialValue, setDialogInitialValue] = useState('');
   const insertLinkRef = useRef<() => void>(() => {});
+  const saveNowRef = useRef<() => void>(() => {});
 
   const editor = useEditor({
     extensions: getExtensions(),
@@ -41,6 +42,12 @@ export function TipTapEditor({
         if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
           event.preventDefault();
           insertLinkRef.current();
+          return true;
+        }
+        // Cmd+S / Ctrl+S → save immediately
+        if (event.key === 's' && (event.metaKey || event.ctrlKey)) {
+          event.preventDefault();
+          saveNowRef.current();
           return true;
         }
         return false;
@@ -99,6 +106,9 @@ export function TipTapEditor({
   }, [editor]);
 
   insertLinkRef.current = handleInsertLink;
+  saveNowRef.current = () => {
+    if (editor) triggerSave(editor.getHTML());
+  };
 
   // Image insertion handler
   const handleInsertImage = useCallback(() => {

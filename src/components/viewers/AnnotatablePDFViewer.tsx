@@ -273,8 +273,37 @@ export function AnnotatablePDFViewer({
             </button>
           </div>
 
-          {/* Right: annotations sidebar toggle + download + open in tab */}
+          {/* Right: mode toggle + annotations + download + open */}
           <div className="flex items-center gap-1 rounded-lg bg-surface-100/80 p-0.5 dark:bg-surface-800/60">
+            {/* Read / Annotate toggle */}
+            <div className="flex items-center rounded-md border border-surface-200/60 bg-white p-px dark:border-surface-700/60 dark:bg-surface-800">
+              <button
+                onClick={() => setHighlightMode(false)}
+                className={cn(
+                  'rounded-[5px] px-2 py-1 text-[11px] font-medium transition-all',
+                  !highlightMode
+                    ? 'bg-surface-100 text-surface-700 shadow-sm dark:bg-surface-700 dark:text-surface-200'
+                    : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
+                )}
+              >
+                Read
+              </button>
+              <button
+                onClick={() => setHighlightMode(true)}
+                className={cn(
+                  'flex items-center gap-1 rounded-[5px] px-2 py-1 text-[11px] font-medium transition-all',
+                  highlightMode
+                    ? 'bg-yellow-100 text-yellow-800 shadow-sm dark:bg-yellow-900/30 dark:text-yellow-300'
+                    : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
+                )}
+              >
+                <Highlighter className="h-3 w-3" />
+                {!compactToolbar && 'Annotate'}
+              </button>
+            </div>
+
+            <div className="mx-0.5 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+
             <button
               onClick={() => setSidebarOpen((s) => !s)}
               className={cn(
@@ -317,65 +346,6 @@ export function AnnotatablePDFViewer({
               <ExternalLink className="h-3.5 w-3.5" />
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Annotation toolbar */}
-      <div
-        className={cn(
-          'shrink-0 border-b border-surface-100 bg-surface-50/80 px-3 py-2 dark:border-surface-800 dark:bg-surface-850',
-          narrowToolbar ? 'space-y-2' : 'flex h-9 items-center gap-1.5'
-        )}
-      >
-        {/* Mode toggle */}
-        <div className="flex items-center rounded-lg border border-surface-200 bg-white p-0.5 dark:border-surface-700 dark:bg-surface-800">
-          <button
-            onClick={() => setHighlightMode(false)}
-            className={cn(
-              'flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
-              !highlightMode
-                ? 'bg-surface-100 text-surface-700 shadow-sm dark:bg-surface-700 dark:text-surface-200'
-                : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
-            )}
-          >
-            Read
-          </button>
-          <button
-            onClick={() => setHighlightMode(true)}
-            className={cn(
-              'flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
-              highlightMode
-                ? 'bg-yellow-100 text-yellow-800 shadow-sm dark:bg-yellow-900/30 dark:text-yellow-300'
-                : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
-            )}
-          >
-            <Highlighter className="h-3 w-3" />
-            Annotate
-          </button>
-        </div>
-
-        <div className="h-4 w-px bg-surface-200 dark:bg-surface-700" />
-
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className={cn(
-            'flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-all',
-            sidebarOpen
-              ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-              : 'text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-700'
-          )}
-        >
-          <MessageSquare className="h-3 w-3" />
-          {annotationCount > 0 ? `${annotationCount} note${annotationCount > 1 ? 's' : ''}` : 'Notes'}
-        </button>
-        <div
-          className={cn(
-            'text-[10px] text-surface-400 dark:text-surface-500',
-            narrowToolbar ? 'flex flex-wrap items-center gap-x-3 gap-y-1' : 'ml-auto flex items-center gap-3'
-          )}
-        >
-          <span>{highlightMode ? 'Select text to annotate' : 'Select text to copy'}</span>
-          {highlightMode && <span>Tip: hold Alt while dragging to mark an area.</span>}
         </div>
       </div>
 

@@ -22,6 +22,8 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   ZoomIn,
   ZoomOut,
   Download,
@@ -38,6 +40,8 @@ import {
   Save,
   Pencil,
   Trash2,
+  RotateCw,
+  Search,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -163,10 +167,17 @@ export function AnnotatablePDFViewer({
   // (see SelectionTipFromContext component)
 
   const [highlightMode, setHighlightMode] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const annotationCount = annotations.length;
   const compactToolbar = viewerWidth > 0 && viewerWidth < 520;
   const narrowToolbar = viewerWidth > 0 && viewerWidth < 760;
   const compactSidebar = viewerWidth > 0 && viewerWidth < 840;
+
+  // Compute display zoom percentage
+  const zoomPercent = typeof scale === 'number' ? Math.round(scale * 100) : null;
 
   useEffect(() => {
     const el = viewerRef.current;
@@ -185,8 +196,101 @@ export function AnnotatablePDFViewer({
     setSidebarOpen(true);
   }, [highlightMode]);
 
+  // Apply rotation to the pdfjs viewer
+  useEffect(() => {
+    const viewer = highlighterUtilsRef.current?.getViewer();
+    if (viewer) {
+      viewer.pagesRotation = rotation;
+    }
+  }, [rotation, highlighterUtilsRef]);
+
+  const handleRotate = useCallback(() => {
+    setRotation((prev) => (prev + 90) % 360);
+  }, []);
+
+  // Zoom presets
+  const handleZoomPreset = useCallback((preset: PdfScaleValue) => {
+    setScale(preset);
+  }, []);
+
+  // Search: focus input when opened
+  useEffect(() => {
+    if (showSearch) {
+      requestAnimationFrame(() => searchInputRef.current?.focus());
+    } else {
+      setSearchQuery('');
+      // Clear search highlights via eventBus
+      const viewer = highlighterUtilsRef.current?.getViewer() as Record<string, unknown> | undefined;
+      const bus = viewer?.eventBus as { dispatch?: (name: string, data: Record<string, unknown>) => void } | undefined;
+      if (bus?.dispatch) {
+        bus.dispatch('find', { source: null, type: '', query: '', highlightAll: false });
+      }
+    }
+  }, [showSearch, highlighterUtilsRef]);
+
+  const dispatchFind = useCallback((opts: { query: string; type?: string; findPrevious?: boolean }) => {
+    const viewer = highlighterUtilsRef.current?.getViewer() as Record<string, unknown> | undefined;
+    const bus = viewer?.eventBus as { dispatch?: (name: string, data: Record<string, unknown>) => void } | undefined;
+    if (!bus?.dispatch || !opts.query.trim()) return;
+    bus.dispatch('find', {
+      source: null,
+      type: opts.type ?? '',
+      query: opts.query,
+      highlightAll: true,
+      caseSensitive: false,
+      entireWord: false,
+      findPrevious: opts.findPrevious ?? false,
+    });
+  }, [highlighterUtilsRef]);
+
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    dispatchFind({ query });
+  }, [dispatchFind]);
+
+  const handleSearchNext = useCallback(() => {
+    dispatchFind({ query: searchQuery, type: 'again', findPrevious: false });
+  }, [dispatchFind, searchQuery]);
+
+  const handleSearchPrev = useCallback(() => {
+    dispatchFind({ query: searchQuery, type: 'again', findPrevious: true });
+  }, [dispatchFind, searchQuery]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const el = viewerRef.current;
+    if (!el) return;
+
+    const handler = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + F = search
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+        e.preventDefault();
+        setShowSearch(true);
+        return;
+      }
+      // Escape = close search
+      if (e.key === 'Escape') {
+        if (showSearch) { setShowSearch(false); return; }
+      }
+      // Don't intercept when typing in inputs
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      // +/= = zoom in, - = zoom out
+      if (e.key === '=' || e.key === '+') { handleZoomIn(); return; }
+      if (e.key === '-') { handleZoomOut(); return; }
+      // r = rotate
+      if (e.key === 'r' && !e.metaKey && !e.ctrlKey) { handleRotate(); return; }
+      // h = toggle highlight mode
+      if (e.key === 'h' && !e.metaKey && !e.ctrlKey) { setHighlightMode((p) => !p); return; }
+    };
+
+    el.addEventListener('keydown', handler);
+    return () => el.removeEventListener('keydown', handler);
+  }, [showSearch, handleZoomIn, handleZoomOut, handleRotate]);
+
   return (
-    <div ref={viewerRef} className="relative flex h-full min-w-0 flex-col">
+    <div ref={viewerRef} className="relative flex h-full min-w-0 flex-col outline-none" tabIndex={-1}>
       {/* Toolbar */}
       <div
         className={cn(
@@ -256,9 +360,20 @@ export function AnnotatablePDFViewer({
                 'dark:hover:bg-surface-700 dark:hover:text-surface-300',
               )}
               aria-label="Zoom out"
+              title="Zoom out (-)"
             >
               <ZoomOut className="h-3.5 w-3.5" />
             </button>
+
+            {/* Zoom level / preset dropdown */}
+            <button
+              onClick={() => handleZoomPreset(typeof scale === 'number' ? 'auto' : 1)}
+              className="min-w-[3.2rem] rounded-md px-1 py-1 text-center text-[11px] font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title={typeof scale === 'number' ? 'Click for Fit Width' : 'Click for 100%'}
+            >
+              {zoomPercent ? `${zoomPercent}%` : 'Fit'}
+            </button>
+
             <button
               onClick={handleZoomIn}
               className={cn(
@@ -268,8 +383,41 @@ export function AnnotatablePDFViewer({
                 'dark:hover:bg-surface-700 dark:hover:text-surface-300',
               )}
               aria-label="Zoom in"
+              title="Zoom in (+)"
             >
               <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+
+            <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+
+            {/* Rotate */}
+            <button
+              onClick={handleRotate}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md',
+                'text-surface-400 transition-colors',
+                'hover:bg-surface-100 hover:text-surface-600',
+                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              aria-label="Rotate page"
+              title="Rotate (R)"
+            >
+              <RotateCw className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Search */}
+            <button
+              onClick={() => setShowSearch((s) => !s)}
+              className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+                showSearch
+                  ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                  : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300',
+              )}
+              aria-label="Find in document"
+              title="Search (Ctrl+F)"
+            >
+              <Search className="h-3.5 w-3.5" />
             </button>
           </div>
 
@@ -348,6 +496,52 @@ export function AnnotatablePDFViewer({
           </div>
         </div>
       </div>
+
+      {/* Search bar */}
+      {showSearch && (
+        <div className="flex shrink-0 items-center gap-2 border-b border-surface-200 bg-surface-50 px-3 py-1.5 dark:border-surface-700 dark:bg-surface-850">
+          <Search className="h-3 w-3 shrink-0 text-surface-400" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                if (e.shiftKey) handleSearchPrev();
+                else handleSearchNext();
+              }
+              if (e.key === 'Escape') setShowSearch(false);
+            }}
+            placeholder="Find in document..."
+            className="min-w-0 flex-1 bg-transparent text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:text-surface-200 dark:placeholder:text-surface-500"
+          />
+          <button
+            onClick={handleSearchPrev}
+            disabled={!searchQuery.trim()}
+            className="flex h-5 w-5 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-200 disabled:opacity-30 dark:hover:bg-surface-700"
+            title="Previous match (Shift+Enter)"
+          >
+            <ChevronUp className="h-3 w-3" />
+          </button>
+          <button
+            onClick={handleSearchNext}
+            disabled={!searchQuery.trim()}
+            className="flex h-5 w-5 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-200 disabled:opacity-30 dark:hover:bg-surface-700"
+            title="Next match (Enter)"
+          >
+            <ChevronDown className="h-3 w-3" />
+          </button>
+          <button
+            onClick={() => setShowSearch(false)}
+            className="flex h-5 w-5 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-200 dark:hover:bg-surface-700"
+            title="Close search (Esc)"
+          >
+            <XIcon className="h-3 w-3" />
+          </button>
+        </div>
+      )}
 
       {/* PDF viewer area */}
       <div className="relative flex-1 overflow-auto">

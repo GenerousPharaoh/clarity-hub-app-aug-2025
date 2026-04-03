@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState } from 'react';
-import { X, Trash2, MessageSquare, FileText, Copy, Download, Check, Pencil } from 'lucide-react';
+import { X, Trash2, MessageSquare, FileText, Copy, Download, Check, Pencil, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useUpdateAnnotation } from '@/hooks/useAnnotations';
@@ -32,11 +32,23 @@ export function AnnotationSidebar({
   fileName,
 }: AnnotationSidebarProps) {
   const [colorFilter, setColorFilter] = useState<string | null>(null);
+  const [searchFilter, setSearchFilter] = useState('');
 
-  const filtered = useMemo(
-    () => colorFilter ? annotations.filter((a) => a.color === colorFilter) : annotations,
-    [annotations, colorFilter]
-  );
+  const filtered = useMemo(() => {
+    let result = annotations;
+    if (colorFilter) {
+      result = result.filter((a) => a.color === colorFilter);
+    }
+    if (searchFilter.trim()) {
+      const q = searchFilter.toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.selected_text?.toLowerCase().includes(q) ||
+          a.comment?.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [annotations, colorFilter, searchFilter]);
 
   // Group annotations by page number
   const grouped = useMemo(() => {
@@ -202,7 +214,26 @@ export function AnnotationSidebar({
         </div>
       </div>
 
-      {/* Color filter */}
+      {/* Search + Color filter */}
+      {annotations.length > 0 && (
+        <div className="border-b border-surface-100 px-3 py-1.5 dark:border-surface-800">
+          <div className="flex items-center gap-1.5 rounded-md bg-surface-50 px-2 py-1 dark:bg-surface-800/60">
+            <Search className="h-3 w-3 shrink-0 text-surface-400" />
+            <input
+              type="text"
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              placeholder="Search annotations..."
+              className="min-w-0 flex-1 bg-transparent text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:text-surface-200 dark:placeholder:text-surface-500"
+            />
+            {searchFilter && (
+              <button onClick={() => setSearchFilter('')} className="text-surface-400 hover:text-surface-600">
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       {annotations.length > 0 && (
         <div className="border-b border-surface-100 px-3 py-2 dark:border-surface-800">
           <div className="flex flex-wrap items-center gap-1.5">

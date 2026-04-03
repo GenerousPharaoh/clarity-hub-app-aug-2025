@@ -191,19 +191,21 @@ export function TipTapEditor({
         </div>
         <div
           className={cn(
-            'flex items-center gap-1.5 text-sm font-medium tabular-nums transition-opacity duration-300',
-            saveStatus === 'idle' && 'opacity-0',
+            'flex items-center gap-1.5 text-xs font-medium tabular-nums transition-all duration-300',
+            saveStatus === 'idle' && 'text-surface-300 dark:text-surface-600',
             saveStatus === 'saving' && 'text-surface-400 dark:text-surface-500',
             saveStatus === 'saved' && 'text-green-500 dark:text-green-400',
             saveStatus === 'error' && 'text-red-500 dark:text-red-400'
           )}
         >
+          {saveStatus === 'idle' && <span className="h-1.5 w-1.5 rounded-full bg-surface-300 dark:bg-surface-600" />}
           {saveStatus === 'saving' && <Loader2 className="h-3 w-3 animate-spin" />}
           {saveStatus === 'saved' && <Check className="h-3 w-3" />}
           {saveStatus === 'error' && <AlertCircle className="h-3 w-3" />}
+          {saveStatus === 'idle' && 'Saved'}
           {saveStatus === 'saving' && 'Saving...'}
-          {saveStatus === 'saved' && 'All changes saved'}
-          {saveStatus === 'error' && 'Failed'}
+          {saveStatus === 'saved' && 'Saved'}
+          {saveStatus === 'error' && 'Save failed'}
         </div>
       </div>
 
@@ -261,6 +263,7 @@ function ExhibitPickerDialog({
   onCancel: () => void;
 }) {
   const [exhibits, setExhibits] = useState<Array<{ exhibit_id: string; file_id: string | null; description: string | null }>>([]);
+  const [exhibitSearch, setExhibitSearch] = useState('');
 
   useEffect(() => {
     import('@/lib/supabase').then(({ supabase }) => {
@@ -272,6 +275,14 @@ function ExhibitPickerDialog({
         .then(({ data }) => setExhibits(data ?? []));
     });
   }, [projectId]);
+
+  const filteredExhibits = exhibitSearch.trim()
+    ? exhibits.filter(
+        (ex) =>
+          ex.exhibit_id.toLowerCase().includes(exhibitSearch.toLowerCase()) ||
+          ex.description?.toLowerCase().includes(exhibitSearch.toLowerCase())
+      )
+    : exhibits;
 
   return (
     <>
@@ -288,8 +299,19 @@ function ExhibitPickerDialog({
             No exhibits yet. Create exhibits in the Exhibits tab first.
           </p>
         ) : (
-          <div className="mt-3 max-h-48 overflow-y-auto space-y-1">
-            {exhibits.map((ex) => (
+          <>
+          {exhibits.length > 5 && (
+            <input
+              type="text"
+              value={exhibitSearch}
+              onChange={(e) => setExhibitSearch(e.target.value)}
+              placeholder="Search exhibits..."
+              className="mt-3 w-full rounded-lg border border-surface-200 bg-surface-50 px-3 py-1.5 text-xs text-surface-700 placeholder:text-surface-400 focus:border-primary-400 focus:outline-none dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200"
+              autoFocus
+            />
+          )}
+          <div className="mt-2 max-h-48 overflow-y-auto space-y-1">
+            {filteredExhibits.map((ex) => (
               <button
                 key={ex.exhibit_id}
                 onClick={() => ex.file_id && onSelect(ex.exhibit_id, ex.file_id)}
@@ -310,6 +332,7 @@ function ExhibitPickerDialog({
               </button>
             ))}
           </div>
+          </>
         )}
         <div className="mt-3 flex justify-end">
           <button

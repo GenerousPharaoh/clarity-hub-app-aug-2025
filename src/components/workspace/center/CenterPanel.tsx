@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { formatRelativeDate } from '@/lib/utils';
@@ -247,6 +247,14 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
   const [titleDraft, setTitleDraft] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
+  const [noteSearchQuery, setNoteSearchQuery] = useState('');
+
+  const filteredNotes = useMemo(() => {
+    if (!notes) return [];
+    if (!noteSearchQuery.trim()) return notes;
+    const q = noteSearchQuery.toLowerCase();
+    return notes.filter((n) => (n.title || 'Untitled').toLowerCase().includes(q));
+  }, [notes, noteSearchQuery]);
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const handledNewNoteRequest = useRef(newNoteRequestNonce);
@@ -283,9 +291,12 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
     }
   }, [notes, activeNoteId, selectedProjectId]);
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click; clear search
   useEffect(() => {
-    if (!dropdownOpen) return;
+    if (!dropdownOpen) {
+      setNoteSearchQuery('');
+      return;
+    }
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
@@ -605,8 +616,20 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                     'dark:border-surface-700 dark:bg-surface-850 dark:shadow-surface-950/30'
                   )}
                 >
+                  {notes.length > 5 && (
+                    <div className="border-b border-surface-100 px-3 py-2 dark:border-surface-800">
+                      <input
+                        type="text"
+                        value={noteSearchQuery}
+                        onChange={(e) => setNoteSearchQuery(e.target.value)}
+                        placeholder="Search documents..."
+                        className="w-full rounded-lg bg-surface-50 px-2.5 py-1.5 text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:bg-surface-800 dark:text-surface-200"
+                        autoFocus
+                      />
+                    </div>
+                  )}
                   <div className="max-h-64 overflow-y-auto p-2">
-                    {notes.map((note) => (
+                    {filteredNotes.map((note) => (
                       <button
                         key={note.id}
                         onClick={() => handleNoteSelect(note.id)}

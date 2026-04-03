@@ -164,18 +164,39 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink, onInsert
       },
       {
         title: 'AI Write',
-        description: 'Generate text with AI at cursor',
+        description: 'Ask AI to draft text at cursor position',
         icon: <Sparkles className="h-4 w-4" />,
         group: 'AI',
         action: () => {
-          // Insert a placeholder that signals to the user they should select text and use AI
-          editor
-            .chain()
-            .focus()
-            .insertContent(
-              '<p><em>Select text above and press the ✦ AI button in the toolbar, or open AI Chat from the right panel.</em></p>'
-            )
-            .run();
+          // Open AI chat with instruction to write at cursor
+          setRightPanel(true);
+          setRightTab('ai');
+          const event = new CustomEvent('ask-ai-about-text', {
+            detail: {
+              text: '[Draft request] Write a paragraph at my current cursor position in this legal document. Ask me what I need.',
+              fileName: 'Document Editor',
+            },
+          });
+          window.dispatchEvent(event);
+        },
+      },
+      // ── Legal ──
+      {
+        title: 'Block Quote (Citation)',
+        description: 'Insert a styled citation block',
+        icon: <Quote className="h-4 w-4" />,
+        group: 'Legal',
+        action: () => {
+          editor.chain().focus().toggleBlockquote().run();
+        },
+      },
+      {
+        title: 'Horizontal Rule',
+        description: 'Insert a section divider',
+        icon: <Minus className="h-4 w-4" />,
+        group: 'Legal',
+        action: () => {
+          editor.chain().focus().setHorizontalRule().run();
         },
       },
     ],

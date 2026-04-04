@@ -10,6 +10,7 @@
  */
 import { supabase } from '@/lib/supabase';
 import { legalKnowledge } from './legalKnowledgeService';
+import useAppStore from '@/store';
 import type { EffortLevel } from '@/types';
 
 // ============================================================
@@ -149,6 +150,11 @@ class AIRouter {
     followUps?: string[];
     webSources?: Array<{ index: number; title: string; url: string }>;
   }> {
+    // PIPEDA compliance: block AI calls when user has disabled AI features
+    if (!useAppStore.getState().aiEnabled) {
+      throw new Error('AI features are disabled. Enable them in Settings.');
+    }
+
     const effort = params.effortLevel ?? 'standard';
     const complexity = this.classifyQuery(params.query);
 

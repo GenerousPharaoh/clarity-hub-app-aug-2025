@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown, Zap, Brain, Globe } from 'lucide-react';
+import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown, Zap, Brain, Globe, ShieldOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -26,6 +26,7 @@ export function AIChatPanel() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const files = useAppStore((s) => s.files);
+  const aiEnabled = useAppStore((s) => s.aiEnabled);
   const processedFiles = files.filter((f) => f.processing_status === 'completed' && !f.is_deleted);
 
   // Multi-file selection: start with the sidebar-selected file if any
@@ -258,6 +259,27 @@ export function AIChatPanel() {
         {isFetchingMessages && isEmpty ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-surface-400 dark:text-surface-500" />
+          </div>
+        ) : !aiEnabled && isEmpty ? (
+          <div className="flex h-full flex-col">
+            {/* AI disabled notice */}
+            <div className={cn('flex flex-1 flex-col items-center justify-center pb-4', narrow ? 'px-3' : 'px-6')}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-900/30">
+                <ShieldOff className="h-6 w-6 text-amber-500 dark:text-amber-400" />
+              </div>
+              <h3 className="mt-4 font-heading text-base font-bold text-surface-800 dark:text-surface-100">
+                AI Features Disabled
+              </h3>
+              <p className={cn('mt-2 text-center text-sm leading-relaxed text-surface-500 dark:text-surface-400', compact ? 'max-w-[80%]' : 'max-w-xs')}>
+                No data is being sent to third-party AI services. Enable AI features in Settings to use the research assistant.
+              </p>
+              <a
+                href="/settings"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50"
+              >
+                Open Settings
+              </a>
+            </div>
           </div>
         ) : isEmpty ? (
           <div className="flex h-full flex-col">

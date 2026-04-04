@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import useAppStore from '@/store';
 import type { ThemeMode } from '@/store/slices/authSlice';
 import { FadeIn } from '@/components/shared/FadeIn';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import {
   getProcessingUsage,
   PROCESSING_DAILY_FILE_LIMIT,
   PROCESSING_DAILY_MB_LIMIT_BYTES,
 } from '@/lib/processingBudget';
 import { formatFileSize } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 import {
   Sun,
   Moon,
@@ -19,6 +22,9 @@ import {
   RefreshCw,
   ShieldCheck,
   ExternalLink,
+  Download,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -104,6 +110,139 @@ export function SettingsPage() {
   };
 
   const refreshUsage = () => setUsage(getProcessingUsage());
+
+  // ── Data export state ─────────────────────────────────
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportData = useCallback(async () => {
+    if (!user?.id) {
+      toast.error('You must be signed in to export data.');
+      return;
+    }
+    setExporting(true);
+    try {
+      // 1. Profile
+      const { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profileErr) throw profileErr;
+
+      // 2. Projects owned by this user
+      const { data: projects, error: projErr } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('owner_id', user.id);
+      if (projErr) throw projErr;
+
+      const projectIds = (projects ?? []).map((p) => p.id);
+
+      // 3. Files metadata (no blobs) for user's projects
+      let files: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('files')
+          .select('id, name, file_type, file_path, project_id, added_at, added_by, processing_status, document_type, ai_summary, is_deleted')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        files = data ?? [];
+      }
+
+      // 4. Notes
+      let notes: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('notes')
+          .select('*')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        notes = data ?? [];
+      }
+
+      // 5. Exhibit markers
+      let exhibitMarkers: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('exhibit_markers')
+          .select('*')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        exhibitMarkers = data ?? [];
+      }
+
+      // 6. PDF annotations
+      let annotations: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('pdf_annotations')
+          .select('*')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        annotations = data ?? [];
+      }
+
+      // 7. Chat messages
+      let chatMessages: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        chatMessages = data ?? [];
+      }
+
+      // Compile export object
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        pipedaNotice:
+          'This export contains all personal data held by Clarity Hub, in compliance with PIPEDA Principle 9 (Individual Access).',
+        profile,
+        projects: projects ?? [],
+        files,
+        notes,
+        exhibitMarkers,
+        annotations,
+        chatMessages,
+      };
+
+      // Trigger browser download
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `clarity-hub-data-export-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast.success('Data export downloaded successfully.');
+    } catch (err) {
+      console.error('Data export failed:', err);
+      toast.error('Failed to export data. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  }, [user?.id]);
+
+  // ── Account deletion state ────────────────────────────
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleDeleteAccountConfirmed = useCallback(() => {
+    setShowDeleteConfirm(false);
+    // Client-side Supabase SDK cannot delete all user data across tables
+    // without server-side admin privileges, so direct users to contact email.
+    toast.success('Deletion request noted', {
+      description:
+        'Please email kareem.hassanein@gmail.com to complete your account deletion.',
+      duration: 8000,
+    });
+  }, []);
 
   useEffect(() => {
     const onFocus = () => refreshUsage();
@@ -394,6 +533,45 @@ export function SettingsPage() {
           </div>
         </section>
 
+        {/* ── Your Data (PIPEDA) ─────────────────────────────── */}
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+          <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
+            <div className="flex items-center gap-2.5">
+              <Download className="h-4.5 w-4.5 text-primary-600 dark:text-primary-400" />
+              <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
+                Your Data
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-5 px-6 py-5">
+            <div>
+              <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+                Download your data
+              </p>
+              <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                Under PIPEDA Principle 9, you have the right to access your
+                personal information. This export includes your profile,
+                projects, file metadata, notes, annotations, exhibit markers,
+                and chat history as a JSON file.
+              </p>
+            </div>
+
+            <button
+              onClick={() => void handleExportData()}
+              disabled={exporting || !user?.id}
+              className="inline-flex w-fit items-center gap-2 rounded-lg border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-primary-800 dark:bg-primary-950/30 dark:text-primary-300 dark:hover:bg-primary-900/40"
+            >
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {exporting ? 'Preparing export...' : 'Download My Data'}
+            </button>
+          </div>
+        </section>
+
         {/* ── Account ───────────────────────────────────────── */}
         <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
           <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
@@ -494,7 +672,55 @@ export function SettingsPage() {
             </div>
           </div>
         </section>
+
+        {/* ── Danger Zone ─────────────────────────────────────── */}
+        {!isDemoMode && (
+          <section className="overflow-hidden rounded-2xl border border-red-200 bg-white dark:border-red-900/50 dark:bg-surface-800">
+            <div className="border-b border-red-200 px-6 py-4 dark:border-red-900/50">
+              <div className="flex items-center gap-2.5">
+                <Trash2 className="h-4.5 w-4.5 text-red-500 dark:text-red-400" />
+                <h2 className="font-heading text-base font-bold text-red-700 dark:text-red-400">
+                  Danger Zone
+                </h2>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 px-6 py-5">
+              <div>
+                <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+                  Delete your account
+                </p>
+                <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+                  Permanently remove your account and all associated data,
+                  including projects, files, notes, annotations, and chat
+                  history. Under PIPEDA Principle 5, data is not retained
+                  longer than necessary. This action cannot be undone.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="inline-flex w-fit items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40"
+              >
+                <Trash2 className="h-4 w-4" />
+                Request Account Deletion
+              </button>
+            </div>
+          </section>
+        )}
       </div>
+
+      {/* ── Confirm deletion dialog ──────────────────────────── */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete your account?"
+        message="This will permanently delete your account and all associated data. To proceed, we will direct you to email the administrator. This action cannot be reversed."
+        confirmLabel="Request Deletion"
+        cancelLabel="Keep Account"
+        variant="danger"
+        onConfirm={handleDeleteAccountConfirmed}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </FadeIn>
   );
 }

@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { aiRouter, EFFORT_CONFIG } from '@/services/aiRouter';
@@ -8,6 +9,7 @@ import { searchDocuments, formatSearchContext, type SearchResult } from '@/servi
 import type { ChatMessage, ChatSource, EffortLevel } from '@/types';
 import type { TablesInsert } from '@/types/database';
 import { getDemoFiles, getDemoProjects } from '@/lib/demo';
+import useAppStore from '@/store';
 
 const CHAT_KEY = 'chat-messages';
 
@@ -325,6 +327,12 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
       enableWebSearch?: boolean
     ) => {
       if (!content.trim() || !projectId || !user || isLoadingRef.current) return;
+
+      // PIPEDA compliance: block AI calls when user has disabled AI features
+      if (!useAppStore.getState().aiEnabled) {
+        toast.info('AI features are disabled. Enable them in Settings.');
+        return;
+      }
 
       abortRef.current = false;
       isLoadingRef.current = true;

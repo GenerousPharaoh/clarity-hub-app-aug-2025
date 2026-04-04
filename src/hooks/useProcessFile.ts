@@ -1,9 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { checkProcessingBudget, reserveProcessingBudget } from '@/lib/processingBudget';
 import type { FileRecord } from '@/types';
 import { filesQueryKey } from './useFiles';
+import useAppStore from '@/store';
 
 interface ProcessFileState {
   isProcessing: boolean;
@@ -65,6 +67,12 @@ export function useProcessFile() {
 
   const processFile = useCallback(
     async (fileId: string, projectId: string, options?: ProcessFileOptions) => {
+      // PIPEDA compliance: block processing when user has disabled AI features
+      if (!useAppStore.getState().aiEnabled) {
+        toast.info('AI features are disabled. Enable them in Settings to process files.');
+        return { status: 'failed' as const, error: 'AI features are disabled' };
+      }
+
       const requestKey = `${projectId}:${fileId}`;
       const inFlightRequest = inFlightProcessingRequests.get(requestKey);
       if (inFlightRequest) {

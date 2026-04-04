@@ -19,6 +19,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
   const { processFile } = useProcessFile();
   const { isDemoMode } = useAuth();
   const processOnUpload = useAppStore((s) => s.processOnUpload);
+  const aiEnabled = useAppStore((s) => s.aiEnabled);
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
 
   const onDrop = useCallback(
@@ -38,7 +39,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
             icon: <CheckCircle2 className="h-4 w-4 text-green-500" />,
           });
 
-          if (processOnUpload) {
+          if (processOnUpload && aiEnabled) {
             void processFile(fileRecord.id, projectId, {
               fileSizeBytes: file.size,
               source: 'auto',
@@ -67,7 +68,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         }
       }
     },
-    [processFile, processOnUpload, projectId, uploadFile]
+    [processFile, processOnUpload, aiEnabled, projectId, uploadFile]
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({

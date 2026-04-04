@@ -83,11 +83,18 @@ function useResolvedTheme() {
 
 export default function App() {
   const resolved = useResolvedTheme();
+  const displayDensity = useAppStore((s) => s.displayDensity);
 
   // Toggle dark class on <html> for Tailwind dark mode to work globally
   useEffect(() => {
     document.documentElement.classList.toggle('dark', resolved === 'dark');
   }, [resolved]);
+
+  // Apply density class on <html> for CSS custom properties
+  useEffect(() => {
+    document.documentElement.classList.remove('density-compact', 'density-comfortable', 'density-spacious');
+    document.documentElement.classList.add(`density-${displayDensity}`);
+  }, [displayDensity]);
 
   return (
     <ErrorBoundary>

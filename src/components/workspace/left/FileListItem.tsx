@@ -7,6 +7,7 @@ import {
   Info,
   X,
   AlertTriangle,
+  Pin,
 } from 'lucide-react';
 import { cn, formatDate, getFileExtension } from '@/lib/utils';
 import { getDocumentTypeLabel, getDocumentTypeCategoryLabel } from '@/lib/documentTypes';
@@ -132,6 +133,13 @@ export function FileListItem({
   const setRightTab = useAppStore((s) => s.setRightTab);
   const setMobileTab = useAppStore((s) => s.setMobileTab);
   const deleteFile = useDeleteFile();
+  const togglePinFile = useAppStore((s) => s.togglePinFile);
+  const trackRecentFile = useAppStore((s) => s.trackRecentFile);
+  const pinnedFileIds = useAppStore((s) => s.pinnedFileIds);
+  const projectId = file.project_id;
+  const isPinned = projectId
+    ? (pinnedFileIds[projectId] ?? []).includes(file.id)
+    : false;
 
   const [showMenu, setShowMenu] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -226,7 +234,8 @@ export function FileListItem({
     setRightPanel(true);
     setRightTab('viewer');
     setMobileTab('viewer');
-  }, [file.id, setSelectedFile, setRightPanel, setRightTab, setMobileTab]);
+    if (projectId) trackRecentFile(projectId, file.id);
+  }, [file.id, projectId, setSelectedFile, setRightPanel, setRightTab, setMobileTab, trackRecentFile]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -266,8 +275,9 @@ export function FileListItem({
             handleClick();
           }
         }}
+        style={{ padding: 'var(--density-py) var(--density-px)', gap: 'var(--density-gap)' }}
         className={cn(
-          'group relative flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors duration-75',
+          'group relative flex w-full items-start text-left transition-colors duration-75',
           isSelected
             ? 'bg-primary-50/70 dark:bg-primary-900/15'
             : 'hover:bg-surface-50 dark:hover:bg-surface-800/40',
@@ -335,8 +345,9 @@ export function FileListItem({
           {/* Line 1: name + actions */}
           <div className="flex items-center gap-1">
             <p
+              style={{ fontSize: 'var(--density-text)' }}
               className={cn(
-                'min-w-0 flex-1 truncate text-[13px] font-medium leading-5',
+                'min-w-0 flex-1 truncate font-medium leading-5',
                 isSelected
                   ? 'text-primary-700 dark:text-primary-200'
                   : isFailed
@@ -355,6 +366,22 @@ export function FileListItem({
               </div>
             )}
 
+            {/* Always-visible pin icon when pinned */}
+            {isPinned && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (projectId) togglePinFile(projectId, file.id);
+                }}
+                className="flex h-5 w-5 shrink-0 items-center justify-center text-primary-500 dark:text-primary-400"
+                title="Unpin file"
+                aria-label="Unpin"
+              >
+                <Pin className="h-3 w-3" />
+              </button>
+            )}
+
             {/* Hover action buttons */}
             <div
               className={cn(
@@ -364,6 +391,22 @@ export function FileListItem({
                   : 'max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100'
               )}
             >
+              {/* Pin toggle (hover-only when not pinned) */}
+              {!isPinned && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (projectId) togglePinFile(projectId, file.id);
+                  }}
+                  className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+                  title="Pin file"
+                  aria-label="Pin"
+                >
+                  <Pin className="h-3 w-3" />
+                </button>
+              )}
+
               {/* Details toggle */}
               <button
                 type="button"

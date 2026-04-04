@@ -17,6 +17,7 @@ import {
   Sparkles,
   Layers3,
   RotateCcw,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -60,6 +61,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const themeMode = useAppStore((s) => s.themeMode);
   const setShowKeyboardShortcuts = useAppStore((s) => s.setShowKeyboardShortcuts);
   const requestNewNote = useAppStore((s) => s.requestNewNote);
+  const recentFileIds = useAppStore((s) => s.recentFileIds);
+  const trackRecentFile = useAppStore((s) => s.trackRecentFile);
 
   const isInWorkspace = location.pathname.startsWith('/project/');
   const lastSession = readWorkspaceSession();
@@ -110,11 +113,37 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       });
     }
 
-    // Files (only if in a workspace)
+    // Recent files (only if in a workspace and query is empty)
     if (isInWorkspace && selectedProjectId) {
+      const recentIds = recentFileIds[selectedProjectId] ?? [];
       const projectFiles = files.filter(
         (f) => f.project_id === selectedProjectId && !f.is_deleted
       );
+      const projectFileMap = new Map(projectFiles.map((f) => [f.id, f]));
+
+      if (recentIds.length > 0) {
+        for (const fileId of recentIds) {
+          const file = projectFileMap.get(fileId);
+          if (!file) continue;
+          items.push({
+            id: `recent-${file.id}`,
+            label: file.name,
+            group: 'Recent Files',
+            icon: <Clock className="h-4 w-4" />,
+            keywords: `recent ${file.file_type ?? ''}`,
+            action: () => {
+              setSelectedFile(file.id);
+              setRightPanel(true);
+              setRightTab('viewer');
+              setMobileTab('viewer');
+              if (selectedProjectId) trackRecentFile(selectedProjectId, file.id);
+              onClose();
+            },
+          });
+        }
+      }
+
+      // All files
       for (const file of projectFiles.slice(0, 20)) {
         items.push({
           id: `file-${file.id}`,
@@ -122,7 +151,14 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           group: 'Files',
           icon: <FileText className="h-4 w-4" />,
           keywords: file.file_type ?? '',
-          action: () => { setSelectedFile(file.id); setRightPanel(true); setRightTab('viewer'); setMobileTab('viewer'); onClose(); },
+          action: () => {
+            setSelectedFile(file.id);
+            setRightPanel(true);
+            setRightTab('viewer');
+            setMobileTab('viewer');
+            if (selectedProjectId) trackRecentFile(selectedProjectId, file.id);
+            onClose();
+          },
         });
       }
     }
@@ -238,6 +274,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     navigate,
     onClose,
     projects,
+    recentFileIds,
     requestNewNote,
     resetDemoWorkspace,
     selectedProjectId,
@@ -251,17 +288,19 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     toggleLeft,
     toggleRight,
     toggleTheme,
+    trackRecentFile,
   ]);
 
-  // Filter commands
+  // Filter commands — show Recent Files only when query is empty
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;
     const q = query.toLowerCase();
     return commands.filter(
       (c) =>
-        c.label.toLowerCase().includes(q) ||
-        c.group.toLowerCase().includes(q) ||
-        (c.keywords && c.keywords.toLowerCase().includes(q))
+        c.group !== 'Recent Files' &&
+        (c.label.toLowerCase().includes(q) ||
+          c.group.toLowerCase().includes(q) ||
+          (c.keywords && c.keywords.toLowerCase().includes(q)))
     );
   }, [commands, query]);
 

@@ -40,6 +40,7 @@ export function WorkspacePage() {
   const selectedFileId = useAppStore((s) => s.selectedFileId);
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const requestNewNote = useAppStore((s) => s.requestNewNote);
+  const defaultCenterTab = useAppStore((s) => s.defaultCenterTab);
 
   const projects = useAppStore((s) => s.projects);
   const files = useAppStore((s) => s.files);
@@ -173,7 +174,7 @@ export function WorkspacePage() {
       return;
     }
 
-    setCenterTab('overview');
+    setCenterTab(defaultCenterTab);
     setRightTab('viewer');
     setSelectedFile(null);
     if (isMobile) {
@@ -182,7 +183,7 @@ export function WorkspacePage() {
       }
 
     setRightPanel(false);
-  }, [projectId, isMobile, setCenterTab, setMobileTab, setRightPanel, setRightTab, setSelectedFile]);
+  }, [projectId, isMobile, defaultCenterTab, setCenterTab, setMobileTab, setRightPanel, setRightTab, setSelectedFile]);
 
   useEffect(() => {
     if (!projectId || !projectName) return;

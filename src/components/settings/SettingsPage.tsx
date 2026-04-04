@@ -3,6 +3,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import useAppStore from '@/store';
 import type { ThemeMode } from '@/store/slices/authSlice';
+import type { DisplayDensity } from '@/store/slices/uiSlice';
+import type { CenterTab } from '@/store/slices/panelSlice';
 import { FadeIn } from '@/components/shared/FadeIn';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import {
@@ -58,6 +60,42 @@ const themeOptions: {
 ];
 
 // ---------------------------------------------------------------------------
+// Density option cards
+// ---------------------------------------------------------------------------
+const densityOptions: {
+  value: DisplayDensity;
+  label: string;
+  description: string;
+}[] = [
+  {
+    value: 'compact',
+    label: 'Compact',
+    description: 'Fit more on screen',
+  },
+  {
+    value: 'comfortable',
+    label: 'Comfortable',
+    description: 'Balanced spacing',
+  },
+  {
+    value: 'spacious',
+    label: 'Spacious',
+    description: 'More breathing room',
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Default center tab options
+// ---------------------------------------------------------------------------
+const centerTabOptions: { value: CenterTab; label: string }[] = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'editor', label: 'Editor' },
+  { value: 'exhibits', label: 'Exhibits' },
+  { value: 'timeline', label: 'Timeline' },
+  { value: 'drafts', label: 'Drafts' },
+];
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 function formatDate(iso: string | undefined | null): string {
@@ -89,6 +127,10 @@ export function SettingsPage() {
   const setProcessOnUpload = useAppStore((s) => s.setProcessOnUpload);
   const aiEnabled = useAppStore((s) => s.aiEnabled);
   const setAIEnabled = useAppStore((s) => s.setAIEnabled);
+  const displayDensity = useAppStore((s) => s.displayDensity);
+  const setDisplayDensity = useAppStore((s) => s.setDisplayDensity);
+  const defaultCenterTab = useAppStore((s) => s.defaultCenterTab);
+  const setDefaultCenterTab = useAppStore((s) => s.setDefaultCenterTab);
   const storeUser = useAppStore((s) => s.user);
   const navigate = useNavigate();
   const [usage, setUsage] = useState(() => getProcessingUsage());
@@ -361,6 +403,62 @@ export function SettingsPage() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Display density */}
+            <div className="mt-6 border-t border-surface-200 pt-5 dark:border-surface-700">
+              <p className="text-sm text-surface-600 dark:text-surface-400">
+                Display density
+              </p>
+
+              <div className="mt-3 inline-flex rounded-lg border border-surface-200 bg-surface-50 p-0.5 dark:border-surface-700 dark:bg-surface-800/50">
+                {densityOptions.map((opt) => {
+                  const active = displayDensity === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => setDisplayDensity(opt.value)}
+                      aria-pressed={active}
+                      className={`relative rounded-md px-4 py-2 text-sm font-medium transition-all ${
+                        active
+                          ? 'bg-white text-primary-700 shadow-sm dark:bg-surface-700 dark:text-primary-300'
+                          : 'text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-300'
+                      }`}
+                      title={opt.description}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-surface-400 dark:text-surface-500">
+                {densityOptions.find((o) => o.value === displayDensity)?.description}
+              </p>
+            </div>
+
+            {/* Default view */}
+            <div className="mt-6 border-t border-surface-200 pt-5 dark:border-surface-700">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm text-surface-600 dark:text-surface-400">
+                    Default view
+                  </p>
+                  <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
+                    Tab shown when opening a project.
+                  </p>
+                </div>
+                <select
+                  value={defaultCenterTab}
+                  onChange={(e) => setDefaultCenterTab(e.target.value as CenterTab)}
+                  className="rounded-lg border border-surface-200 bg-surface-50 px-3 py-1.5 text-sm text-surface-700 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/15 dark:border-surface-700 dark:bg-surface-800/50 dark:text-surface-300 dark:focus:border-primary-400 dark:focus:ring-primary-400/20"
+                >
+                  {centerTabOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         </section>

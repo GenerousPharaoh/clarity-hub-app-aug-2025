@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Search, X, FileText, AlertCircle, AlertTriangle, RefreshCw, Loader2, Zap } from 'lucide-react';
+import { ChevronLeft, Search, X, FileText, AlertCircle, AlertTriangle, RefreshCw, Loader2, Zap, Pin } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn, formatFileSize } from '@/lib/utils';
 import useAppStore from '@/store';
@@ -35,6 +35,7 @@ export function LeftPanel() {
   const isMobile = useIsMobile();
   const searchQuery = useAppStore((s) => s.searchQuery);
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
+  const pinnedFileIds = useAppStore((s) => s.pinnedFileIds);
 
   const { data: files = [], isLoading, isError, refetch } = useFiles(selectedProjectId);
   const { processFile, getState: getProcessState } = useProcessFile();
@@ -42,7 +43,15 @@ export function LeftPanel() {
   const [batchSelectionMode, setBatchSelectionMode] = useState(false);
   const [selectedBatchIds, setSelectedBatchIds] = useState<string[]>([]);
   const [batchConfirmOpen, setBatchConfirmOpen] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const fileTypeFilterMap = useAppStore((s) => s.fileTypeFilter);
+  const setFileTypeFilterStore = useAppStore((s) => s.setFileTypeFilter);
+  const typeFilter = selectedProjectId ? (fileTypeFilterMap[selectedProjectId] ?? null) : null;
+  const setTypeFilter = useCallback(
+    (filter: string | null) => {
+      if (selectedProjectId) setFileTypeFilterStore(selectedProjectId, filter);
+    },
+    [selectedProjectId, setFileTypeFilterStore]
+  );
   const [panelWidth, setPanelWidth] = useState(0);
 
   const processableFiles = useMemo(() => files.filter(isProcessable), [files]);
@@ -309,6 +318,20 @@ export function LeftPanel() {
     return result;
   }, [files, debouncedQuery, typeFilter]);
 
+  const pinnedSet = useMemo(() => {
+    if (!selectedProjectId) return new Set<string>();
+    return new Set(pinnedFileIds[selectedProjectId] ?? []);
+  }, [selectedProjectId, pinnedFileIds]);
+
+  const pinnedFiles = useMemo(
+    () => filteredFiles.filter((f) => pinnedSet.has(f.id)),
+    [filteredFiles, pinnedSet]
+  );
+  const unpinnedFiles = useMemo(
+    () => filteredFiles.filter((f) => !pinnedSet.has(f.id)),
+    [filteredFiles, pinnedSet]
+  );
+
   const clearSearch = useCallback(() => {
     setSearchQuery('');
     setDebouncedQuery('');
@@ -511,7 +534,8 @@ export function LeftPanel() {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2.5 border-b border-surface-100 px-3 py-2.5 dark:border-surface-800/50"
+                style={{ padding: 'var(--density-py) var(--density-px)', gap: 'var(--density-gap)' }}
+                className="flex items-center border-b border-surface-100 dark:border-surface-800/50"
               >
                 <div className="h-6 w-8 shrink-0 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
                 <div className="min-w-0 flex-1 space-y-1.5">
@@ -560,8 +584,45 @@ export function LeftPanel() {
         ) : (
           // File list — tight rows, no gaps
           <div>
+            {/* Pinned files section */}
+            {pinnedFiles.length > 0 && (
+              <>
+                <div className="flex items-center gap-1.5 px-3 pb-1 pt-2">
+                  <Pin className="h-3 w-3 text-surface-400 dark:text-surface-500" />
+                  <span className="text-[11px] font-semibold text-surface-400 dark:text-surface-500">
+                    Pinned
+                  </span>
+                </div>
+                <AnimatePresence initial={false}>
+                  {pinnedFiles.map((file) => (
+                    <motion.div
+                      key={file.id}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <FileListItem
+                        file={file}
+                        compact={compactPanel}
+                        onProcess={handleProcess}
+                        processingState={getProcessState(file.id)}
+                        showBatchSelector={batchSelectionMode && isProcessable(file)}
+                        isBatchSelected={selectedBatchIdSet.has(file.id)}
+                        onToggleBatchSelection={handleToggleBatchSelection}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {unpinnedFiles.length > 0 && (
+                  <div className="mx-3 border-t border-surface-200/60 dark:border-surface-700/50" />
+                )}
+              </>
+            )}
+
+            {/* Unpinned files */}
             <AnimatePresence initial={false}>
-              {filteredFiles.map((file) => (
+              {unpinnedFiles.map((file) => (
                 <motion.div
                   key={file.id}
                   initial={{ opacity: 0, height: 0 }}

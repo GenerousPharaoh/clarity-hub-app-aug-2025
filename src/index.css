@@ -204,6 +204,29 @@ code, pre, kbd {
   background: none !important;
 }
 
+/* ── Display Density Tokens ────────────────────────────── */
+/* Comfortable is the default (no class needed on :root) */
+:root {
+  --density-py: 0.625rem;   /* comfortable: py-2.5 */
+  --density-px: 0.75rem;    /* comfortable: px-3 */
+  --density-gap: 0.625rem;  /* comfortable: gap-2.5 */
+  --density-text: 0.8125rem; /* comfortable: ~13px */
+}
+
+.density-compact {
+  --density-py: 0.375rem;   /* py-1.5 */
+  --density-px: 0.5rem;     /* px-2 */
+  --density-gap: 0.375rem;  /* gap-1.5 */
+  --density-text: 0.75rem;  /* 12px */
+}
+
+.density-spacious {
+  --density-py: 0.875rem;   /* py-3.5 */
+  --density-px: 1rem;       /* px-4 */
+  --density-gap: 0.75rem;   /* gap-3 */
+  --density-text: 0.875rem; /* 14px */
+}
+
 /* ── Dark Mode ─────────────────────────────────────────── */
 .dark {
   color-scheme: dark;

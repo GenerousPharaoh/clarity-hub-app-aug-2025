@@ -147,8 +147,8 @@ export function SuggestedPrompts({
             key={prompt.label}
             onClick={() => onSelectPrompt(prompt.text)}
             className={compact
-              ? 'group interactive-lift flex h-full items-start gap-2 rounded-lg border border-translucent bg-white px-2.5 py-2 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'
-              : 'group interactive-lift flex h-full min-h-20 items-start gap-2.5 rounded-lg border border-translucent bg-white p-3 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'}
+              ? 'group flex h-full items-start gap-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-white px-2.5 py-2 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'
+              : 'group flex h-full min-h-20 items-start gap-2.5 rounded-lg border border-surface-200 dark:border-surface-700 bg-white p-3 text-left shadow-sm hover:border-accent-300 hover:bg-accent-50/50 dark:bg-surface-800 dark:hover:border-accent-700 dark:hover:bg-accent-900/20'}
           >
             <div className="mt-0.5 shrink-0 text-surface-400 transition-colors group-hover:text-accent-500 dark:text-surface-500 dark:group-hover:text-accent-400">
               {prompt.icon}

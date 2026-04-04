@@ -131,7 +131,8 @@ export function Header() {
             'flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-lg',
             'text-surface-400 transition-all',
             'hover:bg-surface-100 hover:text-surface-600',
-            'dark:hover:bg-surface-800 dark:hover:text-surface-300'
+            'dark:hover:bg-surface-800 dark:hover:text-surface-300',
+            'focus-visible:ring-2 focus-visible:ring-primary-500/40 focus-visible:ring-offset-1'
           )}
           title="Settings"
         >

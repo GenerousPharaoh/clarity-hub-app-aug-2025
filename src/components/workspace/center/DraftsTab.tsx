@@ -711,7 +711,7 @@ Return ONLY the section content — no section heading (it will be added automat
               placeholder="Optional: instructions for this section..."
               value={sectionInstructions[section.key] ?? ''}
               onChange={(e) => setSectionInstructions((prev) => ({ ...prev, [section.key]: e.target.value }))}
-              className="mb-2 w-full rounded-lg border border-surface-100 bg-surface-50 px-3 py-1.5 text-xs text-surface-600 placeholder:text-surface-300 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300"
+              className="mb-2 w-full rounded-lg border border-surface-100 bg-surface-50 px-3 py-1.5 text-xs text-surface-600 placeholder:text-surface-400 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:placeholder:text-surface-500"
             />
 
             {/* Section content */}

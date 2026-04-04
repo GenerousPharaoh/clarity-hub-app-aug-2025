@@ -429,7 +429,7 @@ export function AnnotatablePDFViewer({
               <button
                 onClick={() => setHighlightMode(false)}
                 className={cn(
-                  'rounded-[5px] px-2 py-1 text-[11px] font-medium transition-all',
+                  'rounded-md px-2 py-1 text-[11px] font-medium transition-all',
                   !highlightMode
                     ? 'bg-surface-100 text-surface-700 shadow-sm dark:bg-surface-700 dark:text-surface-200'
                     : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
@@ -440,7 +440,7 @@ export function AnnotatablePDFViewer({
               <button
                 onClick={() => setHighlightMode(true)}
                 className={cn(
-                  'flex items-center gap-1 rounded-[5px] px-2 py-1 text-[11px] font-medium transition-all',
+                  'flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-all',
                   highlightMode
                     ? 'bg-yellow-100 text-yellow-800 shadow-sm dark:bg-yellow-900/30 dark:text-yellow-300'
                     : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'

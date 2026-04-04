@@ -778,7 +778,7 @@ function TimelineEventCard({
           {event.source_file_name ? (
             <button
               onClick={() => event.source_file_id && onSourceClick(event.source_file_id)}
-              className="interactive-lift inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-1 text-sm font-medium text-primary-700 hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
+              className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-1 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
               title={`Open ${event.source_file_name}`}
             >
               <FileText className="h-2.5 w-2.5" />

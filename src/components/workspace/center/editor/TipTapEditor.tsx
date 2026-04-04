@@ -179,7 +179,7 @@ export function TipTapEditor({
       </div>
 
       {/* Persistent status bar */}
-      <div className="flex h-9 shrink-0 items-center justify-between overflow-hidden border-t border-surface-200/80 bg-white/90 px-3.5 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90">
+      <div className="flex h-9 shrink-0 items-center justify-between overflow-hidden border-t border-surface-200/80 bg-white px-3.5 backdrop-blur dark:border-surface-800 dark:bg-surface-900">
         <div className="flex min-w-0 items-center gap-3 text-xs tabular-nums text-surface-400 dark:text-surface-500">
           <span className="whitespace-nowrap">{wordCount.toLocaleString()} words</span>
           <span className="hidden whitespace-nowrap sm:inline">{charCount.toLocaleString()} chars</span>

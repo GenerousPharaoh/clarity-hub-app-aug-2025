@@ -389,7 +389,7 @@ function StepSelect({
 
       {/* Item list */}
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-surface-300 bg-white/80 px-4 py-10 text-center dark:border-surface-700 dark:bg-surface-900/60">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-surface-300 bg-surface-50 px-4 py-10 text-center dark:border-surface-700 dark:bg-surface-900">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
             <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
           </div>

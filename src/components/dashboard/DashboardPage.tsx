@@ -40,7 +40,7 @@ function getFirstName(user: { user_metadata?: Record<string, unknown>; email?: s
 
 function SkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-surface-200/80 bg-white/85 p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900/70">
+    <div className="overflow-hidden rounded-2xl border border-surface-200/80 bg-white p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="h-1.5 w-24 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
       <div className="mt-5 flex items-start gap-3">
         <div className="h-11 w-11 animate-pulse rounded-2xl bg-surface-100 dark:bg-surface-800" />
@@ -318,7 +318,7 @@ export function DashboardPage() {
 
         {!isLoading && !error && !hasProjects && (
           <>
-            <div className="mt-4 rounded-2xl border border-dashed border-surface-300 bg-white/85 py-6 shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
+            <div className="mt-4 rounded-2xl border border-dashed border-surface-300 bg-white py-6 shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
               <EmptyState
                 icon={<Scale className="h-6 w-6" />}
                 title="No matters yet"
@@ -344,7 +344,7 @@ export function DashboardPage() {
           <div className="mt-4">
             {visibleProjects.length === 0 ? (
               <>
-                <div className="rounded-2xl border border-dashed border-surface-300 bg-white/80 px-6 py-10 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
+                <div className="rounded-2xl border border-dashed border-surface-300 bg-surface-50 px-6 py-10 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/55">
                   <Search className="mx-auto h-5 w-5 text-surface-400 dark:text-surface-500" />
                   <h3 className="mt-3 text-sm font-semibold text-surface-700 dark:text-surface-200">
                     No matters match that search

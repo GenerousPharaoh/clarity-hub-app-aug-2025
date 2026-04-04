@@ -299,7 +299,7 @@ export function ExhibitsTab() {
         ) : (
           <div className="space-y-3">
             {!hasLinkedFiles && (
-              <div className="rounded-xl border border-dashed border-surface-300 bg-white/80 px-4 py-4 text-sm text-surface-500 shadow-sm dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400">
+              <div className="rounded-xl border border-dashed border-surface-300 bg-surface-50 px-4 py-4 text-sm text-surface-500 shadow-sm dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium text-surface-700 dark:text-surface-200">

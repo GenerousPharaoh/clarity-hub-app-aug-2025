@@ -260,7 +260,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
     <div className="flex-1 overflow-y-auto bg-surface-50/60 @container dark:bg-surface-950/30">
       <div className="mx-auto max-w-5xl space-y-5 p-4 @lg:p-6">
         <div className="space-y-5">
-          <section className="min-w-0 overflow-hidden rounded-2xl border border-surface-200/80 bg-white/90 p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900/78 @lg:p-6">
+          <section className="min-w-0 overflow-hidden rounded-2xl border border-surface-200/80 bg-white p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900 @lg:p-6">
             <div className="min-w-0">
               <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
                 <OverviewBadge tone={stage.tone}>{stage.label}</OverviewBadge>
@@ -449,7 +449,7 @@ function EditableProjectHeader({
             }}
             disabled={updateProject.isPending}
             autoFocus
-            className="min-w-0 flex-1 rounded-2xl border border-primary-300 bg-white/90 px-3 py-2 font-heading text-2xl font-semibold tracking-tight text-surface-950 outline-none focus:ring-2 focus:ring-primary-500/25 disabled:opacity-50 dark:border-primary-700 dark:bg-surface-900 dark:text-surface-50"
+            className="min-w-0 flex-1 rounded-2xl border border-primary-300 bg-white px-3 py-2 font-heading text-2xl font-semibold tracking-tight text-surface-950 outline-none focus:ring-2 focus:ring-primary-500/25 disabled:opacity-50 dark:border-primary-700 dark:bg-surface-900 dark:text-surface-50"
           />
           <div className="flex items-center gap-2 self-end @sm:self-auto">
             <button
@@ -506,7 +506,7 @@ function EditableProjectHeader({
             placeholder="Add a matter summary..."
             className={cn(
               'w-full resize-none rounded-2xl border px-3 py-2 text-sm leading-6 transition-colors',
-              'border-surface-200 bg-white/90 text-surface-700',
+              'border-surface-200 bg-white text-surface-700',
               'focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20',
               'disabled:opacity-50',
               'dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300',
@@ -571,7 +571,7 @@ function OverviewBadge({
         ? 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300'
         : tone === 'emerald'
           ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300'
-          : 'border-surface-200 bg-white/80 text-surface-500 dark:border-surface-700 dark:bg-surface-900/60 dark:text-surface-400';
+          : 'border-surface-200 bg-surface-50 text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400';
 
   return (
     <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-sm font-medium', toneClasses)} title={typeof children === 'string' ? children : undefined}>
@@ -599,7 +599,7 @@ function OverviewMetricCard({
     <Component
       onClick={onClick}
       className={cn(
-        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white/78 p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/45',
+        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white p-4 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/50',
         onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-400 hover:shadow-md dark:hover:border-primary-600'
       )}
     >
@@ -634,7 +634,7 @@ function AnchorCard({
     <Component
       onClick={onClick}
       className={cn(
-        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white/76 px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/45',
+        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/50',
         onClick && 'transition-colors hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
@@ -688,7 +688,7 @@ function MatterStageCard({
         {stage.description}
       </p>
 
-      <div className="mt-5 rounded-xl border border-white/60 bg-white/70 p-4 dark:border-white/5 dark:bg-surface-950/35">
+      <div className="mt-5 rounded-xl border border-white/60 bg-surface-50 p-4 dark:border-white/5 dark:bg-surface-950/35">
         <div className="flex flex-col gap-1 text-xs text-surface-500 dark:text-surface-400 sm:flex-row sm:items-center sm:justify-between">
           <span>indexed coverage</span>
           <span>{readinessPercent}%</span>
@@ -712,7 +712,7 @@ function NextStepsCard({
   }>;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <Sparkles className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Next steps
@@ -780,7 +780,7 @@ function FileTypeBreakdown({
   };
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <FileText className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Evidence profile
@@ -854,7 +854,7 @@ function RecentActivity({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <Clock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Recent activity
@@ -901,7 +901,7 @@ function MatterDetailsCard({
   exhibitCount: number;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
         <FolderOpen className="h-4 w-4 text-primary-500 dark:text-primary-400" />
         Matter details
@@ -932,7 +932,7 @@ function SignalEmptyState({
   description: string;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-dashed border-surface-300 bg-white/82 p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900/60">
+    <div className="flex h-full flex-col rounded-2xl border border-dashed border-surface-300 bg-white p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900">
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
         <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
       </div>
@@ -977,7 +977,7 @@ function QuickActions() {
   const acceptStr = Object.keys(ACCEPTED_FILE_TYPES).join(',');
 
   return (
-    <div className="rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <input
         ref={fileInputRef}
         type="file"
@@ -1134,7 +1134,7 @@ Base your analysis ONLY on the documents provided. Do not fabricate facts. If in
   }, [analysis]);
 
   return (
-    <div className="rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
@@ -1331,7 +1331,7 @@ function HighlightsSummaryCard({ projectId }: { projectId: string | null }) {
   };
 
   return (
-    <div className="rounded-2xl border border-surface-200/80 bg-white/88 p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900/76">
+    <div className="rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">

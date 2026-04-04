@@ -491,7 +491,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Header bar: note selector dropdown + actions */}
-      <div className="shrink-0 border-b border-surface-200/80 bg-white/90 px-3 py-3 backdrop-blur dark:border-surface-800 dark:bg-surface-900/90 sm:px-4">
+      <div className="shrink-0 border-b border-surface-200/80 bg-white px-3 py-3 backdrop-blur dark:border-surface-800 dark:bg-surface-900 sm:px-4">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex min-w-0 items-center gap-3">

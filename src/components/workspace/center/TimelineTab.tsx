@@ -284,7 +284,7 @@ export function TimelineTab() {
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="rounded-xl border border-translucent bg-white/88 p-4 dark:bg-surface-900/78"
+              className="rounded-xl border border-translucent bg-white p-4 dark:bg-surface-900"
             >
               <div className="space-y-2">
                 <div className="h-3 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
@@ -332,7 +332,7 @@ export function TimelineTab() {
   return (
     <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Header */}
-      <div className="shrink-0 border-b border-translucent bg-white/90 px-3 py-3 backdrop-blur dark:bg-surface-900/90 sm:px-4">
+      <div className="shrink-0 border-b border-translucent bg-surface-50 px-3 py-3 backdrop-blur-md dark:bg-surface-900 sm:px-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex items-center gap-1 rounded-full border border-surface-200 bg-surface-50 p-0.5 dark:border-surface-700 dark:bg-surface-800">
@@ -692,9 +692,9 @@ function TimelineEventCard({
       <div
         className={cn(
           'mb-2 min-w-0 flex-1 rounded-xl border px-4 py-3 transition-all',
-          'border-translucent bg-white/88 shadow-sm',
+          'border-translucent bg-white shadow-sm',
           'hover:shadow-md',
-          'dark:bg-surface-900/78'
+          'dark:bg-surface-900'
         )}
       >
         {/* Date + title row */}

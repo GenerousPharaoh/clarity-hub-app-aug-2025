@@ -192,10 +192,7 @@ export function AnnotatablePDFViewer({
     return () => ro.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!highlightMode) return;
-    setSidebarOpen(true);
-  }, [highlightMode]);
+  // Don't auto-open sidebar — user can click the annotations button explicitly
 
   // Apply rotation to the pdfjs viewer
   useEffect(() => {
@@ -598,7 +595,6 @@ export function AnnotatablePDFViewer({
           onClose={() => setSidebarOpen(false)}
           onStartHighlighting={() => {
             setHighlightMode(true);
-            setSidebarOpen(true);
           }}
           onScrollTo={handleScrollToHighlight}
           onDelete={(a) => handleDeleteAnnotation(a)}

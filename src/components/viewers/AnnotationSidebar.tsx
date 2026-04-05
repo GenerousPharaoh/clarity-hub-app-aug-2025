@@ -161,8 +161,8 @@ export function AnnotationSidebar({
         'transition-transform duration-200 ease-out',
         'dark:bg-surface-900',
         compact
-          ? 'inset-x-0 bottom-0 h-[min(72%,34rem)] max-w-none rounded-t-[1.75rem] border-t border-surface-200 dark:border-surface-700'
-          : 'inset-y-0 right-0 h-full max-w-[24rem] border-l border-surface-200 dark:border-surface-700',
+          ? 'inset-x-0 bottom-0 h-[min(50%,24rem)] max-w-none rounded-t-xl border-t border-surface-200 dark:border-surface-700'
+          : 'inset-y-0 right-0 h-full max-w-[22rem] border-l border-surface-200 dark:border-surface-700',
         compact
           ? (isOpen ? 'translate-y-0' : 'translate-y-full')
           : (isOpen ? 'translate-x-0' : 'translate-x-full'),

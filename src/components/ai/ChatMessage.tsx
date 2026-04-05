@@ -287,9 +287,10 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
 
   if (isUser) {
     return (
-      <div className="flex justify-end px-4 py-2">
+      <div className="flex justify-end px-4 py-2" aria-label="Your message">
         <div className="flex max-w-[88%] items-end gap-2">
           <div>
+            <span className="sr-only">You said:</span>
             <div className="rounded-2xl rounded-br-md bg-primary-600 px-3 py-2 text-[13px] leading-relaxed text-white shadow-elevated break-words">
               {message.content}
             </div>
@@ -306,10 +307,12 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   }
 
   // Assistant message
+  const srLabel = `Clarity Hub${message.model ? ` (${message.model})` : ''} replied:`;
   const modelConfig = message.model ? MODEL_CONFIG[message.model] : null;
 
   return (
-    <div className="flex justify-start px-4 py-2">
+    <div className="flex justify-start px-4 py-2" aria-label="Assistant message">
+      <span className="sr-only">{srLabel}</span>
       <div className="group flex max-w-[90%] items-start gap-2">
         <div
           className={cn(
@@ -340,14 +343,14 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                   {modelConfig.label}
                 </span>
               )}
-              {message.effortLevel && EFFORT_BADGE_CONFIG[message.effortLevel] && (
+              {message.effortLevel === 'deep' && EFFORT_BADGE_CONFIG.deep && (
                 <span
                   className={cn(
                     'inline-flex items-center rounded-full px-2 py-1 text-sm font-medium',
-                    EFFORT_BADGE_CONFIG[message.effortLevel].className
+                    EFFORT_BADGE_CONFIG.deep.className
                   )}
                 >
-                  {EFFORT_BADGE_CONFIG[message.effortLevel].label}
+                  {EFFORT_BADGE_CONFIG.deep.label}
                 </span>
               )}
             </div>

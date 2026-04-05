@@ -322,25 +322,69 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
   const totalCount = draft.sections.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  // Cache project context so it's fetched once, reused across all section generations
+  const projectContextRef = useRef<{
+    fileSummaries: string;
+    exhibitsContext: string;
+    timelineContext: string;
+    fetchedAt: number;
+  } | null>(null);
+
+  const getProjectContext = useCallback(async () => {
+    // Reuse cached context if fresh (within 60 seconds)
+    if (projectContextRef.current && Date.now() - projectContextRef.current.fetchedAt < 60_000) {
+      return projectContextRef.current;
+    }
+
+    const { data: files } = await supabase
+      .from('files')
+      .select('name, document_type, ai_summary')
+      .eq('project_id', projectId)
+      .eq('processing_status', 'completed')
+      .is('is_deleted', false);
+
+    const fileSummaries = (files ?? [])
+      .map((f) => `- ${f.name}${f.document_type ? ` [${f.document_type}]` : ''}: ${f.ai_summary ?? 'No summary'}`)
+      .join('\n');
+
+    let exhibitsContext = '';
+    const { data: exhibits } = await supabase
+      .from('exhibit_markers')
+      .select('exhibit_id, description, file_id')
+      .eq('project_id', projectId)
+      .order('sort_order', { ascending: true });
+
+    if (exhibits && exhibits.length > 0) {
+      exhibitsContext = `\n\n--- EXHIBITS ---\n${exhibits.map((ex) => `${ex.exhibit_id}${ex.description ? `: ${ex.description}` : ''}`).join('\n')}`;
+    }
+
+    let timelineContext = '';
+    const { data: timelineEvents } = await supabase
+      .from('timeline_events')
+      .select('date, title, description, category, is_verified')
+      .eq('project_id', projectId)
+      .eq('is_hidden', false)
+      .order('date', { ascending: true });
+
+    if (timelineEvents && timelineEvents.length > 0) {
+      timelineContext = `\n\n--- TIMELINE ---\n${timelineEvents.map((ev) => `${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${ev.is_verified ? ' [v]' : ''}`).join('\n')}`;
+    }
+
+    const ctx = { fileSummaries, exhibitsContext, timelineContext, fetchedAt: Date.now() };
+    projectContextRef.current = ctx;
+    return ctx;
+  }, [projectId]);
+
   const handleGenerateSection = useCallback(async (sectionKey: string) => {
     setGeneratingSection(sectionKey);
     try {
       const section = draft.sections.find((s) => s.key === sectionKey);
       if (!section) return;
 
-      // Gather context: file summaries only (NOT extracted_text — full text comes from RAG)
-      const { data: files } = await supabase
-        .from('files')
-        .select('name, document_type, ai_summary')
-        .eq('project_id', projectId)
-        .eq('processing_status', 'completed')
-        .is('is_deleted', false);
+      // Get cached project context (files, exhibits, timeline)
+      const { fileSummaries, exhibitsContext, timelineContext } = await getProjectContext();
 
-      const fileSummaries = (files ?? [])
-        .map((f) => `- ${f.name}${f.document_type ? ` [${f.document_type}]` : ''}: ${f.ai_summary ?? 'No summary'}`)
-        .join('\n');
-
-      // RAG search for section-relevant content — generous limit for expert drafting
+      // RAG search — section-specific (this one can't be cached since query varies)
       const chunkLimit = (sectionKey === 'facts' || sectionKey === 'background' || sectionKey === 'damages' || sectionKey === 'law_argument') ? 20 : 12;
       const searchResults = await searchDocuments({
         query: `${section.heading} ${sectionInstructions[sectionKey] || ''}`.trim(),
@@ -349,38 +393,6 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
       }).catch(() => []);
 
       const documentContext = formatSearchContext(searchResults);
-
-      // Fetch exhibit markers and timeline events for ALL sections (not just facts)
-      let exhibitsContext = '';
-      let timelineContext = '';
-
-      const { data: exhibits } = await supabase
-        .from('exhibit_markers')
-        .select('exhibit_id, description, file_id')
-        .eq('project_id', projectId)
-        .order('sort_order', { ascending: true });
-
-      if (exhibits && exhibits.length > 0) {
-        const exhibitLines = exhibits.map((ex) =>
-          `- Exhibit ${ex.exhibit_id}${ex.description ? `: ${ex.description}` : ''}`
-        );
-        exhibitsContext = `\n\n--- EXHIBIT LIST ---\n${exhibitLines.join('\n')}\n--- END EXHIBITS ---`;
-      }
-
-      const { data: timelineEvents } = await supabase
-        .from('timeline_events')
-        .select('date, title, description, category, is_verified, source_file_id')
-        .eq('project_id', projectId)
-        .eq('is_hidden', false)
-        .order('date', { ascending: true });
-
-      if (timelineEvents && timelineEvents.length > 0) {
-        const eventLines = timelineEvents.map((ev) => {
-          const verified = ev.is_verified ? ' [verified]' : '';
-          return `- ${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${verified}`;
-        });
-        timelineContext = `\n\n--- CHRONOLOGICAL TIMELINE ---\n${eventLines.join('\n')}\n--- END TIMELINE ---`;
-      }
 
       // Build template-specific prompt using TEMPLATE_PROMPTS
       const templatePrompts = TEMPLATE_PROMPTS[draft.template_type] ?? {};
@@ -439,7 +451,7 @@ IMPORTANT: Return ONLY the section content — no section heading (it will be ad
     } finally {
       setGeneratingSection(null);
     }
-  }, [draft, projectId, updateDraft, sectionInstructions]);
+  }, [draft, projectId, updateDraft, sectionInstructions, getProjectContext]);
 
   const handleEditSection = useCallback(async (sectionKey: string, newHtml: string) => {
     const updatedSections = draft.sections.map((s) =>

@@ -178,33 +178,27 @@ export function AnnotationSidebar({
               </span>
             </div>
             {fileName && (
-              <p className="mt-1 truncate text-[11px] font-medium text-surface-500 dark:text-surface-400" title={fileName}>
+              <p className="mt-0.5 truncate text-[11px] text-surface-400 dark:text-surface-500" title={fileName}>
                 {fileName}
               </p>
             )}
-            <p className="mt-1 text-[11px] text-surface-400 dark:text-surface-500">
-              {filtered.length > 0
-                ? 'Click a note to jump back to the source.'
-                : highlightMode
-                  ? 'Select text in the PDF to create your first highlight.'
-                  : 'Switch to annotate mode to start highlighting and commenting.'}
-            </p>
           </div>
           <div className="flex items-center gap-1">
             {annotations.length > 0 && (
               <button
                 onClick={handleExportAll}
-                className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
                 title="Export all highlights"
               >
-                <Download className="h-3 w-3" />
+                <Download className="h-3.5 w-3.5" />
               </button>
             )}
             <button
               onClick={onClose}
-              className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
+              title="Close"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -264,9 +258,6 @@ export function AnnotationSidebar({
             );
           })}
         </div>
-          <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
-            Filter by color or export as Markdown.
-          </p>
         </div>
       )}
 

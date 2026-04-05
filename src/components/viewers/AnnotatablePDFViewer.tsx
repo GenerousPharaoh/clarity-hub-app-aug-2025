@@ -388,20 +388,22 @@ export function AnnotatablePDFViewer({
 
             <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
 
-            {/* Rotate */}
-            <button
-              onClick={handleRotate}
-              className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-md',
-                'text-surface-400 transition-colors',
-                'hover:bg-surface-100 hover:text-surface-600',
-                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-              )}
-              aria-label="Rotate page"
-              title="Rotate (R)"
-            >
-              <RotateCw className="h-3.5 w-3.5" />
-            </button>
+            {/* Rotate — hidden on compact */}
+            {!compactToolbar && (
+              <button
+                onClick={handleRotate}
+                className={cn(
+                  'flex h-7 w-7 items-center justify-center rounded-md',
+                  'text-surface-400 transition-colors',
+                  'hover:bg-surface-100 hover:text-surface-600',
+                  'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+                )}
+                aria-label="Rotate page"
+                title="Rotate (R)"
+              >
+                <RotateCw className="h-3.5 w-3.5" />
+              </button>
+            )}
 
             {/* Search */}
             <button
@@ -478,27 +480,29 @@ export function AnnotatablePDFViewer({
             >
               <Download className="h-3.5 w-3.5" />
             </button>
-            <button
-              onClick={handleOpenInTab}
-              className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-md',
-                'text-surface-400 transition-colors',
-                'hover:bg-surface-100 hover:text-surface-600',
-                'dark:hover:bg-surface-700 dark:hover:text-surface-300',
-              )}
-              title="Open in new tab"
-              aria-label="Open in new tab"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-            </button>
+            {!compactToolbar && (
+              <button
+                onClick={handleOpenInTab}
+                className={cn(
+                  'flex h-7 w-7 items-center justify-center rounded-md',
+                  'text-surface-400 transition-colors',
+                  'hover:bg-surface-100 hover:text-surface-600',
+                  'dark:hover:bg-surface-700 dark:hover:text-surface-300',
+                )}
+                title="Open in new tab"
+                aria-label="Open in new tab"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Search bar */}
       {showSearch && (
-        <div className="flex shrink-0 items-center gap-2 border-b border-surface-200 bg-surface-50 px-3 py-1.5 dark:border-surface-700 dark:bg-surface-850">
-          <Search className="h-3 w-3 shrink-0 text-surface-400" />
+        <div className="flex shrink-0 items-center gap-2 border-b border-surface-200 bg-surface-50 px-3 py-2 dark:border-surface-700 dark:bg-surface-850">
+          <Search className="h-3.5 w-3.5 shrink-0 text-surface-400" />
           <input
             ref={searchInputRef}
             type="text"
@@ -513,30 +517,30 @@ export function AnnotatablePDFViewer({
               if (e.key === 'Escape') setShowSearch(false);
             }}
             placeholder="Find in document..."
-            className="min-w-0 flex-1 bg-transparent text-xs text-surface-700 placeholder:text-surface-400 focus:outline-none dark:text-surface-200 dark:placeholder:text-surface-500"
+            className="min-w-0 flex-1 bg-transparent text-sm text-surface-700 placeholder:text-surface-400 focus:outline-none md:text-xs dark:text-surface-200 dark:placeholder:text-surface-500"
           />
           <button
             onClick={handleSearchPrev}
             disabled={!searchQuery.trim()}
-            className="flex h-5 w-5 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-200 disabled:opacity-30 dark:hover:bg-surface-700"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-200 disabled:opacity-30 dark:hover:bg-surface-700"
             title="Previous match (Shift+Enter)"
           >
-            <ChevronUp className="h-3 w-3" />
+            <ChevronUp className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={handleSearchNext}
             disabled={!searchQuery.trim()}
-            className="flex h-5 w-5 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-200 disabled:opacity-30 dark:hover:bg-surface-700"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-200 disabled:opacity-30 dark:hover:bg-surface-700"
             title="Next match (Enter)"
           >
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => setShowSearch(false)}
-            className="flex h-5 w-5 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-200 dark:hover:bg-surface-700"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-200 dark:hover:bg-surface-700"
             title="Close search (Esc)"
           >
-            <XIcon className="h-3 w-3" />
+            <XIcon className="h-3.5 w-3.5" />
           </button>
         </div>
       )}
@@ -1008,7 +1012,8 @@ function SelectionTip({
   if (mode === 'menu' || mode === 'highlight') {
     return (
       <div className={cn(
-        'flex items-center gap-1 rounded-lg border border-surface-200 bg-white p-1 shadow-xl',
+        'flex flex-wrap items-center gap-1 rounded-lg border border-surface-200 bg-white p-1.5 shadow-xl',
+        'max-w-[calc(100vw-2rem)]',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
         {/* Color dots — click to instantly highlight */}
@@ -1016,31 +1021,28 @@ function SelectionTip({
           <button
             key={c.name}
             onClick={() => handleHighlight(c.value)}
-            className="h-6 w-6 rounded-full transition-all hover:scale-110 ring-1 ring-surface-200/60 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
+            className="h-7 w-7 rounded-full transition-all hover:scale-110 ring-1 ring-surface-200/60 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
             style={{ backgroundColor: c.value }}
             title={`Highlight ${c.label}`}
           />
         ))}
 
-        <div className="mx-0.5 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+        <div className="mx-0.5 h-5 w-px bg-surface-200 dark:bg-surface-700" />
 
-        {/* Action buttons — compact icons */}
-        <button onClick={() => setMode('comment')} className="flex h-6 w-6 items-center justify-center rounded-md text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Add comment">
+        {/* Action buttons */}
+        <button onClick={() => setMode('comment')} className="flex h-7 w-7 items-center justify-center rounded-md text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Add comment">
           <MessageSquare className="h-3.5 w-3.5" />
         </button>
-        <button onClick={handleCopy} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Copy text">
+        <button onClick={handleCopy} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Copy text">
           <Copy className="h-3.5 w-3.5" />
         </button>
-        <button onClick={handleAskAI} className="flex h-6 w-6 items-center justify-center rounded-md text-accent-500 transition-colors hover:bg-accent-50 dark:hover:bg-accent-900/20" title="Ask AI">
+        <button onClick={handleAskAI} className="flex h-7 w-7 items-center justify-center rounded-md text-accent-500 transition-colors hover:bg-accent-50 dark:hover:bg-accent-900/20" title="Ask AI">
           <Sparkles className="h-3.5 w-3.5" />
         </button>
-
-        <div className="mx-0.5 h-4 w-px bg-surface-200 dark:bg-surface-700" />
-
-        <button onClick={handleAddToBrief} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to draft">
+        <button onClick={handleAddToBrief} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to draft">
           <FileSignature className="h-3.5 w-3.5" />
         </button>
-        <button onClick={handleAddToChronology} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to timeline">
+        <button onClick={handleAddToChronology} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to timeline">
           <Clock className="h-3.5 w-3.5" />
         </button>
       </div>

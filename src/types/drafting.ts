@@ -125,6 +125,9 @@ Present the calculation clearly. State the total quantum demanded.`,
 - An invitation to discuss resolution
 - Closing with "Yours truly" or "Yours very truly"
 Do NOT threaten — state consequences matter-of-factly.`,
+    reservation: `Draft a RESERVATION OF RIGHTS paragraph:
+"Our client expressly reserves all rights and remedies available at law, in equity, and under statute, including but not limited to claims under the Employment Standards Act, 2000, the Human Rights Code, R.S.O. 1990, c. H.19, and the common law. Nothing in this letter shall be construed as a waiver of any such rights. This letter is written on a without-prejudice basis and is inadmissible in any proceeding except on the issue of costs."
+Keep it to one concise paragraph.`,
   },
   statement_of_claim: {
     _system: `You are drafting a Statement of Claim (Form 14A) for the Ontario Superior Court of Justice.
@@ -274,6 +277,12 @@ State each ground clearly and concisely.`,
 - The impact on the applicant (emotional, financial, professional)
 Use plain language — HRTO adjudicators are not judges and appreciate clarity.
 Reference evidence from project files where supported.`,
+    other_proceedings: `Draft the OTHER PROCEEDINGS section. Disclose:
+- Whether any other legal proceeding has been commenced or completed relating to the same facts
+- This includes: civil actions (e.g., wrongful dismissal claim), union grievances, professional regulatory complaints, WSIB claims, or any other tribunal proceedings
+- For each, state: the forum, the parties, the file/case number if known, the current status
+- If no other proceedings exist, state: "The Applicant has not commenced any other legal proceeding relating to the subject matter of this Application."
+This disclosure is mandatory under the HRTO Rules of Procedure.`,
     remedy: `Draft the REMEDY SOUGHT section. The HRTO can order (s. 45.2 of the Code):
 1. Monetary compensation for loss arising out of the infringement (lost wages, benefits, etc.)
 2. Monetary compensation for injury to dignity, feelings, and self-respect (typically $10,000-$35,000 for employment cases)
@@ -292,10 +301,11 @@ export const BRIEF_TEMPLATES: BriefTemplate[] = [
     description: 'Without-prejudice demand for compensation',
     icon: 'Mail',
     sections: [
-      { key: 'header', heading: 'WITHOUT PREJUDICE', description: 'Header and recipient info', required: true },
-      { key: 'background', heading: 'BACKGROUND', description: 'Employment history and facts', required: true },
-      { key: 'entitlements', heading: 'ENTITLEMENTS', description: 'Legal basis and amounts claimed', required: true },
-      { key: 'demand', heading: 'DEMAND', description: 'Specific demand and deadline', required: true },
+      { key: 'header', heading: 'WITHOUT PREJUDICE', description: 'Header, date, addressee, and re: line', required: true },
+      { key: 'background', heading: 'BACKGROUND', description: 'Employment history and termination facts', required: true },
+      { key: 'entitlements', heading: 'ENTITLEMENTS', description: 'ESA minimums + common law notice + damages', required: true },
+      { key: 'demand', heading: 'DEMAND', description: 'Amount, deadline, and consequences', required: true },
+      { key: 'reservation', heading: 'RESERVATION OF RIGHTS', description: 'Preserve all claims', required: false },
     ],
   },
   {
@@ -305,26 +315,26 @@ export const BRIEF_TEMPLATES: BriefTemplate[] = [
     description: 'Ontario Superior Court Form 14A',
     icon: 'Scale',
     sections: [
-      { key: 'parties', heading: 'THE PARTIES', description: 'Plaintiff and defendant identification', required: true },
-      { key: 'claim', heading: 'THE CLAIM', description: 'Summary of claim and relief sought', required: true },
-      { key: 'facts', heading: 'FACTS', description: 'Material facts in numbered paragraphs', required: true },
-      { key: 'damages', heading: 'DAMAGES', description: 'Particulars of damages claimed', required: true },
-      { key: 'relief', heading: 'RELIEF SOUGHT', description: 'Specific orders requested', required: true },
+      { key: 'parties', heading: 'THE PARTIES', description: 'Names, addresses, capacity (Rule 25.06)', required: true },
+      { key: 'claim', heading: 'THE CLAIM', description: 'Nature of claim and causes of action', required: true },
+      { key: 'facts', heading: 'FACTS', description: 'Material facts only — not evidence (Rule 25.06(1))', required: true },
+      { key: 'damages', heading: 'DAMAGES', description: 'Particulars: ESA + Bardal + moral + punitive', required: true },
+      { key: 'relief', heading: 'RELIEF SOUGHT', description: 'Lettered sub-paragraphs with catch-all', required: true },
     ],
   },
   {
     slug: 'motion_factum',
     name: 'Motion Factum',
     category: 'Court Filing',
-    description: 'Factum for an Ontario motion',
+    description: 'Factum for an Ontario motion (max 20 pages)',
     icon: 'BookOpen',
     sections: [
-      { key: 'overview', heading: 'PART I - OVERVIEW', description: 'Brief summary of the motion', required: true },
-      { key: 'facts', heading: 'PART II - THE FACTS', description: 'Chronological facts with exhibit references', required: true },
-      { key: 'issues', heading: 'PART III - ISSUES', description: 'Legal issues to be decided', required: true },
-      { key: 'law_argument', heading: 'PART IV - LAW AND ARGUMENT', description: 'Legal analysis with case law', required: true },
-      { key: 'order_sought', heading: 'PART V - ORDER SOUGHT', description: 'Specific relief requested', required: true },
-      { key: 'authorities', heading: 'SCHEDULE A - TABLE OF AUTHORITIES', description: 'Auto-generated from citations', required: false },
+      { key: 'overview', heading: 'PART I - OVERVIEW', description: '1-2 paragraph summary and thesis', required: true },
+      { key: 'facts', heading: 'PART II - THE FACTS', description: 'Facts with motion record Tab/para references', required: true },
+      { key: 'issues', heading: 'PART III - ISSUES', description: 'Issues framed as questions', required: true },
+      { key: 'law_argument', heading: 'PART IV - LAW AND ARGUMENT', description: 'Legal test + binding authority + application', required: true },
+      { key: 'order_sought', heading: 'PART V - ORDER SOUGHT', description: 'Specific relief and costs', required: true },
+      { key: 'authorities', heading: 'SCHEDULE A - TABLE OF AUTHORITIES', description: 'Cases and legislation cited', required: false },
     ],
   },
   {
@@ -334,11 +344,12 @@ export const BRIEF_TEMPLATES: BriefTemplate[] = [
     description: 'Human Rights Tribunal of Ontario Form 1',
     icon: 'Shield',
     sections: [
-      { key: 'applicant', heading: 'APPLICANT INFORMATION', description: 'Applicant details', required: true },
-      { key: 'respondent', heading: 'RESPONDENT INFORMATION', description: 'Respondent details', required: true },
-      { key: 'grounds', heading: 'GROUNDS', description: 'Protected grounds under the Code', required: true },
-      { key: 'facts', heading: 'FACTS', description: 'What happened, chronological order', required: true },
-      { key: 'remedy', heading: 'REMEDY SOUGHT', description: 'What you want the Tribunal to order', required: true },
+      { key: 'applicant', heading: 'APPLICANT INFORMATION', description: 'Applicant name, contact, representative', required: true },
+      { key: 'respondent', heading: 'RESPONDENT INFORMATION', description: 'Respondent legal name and address', required: true },
+      { key: 'grounds', heading: 'GROUNDS OF DISCRIMINATION', description: 'Social area + protected grounds under s.5(1)', required: true },
+      { key: 'facts', heading: 'FACTS (WHAT HAPPENED)', description: 'Chronological events with nexus to grounds', required: true },
+      { key: 'other_proceedings', heading: 'OTHER PROCEEDINGS', description: 'Disclose parallel civil/grievance actions', required: false },
+      { key: 'remedy', heading: 'REMEDY SOUGHT', description: 'Monetary + non-monetary + systemic remedies', required: true },
     ],
   },
 ];

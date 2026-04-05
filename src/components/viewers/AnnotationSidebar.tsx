@@ -160,12 +160,8 @@ export function AnnotationSidebar({
         'absolute z-30 flex w-full flex-col bg-white shadow-lg',
         'transition-transform duration-200 ease-out',
         'dark:bg-surface-900',
-        compact
-          ? 'inset-x-0 bottom-0 h-[min(50%,24rem)] max-w-none rounded-t-xl border-t border-surface-200 dark:border-surface-700'
-          : 'inset-y-0 right-0 h-full max-w-[22rem] border-l border-surface-200 dark:border-surface-700',
-        compact
-          ? (isOpen ? 'translate-y-0' : 'translate-y-full')
-          : (isOpen ? 'translate-x-0' : 'translate-x-full'),
+        'inset-y-0 right-0 h-full w-[min(100%,22rem)] border-l border-surface-200 dark:border-surface-700',
+        isOpen ? 'translate-x-0' : 'translate-x-full',
       )}
     >
       {/* Header */}

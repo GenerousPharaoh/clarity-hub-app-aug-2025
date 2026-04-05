@@ -211,6 +211,28 @@ export function useDeleteTimelineEvent() {
 }
 
 /**
+ * Deletes ALL timeline events for a project.
+ */
+export function useDeleteAllTimelineEvents() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ projectId }: { projectId: string }) => {
+      const { error, count } = await supabase
+        .from('timeline_events')
+        .delete()
+        .eq('project_id', projectId);
+      if (error) throw error;
+      return { projectId, count };
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.setQueryData<TimelineEvent[]>(timelineKey(variables.projectId), []);
+      queryClient.invalidateQueries({ queryKey: timelineKey(variables.projectId) });
+    },
+  });
+}
+
+/**
  * Triggers AI extraction of timeline events from project files.
  */
 export function useExtractTimeline() {

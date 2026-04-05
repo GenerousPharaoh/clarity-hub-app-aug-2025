@@ -32,6 +32,7 @@ import {
   useUpdateTimelineEvent,
   useDeleteTimelineEvent,
   useExtractTimeline,
+  useDeleteAllTimelineEvents,
 } from '@/hooks/useTimeline';
 import type { TimelineEvent } from '@/hooks/useTimeline';
 import { useChronologyEntries, useImportFromTimeline, useDeleteChronologyEntry, useCreateChronologyEntry, useUpdateChronologyEntry } from '@/hooks/useChronology';
@@ -123,11 +124,13 @@ export function TimelineTab() {
   const createEvent = useCreateTimelineEvent();
   const updateEvent = useUpdateTimelineEvent();
   const deleteEvent = useDeleteTimelineEvent();
+  const deleteAllEvents = useDeleteAllTimelineEvents();
   const extractTimeline = useExtractTimeline();
   const { processFile, getState: getProcessState } = useProcessFile();
 
   const [viewMode, setViewMode] = useState<'events' | 'chronology'>('events');
   const [eventToDelete, setEventToDelete] = useState<TimelineEvent | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDate, setNewDate] = useState('');
   const [newTitle, setNewTitle] = useState('');
@@ -152,8 +155,10 @@ export function TimelineTab() {
     try {
       const result = await extractTimeline.mutateAsync({ projectId: selectedProjectId });
       const count = result?.totalEventsExtracted ?? result?.total ?? 0;
+      const dupes = result?.duplicatesRemoved ?? 0;
       if (count > 0) {
-        toast.success(`Extracted ${count} timeline event${count !== 1 ? 's' : ''}`);
+        const dupeNote = dupes > 0 ? ` (${dupes} duplicate${dupes !== 1 ? 's' : ''} removed)` : '';
+        toast.success(`Extracted ${count} timeline event${count !== 1 ? 's' : ''}${dupeNote}`);
       } else {
         toast.success('Timeline extraction complete — no new events found');
       }
@@ -414,6 +419,17 @@ export function TimelineTab() {
               )}
               {showAddForm ? 'Cancel' : 'Add Event'}
             </button>
+
+            {eventCount > 0 && (
+              <button
+                onClick={() => setShowDeleteAllConfirm(true)}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-surface-200 bg-white px-3 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 hover:border-red-200 dark:border-surface-700 dark:bg-surface-800 dark:hover:bg-red-950/20 dark:hover:border-red-800"
+                title="Delete all timeline events"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear All
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -658,6 +674,24 @@ export function TimelineTab() {
         variant="danger"
         onConfirm={handleDeleteConfirm}
         onCancel={() => setEventToDelete(null)}
+      />
+      <ConfirmDialog
+        open={showDeleteAllConfirm}
+        title="Delete all timeline events"
+        message={`This will permanently delete all ${eventCount} timeline event${eventCount !== 1 ? 's' : ''} for this project, including both AI-extracted and manually created events. This cannot be undone.`}
+        confirmLabel="Delete All"
+        variant="danger"
+        onConfirm={async () => {
+          if (!selectedProjectId) return;
+          try {
+            await deleteAllEvents.mutateAsync({ projectId: selectedProjectId });
+            toast.success('All timeline events deleted');
+          } catch {
+            toast.error('Failed to delete events');
+          }
+          setShowDeleteAllConfirm(false);
+        }}
+        onCancel={() => setShowDeleteAllConfirm(false)}
       />
     </div>
   );

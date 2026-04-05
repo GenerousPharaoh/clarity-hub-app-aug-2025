@@ -158,8 +158,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(500).json({ error: 'Failed to clear existing timeline events' });
     }
 
-    // Process each file sequentially to avoid API rate limits
-    let totalEventsExtracted = 0;
+    // Process each file sequentially, collect all events before inserting
+    const allEventRows: Array<Record<string, unknown>> = [];
     let filesProcessed = 0;
     const errors: Array<{ fileId: string; fileName: string; error: string }> = [];
 
@@ -172,8 +172,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           openai
         );
 
-        if (events.length > 0) {
-          const eventRows = events.map((event) => ({
+        for (const event of events) {
+          allEventRows.push({
             source_file_id: file.id,
             project_id: projectId,
             date: event.date,
@@ -190,21 +190,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             page_reference: event.page_reference || null,
             extraction_method: 'ai',
             confidence: event.confidence ?? 0.7,
-          }));
-
-          const { error: insertError } = await serviceClient
-            .from('timeline_events')
-            .insert(eventRows);
-
-          if (insertError) {
-            errors.push({
-              fileId: file.id,
-              fileName: file.name,
-              error: `Insert failed: ${insertError.message}`,
-            });
-          } else {
-            totalEventsExtracted += eventRows.length;
-          }
+          });
         }
 
         filesProcessed++;
@@ -217,11 +203,49 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // Deduplicate: events with same date + similar title (case-insensitive, trimmed) are duplicates
+    const seen = new Map<string, Record<string, unknown>>();
+    for (const row of allEventRows) {
+      const dateStr = String(row.date).slice(0, 10);
+      const titleNorm = String(row.title).toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
+      const key = `${dateStr}||${titleNorm}`;
+
+      if (!seen.has(key)) {
+        seen.set(key, row);
+      } else {
+        // Keep the one with higher significance or longer description
+        const existing = seen.get(key)!;
+        const sigOrder = { high: 3, medium: 2, low: 1 };
+        const existingSig = sigOrder[existing.significance as keyof typeof sigOrder] ?? 1;
+        const newSig = sigOrder[row.significance as keyof typeof sigOrder] ?? 1;
+        if (newSig > existingSig || (newSig === existingSig && String(row.description ?? '').length > String(existing.description ?? '').length)) {
+          seen.set(key, row);
+        }
+      }
+    }
+
+    const deduped = Array.from(seen.values());
+    const duplicatesRemoved = allEventRows.length - deduped.length;
+    let totalEventsExtracted = 0;
+
+    if (deduped.length > 0) {
+      const { error: insertError } = await serviceClient
+        .from('timeline_events')
+        .insert(deduped);
+
+      if (insertError) {
+        errors.push({ fileId: 'batch', fileName: 'batch insert', error: insertError.message });
+      } else {
+        totalEventsExtracted = deduped.length;
+      }
+    }
+
     return res.status(200).json({
       projectId,
       filesProcessed,
       totalFiles: files.length,
-      eventsExtracted: totalEventsExtracted,
+      totalEventsExtracted,
+      duplicatesRemoved,
       ...(errors.length > 0 ? { errors } : {}),
     });
   } catch (error) {

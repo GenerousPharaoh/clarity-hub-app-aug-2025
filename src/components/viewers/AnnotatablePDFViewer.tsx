@@ -819,62 +819,28 @@ function HighlightActionPopover({ highlight: rawHighlight }: { highlight: unknow
 
   return (
     <div className={cn(
-      'rounded-xl border border-surface-200 bg-white shadow-xl overflow-hidden',
+      'flex items-center gap-1 rounded-lg border border-surface-200 bg-white p-1 shadow-xl',
       'dark:border-surface-700 dark:bg-surface-900',
     )}>
-      {/* Text preview + comment */}
-      {(highlight.content?.text || ('comment' in highlight && highlight.comment)) && (
-        <div className="max-w-[240px] px-3 py-2 border-b border-surface-100 dark:border-surface-800">
-          {highlight.content?.text && (
-            <p className="line-clamp-2 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
-              "{highlight.content.text}"
-            </p>
-          )}
-          {highlight.comment && (
-            <div className="mt-1.5 rounded-md bg-blue-50 px-2 py-1 dark:bg-blue-900/20">
-              <p className="text-xs text-blue-800 dark:text-blue-200">
-                {highlight.comment}
-              </p>
-            </div>
-          )}
+      {/* Comment preview (compact) */}
+      {highlight.comment && (
+        <div className="max-w-[120px] truncate rounded-md bg-blue-50 px-2 py-1 text-[10px] text-blue-700 dark:bg-blue-900/20 dark:text-blue-300" title={highlight.comment}>
+          {highlight.comment}
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex">
-        <button
-          onClick={() => setEditing(true)}
-          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
-          title="Edit note"
-        >
-          <Pencil className="h-3 w-3" />
-          Edit
-        </button>
-        <button
-          onClick={() => setShowColorPicker(true)}
-          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
-          title="Change color"
-        >
-          <span className="h-3 w-3 rounded-full" style={{ backgroundColor: highlight.color }} />
-          Color
-        </button>
-        <button
-          onClick={handleCopy}
-          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
-          title="Copy text"
-        >
-          <Copy className="h-3 w-3" />
-          Copy
-        </button>
-        <button
-          onClick={handleDelete}
-          className="flex flex-1 items-center justify-center gap-1 px-2.5 py-2 text-xs font-medium text-red-500 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-          title="Delete highlight"
-        >
-          <Trash2 className="h-3 w-3" />
-          Delete
-        </button>
-      </div>
+      <button onClick={() => setEditing(true)} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Edit note">
+        <Pencil className="h-3 w-3" />
+      </button>
+      <button onClick={() => setShowColorPicker(true)} className="flex h-6 w-6 items-center justify-center rounded-md transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Change color">
+        <span className="h-3.5 w-3.5 rounded-full ring-1 ring-surface-200 dark:ring-surface-700" style={{ backgroundColor: highlight.color }} />
+      </button>
+      <button onClick={handleCopy} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Copy text">
+        <Copy className="h-3 w-3" />
+      </button>
+      <button onClick={handleDelete} className="flex h-6 w-6 items-center justify-center rounded-md text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20" title="Delete">
+        <Trash2 className="h-3 w-3" />
+      </button>
     </div>
   );
 }
@@ -1038,109 +1004,44 @@ function SelectionTip({
     onSave();
   }, [selectedText, fileId, fileName, ghost.position, onSave]);
 
-  // Initial menu: actions grid
-  if (mode === 'menu') {
+  // Compact action bar — color dots for instant highlight + action icons
+  if (mode === 'menu' || mode === 'highlight') {
     return (
       <div className={cn(
-        'max-w-[22rem] overflow-hidden rounded-xl border border-surface-200 bg-white shadow-xl',
+        'flex items-center gap-1 rounded-lg border border-surface-200 bg-white p-1 shadow-xl',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
-        {selectedText && (
-          <div className="border-b border-surface-100 px-3 py-2 dark:border-surface-800">
-            <p className="line-clamp-3 text-xs leading-relaxed text-surface-600 dark:text-surface-300">
-              "{selectedText}"
-            </p>
-            <p className="mt-1 text-[10px] text-surface-400 dark:text-surface-500">
-              Choose what to do with this passage.
-            </p>
-          </div>
-        )}
-        {/* Primary actions row */}
-        <div className="flex border-b border-surface-100 dark:border-surface-800">
-          <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium text-surface-600 hover:bg-surface-50 dark:text-surface-300 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
-            title="Copy selected text"
-          >
-            <Copy className="h-3.5 w-3.5" />
-            Copy
-          </button>
-          <button
-            onClick={() => setMode('highlight')}
-            className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium text-surface-600 hover:bg-yellow-50 dark:text-surface-300 dark:hover:bg-yellow-900/20 border-r border-surface-100 dark:border-surface-800"
-            title="Highlight this text"
-          >
-            <Highlighter className="h-3.5 w-3.5 text-yellow-600" />
-            Highlight
-          </button>
-          <button
-            onClick={() => setMode('comment')}
-            className="flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium text-surface-600 hover:bg-blue-50 dark:text-surface-300 dark:hover:bg-blue-900/20"
-            title="Add a comment"
-          >
-            <MessageSquare className="h-3.5 w-3.5 text-blue-500" />
-            Comment
-          </button>
-        </div>
-        {/* Secondary actions row */}
-        <div className="flex">
-          <button
-            onClick={handleAskAI}
-            className="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20 border-r border-surface-100 dark:border-surface-800"
-            title="Ask AI about this text"
-          >
-            <Sparkles className="h-3 w-3" />
-            Ask AI
-          </button>
-          <button
-            onClick={handleAddToBrief}
-            className="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800 border-r border-surface-100 dark:border-surface-800"
-            title="Insert into a legal draft"
-          >
-            <FileSignature className="h-3 w-3" />
-            Brief
-          </button>
-          <button
-            onClick={handleAddToChronology}
-            className="flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-surface-500 hover:bg-surface-50 dark:text-surface-400 dark:hover:bg-surface-800"
-            title="Add to chronology"
-          >
-            <Clock className="h-3 w-3" />
-            Timeline
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Highlight mode: pick a color → instant save
-  if (mode === 'highlight') {
-    return (
-      <div className={cn(
-        'flex items-center gap-1.5 rounded-xl border border-surface-200 bg-white p-2 shadow-xl',
-        'dark:border-surface-700 dark:bg-surface-900',
-      )}>
-        {selectedText && (
-          <p className="mr-2 max-w-[10rem] truncate text-[10px] text-surface-400 dark:text-surface-500" title={selectedText}>
-            {selectedText}
-          </p>
-        )}
-        <span className="text-[10px] font-medium text-surface-400 mr-1">Color:</span>
+        {/* Color dots — click to instantly highlight */}
         {HIGHLIGHT_COLORS.map((c) => (
           <button
             key={c.name}
             onClick={() => handleHighlight(c.value)}
-            className="h-7 w-7 rounded-full transition-transform hover:scale-110 ring-1 ring-surface-200 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
+            className="h-6 w-6 rounded-full transition-all hover:scale-110 ring-1 ring-surface-200/60 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
             style={{ backgroundColor: c.value }}
-            title={c.label}
+            title={`Highlight ${c.label}`}
           />
         ))}
-        <button
-          onClick={() => setMode('menu')}
-          className="ml-1 rounded-md p-1 text-surface-300 hover:bg-surface-100 hover:text-surface-500 dark:hover:bg-surface-800"
-          title="Back"
-        >
-          <XIcon className="h-3 w-3" />
+
+        <div className="mx-0.5 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+
+        {/* Action buttons — compact icons */}
+        <button onClick={() => setMode('comment')} className="flex h-6 w-6 items-center justify-center rounded-md text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Add comment">
+          <MessageSquare className="h-3.5 w-3.5" />
+        </button>
+        <button onClick={handleCopy} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Copy text">
+          <Copy className="h-3.5 w-3.5" />
+        </button>
+        <button onClick={handleAskAI} className="flex h-6 w-6 items-center justify-center rounded-md text-accent-500 transition-colors hover:bg-accent-50 dark:hover:bg-accent-900/20" title="Ask AI">
+          <Sparkles className="h-3.5 w-3.5" />
+        </button>
+
+        <div className="mx-0.5 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+
+        <button onClick={handleAddToBrief} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to draft">
+          <FileSignature className="h-3.5 w-3.5" />
+        </button>
+        <button onClick={handleAddToChronology} className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to timeline">
+          <Clock className="h-3.5 w-3.5" />
         </button>
       </div>
     );

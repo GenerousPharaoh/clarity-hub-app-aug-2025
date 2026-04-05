@@ -278,13 +278,12 @@ export function WorkspacePage() {
       <div className="flex h-full flex-col">
         {/* Active panel with crossfade */}
         <div className="relative flex-1 overflow-hidden">
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence initial={false}>
             <motion.div
               key={mobileTab}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.1 }}
               className="absolute inset-0"
             >
               {mobileTab === 'files' && <LeftPanel />}

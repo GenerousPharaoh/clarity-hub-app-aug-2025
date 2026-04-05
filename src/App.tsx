@@ -125,12 +125,15 @@ export default function App() {
       <Toaster
         position="bottom-right"
         theme={resolved}
+        gap={8}
         toastOptions={{
           className: 'font-body',
           style: {
             borderRadius: '8px',
           },
         }}
+        offset={{ bottom: 16, right: 16 }}
+        mobileOffset={{ bottom: 72 }}
       />
     </ErrorBoundary>
   );

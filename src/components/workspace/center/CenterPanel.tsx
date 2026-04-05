@@ -149,9 +149,9 @@ export function CenterPanel() {
         </div>
       </div>
 
-      {/* Content area — no AnimatePresence to avoid flash on first lazy load */}
+      {/* Content area — uses CSS animation-based fade (not AnimatePresence, which flashes with Suspense) */}
       <div className="relative flex flex-1 overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
-          <div className="flex h-full w-full min-w-0">
+          <div key={activeTab} className="flex h-full w-full min-w-0 animate-in fade-in-0 duration-150">
             {activeTab === 'overview' ? (
               <ProjectOverview onSwitchTab={(tab) => setActiveTab(tab as CenterTab)} />
             ) : activeTab === 'editor' ? (

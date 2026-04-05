@@ -385,7 +385,7 @@ export function FileListItem({
             {/* Hover action buttons */}
             <div
               className={cn(
-                'flex shrink-0 items-center transition-opacity duration-75',
+                'flex shrink-0 items-center transition-opacity duration-100',
                 showMenu || showDetails
                   ? 'opacity-100'
                   : 'max-md:opacity-100 md:opacity-0 md:group-hover:opacity-100'

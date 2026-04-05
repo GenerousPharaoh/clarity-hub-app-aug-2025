@@ -1035,18 +1035,18 @@ function SelectionTip({
         'max-w-[calc(100vw-2rem)]',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
-        {/* Color dots — small, click to instantly highlight */}
+        {/* Color dots — tiny inline circles */}
         {HIGHLIGHT_COLORS.map((c) => (
           <button
             key={c.name}
             onClick={() => handleHighlight(c.value)}
-            className="h-5 w-5 rounded-full ring-1 ring-surface-200/60 transition-all hover:scale-110 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
+            className="h-3.5 w-3.5 rounded-full ring-1 ring-surface-300/50 transition-all hover:scale-125 hover:ring-2 hover:ring-surface-400 dark:ring-surface-600"
             style={{ backgroundColor: c.value }}
-            title={`Highlight ${c.label}`}
+            title={c.label}
           />
         ))}
 
-        <div className="mx-px h-4 w-px bg-surface-200 dark:bg-surface-700" />
+        <div className="mx-px h-3.5 w-px bg-surface-200 dark:bg-surface-700" />
 
         {/* Action buttons — compact */}
         <button onClick={() => setMode('comment')} className="flex h-6 w-6 items-center justify-center rounded text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Add comment">

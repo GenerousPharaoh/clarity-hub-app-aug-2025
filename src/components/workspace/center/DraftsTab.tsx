@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBriefDrafts, useCreateBriefDraft, useDeleteBriefDraft, useUpdateBriefDraft } from '@/hooks/useBriefDrafts';
-import { BRIEF_TEMPLATES, type BriefDraft, type BriefTemplate } from '@/types/drafting';
+import { BRIEF_TEMPLATES, TEMPLATE_PROMPTS, type BriefDraft, type BriefTemplate } from '@/types/drafting';
 import { searchDocuments, formatSearchContext } from '@/services/documentSearchService';
 import { aiRouter } from '@/services/aiRouter';
 import { supabase } from '@/lib/supabase';
@@ -340,9 +340,8 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         .map((f) => `- ${f.name}${f.document_type ? ` [${f.document_type}]` : ''}: ${f.ai_summary ?? 'No summary'}`)
         .join('\n');
 
-      // RAG search for section-relevant content (more chunks for facts sections)
-      const isFactsSection = sectionKey === 'facts' || sectionKey === 'background';
-      const chunkLimit = isFactsSection ? 15 : 10;
+      // RAG search for section-relevant content
+      const chunkLimit = (sectionKey === 'facts' || sectionKey === 'background') ? 15 : 10;
       const searchResults = await searchDocuments({
         query: `${section.heading} ${sectionInstructions[sectionKey] || ''}`.trim(),
         projectId,
@@ -351,45 +350,45 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
 
       const documentContext = formatSearchContext(searchResults);
 
-      // For facts/background sections, also fetch exhibit markers and timeline events
+      // Fetch exhibit markers and timeline events for ALL sections (not just facts)
       let exhibitsContext = '';
       let timelineContext = '';
 
-      if (isFactsSection) {
-        // Fetch exhibit markers for evidence references
-        const { data: exhibits } = await supabase
-          .from('exhibit_markers')
-          .select('exhibit_id, description, file_id')
-          .eq('project_id', projectId)
-          .order('sort_order', { ascending: true });
+      const { data: exhibits } = await supabase
+        .from('exhibit_markers')
+        .select('exhibit_id, description, file_id')
+        .eq('project_id', projectId)
+        .order('sort_order', { ascending: true });
 
-        if (exhibits && exhibits.length > 0) {
-          const exhibitLines = exhibits.map((ex) =>
-            `- Exhibit ${ex.exhibit_id}${ex.description ? `: ${ex.description}` : ''}`
-          );
-          exhibitsContext = `\n\n--- EXHIBIT LIST ---\n${exhibitLines.join('\n')}\n--- END EXHIBITS ---`;
-        }
-
-        // Fetch timeline events for chronological facts
-        const { data: timelineEvents } = await supabase
-          .from('timeline_events')
-          .select('date, title, description, category, is_verified, source_file_id')
-          .eq('project_id', projectId)
-          .eq('is_hidden', false)
-          .order('date', { ascending: true });
-
-        if (timelineEvents && timelineEvents.length > 0) {
-          const eventLines = timelineEvents.map((ev) => {
-            const verified = ev.is_verified ? ' [verified]' : '';
-            return `- ${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${verified}`;
-          });
-          timelineContext = `\n\n--- CHRONOLOGICAL TIMELINE ---\n${eventLines.join('\n')}\n--- END TIMELINE ---`;
-        }
+      if (exhibits && exhibits.length > 0) {
+        const exhibitLines = exhibits.map((ex) =>
+          `- Exhibit ${ex.exhibit_id}${ex.description ? `: ${ex.description}` : ''}`
+        );
+        exhibitsContext = `\n\n--- EXHIBIT LIST ---\n${exhibitLines.join('\n')}\n--- END EXHIBITS ---`;
       }
 
-      // Build section-specific prompt
+      const { data: timelineEvents } = await supabase
+        .from('timeline_events')
+        .select('date, title, description, category, is_verified, source_file_id')
+        .eq('project_id', projectId)
+        .eq('is_hidden', false)
+        .order('date', { ascending: true });
+
+      if (timelineEvents && timelineEvents.length > 0) {
+        const eventLines = timelineEvents.map((ev) => {
+          const verified = ev.is_verified ? ' [verified]' : '';
+          return `- ${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${verified}`;
+        });
+        timelineContext = `\n\n--- CHRONOLOGICAL TIMELINE ---\n${eventLines.join('\n')}\n--- END TIMELINE ---`;
+      }
+
+      // Build template-specific prompt using TEMPLATE_PROMPTS
+      const templatePrompts = TEMPLATE_PROMPTS[draft.template_type] ?? {};
+      const systemInstruction = templatePrompts._system ?? 'You are drafting an Ontario legal document.';
+      const sectionInstruction = templatePrompts[sectionKey] ?? `Draft the "${section.heading}" section.`;
+
       const userInstructions = sectionInstructions[sectionKey]
-        ? `\n\nUser instructions for this section: ${sectionInstructions[sectionKey]}`
+        ? `\n\nAdditional user instructions: ${sectionInstructions[sectionKey]}`
         : '';
 
       // Previously generated sections for context
@@ -398,24 +397,22 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         .map((s) => `## ${s.heading}\n${s.content_html.replace(/<[^>]+>/g, '')}`)
         .join('\n\n');
 
-      const factsInstructions = isFactsSection
-        ? '\nUse the exhibit list and timeline below to structure facts chronologically. Reference exhibits as (Exhibit [X]) where supported by the evidence.'
-        : '\nReference exhibits as (Exhibit [X]) where supported by the evidence.';
-
       const result = await aiRouter.routeQuery({
-        query: `Generate the "${section.heading}" section for a ${draft.title} (Ontario legal document).
+        query: `${systemInstruction}
 
 Document metadata:
-- Court: ${draft.court_name || 'Ontario Superior Court of Justice'}
+- Court/Tribunal: ${draft.court_name || 'Ontario Superior Court of Justice'}
 - File Number: ${draft.file_number || '[To be assigned]'}
 - Case Name: ${draft.case_name || '[Parties TBD]'}
+- Party: ${draft.party_name || '[Party name TBD]'}
 
-Section description: ${BRIEF_TEMPLATES.find((t) => t.slug === draft.template_type)?.sections.find((s) => s.key === sectionKey)?.description || section.heading}
+SECTION TO DRAFT: ${section.heading}
+
+${sectionInstruction}
 ${userInstructions}
 
-Write this section in formal legal prose suitable for filing. Use numbered paragraphs where appropriate.${factsInstructions} Cite case law with neutral citations.
-
-Return ONLY the section content — no section heading (it will be added automatically).`,
+Return ONLY the section content — no section heading (it will be added automatically).
+Cite case law with neutral citations (e.g., 2024 ONSC 1234). Do not fabricate citations.`,
         effortLevel: 'deep',
         caseContext: `--- PROJECT FILES ---\n${fileSummaries}\n\n${documentContext}${exhibitsContext}${timelineContext}\n\n${priorSections ? `--- PRIOR SECTIONS ---\n${priorSections}` : ''}`,
       });

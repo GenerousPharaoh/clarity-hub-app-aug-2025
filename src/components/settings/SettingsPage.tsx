@@ -235,6 +235,39 @@ export function SettingsPage() {
         chatMessages = data ?? [];
       }
 
+      // 8. Timeline events
+      let timelineEvents: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('timeline_events')
+          .select('*')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        timelineEvents = data ?? [];
+      }
+
+      // 9. Chronology entries
+      let chronologyEntries: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('chronology_entries')
+          .select('*')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        chronologyEntries = data ?? [];
+      }
+
+      // 10. Brief drafts
+      let briefDrafts: Record<string, unknown>[] = [];
+      if (projectIds.length > 0) {
+        const { data, error } = await supabase
+          .from('brief_drafts')
+          .select('*')
+          .in('project_id', projectIds);
+        if (error) throw error;
+        briefDrafts = data ?? [];
+      }
+
       // Compile export object
       const exportData = {
         exportedAt: new Date().toISOString(),
@@ -247,6 +280,9 @@ export function SettingsPage() {
         exhibitMarkers,
         annotations,
         chatMessages,
+        timelineEvents,
+        chronologyEntries,
+        briefDrafts,
       };
 
       // Trigger browser download

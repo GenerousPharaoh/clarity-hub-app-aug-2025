@@ -678,34 +678,10 @@ IMPORTANT: Return ONLY the section content — no section heading (it will be ad
       </div>
       <div className="rounded-2xl border border-surface-200/80 bg-surface-50/50 p-4 dark:border-surface-700 dark:bg-surface-800/50">
         <div className="grid gap-3 sm:grid-cols-2">
-          <input
-            type="text"
-            placeholder="Court name"
-            value={draft.court_name ?? ''}
-            onChange={(e) => updateDraft.mutate({ id: draft.id, projectId, court_name: e.target.value })}
-            className="rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200"
-          />
-          <input
-            type="text"
-            placeholder="File number"
-            value={draft.file_number ?? ''}
-            onChange={(e) => updateDraft.mutate({ id: draft.id, projectId, file_number: e.target.value })}
-            className="rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200"
-          />
-          <input
-            type="text"
-            placeholder="Case name (e.g., Smith v. Jones)"
-            value={draft.case_name ?? ''}
-            onChange={(e) => updateDraft.mutate({ id: draft.id, projectId, case_name: e.target.value })}
-            className="rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200"
-          />
-          <input
-            type="text"
-            placeholder="Party name"
-            value={draft.party_name ?? ''}
-            onChange={(e) => updateDraft.mutate({ id: draft.id, projectId, party_name: e.target.value })}
-            className="rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200"
-          />
+          <MetadataInput placeholder="Court name" field="court_name" draft={draft} projectId={projectId} updateDraft={updateDraft} />
+          <MetadataInput placeholder="File number" field="file_number" draft={draft} projectId={projectId} updateDraft={updateDraft} />
+          <MetadataInput placeholder="Case name (e.g., Smith v. Jones)" field="case_name" draft={draft} projectId={projectId} updateDraft={updateDraft} />
+          <MetadataInput placeholder="Party name" field="party_name" draft={draft} projectId={projectId} updateDraft={updateDraft} />
         </div>
       </div>
 
@@ -776,5 +752,38 @@ IMPORTANT: Return ONLY the section content — no section heading (it will be ad
         );
       })}
     </div>
+  );
+}
+
+/** Metadata input that saves on blur instead of every keystroke. */
+function MetadataInput({ placeholder, field, draft, projectId, updateDraft }: {
+  placeholder: string;
+  field: 'court_name' | 'file_number' | 'case_name' | 'party_name';
+  draft: BriefDraft;
+  projectId: string;
+  updateDraft: ReturnType<typeof useUpdateBriefDraft>;
+}) {
+  const [value, setValue] = useState(draft[field] ?? '');
+
+  useEffect(() => {
+    setValue(draft[field] ?? '');
+  }, [draft[field]]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const save = useCallback(() => {
+    if (value !== (draft[field] ?? '')) {
+      updateDraft.mutate({ id: draft.id, projectId, [field]: value || null });
+    }
+  }, [value, draft, field, projectId, updateDraft]);
+
+  return (
+    <input
+      type="text"
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={save}
+      onKeyDown={(e) => { if (e.key === 'Enter') save(); }}
+      className="rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm placeholder:text-surface-400 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-200 dark:placeholder:text-surface-500"
+    />
   );
 }

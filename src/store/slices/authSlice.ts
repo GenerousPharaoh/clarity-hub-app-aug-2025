@@ -4,6 +4,20 @@ import { THEME_KEY } from '../../lib/constants';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
+const VALID_THEMES: ThemeMode[] = ['light', 'dark', 'system'];
+
+function loadTheme(): ThemeMode {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored && VALID_THEMES.includes(stored as ThemeMode)) return stored as ThemeMode;
+  } catch { /* localStorage unavailable */ }
+  return 'system';
+}
+
+function saveTheme(mode: ThemeMode) {
+  try { localStorage.setItem(THEME_KEY, mode); } catch { /* ignore */ }
+}
+
 export interface AuthSlice {
   user: AppUser | null;
   themeMode: ThemeMode;
@@ -14,18 +28,17 @@ export interface AuthSlice {
 
 export const createAuthSlice: StateCreator<AuthSlice> = (set) => ({
   user: null,
-  themeMode: (localStorage.getItem(THEME_KEY) as ThemeMode) || 'system',
+  themeMode: loadTheme(),
   setUser: (user) => set({ user }),
   toggleTheme: () =>
     set((state) => {
-      const cycle: ThemeMode[] = ['light', 'dark', 'system'];
-      const idx = cycle.indexOf(state.themeMode);
-      const next = cycle[(idx + 1) % cycle.length];
-      localStorage.setItem(THEME_KEY, next);
+      const idx = VALID_THEMES.indexOf(state.themeMode);
+      const next = VALID_THEMES[(idx + 1) % VALID_THEMES.length];
+      saveTheme(next);
       return { themeMode: next };
     }),
   setTheme: (mode) => {
-    localStorage.setItem(THEME_KEY, mode);
+    saveTheme(mode);
     set({ themeMode: mode });
   },
 });

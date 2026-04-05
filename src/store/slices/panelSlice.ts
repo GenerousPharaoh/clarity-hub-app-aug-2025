@@ -52,7 +52,7 @@ const initial = loadPanelState();
 export const createPanelSlice: StateCreator<PanelSlice> = (set) => ({
   isLeftPanelOpen: initial.isLeftPanelOpen,
   isRightPanelOpen: initial.isRightPanelOpen,
-  centerTab: 'editor' as CenterTab,
+  centerTab: 'overview' as CenterTab,
   rightTab: 'viewer' as RightTab,
   mobileTab: 'content' as MobileTab,
   toggleLeftPanel: () =>

@@ -68,27 +68,23 @@ export function useCreateTimelineEvent() {
       sourcePage?: number;
       excerpt?: string;
     }) => {
-      // Insert directly — the TypeScript types for timeline_events are outdated
-      // so we bypass TablesInsert and use the actual DB column names
-      const insert = {
-        project_id: projectId,
-        date,
-        title,
-        description: description?.trim() || null,
-        category: category || 'other',
-        event_type: 'other' as const,
-        extraction_method: 'manual' as const,
-        confidence: 0.8,
-        source_file_id: sourceFileId || null,
-        source_quote: excerpt?.trim() || null,
-        page_reference: sourcePage ?? null,
-        is_verified: false,
-        is_hidden: false,
-      };
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.from('timeline_events') as any)
-        .insert(insert)
+      const { data, error } = await supabase
+        .from('timeline_events')
+        .insert({
+          project_id: projectId,
+          date,
+          title,
+          description: description?.trim() || null,
+          category: category || 'other',
+          event_type: 'other',
+          extraction_method: 'manual',
+          confidence: 0.8,
+          source_file_id: sourceFileId || null,
+          source_quote: excerpt?.trim() || null,
+          page_reference: sourcePage ?? null,
+          is_verified: false,
+          is_hidden: false,
+        })
         .select()
         .single();
 

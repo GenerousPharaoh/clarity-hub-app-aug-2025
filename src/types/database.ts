@@ -626,52 +626,73 @@ export type Database = {
           id: string
           project_id: string
           date: string
+          date_end: string | null
+          date_precision: string | null
+          date_text: string | null
           title: string
           description: string | null
-          category: string | null
-          confidence: string | null
+          category: string
+          event_type: string | null
+          significance: string | null
+          parties: string[] | null
           source_file_id: string | null
-          source_file_name: string | null
-          source_page: number | null
-          excerpt: string | null
+          source_quote: string | null
+          page_reference: number | null
+          extraction_method: string | null
+          confidence: number | null
           is_verified: boolean
           is_hidden: boolean
           created_at: string | null
           updated_at: string | null
+          created_by: string | null
         }
         Insert: {
           id?: string
           project_id: string
           date: string
+          date_end?: string | null
+          date_precision?: string | null
+          date_text?: string | null
           title: string
           description?: string | null
-          category?: string | null
-          confidence?: string | null
+          category?: string
+          event_type?: string | null
+          significance?: string | null
+          parties?: string[] | null
           source_file_id?: string | null
-          source_file_name?: string | null
-          source_page?: number | null
-          excerpt?: string | null
+          source_quote?: string | null
+          page_reference?: number | null
+          extraction_method?: string | null
+          confidence?: number | null
           is_verified?: boolean
           is_hidden?: boolean
           created_at?: string | null
           updated_at?: string | null
+          created_by?: string | null
         }
         Update: {
           id?: string
           project_id?: string
           date?: string
+          date_end?: string | null
+          date_precision?: string | null
+          date_text?: string | null
           title?: string
           description?: string | null
-          category?: string | null
-          confidence?: string | null
+          category?: string
+          event_type?: string | null
+          significance?: string | null
+          parties?: string[] | null
           source_file_id?: string | null
-          source_file_name?: string | null
-          source_page?: number | null
-          excerpt?: string | null
+          source_quote?: string | null
+          page_reference?: number | null
+          extraction_method?: string | null
+          confidence?: number | null
           is_verified?: boolean
           is_hidden?: boolean
           created_at?: string | null
           updated_at?: string | null
+          created_by?: string | null
         }
         Relationships: [
           {

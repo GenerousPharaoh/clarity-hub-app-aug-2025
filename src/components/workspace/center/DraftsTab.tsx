@@ -373,7 +373,7 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         // Fetch timeline events for chronological facts
         const { data: timelineEvents } = await supabase
           .from('timeline_events')
-          .select('date, title, description, category, source_file_name, is_verified')
+          .select('date, title, description, category, is_verified, source_file_id')
           .eq('project_id', projectId)
           .eq('is_hidden', false)
           .order('date', { ascending: true });
@@ -381,8 +381,7 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         if (timelineEvents && timelineEvents.length > 0) {
           const eventLines = timelineEvents.map((ev) => {
             const verified = ev.is_verified ? ' [verified]' : '';
-            const source = ev.source_file_name ? ` (source: ${ev.source_file_name})` : '';
-            return `- ${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${source}${verified}`;
+            return `- ${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${verified}`;
           });
           timelineContext = `\n\n--- CHRONOLOGICAL TIMELINE ---\n${eventLines.join('\n')}\n--- END TIMELINE ---`;
         }

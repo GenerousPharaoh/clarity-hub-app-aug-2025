@@ -91,17 +91,16 @@ function formatEventDate(dateStr: string): string {
   }
 }
 
-function getConfidenceLabel(confidence: string | null): string {
-  switch (confidence) {
-    case 'high':
-      return 'High';
-    case 'medium':
-      return 'Medium';
-    case 'low':
-      return 'Low';
-    default:
-      return 'Medium';
+function getConfidenceLabel(confidence: number | string | null): string {
+  if (typeof confidence === 'number') {
+    if (confidence >= 0.7) return 'High';
+    if (confidence >= 0.4) return 'Medium';
+    return 'Low';
   }
+  // Legacy string values
+  if (confidence === 'high') return 'High';
+  if (confidence === 'low') return 'Low';
+  return 'Medium';
 }
 
 export function TimelineTab() {
@@ -673,6 +672,10 @@ function TimelineEventCard({
   onSourceClick: (fileId: string) => void;
 }) {
   const categoryStyle = getCategoryStyle(event.category);
+  const files = useAppStore((s) => s.files);
+  const sourceFileName = event.source_file_id
+    ? files.find((f) => f.id === event.source_file_id)?.name ?? null
+    : null;
 
   return (
     <div className="group relative flex gap-3 pl-1">
@@ -775,32 +778,36 @@ function TimelineEventCard({
             </span>
           )}
 
-          {event.source_file_name ? (
+          {sourceFileName ? (
             <button
               onClick={() => event.source_file_id && onSourceClick(event.source_file_id)}
               className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-1 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:bg-primary-900/20 dark:text-primary-300 dark:hover:bg-primary-900/30"
-              title={`Open ${event.source_file_name}`}
+              title={`Open ${sourceFileName}`}
             >
               <FileText className="h-2.5 w-2.5" />
-              {event.source_file_name}
-              {event.source_page != null && ` p.${event.source_page}`}
+              {sourceFileName}
+              {event.page_reference != null && ` p.${event.page_reference}`}
             </button>
+          ) : event.extraction_method === 'ai' ? (
+            <span className="rounded-full bg-accent-50 px-2 py-1 text-sm font-medium text-accent-600 dark:bg-accent-900/20 dark:text-accent-400">
+              AI extracted
+            </span>
           ) : (
             <span className="rounded-full bg-surface-100 px-2 py-1 text-sm font-medium text-surface-400 dark:bg-surface-800 dark:text-surface-500">
-              Manual entry
+              Manual
             </span>
           )}
         </div>
 
-        {/* Description / excerpt */}
-        {(event.description || event.excerpt) && (
+        {/* Description / source quote */}
+        {(event.description || event.source_quote) && (
           <div className="mt-2">
-            {event.excerpt && (
+            {event.source_quote && (
               <p className="text-xs italic leading-relaxed text-surface-500 dark:text-surface-400">
-                "{event.excerpt}"
+                "{event.source_quote}"
               </p>
             )}
-            {event.description && !event.excerpt && (
+            {event.description && !event.source_quote && (
               <p className="text-xs leading-relaxed text-surface-500 dark:text-surface-400">
                 {event.description}
               </p>

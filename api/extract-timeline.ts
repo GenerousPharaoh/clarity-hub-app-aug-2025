@@ -151,7 +151,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .from('timeline_events')
       .delete()
       .eq('project_id', projectId)
-      .eq('extraction_source', 'ai');
+      .eq('extraction_method', 'ai');
 
     if (deleteError) {
       console.error('Failed to clear existing timeline events:', deleteError.message);
@@ -174,11 +174,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         if (events.length > 0) {
           const eventRows = events.map((event) => ({
-            file_id: file.id,
             source_file_id: file.id,
             project_id: projectId,
-            event_date: event.date,
-            event_date_end: event.date_end || null,
+            date: event.date,
+            date_end: event.date_end || null,
             date_precision: event.date_precision,
             date_text: event.date_text || null,
             title: event.title,
@@ -189,8 +188,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             parties: event.parties || [],
             source_quote: event.source_quote || null,
             page_reference: event.page_reference || null,
-            extraction_source: 'ai',
-            extracted_at: new Date().toISOString(),
+            extraction_method: 'ai',
+            confidence: event.confidence ?? 0.7,
           }));
 
           const { error: insertError } = await serviceClient

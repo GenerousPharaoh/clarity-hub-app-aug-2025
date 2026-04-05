@@ -49,12 +49,12 @@ export function LoginPage() {
       {/* Left: Dark branding panel */}
       <div className="relative hidden lg:flex lg:w-[52%] flex-col overflow-hidden bg-surface-950 p-12 xl:p-16">
         {/* Ambient glow */}
-        <div className="pointer-events-none absolute -bottom-40 -left-40 h-[600px] w-[600px] rounded-full bg-accent-500/[0.06] blur-[150px]" />
+        <div className="pointer-events-none absolute -bottom-40 -left-40 h-[600px] w-[600px] rounded-full bg-accent-500/5 blur-[150px]" />
         <div className="pointer-events-none absolute -top-20 -right-20 h-[400px] w-[400px] rounded-full bg-surface-700/20 blur-[100px]" />
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.07] ring-1 ring-white/[0.08]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
             <Scale className="h-5 w-5 text-white/80" />
           </div>
           <span className="font-heading text-lg font-semibold tracking-tight text-white">Clarity Hub</span>
@@ -78,17 +78,17 @@ export function LoginPage() {
             <FeatureCard
               icon={<FileText className="h-4 w-4" />}
               title="Document Processing"
-              desc="OCR, auto-classification, and full-text search across uploads"
+              desc="Every PDF indexed, classified, and searchable in seconds"
             />
             <FeatureCard
               icon={<Brain className="h-4 w-4" />}
-              title="AI Analysis"
-              desc="Ask questions across your documents with Ontario law context"
+              title="AI Research"
+              desc="Query your entire case file with Ontario employment law context"
             />
             <FeatureCard
               icon={<Bookmark className="h-4 w-4" />}
-              title="Exhibit Builder"
-              desc="Compile exhibit books, chronologies, and filing-ready PDFs"
+              title="Filing Preparation"
+              desc="Build exhibit books, timelines, and court-ready documents"
             />
           </div>
         </div>
@@ -202,7 +202,7 @@ export function LoginPage() {
 
 function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <div className="group flex items-start gap-4 rounded-xl bg-white/[0.05] px-5 py-4 ring-1 ring-white/[0.08] transition-all duration-300 hover:bg-white/[0.08] hover:ring-accent-500/30">
+    <div className="group flex items-start gap-4 rounded-xl bg-white/5 px-5 py-4 ring-1 ring-white/10 transition-all duration-300 hover:bg-white/10 hover:ring-accent-500/30">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500/10 text-accent-400 transition-colors group-hover:bg-accent-500/20 group-hover:text-accent-500">
         {icon}
       </div>

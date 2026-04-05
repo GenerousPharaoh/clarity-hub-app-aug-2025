@@ -438,7 +438,7 @@ export function TimelineTab() {
         <div className="shrink-0 border-b border-translucent px-3 py-3 sm:px-4">
           <ProcessingRecoveryBanner
             title={`${failedFiles.length} file${failedFiles.length === 1 ? '' : 's'} still need AI indexing`}
-            description="Timeline extraction skips failed files. Retry indexing so events and chronology entries can be generated from the full record."
+            description="Retry indexing to extract timeline events from these files."
             failedCount={failedFiles.length}
             fileName={firstFailedFile.name}
             isRetrying={isRetryingFailedFile}

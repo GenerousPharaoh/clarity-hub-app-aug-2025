@@ -270,7 +270,7 @@ export function ExhibitsTab() {
         <div className="shrink-0 border-b border-surface-200/80 px-4 py-3 dark:border-surface-800">
           <ProcessingRecoveryBanner
             title={`${failedFiles.length} file${failedFiles.length === 1 ? '' : 's'} still need AI indexing`}
-            description="Failed indexing can hide details you want when linking exhibits or generating a compendium. Retry the file so the workspace reflects the full record."
+            description="Retry indexing to link exhibits and build your compendium from the full record."
             failedCount={failedFiles.length}
             fileName={firstFailedFile.name}
             isRetrying={isRetryingFailedFile}

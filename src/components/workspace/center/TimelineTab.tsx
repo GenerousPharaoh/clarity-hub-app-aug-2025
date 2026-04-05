@@ -150,8 +150,13 @@ export function TimelineTab() {
   const handleExtract = useCallback(async () => {
     if (!selectedProjectId) return;
     try {
-      await extractTimeline.mutateAsync({ projectId: selectedProjectId });
-      toast.success('Timeline extraction started');
+      const result = await extractTimeline.mutateAsync({ projectId: selectedProjectId });
+      const count = result?.totalEventsExtracted ?? result?.total ?? 0;
+      if (count > 0) {
+        toast.success(`Extracted ${count} timeline event${count !== 1 ? 's' : ''}`);
+      } else {
+        toast.success('Timeline extraction complete — no new events found');
+      }
     } catch (err) {
       toast.error('Failed to extract timeline', {
         description: err instanceof Error ? err.message : 'Unknown error',

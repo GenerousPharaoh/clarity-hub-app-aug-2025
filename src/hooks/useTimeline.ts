@@ -218,6 +218,11 @@ export function useExtractTimeline() {
 
   return useMutation({
     mutationFn: async ({ projectId }: { projectId: string }) => {
+      // Check AI opt-out
+      const { default: store } = await import('@/store');
+      if (!store.getState().aiEnabled) {
+        throw new Error('AI features are disabled. Enable them in Settings.');
+      }
       const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch('/api/extract-timeline', {
         method: 'POST',

@@ -221,12 +221,12 @@ export function ExhibitsTab() {
           </h2>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {linkedCount > 0 && (
-              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">
+              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-600 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-400">
                 {linkedCount} linked
               </span>
             )}
             {projectFiles.length > 0 && (
-              <span className="rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+              <span className="rounded-full border border-surface-200 bg-surface-50 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
                 {projectFiles.length} file{projectFiles.length === 1 ? '' : 's'} available
               </span>
             )}

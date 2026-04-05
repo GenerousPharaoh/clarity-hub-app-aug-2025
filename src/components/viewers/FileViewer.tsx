@@ -121,7 +121,10 @@ export function FileViewer() {
         <div className="text-center">
           <FileSearch className="mx-auto h-6 w-6 text-surface-300 dark:text-surface-600" />
           <p className="mt-3 text-sm text-surface-500 dark:text-surface-400">
-            Select a file from the left panel to view it here.
+            Select a file from the left panel.
+          </p>
+          <p className="mt-1 text-xs text-surface-400 dark:text-surface-500">
+            PDF, images, audio, video, and text files supported.
           </p>
         </div>
       </div>

@@ -382,7 +382,7 @@ export function LeftPanel() {
             className="mt-2 flex w-full items-center gap-2 rounded-lg bg-red-50/75 px-2.5 py-1.5 text-left transition-colors hover:bg-red-100/80 dark:bg-red-950/20 dark:hover:bg-red-950/35"
           >
             <AlertTriangle className="h-3 w-3 shrink-0 text-red-500" />
-            <span className="flex-1 text-[11px] font-medium text-red-700 dark:text-red-300">
+            <span className="flex-1 text-xs font-medium text-red-700 dark:text-red-300">
               {failedCount} failed — retry
             </span>
             <Zap className="h-3 w-3 shrink-0 text-red-500" />
@@ -441,7 +441,7 @@ export function LeftPanel() {
                 key={label}
                 onClick={() => setTypeFilter(key)}
                 className={cn(
-                  'rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors',
+                  'rounded-md px-2 py-0.5 text-xs font-medium transition-colors',
                   typeFilter === key
                     ? 'bg-primary-100 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
                     : 'text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-300'
@@ -464,7 +464,7 @@ export function LeftPanel() {
             {!batchSelectionMode ? (
               <button
                 onClick={() => setBatchSelectionMode(true)}
-                className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-[11px] transition-colors hover:bg-surface-100 dark:hover:bg-surface-800"
+                className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-xs transition-colors hover:bg-surface-100 dark:hover:bg-surface-800"
               >
                 <span className="font-medium text-surface-500 dark:text-surface-400">
                   Batch index
@@ -476,10 +476,10 @@ export function LeftPanel() {
             ) : (
               <div className="rounded-lg border border-surface-200 bg-surface-50/60 p-2 dark:border-surface-700 dark:bg-surface-800/40">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-medium text-surface-700 dark:text-surface-200">
+                  <span className="text-xs font-medium text-surface-700 dark:text-surface-200">
                     {selectedBatchFiles.length} selected
                   </span>
-                  <div className="flex items-center gap-1.5 text-[11px]">
+                  <div className="flex items-center gap-1.5 text-xs">
                     <button
                       onClick={() => setSelectedBatchIds(processableFiles.map((f) => f.id))}
                       className="font-medium text-surface-500 hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
@@ -500,7 +500,7 @@ export function LeftPanel() {
                       setBatchSelectionMode(false);
                       setSelectedBatchIds([]);
                     }}
-                    className="rounded-md px-2 py-1 text-[11px] font-medium text-surface-500 transition-colors hover:bg-surface-200 dark:text-surface-400 dark:hover:bg-surface-700"
+                    className="rounded-md px-2 py-1 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-200 dark:text-surface-400 dark:hover:bg-surface-700"
                     title="Cancel selection"
                   >
                     Cancel
@@ -509,7 +509,7 @@ export function LeftPanel() {
                     onClick={handleOpenBatchConfirm}
                     disabled={selectedBatchFiles.length === 0}
                     className={cn(
-                      'inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors',
+                      'inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
                       selectedBatchFiles.length === 0
                         ? 'bg-surface-200 text-surface-400 dark:bg-surface-700 dark:text-surface-500'
                         : 'bg-surface-900 text-white hover:bg-surface-700 dark:bg-white dark:text-surface-900 dark:hover:bg-surface-200'
@@ -589,7 +589,7 @@ export function LeftPanel() {
               <>
                 <div className="flex items-center gap-1.5 px-3 pb-1 pt-2">
                   <Pin className="h-3 w-3 text-surface-400 dark:text-surface-500" />
-                  <span className="text-[11px] font-semibold text-surface-400 dark:text-surface-500">
+                  <span className="text-xs font-semibold text-surface-400 dark:text-surface-500">
                     Pinned
                   </span>
                 </div>
@@ -649,7 +649,7 @@ export function LeftPanel() {
       {/* ── Footer file count ─────────────────────────────── */}
       {files.length > 0 && (
         <div className="flex shrink-0 items-center justify-between border-t border-surface-200/80 px-3 py-1.5 dark:border-surface-800">
-          <span className="text-[11px] text-surface-400 dark:text-surface-500">
+          <span className="text-xs text-surface-400 dark:text-surface-500">
             {searchQuery
               ? `${filteredFiles.length} of ${files.length} files`
               : `${files.length} file${files.length !== 1 ? 's' : ''}`}

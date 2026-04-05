@@ -1019,11 +1019,11 @@ function QuickActions() {
         <span className="hidden sm:inline">{isDemoMode ? 'Uploads require sign-in' : 'Upload files'}</span>
       </button>
 
-      <div className="mt-4 rounded-xl border border-surface-200/80 bg-surface-50/75 p-4 text-sm text-surface-500 dark:border-surface-800 dark:bg-surface-950/35 dark:text-surface-400">
-        {isDemoMode
-          ? 'Demo: view, draft, and manage exhibits.'
-          : ''}
-      </div>
+      {isDemoMode && (
+        <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
+          Demo mode: uploads disabled. Sign in to add your own files.
+        </p>
+      )}
     </div>
   );
 }
@@ -1373,7 +1373,7 @@ function HighlightsSummaryCard({ projectId }: { projectId: string | null }) {
             <div className="min-w-0 flex-1">
               <p className="line-clamp-2 text-xs text-surface-600 dark:text-surface-300">"{h.selected_text}"</p>
               {h.comment && (
-                <p className="mt-0.5 text-[11px] font-medium text-blue-600 dark:text-blue-400">{h.comment}</p>
+                <p className="mt-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">{h.comment}</p>
               )}
             </div>
           </div>

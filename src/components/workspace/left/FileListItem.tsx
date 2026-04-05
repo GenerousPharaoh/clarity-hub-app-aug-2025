@@ -469,7 +469,7 @@ export function FileListItem({
           </div>
 
           {/* Line 2: metadata */}
-          <div className="mt-0.5 flex items-center gap-1 text-[11px] leading-4">
+          <div className="mt-0.5 flex items-center gap-1 text-xs leading-4">
             {docTypeLabel && (
               <>
                 <span
@@ -516,7 +516,7 @@ export function FileListItem({
           )}
         >
           <div className="flex items-center justify-between border-b border-surface-100 px-3 py-1.5 dark:border-surface-700/60">
-            <span className="text-[11px] font-semibold text-surface-600 dark:text-surface-300">
+            <span className="text-xs font-semibold text-surface-600 dark:text-surface-300">
               Details
             </span>
             <button

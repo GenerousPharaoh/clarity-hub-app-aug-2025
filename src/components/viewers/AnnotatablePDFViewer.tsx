@@ -368,7 +368,7 @@ export function AnnotatablePDFViewer({
             {/* Zoom level / preset dropdown */}
             <button
               onClick={() => handleZoomPreset(typeof scale === 'number' ? 'auto' : 1)}
-              className="min-w-[3.2rem] rounded-md px-1 py-1 text-center text-[11px] font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              className="min-w-[3.2rem] rounded-md px-1 py-1 text-center text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-300"
               title={typeof scale === 'number' ? 'Click for Fit Width' : 'Click for 100%'}
             >
               {zoomPercent ? `${zoomPercent}%` : 'Fit'}
@@ -430,7 +430,7 @@ export function AnnotatablePDFViewer({
               <button
                 onClick={() => setHighlightMode(false)}
                 className={cn(
-                  'rounded-md px-2 py-1 text-[11px] font-medium transition-all',
+                  'rounded-md px-2 py-1 text-xs font-medium transition-all',
                   !highlightMode
                     ? 'bg-surface-100 text-surface-700 shadow-sm dark:bg-surface-700 dark:text-surface-200'
                     : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'
@@ -441,7 +441,7 @@ export function AnnotatablePDFViewer({
               <button
                 onClick={() => setHighlightMode(true)}
                 className={cn(
-                  'flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-all',
+                  'flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-all',
                   highlightMode
                     ? 'bg-yellow-100 text-yellow-800 shadow-sm dark:bg-yellow-900/30 dark:text-yellow-300'
                     : 'text-surface-400 hover:text-surface-600 dark:text-surface-500'

@@ -73,10 +73,14 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
 
 /** All registered shortcuts for display in help UI. */
 export const SHORTCUTS = [
+  { keys: ['Cmd', 'K'], description: 'Command palette' },
   { keys: ['Cmd', '\\'], description: 'Toggle file browser' },
   { keys: ['Cmd', 'Shift', '\\'], description: 'Toggle viewer panel' },
   { keys: ['Cmd', 'J'], description: 'Toggle AI chat' },
   { keys: ['Cmd', 'Shift', 'N'], description: 'Create document' },
-  { keys: ['Cmd', 'K'], description: 'Command palette' },
+  { keys: ['Cmd', 'S'], description: 'Save document' },
+  { keys: ['Cmd', 'F'], description: 'Search in PDF' },
+  { keys: ['R'], description: 'Rotate PDF page' },
+  { keys: ['H'], description: 'Toggle highlight mode' },
   { keys: ['Cmd', '/'], description: 'Show keyboard shortcuts' },
 ] as const;

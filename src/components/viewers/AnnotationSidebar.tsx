@@ -178,7 +178,7 @@ export function AnnotationSidebar({
               </span>
             </div>
             {fileName && (
-              <p className="mt-0.5 truncate text-[11px] text-surface-400 dark:text-surface-500" title={fileName}>
+              <p className="mt-0.5 truncate text-xs text-surface-400 dark:text-surface-500" title={fileName}>
                 {fileName}
               </p>
             )}

@@ -100,7 +100,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
           <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-primary-500" />
           <div className="min-w-0 flex-1">
             <p
-              className="truncate text-[11px] font-medium text-surface-700 dark:text-surface-200"
+              className="truncate text-xs font-medium text-surface-700 dark:text-surface-200"
               title={uploadingFile}
             >
               {uploadingFile}

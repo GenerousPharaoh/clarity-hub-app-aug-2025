@@ -27,6 +27,7 @@ import { useNotes } from '@/hooks/useNotes';
 import { useUpdateProject } from '@/hooks/useProjects';
 import { useUploadFile, useFiles } from '@/hooks/useFiles';
 import { useExhibits } from '@/hooks/useExhibits';
+import { useTimelineEvents } from '@/hooks/useTimeline';
 import {
   formatDate,
   formatRelativeDate,
@@ -107,6 +108,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   const { isLoading: filesLoading } = useFiles(selectedProjectId);
   const { data: notes, isLoading: notesLoading } = useNotes(selectedProjectId);
   const { data: exhibits } = useExhibits(selectedProjectId);
+  const { data: timelineEvents } = useTimelineEvents(selectedProjectId);
   const isInitialLoad = filesLoading || notesLoading;
 
   const projectFiles = files.filter(
@@ -116,6 +118,8 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   const noteCount = notes?.length ?? 0;
   const exhibitCount = exhibits?.length ?? 0;
   const processedCount = projectFiles.filter((file) => file.processing_status === 'completed').length;
+  const timelineCount = timelineEvents?.length ?? 0;
+  const verifiedCount = timelineEvents?.filter((e) => e.is_verified).length ?? 0;
   const stage = getMatterStage({ fileCount, noteCount, exhibitCount, processedCount });
   const readinessPercent = fileCount === 0 ? 0 : Math.round((processedCount / fileCount) * 100);
 
@@ -230,8 +234,8 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
               <div className="h-5 w-24 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
             </div>
             <div className="mt-4 h-8 w-48 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[...Array(4)].map((_, i) => (
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+              {[...Array(5)].map((_, i) => (
                 <div key={i} className="rounded-xl border border-surface-200/80 bg-surface-50 p-4 dark:border-surface-800 dark:bg-surface-950/40">
                   <div className="h-3 w-12 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
                   <div className="mt-3 h-7 w-8 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
@@ -271,7 +275,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 <EditableProjectHeader project={project} />
               </div>
 
-              <div className="mt-5 grid grid-cols-2 items-stretch gap-3 @md:grid-cols-4">
+              <div className="mt-5 grid grid-cols-2 items-stretch gap-3 @md:grid-cols-5">
                 <OverviewMetricCard
                   icon={<FileText className="h-4 w-4" />}
                   label="Files"
@@ -291,6 +295,13 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                   value={exhibitCount}
                   detail={exhibitCount === 1 ? 'marked' : 'marked'}
                   onClick={onSwitchTab ? () => onSwitchTab('exhibits') : undefined}
+                />
+                <OverviewMetricCard
+                  icon={<Clock className="h-4 w-4" />}
+                  label="Events"
+                  value={timelineCount}
+                  detail={verifiedCount > 0 ? `${verifiedCount} verified` : 'events'}
+                  onClick={onSwitchTab ? () => onSwitchTab('timeline') : undefined}
                 />
                 <OverviewMetricCard
                   icon={<Sparkles className="h-4 w-4" />}

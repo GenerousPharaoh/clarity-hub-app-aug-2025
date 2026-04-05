@@ -28,6 +28,12 @@ export function AIChatPanel() {
   const files = useAppStore((s) => s.files);
   const aiEnabled = useAppStore((s) => s.aiEnabled);
   const processedFiles = files.filter((f) => f.processing_status === 'completed' && !f.is_deleted);
+  const unprocessedFileCount = files.filter(
+    (f) =>
+      f.project_id === selectedProjectId &&
+      !f.is_deleted &&
+      (f.processing_status === 'processing' || f.processing_status === 'failed'),
+  ).length;
 
   // Multi-file selection: start with the sidebar-selected file if any
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
@@ -497,6 +503,13 @@ export function AIChatPanel() {
             {!compact && 'Web'}
           </button>
         </div>
+
+        {/* Unprocessed files warning */}
+        {unprocessedFileCount > 0 && (
+          <p className="mb-1.5 text-xs text-amber-600 dark:text-amber-400">
+            {unprocessedFileCount} file{unprocessedFileCount !== 1 ? 's' : ''} pending processing — AI responses may be incomplete
+          </p>
+        )}
 
         <div
           className={cn(

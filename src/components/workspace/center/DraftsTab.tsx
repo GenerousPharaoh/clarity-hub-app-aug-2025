@@ -318,6 +318,15 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
   const [generatingAll, setGeneratingAll] = useState(false);
   const [sectionInstructions, setSectionInstructions] = useState<Record<string, string>>({});
 
+  // Check for files still processing or failed
+  const allFiles = useAppStore((s) => s.files);
+  const unprocessedCount = allFiles.filter(
+    (f) =>
+      f.project_id === projectId &&
+      !f.is_deleted &&
+      (f.processing_status === 'processing' || f.processing_status === 'failed'),
+  ).length;
+
   const completedCount = draft.sections.filter((s) => s.content_html).length;
   const totalCount = draft.sections.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -327,6 +336,7 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
     fileSummaries: string;
     exhibitsContext: string;
     timelineContext: string;
+    chronologyContext: string;
     fetchedAt: number;
   } | null>(null);
 
@@ -370,7 +380,21 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
       timelineContext = `\n\n--- TIMELINE ---\n${timelineEvents.map((ev) => `${ev.date}: ${ev.title}${ev.description ? ` — ${ev.description}` : ''}${ev.is_verified ? ' [v]' : ''}`).join('\n')}`;
     }
 
-    const ctx = { fileSummaries, exhibitsContext, timelineContext, fetchedAt: Date.now() };
+    let chronologyContext = '';
+    const { data: chronologyEntries } = await supabase
+      .from('chronology_entries')
+      .select('date_display, description, source_description, exhibit_ref, category')
+      .eq('project_id', projectId)
+      .eq('is_included', true)
+      .order('date_sort', { ascending: true });
+
+    if (chronologyEntries && chronologyEntries.length > 0) {
+      chronologyContext = `\n\n--- CHRONOLOGY ---\n${chronologyEntries.map(e =>
+        `${e.date_display}: ${e.description}${e.source_description ? ` (${e.source_description})` : ''}${e.exhibit_ref ? ` [${e.exhibit_ref}]` : ''}`
+      ).join('\n')}`;
+    }
+
+    const ctx = { fileSummaries, exhibitsContext, timelineContext, chronologyContext, fetchedAt: Date.now() };
     projectContextRef.current = ctx;
     return ctx;
   }, [projectId]);
@@ -381,8 +405,8 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
       const section = draft.sections.find((s) => s.key === sectionKey);
       if (!section) return;
 
-      // Get cached project context (files, exhibits, timeline)
-      const { fileSummaries, exhibitsContext, timelineContext } = await getProjectContext();
+      // Get cached project context (files, exhibits, timeline, chronology)
+      const { fileSummaries, exhibitsContext, timelineContext, chronologyContext } = await getProjectContext();
 
       // RAG search — section-specific (this one can't be cached since query varies)
       const chunkLimit = (sectionKey === 'facts' || sectionKey === 'background' || sectionKey === 'damages' || sectionKey === 'law_argument') ? 20 : 12;
@@ -429,7 +453,7 @@ ${userInstructions}
 
 IMPORTANT: Return ONLY the section content — no section heading (it will be added automatically). Do not fabricate case citations. If evidence is insufficient for a factual assertion, flag it with [EVIDENCE NEEDED].`,
         effortLevel: 'deep',
-        caseContext: `--- PROJECT FILES ---\n${fileSummaries}\n\n${documentContext}${exhibitsContext}${timelineContext}\n\n${priorSections ? `--- PRIOR SECTIONS ---\n${priorSections}` : ''}`,
+        caseContext: `--- PROJECT FILES ---\n${fileSummaries}\n\n${documentContext}${exhibitsContext}${timelineContext}${chronologyContext}\n\n${priorSections ? `--- PRIOR SECTIONS ---\n${priorSections}` : ''}`,
       });
 
       // Update the section with generated content
@@ -575,6 +599,15 @@ IMPORTANT: Return ONLY the section content — no section heading (it will be ad
 
   return (
     <div className="p-4 space-y-4">
+      {/* Processing status warning */}
+      {unprocessedCount > 0 && (
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-900/20">
+          <span className="text-xs text-amber-700 dark:text-amber-300">
+            {unprocessedCount} file{unprocessedCount !== 1 ? 's' : ''} still processing or need retry. Generated content may not include all evidence.
+          </span>
+        </div>
+      )}
+
       {/* Draft header with progress + actions */}
       <div className="rounded-2xl border border-surface-200/80 bg-white p-4 shadow-sm dark:border-surface-700 dark:bg-surface-800">
         <div className="flex items-center justify-between">

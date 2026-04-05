@@ -37,6 +37,7 @@ import {
   Sparkles,
   FileSignature,
   Clock,
+  Tag,
   Save,
   Pencil,
   Trash2,
@@ -57,6 +58,7 @@ import {
   annotationToHighlight,
   type AnnotationHighlight,
 } from '@/types/annotations';
+import { useCreateExhibit, useExhibits, getNextExhibitId } from '@/hooks/useExhibits';
 import { AnnotationSidebar } from './AnnotationSidebar';
 
 // Required CSS for react-pdf-highlighter-extended-extended + pdfjs
@@ -918,6 +920,8 @@ function SelectionTip({
   const [mode, setMode] = useState<TipMode>('menu');
   const [color, setColor] = useState<string>(HIGHLIGHT_COLORS[0].value);
   const [comment, setComment] = useState('');
+  const createExhibit = useCreateExhibit();
+  const { data: existingExhibits = [] } = useExhibits(projectId);
 
   const { updateTipPosition } = usePdfHighlighterContext();
 
@@ -1008,6 +1012,23 @@ function SelectionTip({
     onSave();
   }, [selectedText, fileId, fileName, ghost.position, onSave]);
 
+  const handleMarkAsExhibit = useCallback(async () => {
+    if (!selectedText) return;
+    try {
+      const nextId = getNextExhibitId(existingExhibits);
+      const result = await createExhibit.mutateAsync({
+        projectId,
+        exhibitId: nextId,
+        description: selectedText.slice(0, 200),
+        fileId,
+      });
+      toast.success(`Exhibit created: ${result.exhibit_id}`);
+      onSave();
+    } catch {
+      toast.error('Failed to create exhibit');
+    }
+  }, [selectedText, existingExhibits, createExhibit, projectId, fileId, onSave]);
+
   // Compact action bar — color dots for instant highlight + action icons
   if (mode === 'menu' || mode === 'highlight') {
     return (
@@ -1044,6 +1065,9 @@ function SelectionTip({
         </button>
         <button onClick={handleAddToChronology} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to timeline">
           <Clock className="h-3.5 w-3.5" />
+        </button>
+        <button onClick={handleMarkAsExhibit} disabled={createExhibit.isPending} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 disabled:opacity-50 dark:hover:bg-surface-800" title="Mark as exhibit">
+          <Tag className="h-3.5 w-3.5" />
         </button>
       </div>
     );

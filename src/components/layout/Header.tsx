@@ -36,7 +36,7 @@ export function Header() {
   return (
     <header
       className={cn(
-        'glass flex h-14 shrink-0 items-center justify-between gap-3 px-4 sm:px-5',
+        'glass flex h-12 shrink-0 items-center justify-between gap-2 px-3 sm:h-14 sm:gap-3 sm:px-5',
         'border-b border-surface-200/80',
         'dark:border-surface-800'
       )}
@@ -44,8 +44,8 @@ export function Header() {
       {/* Left */}
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
         <Link to="/" className="group flex shrink-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-900 dark:bg-white transition-all group-hover:scale-105">
-            <Scale className="h-4 w-4 text-white dark:text-surface-900" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-surface-900 transition-all group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-lg dark:bg-white">
+            <Scale className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4 dark:text-surface-900" />
           </div>
           {!isWorkspace && (
             <div className="flex items-center gap-2">

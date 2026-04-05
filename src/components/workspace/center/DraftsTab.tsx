@@ -220,92 +220,65 @@ export function DraftsTab() {
         </div>
       )}
 
-      {/* Draft list header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-surface-200 px-4 py-3 dark:border-surface-700">
-        <div className="flex items-center gap-2">
-          <FileSignature className="h-4 w-4 text-surface-400" />
-          <span className="text-sm font-medium text-surface-600 dark:text-surface-300">
-            {drafts?.length ?? 0} draft{(drafts?.length ?? 0) !== 1 ? 's' : ''}
+      {/* Header — compact dropdown selector + actions */}
+      <div className="flex shrink-0 items-center gap-2 border-b border-surface-200 px-3 py-2 dark:border-surface-700">
+        {/* Draft selector dropdown */}
+        {drafts && drafts.length > 0 ? (
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <select
+              value={activeDraftId ?? ''}
+              onChange={(e) => setActiveDraftId(e.target.value || null)}
+              className="min-w-0 flex-1 truncate rounded-lg border border-surface-200 bg-white px-2.5 py-1.5 text-sm font-medium text-surface-700 focus:border-primary-400 focus:outline-none dark:border-surface-700 dark:bg-surface-800 dark:text-surface-200"
+            >
+              {drafts.map((d) => (
+                <option key={d.id} value={d.id}>{d.title}</option>
+              ))}
+            </select>
+            {activeDraftId && (
+              <button
+                onClick={() => activeDraftId && handleDelete(activeDraftId)}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                title="Delete this draft"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <span className="flex-1 text-sm text-surface-400 dark:text-surface-500">
+            {isLoading ? 'Loading...' : 'No drafts'}
           </span>
-        </div>
+        )}
         <button
           onClick={() => setShowTemplates(true)}
-          className="flex items-center gap-1 rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+          className="flex shrink-0 items-center gap-1 rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-700"
         >
           <Plus className="h-3.5 w-3.5" />
-          New Draft
+          New
         </button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Draft sidebar */}
-        <div className="w-56 shrink-0 overflow-y-auto border-r border-surface-200 dark:border-surface-700">
-          {isLoading ? (
-            <div className="space-y-0">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="border-b border-surface-100 px-3 py-3 dark:border-surface-800">
-                  <div className="h-3.5 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-                  <div className="mt-1.5 h-2.5 w-1/2 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-                </div>
-              ))}
-            </div>
-          ) : !drafts || drafts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-              <FileSignature className="h-5 w-5 text-surface-300 dark:text-surface-600" />
-              <p className="mt-2 text-xs text-surface-400 dark:text-surface-500">No drafts yet</p>
-            </div>
-          ) : (
-            drafts.map((draft) => (
-              <div
-                key={draft.id}
-                className={cn(
-                  'flex items-center justify-between border-b border-surface-100 px-3 py-2.5 transition-colors cursor-pointer',
-                  activeDraftId === draft.id
-                    ? 'bg-primary-50 dark:bg-primary-900/20'
-                    : 'hover:bg-surface-50 dark:hover:bg-surface-800',
-                  'dark:border-surface-800'
-                )}
-              >
-                <button
-                  onClick={() => setActiveDraftId(draft.id)}
-                  className="min-w-0 flex-1 text-left"
-                >
-                  <p className="truncate text-sm font-medium text-surface-700 dark:text-surface-200" title={draft.title}>
-                    {draft.title}
-                  </p>
-                  <p className="text-xs text-surface-400 dark:text-surface-500">
-                    {draft.status} &middot; {draft.sections.length} sections
-                  </p>
-                </button>
-                <button
-                  onClick={() => handleDelete(draft.id)}
-                  className="ml-1 shrink-0 rounded p-1 text-surface-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
+      {/* Full-width editor */}
+      <div className="flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="space-y-3 p-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="rounded-2xl border border-surface-200/80 bg-white p-4 dark:border-surface-700 dark:bg-surface-800">
+                <div className="h-4 w-2/3 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
+                <div className="mt-2 h-3 w-1/3 animate-pulse rounded bg-surface-100 dark:bg-surface-700" />
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Active draft editor */}
-        <div className="flex-1 overflow-y-auto">
-          {activeDraft ? (
-            <DraftEditor draft={activeDraft} projectId={selectedProjectId} />
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center px-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
-                <FileSignature className="h-5 w-5 text-surface-400 dark:text-surface-500" />
-              </div>
-              <h3 className="mt-3 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
-                No Draft Selected
-              </h3>
-              <p className="mt-1.5 max-w-xs text-center text-xs leading-relaxed text-surface-400 dark:text-surface-500">
-                Pick a draft from the sidebar to start editing.
-              </p>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : activeDraft ? (
+          <DraftEditor draft={activeDraft} projectId={selectedProjectId} />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center px-6">
+            <FileSignature className="h-6 w-6 text-surface-300 dark:text-surface-600" />
+            <p className="mt-3 text-sm text-surface-500 dark:text-surface-400">
+              {drafts && drafts.length > 0 ? 'Select a draft above.' : 'Create a draft to get started.'}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

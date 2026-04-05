@@ -658,16 +658,14 @@ function PdfHighlighterInner({
         highlighterUtilsRef.current = utils;
       }}
       selectionTip={
-        highlightMode ? (
-          <SelectionTipFromContext
-            fileId={fileId}
-            fileName={fileName}
-            projectId={projectId}
-            createAnnotation={createAnnotation}
-          />
-        ) : undefined
+        <SelectionTipFromContext
+          fileId={fileId}
+          fileName={fileName}
+          projectId={projectId}
+          createAnnotation={createAnnotation}
+        />
       }
-      enableAreaSelection={highlightMode ? (event) => event.altKey : () => false}
+      enableAreaSelection={(event) => event.altKey}
       textSelectionColor="rgba(98, 121, 143, 0.15)"
       style={{
         height: '100%',
@@ -1029,45 +1027,45 @@ function SelectionTip({
     }
   }, [selectedText, existingExhibits, createExhibit, projectId, fileId, onSave]);
 
-  // Compact action bar — color dots for instant highlight + action icons
+  // Compact action bar — small color dots + action icons
   if (mode === 'menu' || mode === 'highlight') {
     return (
       <div className={cn(
-        'flex flex-wrap items-center gap-1 rounded-lg border border-surface-200 bg-white p-1.5 shadow-xl',
+        'flex flex-wrap items-center gap-0.5 rounded-lg border border-surface-200 bg-white p-1 shadow-xl',
         'max-w-[calc(100vw-2rem)]',
         'dark:border-surface-700 dark:bg-surface-900',
       )}>
-        {/* Color dots — click to instantly highlight */}
+        {/* Color dots — small, click to instantly highlight */}
         {HIGHLIGHT_COLORS.map((c) => (
           <button
             key={c.name}
             onClick={() => handleHighlight(c.value)}
-            className="h-7 w-7 rounded-full transition-all hover:scale-110 ring-1 ring-surface-200/60 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
+            className="h-5 w-5 rounded-full ring-1 ring-surface-200/60 transition-all hover:scale-110 hover:ring-2 hover:ring-surface-400 dark:ring-surface-700"
             style={{ backgroundColor: c.value }}
             title={`Highlight ${c.label}`}
           />
         ))}
 
-        <div className="mx-0.5 h-5 w-px bg-surface-200 dark:bg-surface-700" />
+        <div className="mx-px h-4 w-px bg-surface-200 dark:bg-surface-700" />
 
-        {/* Action buttons */}
-        <button onClick={() => setMode('comment')} className="flex h-7 w-7 items-center justify-center rounded-md text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Add comment">
-          <MessageSquare className="h-3.5 w-3.5" />
+        {/* Action buttons — compact */}
+        <button onClick={() => setMode('comment')} className="flex h-6 w-6 items-center justify-center rounded text-blue-500 transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Add comment">
+          <MessageSquare className="h-3 w-3" />
         </button>
-        <button onClick={handleCopy} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Copy text">
-          <Copy className="h-3.5 w-3.5" />
+        <button onClick={handleCopy} className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Copy text">
+          <Copy className="h-3 w-3" />
         </button>
-        <button onClick={handleAskAI} className="flex h-7 w-7 items-center justify-center rounded-md text-accent-500 transition-colors hover:bg-accent-50 dark:hover:bg-accent-900/20" title="Ask AI">
-          <Sparkles className="h-3.5 w-3.5" />
+        <button onClick={handleAskAI} className="flex h-6 w-6 items-center justify-center rounded text-accent-500 transition-colors hover:bg-accent-50 dark:hover:bg-accent-900/20" title="Ask AI">
+          <Sparkles className="h-3 w-3" />
         </button>
-        <button onClick={handleAddToBrief} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to draft">
-          <FileSignature className="h-3.5 w-3.5" />
+        <button onClick={handleAddToBrief} className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to draft">
+          <FileSignature className="h-3 w-3" />
         </button>
-        <button onClick={handleAddToChronology} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to timeline">
-          <Clock className="h-3.5 w-3.5" />
+        <button onClick={handleAddToChronology} className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 dark:hover:bg-surface-800" title="Add to timeline">
+          <Clock className="h-3 w-3" />
         </button>
-        <button onClick={handleMarkAsExhibit} disabled={createExhibit.isPending} className="flex h-7 w-7 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 disabled:opacity-50 dark:hover:bg-surface-800" title="Mark as exhibit">
-          <Tag className="h-3.5 w-3.5" />
+        <button onClick={handleMarkAsExhibit} disabled={createExhibit.isPending} className="flex h-6 w-6 items-center justify-center rounded text-surface-400 transition-colors hover:bg-surface-100 disabled:opacity-50 dark:hover:bg-surface-800" title="Mark as exhibit">
+          <Tag className="h-3 w-3" />
         </button>
       </div>
     );

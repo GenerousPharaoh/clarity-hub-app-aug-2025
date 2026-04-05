@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import useAppStore from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBriefDrafts, useCreateBriefDraft, useDeleteBriefDraft, useUpdateBriefDraft } from '@/hooks/useBriefDrafts';
-import { BRIEF_TEMPLATES, TEMPLATE_PROMPTS, type BriefDraft, type BriefTemplate } from '@/types/drafting';
+import { BRIEF_TEMPLATES, TEMPLATE_PROMPTS, DRAFTING_SYSTEM_PROMPT, type BriefDraft, type BriefTemplate } from '@/types/drafting';
 import { searchDocuments, formatSearchContext } from '@/services/documentSearchService';
 import { aiRouter } from '@/services/aiRouter';
 import { supabase } from '@/lib/supabase';
@@ -340,8 +340,8 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         .map((f) => `- ${f.name}${f.document_type ? ` [${f.document_type}]` : ''}: ${f.ai_summary ?? 'No summary'}`)
         .join('\n');
 
-      // RAG search for section-relevant content
-      const chunkLimit = (sectionKey === 'facts' || sectionKey === 'background') ? 15 : 10;
+      // RAG search for section-relevant content — generous limit for expert drafting
+      const chunkLimit = (sectionKey === 'facts' || sectionKey === 'background' || sectionKey === 'damages' || sectionKey === 'law_argument') ? 20 : 12;
       const searchResults = await searchDocuments({
         query: `${section.heading} ${sectionInstructions[sectionKey] || ''}`.trim(),
         projectId,
@@ -398,21 +398,24 @@ function DraftEditor({ draft, projectId }: { draft: BriefDraft; projectId: strin
         .join('\n\n');
 
       const result = await aiRouter.routeQuery({
-        query: `${systemInstruction}
+        query: `${DRAFTING_SYSTEM_PROMPT}
+
+---
+
+${systemInstruction}
 
 Document metadata:
 - Court/Tribunal: ${draft.court_name || 'Ontario Superior Court of Justice'}
 - File Number: ${draft.file_number || '[To be assigned]'}
 - Case Name: ${draft.case_name || '[Parties TBD]'}
-- Party: ${draft.party_name || '[Party name TBD]'}
+- Party (your client): ${draft.party_name || '[Party name TBD]'}
 
 SECTION TO DRAFT: ${section.heading}
 
 ${sectionInstruction}
 ${userInstructions}
 
-Return ONLY the section content — no section heading (it will be added automatically).
-Cite case law with neutral citations (e.g., 2024 ONSC 1234). Do not fabricate citations.`,
+IMPORTANT: Return ONLY the section content — no section heading (it will be added automatically). Do not fabricate case citations. If evidence is insufficient for a factual assertion, flag it with [EVIDENCE NEEDED].`,
         effortLevel: 'deep',
         caseContext: `--- PROJECT FILES ---\n${fileSummaries}\n\n${documentContext}${exhibitsContext}${timelineContext}\n\n${priorSections ? `--- PRIOR SECTIONS ---\n${priorSections}` : ''}`,
       });

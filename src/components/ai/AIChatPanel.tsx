@@ -309,36 +309,6 @@ export function AIChatPanel() {
           </div>
         ) : (
           <div className="py-2">
-            {/* Chat actions: export + clear */}
-            <div className="flex justify-end gap-1 px-4 pb-1">
-              <ExportButton
-                content=""
-                title="AI Chat Conversation"
-                type="chat"
-                chatMessages={messages.map((m) => ({
-                  role: m.role,
-                  content: m.content,
-                  model: m.model,
-                  timestamp: m.timestamp,
-                  sources: m.sources?.map((s) => ({
-                    sourceIndex: s.sourceIndex,
-                    fileName: s.fileName,
-                    pageNumber: s.pageNumber,
-                    sectionHeading: s.sectionHeading,
-                    contentPreview: s.contentPreview,
-                  })),
-                }))}
-                className="p-1.5 [&_span]:hidden"
-              />
-              <button
-                onClick={() => setShowClearConfirm(true)}
-                className="flex items-center justify-center rounded-md p-1.5 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:text-surface-500 dark:hover:bg-surface-700 dark:hover:text-surface-300"
-                title="Clear conversation"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
-            </div>
-
             {/* Messages */}
             {messages.map((msg, idx) => (
               <ChatMessageComponent
@@ -566,13 +536,45 @@ export function AIChatPanel() {
         </div>
 
         <div className={cn('mt-2 flex items-center gap-1 px-1', compact ? 'justify-end' : 'justify-between')}>
-          {!compact && !narrow && (
-            <span className="text-xs text-surface-400 dark:text-surface-500">
-              <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
-              <span className="mx-1 text-surface-300 dark:text-surface-600">/</span>
-              <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Shift+Enter</kbd> new line
-            </span>
-          )}
+          {/* Left: keyboard hint OR chat actions */}
+          <div className="flex items-center gap-1">
+            {!isEmpty && (
+              <>
+                <ExportButton
+                  content=""
+                  title="AI Chat Conversation"
+                  type="chat"
+                  chatMessages={messages.map((m) => ({
+                    role: m.role,
+                    content: m.content,
+                    model: m.model,
+                    timestamp: m.timestamp,
+                    sources: m.sources?.map((s) => ({
+                      sourceIndex: s.sourceIndex,
+                      fileName: s.fileName,
+                      pageNumber: s.pageNumber,
+                      sectionHeading: s.sectionHeading,
+                      contentPreview: s.contentPreview,
+                    })),
+                  }))}
+                  className="p-1 [&_span]:hidden"
+                />
+                <button
+                  onClick={() => setShowClearConfirm(true)}
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:text-surface-500 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                  title="Clear conversation"
+                  aria-label="Clear conversation"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </>
+            )}
+            {isEmpty && !compact && !narrow && (
+              <span className="text-xs text-surface-400 dark:text-surface-500">
+                <kbd className="rounded border border-surface-200 px-1 py-px font-mono text-[9px] dark:border-surface-700">Enter</kbd> to send
+              </span>
+            )}
+          </div>
           {input.length > 2000 ? (
             <span className={cn(
               'text-xs whitespace-nowrap',

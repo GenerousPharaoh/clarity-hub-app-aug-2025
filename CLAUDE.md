@@ -38,6 +38,7 @@ All AI calls go through Vercel serverless functions — API keys are NOT in the 
 | `api/canlii.ts` | CanLII API proxy — Canadian case law and legislation lookup |
 | `api/legal-web-search.ts` | Tavily web search — real-time legal research for recent case law/news |
 | `api/reembed.ts` | Re-embed utility — regenerate embeddings after provider switch (5-min timeout) |
+| `api/canlii-verify.ts` | Citation verification — batch-verifies legal citations against CanLII API |
 
 **Client services** (`src/services/`):
 - `aiRouter.ts` — classifies queries, calls `/api/ai-chat`, extracts citations
@@ -194,7 +195,7 @@ src/
 
 ## Gotchas & Constraints
 
-- **Vercel Hobby plan: max 12 serverless functions.** `api/_lib/` uses underscore prefix so Vercel ignores those files. Currently 9 of 12 used.
+- **Vercel Hobby plan: max 12 serverless functions.** `api/_lib/` uses underscore prefix so Vercel ignores those files. Currently 10 of 12 used.
 - **`.npmrc` has `legacy-peer-deps=true`** — required for `react-pdf-highlighter-extended-extended` (React 18 peer dep with React 19).
 - **Geist font is self-hosted** in `public/fonts/` with `@font-face` in `index.css`. Do NOT use jsDelivr CDN — blocked by Chromium ORB.
 - **`database.ts` types are outdated for `timeline_events`** — actual DB has `extraction_method`, `event_type`, `significance`, `source_quote`, `page_reference` etc. that aren't in the types. Use `as any` cast or raw queries for timeline inserts.

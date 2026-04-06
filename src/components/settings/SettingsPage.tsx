@@ -613,6 +613,10 @@ export function SettingsPage() {
                   <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
                   <span><span className="font-medium text-surface-700 dark:text-surface-300">Tavily</span> &mdash; web search for legal research (US)</span>
                 </li>
+                <li className="flex items-baseline gap-2">
+                  <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-surface-400 dark:bg-surface-500" />
+                  <span><span className="font-medium text-surface-700 dark:text-surface-300">CanLII</span> &mdash; citation verification for Canadian case law (Canada)</span>
+                </li>
               </ul>
               <p className="mt-2 text-xs text-surface-500 dark:text-surface-400">
                 All providers are accessed via API-tier agreements. They do not

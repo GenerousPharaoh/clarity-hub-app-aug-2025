@@ -58,10 +58,7 @@ const MODEL_CONFIG = {
 
 
 const EFFORT_BADGE_CONFIG: Record<string, { label: string; className: string }> = {
-  quick:    { label: 'Fast',     className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
-  standard: { label: 'Fast',     className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
-  thorough: { label: 'Fast',     className: 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300' },
-  deep:     { label: 'Thinking', className: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300' },
+  deep: { label: 'Deep analysis', className: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-300' },
 };
 
 /**

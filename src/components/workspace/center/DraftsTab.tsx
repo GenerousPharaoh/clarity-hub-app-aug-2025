@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Plus, FileSignature, Trash2, Loader2, Sparkles, BookOpen, Mail, Scale, Shield, ArrowRight, X, Download, Copy, FileText, FileDown, FileType } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import useAppStore from '@/store';
@@ -714,7 +715,7 @@ IMPORTANT: Return ONLY the section content — no section heading (it will be ad
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={(e) => handleEditSection(section.key, e.currentTarget.innerHTML)}
-                dangerouslySetInnerHTML={{ __html: section.content_html }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.content_html) }}
               />
             ) : (
               <p className="text-xs italic text-surface-300 dark:text-surface-600">

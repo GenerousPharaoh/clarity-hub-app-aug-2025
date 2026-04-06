@@ -214,7 +214,7 @@ export function ExhibitsTab() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-surface-200/80 px-4 py-3 dark:border-surface-800">
+      <div className="flex shrink-0 items-center justify-between border-b border-surface-200/80 px-3 py-2 dark:border-surface-800">
         <div className="min-w-0">
           <h2 className="min-w-0 truncate text-xs font-semibold uppercase tracking-wider text-surface-500 dark:text-surface-400">
             Exhibit Markers ({exhibits?.length ?? 0})

@@ -341,7 +341,7 @@ export function TimelineTab() {
   return (
     <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
       {/* Header */}
-      <div className="shrink-0 border-b border-translucent bg-surface-50 px-3 py-3 backdrop-blur-md dark:bg-surface-900 sm:px-4">
+      <div className="shrink-0 border-b border-translucent bg-surface-50 px-3 py-2 dark:bg-surface-900 sm:px-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex items-center gap-1 rounded-full border border-surface-200 bg-surface-50 p-0.5 dark:border-surface-700 dark:bg-surface-800">

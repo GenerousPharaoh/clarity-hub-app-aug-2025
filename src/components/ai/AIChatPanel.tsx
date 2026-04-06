@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown, Zap, Brain, Globe, ShieldOff } from 'lucide-react';
+import { Send, Sparkles, Trash2, Loader2, FileText, FileImage, FileAudio, FileVideo, File, X, ArrowDown, Zap, Brain, Globe, ShieldOff, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -58,6 +58,7 @@ export function AIChatPanel() {
   const [input, setInput] = useState('');
   const [useDeepThinking, setUseDeepThinking] = useState(false);
   const [useWebSearch, setUseWebSearch] = useState(false);
+  const [showTaskLibrary, setShowTaskLibrary] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -310,6 +311,7 @@ export function AIChatPanel() {
                 selectedFileType={selectedFiles[0]?.file_type}
                 selectedFileName={selectedFiles[0]?.name}
                 compact={narrow}
+                showTaskLibrary={showTaskLibrary}
               />
             </div>
           </div>
@@ -502,7 +504,39 @@ export function AIChatPanel() {
             <Globe className="h-3 w-3" />
             {!compact && 'Web'}
           </button>
+
+          <div className="mx-1 h-4 w-px bg-surface-200 dark:bg-surface-700" />
+
+          <button
+            onClick={() => setShowTaskLibrary(!showTaskLibrary)}
+            className={cn(
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              showTaskLibrary
+                ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-700 dark:bg-accent-900/30 dark:text-accent-300'
+                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+            )}
+            title="Open task library"
+          >
+            <BookOpen className="h-3 w-3" />
+            {!compact && 'Tasks'}
+          </button>
         </div>
+
+        {/* Task library popover (shown when chat has messages) */}
+        {showTaskLibrary && !isEmpty && (
+          <div className="mb-2 max-h-64 overflow-y-auto rounded-lg border border-surface-200 bg-surface-50 p-2 dark:border-surface-700 dark:bg-surface-800/80">
+            <SuggestedPrompts
+              onSelectPrompt={(prompt) => {
+                handlePromptSelect(prompt);
+                setShowTaskLibrary(false);
+              }}
+              selectedFileType={selectedFiles[0]?.file_type}
+              selectedFileName={selectedFiles[0]?.name}
+              compact={narrow}
+              showTaskLibrary
+            />
+          </div>
+        )}
 
         {/* Unprocessed files warning */}
         {unprocessedFileCount > 0 && (

@@ -27,9 +27,11 @@ SyntaxHighlighter.registerLanguage('css', css);
 SyntaxHighlighter.registerLanguage('sql', sql);
 SyntaxHighlighter.registerLanguage('markdown', markdown);
 import { cn } from '@/lib/utils';
-import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check, Globe } from 'lucide-react';
+import { parseStructuredResponse, type ConfidenceLevel } from '@/lib/parseStructuredResponse';
+import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check, Globe, ChevronDown } from 'lucide-react';
 import { ChatCitation, SourcesList } from './ChatCitation';
 import { FollowUpSuggestions } from './FollowUpSuggestions';
+import { useCitationVerification } from '@/hooks/useCitationVerification';
 import type { ChatMessage as ChatMessageType, ChatSource, WebSource } from '@/types';
 
 interface ChatMessageProps {
@@ -257,6 +259,64 @@ function processChildrenForCitations(children: ReactNode, sources: ChatSource[],
   return children;
 }
 
+// ============================================================
+// Confidence badge colors
+// ============================================================
+const CONFIDENCE_COLORS: Record<ConfidenceLevel, string> = {
+  high: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  medium: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  low: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+};
+
+function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+        CONFIDENCE_COLORS[level]
+      )}
+    >
+      {level === 'high' && 'High confidence'}
+      {level === 'medium' && 'Medium confidence'}
+      {level === 'low' && 'Low confidence'}
+    </span>
+  );
+}
+
+/**
+ * A collapsible section with a small toggle button and bordered content area.
+ */
+function CollapsibleSection({ label, content }: { label: string; content: string }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="mt-2">
+      <button
+        type="button"
+        onClick={() => setExpanded((prev) => !prev)}
+        className="text-xs text-surface-500 flex items-center gap-1 hover:text-surface-700 dark:hover:text-surface-300 transition-colors"
+      >
+        <ChevronDown
+          className={cn(
+            'h-3 w-3 transition-transform duration-200',
+            expanded && 'rotate-180'
+          )}
+        />
+        {label}
+      </button>
+      {expanded && (
+        <div className="mt-1 rounded-lg border border-surface-100 dark:border-surface-700 px-3 py-2">
+          <div className="prose-chat min-w-0 text-[13px] leading-relaxed break-words text-surface-700 dark:text-surface-200">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export const ChatMessageComponent = memo(function ChatMessageComponent({
   message,
   onRetry,
@@ -284,6 +344,23 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
       setTimeout(() => setCopied(false), 2000);
     } catch { /* clipboard API may be unavailable */ }
   }, [message.content]);
+
+  // Parse structured response markers for assistant messages
+  const structured = useMemo(
+    () => (!isUser && !isErrorMessage(message.content))
+      ? parseStructuredResponse(message.content)
+      : null,
+    [isUser, message.content]
+  );
+
+  // Async citation verification against CanLII
+  const { data: verificationResults } = useCitationVerification(
+    message.id,
+    message.citations ?? []
+  );
+
+  // Content to render in the main ReactMarkdown block
+  const displayContent = structured?.isStructured ? structured.answer : message.content;
 
   if (isUser) {
     return (
@@ -495,9 +572,24 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                   ),
                 }}
               >
-                {message.content}
+                {displayContent}
               </ReactMarkdown>
             </div>
+
+            {/* Structured response: confidence badge + collapsible sections */}
+            {structured?.isStructured && (
+              <div className="mt-2 space-y-1">
+                {structured.confidence && (
+                  <ConfidenceBadge level={structured.confidence} />
+                )}
+                {structured.reasoning && (
+                  <CollapsibleSection label="Show reasoning" content={structured.reasoning} />
+                )}
+                {structured.sources && (
+                  <CollapsibleSection label="Sources cited" content={structured.sources} />
+                )}
+              </div>
+            )}
           </div>
 
           {/* Sources list */}
@@ -510,6 +602,11 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           {/* Web sources list */}
           {!isError && message.webSources && message.webSources.length > 0 && (
             <WebSourcesList webSources={message.webSources} />
+          )}
+
+          {/* Citation verification badges */}
+          {!isError && verificationResults && verificationResults.length > 0 && (
+            <CitationVerificationBadges results={verificationResults} />
           )}
 
           {/* Retry button for error messages */}
@@ -540,6 +637,38 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
     </div>
   );
 });
+
+/**
+ * Summary line showing CanLII citation verification results.
+ * Only rendered after verification completes (no loading state).
+ */
+function CitationVerificationBadges({ results }: { results: import('@/hooks/useCitationVerification').CitationVerification[] }) {
+  const verified = results.filter((r) => r.status === 'verified').length;
+  const unverified = results.filter((r) => r.status === 'unverified').length;
+  const notFound = results.filter((r) => r.status === 'not_found').length;
+
+  if (verified === 0 && unverified === 0 && notFound === 0) return null;
+
+  return (
+    <div className="mt-1.5 flex items-center gap-3 text-xs">
+      {verified > 0 && (
+        <span className="text-green-600 dark:text-green-400">
+          {'\u2713'} {verified} verified
+        </span>
+      )}
+      {unverified > 0 && (
+        <span className="text-amber-500 dark:text-amber-400">
+          {'\u26A0'} {unverified} unverified
+        </span>
+      )}
+      {notFound > 0 && (
+        <span className="text-red-500 dark:text-red-400">
+          {'\u2717'} {notFound} not found
+        </span>
+      )}
+    </div>
+  );
+}
 
 /**
  * Collapsible list of web sources used in the AI response.

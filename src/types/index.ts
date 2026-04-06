@@ -54,6 +54,7 @@ export interface ChatMessage {
   complexity?: string;
   effortLevel?: EffortLevel;
   followUps?: string[];
+  citations?: string[];
 }
 
 // Panel state

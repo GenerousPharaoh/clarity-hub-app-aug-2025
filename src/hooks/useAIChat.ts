@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
-import { aiRouter, EFFORT_CONFIG } from '@/services/aiRouter';
+import { aiRouter, EFFORT_CONFIG, extractCitations } from '@/services/aiRouter';
 import { downloadFile } from '@/services/storageService';
 import { searchDocuments, formatSearchContext, type SearchResult } from '@/services/documentSearchService';
 import type { ChatMessage, ChatSource, EffortLevel } from '@/types';
@@ -31,6 +31,11 @@ function rowToMessage(row: {
   effort_level?: string | null;
   follow_ups?: unknown;
 }): ChatMessage {
+  // For assistant messages, extract legal citations from content so the
+  // verification badge can run even for messages loaded from the DB.
+  const citations =
+    row.role === 'assistant' ? extractCitations(row.content) : undefined;
+
   return {
     id: row.id,
     role: row.role as 'user' | 'assistant',
@@ -43,6 +48,7 @@ function rowToMessage(row: {
     complexity: row.complexity ?? undefined,
     effortLevel: (row.effort_level as EffortLevel) ?? undefined,
     followUps: (row.follow_ups as string[]) ?? undefined,
+    citations: citations && citations.length > 0 ? citations : undefined,
   };
 }
 
@@ -527,12 +533,16 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
           follow_ups: followUps.length > 0 ? followUps : null,
         });
 
+        // Extract legal citations from the AI response for verification badges
+        const legalCitations = extractCitations(result.response);
+
         // Remove loading indicator and add real response with effort + follow-ups + web sources
         const assistantMsg: ChatMessage = {
           ...rowToMessage(assistantRow),
           effortLevel: effort,
           followUps: followUps.length > 0 ? followUps : undefined,
           webSources: webSources.length > 0 ? webSources : undefined,
+          citations: legalCitations.length > 0 ? legalCitations : undefined,
         };
         queryClient.setQueryData<ChatMessage[]>(chatKey(projectId), (old) =>
           (old ?? []).filter((m) => m.id !== loadingId).concat(assistantMsg)

@@ -164,6 +164,7 @@ async function callGPT(params: {
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
   reasoningEffort?: 'low' | 'medium' | 'high';
   maxCompletionTokens?: number;
+  responseFormatInstruction?: string;
 }): Promise<{ content: string; citations: string[] }> {
   const openai = getOpenAI();
   if (!openai) throw new Error('OpenAI not configured server-side');
@@ -194,8 +195,12 @@ When analyzing legal issues:
 4. Note any counterarguments or risks
 5. Provide a practical recommendation`;
 
+  const fullSystemPrompt = params.responseFormatInstruction
+    ? systemPrompt + '\n\n' + params.responseFormatInstruction
+    : systemPrompt;
+
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: 'system', content: systemPrompt },
+    { role: 'system', content: fullSystemPrompt },
   ];
 
   if (params.conversationHistory?.length) {
@@ -238,6 +243,7 @@ async function callGemini(params: {
   caseContext?: string;
   conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>;
   maxOutputTokens?: number;
+  responseFormatInstruction?: string;
 }): Promise<{ content: string; citations: string[] }> {
   const model = getGeminiModel();
   if (!model) throw new Error('Gemini not configured server-side');
@@ -259,12 +265,16 @@ async function callGemini(params: {
   if (params.legalContext) contextParts.push(params.legalContext);
   if (params.caseContext) contextParts.push(params.caseContext);
 
+  const formatBlock = params.responseFormatInstruction
+    ? '\n\n' + params.responseFormatInstruction
+    : '';
+
   const contextPrompt = `
 You are a legal research assistant specializing in Ontario employment law. You have knowledge of the Employment Standards Act, 2000, the Human Rights Code, the common law of wrongful dismissal, and Ontario Rules of Civil Procedure.
 
 Always cite cases with neutral citations (e.g., 2024 ONSC 1234). Never fabricate case citations. If you don't know a case, say so.
 When analyzing termination, consider: Bardal factors (age, length of service, character of employment, availability of similar employment), ESA minimums, any contractual termination clause and its enforceability after Waksdale.
-When discussing costs, reference the Ontario costs grid and partial/substantial indemnity scales.
+When discussing costs, reference the Ontario costs grid and partial/substantial indemnity scales.${formatBlock}
 
 Here's the relevant context:
 
@@ -573,6 +583,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const fullLegalContext = (legalContext || '') + citationInstruction + webSearchContext;
 
+    // Build structured response format instruction for non-quick effort levels
+    const responseFormatInstruction = effort !== 'quick'
+      ? `RESPONSE FORMAT:
+Structure your response with these markers when providing substantive analysis:
+
+[ANSWER]
+Your direct answer. Lead with the conclusion.
+
+[REASONING]
+Your legal analysis — framework applied, facts mapped to elements, authorities considered.
+
+[SOURCES]
+Specific documents, cases, or legislation you relied on.
+
+[CONFIDENCE: high|medium|low]
+high = strong evidence + settled law. medium = some gaps or unsettled law. low = limited evidence.`
+      : undefined;
+
     // --- Determine model ---
     const geminiAvailable = !!getGeminiModel();
     const gptAvailable = !!getOpenAI();
@@ -608,6 +636,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             conversationHistory,
             reasoningEffort: effortCfg.reasoning,
             maxCompletionTokens: effortCfg.maxTokens,
+            responseFormatInstruction,
           })
         : callGemini({
             query: query.trim(),
@@ -615,6 +644,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             caseContext,
             conversationHistory,
             maxOutputTokens: effortCfg.maxTokens,
+            responseFormatInstruction,
           });
 
       // Race AI call against the timeout

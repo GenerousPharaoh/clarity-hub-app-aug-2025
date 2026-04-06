@@ -17,6 +17,7 @@ interface ProjectCardProps {
   fileCount?: number;
   index: number;
   onDelete: (id: string) => void;
+  isLastOpened?: boolean;
 }
 
 function getMatterStatus(fileCount?: number) {
@@ -40,7 +41,7 @@ function getMatterStatus(fileCount?: number) {
   };
 }
 
-export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened }: ProjectCardProps) {
   const navigate = useNavigate();
   const updateProject = useUpdateProject();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -160,7 +161,8 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
           'hover:shadow-lg hover:shadow-surface-200/50 hover:-translate-y-0.5 hover:border-surface-300',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2',
           'dark:border-surface-800 dark:bg-surface-900',
-          'dark:hover:shadow-lg dark:hover:shadow-surface-950/40 dark:hover:border-surface-700'
+          'dark:hover:shadow-lg dark:hover:shadow-surface-950/40 dark:hover:border-surface-700',
+          isLastOpened && 'border-l-[3px] border-l-accent-500'
         )}
       >
         <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', accent)} />
@@ -184,6 +186,11 @@ export function ProjectCard({ project, fileCount, index, onDelete }: ProjectCard
                   <span title={status.label} className={cn('max-w-full rounded-full border px-2 py-0.5 text-xs font-medium', status.chip)}>
                     {status.label}
                   </span>
+                  {isLastOpened && (
+                    <span className="max-w-full rounded-full border border-accent-200 bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:border-accent-900/50 dark:bg-accent-950/30 dark:text-accent-300">
+                      Last opened
+                    </span>
+                  )}
                 </div>
 
                 <div className="mt-2">

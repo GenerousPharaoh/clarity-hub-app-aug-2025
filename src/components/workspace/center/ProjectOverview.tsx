@@ -14,7 +14,6 @@ import {
   Loader2,
   NotebookPen,
   Pencil,
-  ShieldCheck,
   Sparkles,
   Tag,
   Upload,
@@ -226,29 +225,29 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
   if (isInitialLoad) {
     return (
       <div className="flex-1 overflow-y-auto bg-surface-50/60 dark:bg-surface-950/30">
-        <div className="mx-auto max-w-5xl space-y-5 p-4 sm:p-6">
+        <div className="mx-auto max-w-5xl space-y-3 p-3 sm:p-4">
           {/* Header skeleton */}
-          <div className="rounded-2xl border border-surface-200/80 bg-white p-5 dark:border-surface-800 dark:bg-surface-900">
+          <div className="rounded-xl border border-surface-200/80 bg-white px-4 py-3 dark:border-surface-800 dark:bg-surface-900">
             <div className="flex gap-2">
-              <div className="h-5 w-20 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
-              <div className="h-5 w-24 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
+              <div className="h-4 w-16 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
+              <div className="h-4 w-20 animate-pulse rounded-full bg-surface-100 dark:bg-surface-800" />
             </div>
-            <div className="mt-4 h-8 w-48 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <div className="mt-2 h-6 w-40 animate-pulse rounded-lg bg-surface-100 dark:bg-surface-800" />
+            <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="rounded-xl border border-surface-200/80 bg-surface-50 p-4 dark:border-surface-800 dark:bg-surface-950/40">
-                  <div className="h-3 w-12 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
-                  <div className="mt-3 h-7 w-8 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
+                <div key={i} className="flex items-center gap-2 rounded-lg border border-surface-200/80 bg-surface-50 px-3 py-2 dark:border-surface-800 dark:bg-surface-950/40">
+                  <div className="h-3 w-10 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
+                  <div className="ml-auto h-4 w-4 animate-pulse rounded bg-surface-200 dark:bg-surface-700" />
                 </div>
               ))}
             </div>
           </div>
           {/* Card skeletons */}
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="rounded-2xl border border-surface-200/80 bg-white p-5 dark:border-surface-800 dark:bg-surface-900">
-                <div className="h-4 w-28 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
-                <div className="mt-4 space-y-2">
+              <div key={i} className="rounded-xl border border-surface-200/80 bg-white px-4 py-3 dark:border-surface-800 dark:bg-surface-900">
+                <div className="h-3 w-24 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
+                <div className="mt-2 space-y-1.5">
                   <div className="h-3 w-full animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
                   <div className="h-3 w-3/4 animate-pulse rounded bg-surface-100 dark:bg-surface-800" />
                 </div>
@@ -262,20 +261,20 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
 
   return (
     <div className="flex-1 overflow-y-auto bg-surface-50/60 @container dark:bg-surface-950/30">
-      <div className="mx-auto max-w-5xl space-y-5 p-4 @lg:p-6">
-        <div className="space-y-5">
-          <section className="min-w-0 overflow-hidden rounded-2xl border border-surface-200/80 bg-white p-4 shadow-sm dark:border-surface-800 dark:bg-surface-900 @lg:p-6">
+      <div className="mx-auto max-w-5xl space-y-3 p-3 @lg:p-4">
+        <div className="space-y-3">
+          <section className="min-w-0 overflow-hidden rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900 @lg:px-5 @lg:py-3">
             <div className="min-w-0">
               <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
                 <OverviewBadge tone={stage.tone}>{stage.label}</OverviewBadge>
                 <OverviewBadge tone="neutral">{readinessPercent}% indexed</OverviewBadge>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-2">
                 <EditableProjectHeader project={project} />
               </div>
 
-              <div className="mt-5 grid grid-cols-2 items-stretch gap-3 @md:grid-cols-5">
+              <div className="mt-3 grid grid-cols-3 items-stretch gap-2 @md:grid-cols-5">
                 <OverviewMetricCard
                   icon={<FileText className="h-4 w-4" />}
                   label="Files"
@@ -311,7 +310,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
                 />
               </div>
 
-              <div className="mt-5 grid items-stretch gap-3 @md:grid-cols-2">
+              <div className="mt-3 grid items-stretch gap-2 @md:grid-cols-2">
                 <AnchorCard
                   eyebrow="Latest evidence"
                   title={latestFile?.name ?? 'No files yet'}
@@ -346,19 +345,10 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
             </div>
           </section>
 
-          <div className="grid items-stretch gap-4 @md:grid-cols-2">
-            <MatterStageCard
-              stage={stage}
-              readinessPercent={readinessPercent}
-              processedCount={processedCount}
-              fileCount={fileCount}
-              exhibitCount={exhibitCount}
-            />
-            <QuickActions />
-          </div>
+          <UploadBar />
         </div>
 
-        <div className="grid items-stretch gap-4 @md:grid-cols-2">
+        <div className="grid items-stretch gap-3 @md:grid-cols-2">
           <NextStepsCard actions={nextSteps} />
           <RecentActivity
             files={projectFiles}
@@ -380,7 +370,7 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
         {/* Highlights Summary */}
         <HighlightsSummaryCard projectId={selectedProjectId} />
 
-        <div className="grid items-stretch gap-4 @md:grid-cols-2">
+        <div className="grid items-stretch gap-3 @md:grid-cols-2">
           {fileCount > 0 ? (
             <FileTypeBreakdown files={projectFiles} />
           ) : (
@@ -460,7 +450,7 @@ function EditableProjectHeader({
             }}
             disabled={updateProject.isPending}
             autoFocus
-            className="min-w-0 flex-1 rounded-2xl border border-primary-300 bg-white px-3 py-2 font-heading text-2xl font-semibold tracking-tight text-surface-950 outline-none focus:ring-2 focus:ring-primary-500/25 disabled:opacity-50 dark:border-primary-700 dark:bg-surface-900 dark:text-surface-50"
+            className="min-w-0 flex-1 rounded-lg border border-primary-300 bg-white px-3 py-1.5 font-heading text-xl font-semibold tracking-tight text-surface-950 outline-none focus:ring-2 focus:ring-primary-500/25 disabled:opacity-50 dark:border-primary-700 dark:bg-surface-900 dark:text-surface-50"
           />
           <div className="flex items-center gap-2 self-end @sm:self-auto">
             <button
@@ -490,7 +480,7 @@ function EditableProjectHeader({
         </div>
       ) : (
         <div className="group flex min-w-0 items-start gap-2">
-          <h1 className="min-w-0 truncate font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50" title={project.name}>
+          <h1 className="min-w-0 truncate font-heading text-xl font-semibold tracking-tight text-surface-950 dark:text-surface-50" title={project.name}>
             {project.name}
           </h1>
           <button
@@ -546,11 +536,11 @@ function EditableProjectHeader({
           </div>
         </div>
       ) : (
-        <div className="group mt-3">
+        <div className="group mt-1">
           {project.description ? (
             <p
               onClick={() => setIsEditingDesc(true)}
-              className="cursor-pointer break-words text-sm leading-7 text-surface-600 transition-colors hover:text-surface-800 dark:text-surface-300 dark:hover:text-surface-100"
+              className="cursor-pointer break-words text-xs leading-5 text-surface-500 transition-colors hover:text-surface-700 dark:text-surface-400 dark:hover:text-surface-200"
             >
               {project.description}
             </p>
@@ -585,7 +575,7 @@ function OverviewBadge({
           : 'border-surface-200 bg-surface-50 text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400';
 
   return (
-    <span className={cn('max-w-full truncate rounded-full border px-3 py-1 text-sm font-medium', toneClasses)} title={typeof children === 'string' ? children : undefined}>
+    <span className={cn('max-w-full truncate rounded-full border px-2.5 py-0.5 text-xs font-medium', toneClasses)} title={typeof children === 'string' ? children : undefined}>
       {children}
     </span>
   );
@@ -595,13 +585,12 @@ function OverviewMetricCard({
   icon,
   label,
   value,
-  detail,
   onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
-  detail: string;
+  detail?: string;
   onClick?: () => void;
 }) {
   const Component = onClick ? 'button' : 'div';
@@ -610,20 +599,15 @@ function OverviewMetricCard({
     <Component
       onClick={onClick}
       className={cn(
-        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white px-3 py-2.5 text-left shadow-sm dark:border-surface-800 dark:bg-surface-950/50',
-        onClick && 'transition-all hover:-translate-y-0.5 hover:border-primary-400 hover:shadow-md dark:hover:border-primary-600'
+        'flex h-full min-w-0 items-center gap-2.5 rounded-lg border border-surface-200/80 bg-white px-3 py-2 text-left dark:border-surface-800 dark:bg-surface-950/50',
+        onClick && 'transition-colors hover:border-primary-400 dark:hover:border-primary-600'
       )}
     >
-      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
-        {icon}
-        <span>{label}</span>
-      </div>
-      <p className="mt-3 font-heading text-3xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
+      <span className="text-surface-400 dark:text-surface-500">{icon}</span>
+      <span className="min-w-0 truncate text-xs font-medium text-surface-500 dark:text-surface-400">{label}</span>
+      <span className="ml-auto font-heading text-lg font-semibold tabular-nums text-surface-950 dark:text-surface-50">
         {value}
-      </p>
-      <p className="mt-2 line-clamp-1 text-xs text-surface-500 dark:text-surface-400">
-        {detail}
-      </p>
+      </span>
     </Component>
   );
 }
@@ -645,69 +629,78 @@ function AnchorCard({
     <Component
       onClick={onClick}
       className={cn(
-        'flex h-full min-w-0 flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 text-left dark:border-surface-800 dark:bg-surface-950/50',
+        'flex h-full min-w-0 items-center gap-3 rounded-lg border border-surface-200/80 bg-white px-3 py-2 text-left dark:border-surface-800 dark:bg-surface-950/50',
         onClick && 'transition-colors hover:border-primary-300 dark:hover:border-primary-700'
       )}
     >
-      <p className="line-clamp-2 text-sm font-medium text-surface-900 dark:text-surface-100">
-        {title}
-      </p>
-      <p className="mt-1 line-clamp-1 text-xs text-surface-500 dark:text-surface-400">
-        {detail}
-      </p>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-surface-900 dark:text-surface-100">
+          {title}
+        </span>
+        <span className="block truncate text-xs text-surface-400 dark:text-surface-500">
+          {detail}
+        </span>
+      </span>
     </Component>
   );
 }
 
-function MatterStageCard({
-  stage,
-  readinessPercent,
-  processedCount,
-  fileCount,
-  exhibitCount,
-}: {
-  stage: { label: string; description: string; tone: MatterStageTone };
-  readinessPercent: number;
-  processedCount: number;
-  fileCount: number;
-  exhibitCount: number;
-}) {
-  const toneClasses =
-    stage.tone === 'emerald'
-      ? 'border-emerald-200 bg-emerald-50/85 dark:border-emerald-900/50 dark:bg-emerald-950/20'
-      : stage.tone === 'amber'
-        ? 'border-amber-200 bg-amber-50/85 dark:border-amber-900/50 dark:bg-amber-950/20'
-        : 'border-primary-200 bg-primary-50/85 dark:border-primary-900/50 dark:bg-primary-950/20';
+/** Compact single-line upload bar replacing the old MatterStageCard + QuickActions */
+function UploadBar() {
+  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const { isDemoMode } = useAuth();
+  const uploadFile = useUploadFile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const barClass =
-    stage.tone === 'emerald'
-      ? 'bg-emerald-500'
-      : stage.tone === 'amber'
-        ? 'bg-amber-500'
-        : 'bg-primary-500';
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (!files || !selectedProjectId) return;
+
+      for (const file of Array.from(files)) {
+        if (file.size > MAX_FILE_SIZE) {
+          toast.error(`File too large: ${file.name}`);
+          continue;
+        }
+        try {
+          await uploadFile.mutateAsync({ file, projectId: selectedProjectId });
+          toast.success(`Uploaded ${file.name}`);
+        } catch {
+          toast.error(`Failed: ${file.name}`);
+        }
+      }
+      e.target.value = '';
+    },
+    [selectedProjectId, uploadFile]
+  );
+
+  const acceptStr = Object.keys(ACCEPTED_FILE_TYPES).join(',');
 
   return (
-    <div className={cn('rounded-2xl border p-5 shadow-sm', toneClasses)}>
-      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-400">
-        <ShieldCheck className="h-4 w-4" />
-        Status
-      </div>
-      <h3 className="mt-4 font-heading text-2xl font-semibold tracking-tight text-surface-950 dark:text-surface-50">
-        {stage.label}
-      </h3>
-      <p className="mt-2 text-sm leading-6 text-surface-600 dark:text-surface-300">
-        {stage.description}
-      </p>
-
-      <div className="mt-5 rounded-xl border border-white/60 bg-surface-50 p-4 dark:border-white/5 dark:bg-surface-950/35">
-        <div className="flex flex-col gap-1 text-xs text-surface-500 dark:text-surface-400 sm:flex-row sm:items-center sm:justify-between">
-          <span>indexed coverage</span>
-          <span>{readinessPercent}%</span>
-        </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-200 dark:bg-surface-800">
-          <div className={cn('h-full rounded-full transition-all', barClass)} style={{ width: `${readinessPercent}%` }} />
-        </div>
-      </div>
+    <div className="flex items-center gap-3 rounded-lg border border-dashed border-surface-300 bg-surface-50/60 px-3 py-2 dark:border-surface-700 dark:bg-surface-950/30">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={acceptStr}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <Upload className="h-3.5 w-3.5 shrink-0 text-surface-400 dark:text-surface-500" />
+      <button
+        onClick={() => {
+          if (!isDemoMode) fileInputRef.current?.click();
+        }}
+        disabled={isDemoMode}
+        className={cn(
+          'text-xs font-medium transition-colors',
+          isDemoMode
+            ? 'cursor-not-allowed text-surface-400 dark:text-surface-500'
+            : 'text-primary-700 hover:text-primary-800 dark:text-primary-300 dark:hover:text-primary-200'
+        )}
+      >
+        {isDemoMode ? 'Sign in to upload files' : 'Upload files'}
+      </button>
     </div>
   );
 }
@@ -723,27 +716,29 @@ function NextStepsCard({
   }>;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
-        <Sparkles className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+    <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+        <Sparkles className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Next steps
       </div>
-      <div className="mt-4 flex flex-1 flex-col space-y-3">
+      <div className="mt-2 flex flex-1 flex-col space-y-1.5">
         {actions.map((action) => (
-          <div key={action.title} className="flex flex-col rounded-xl border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
-            <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
-              {action.title}
-            </h3>
-            <p className="mt-1 text-sm leading-6 text-surface-500 dark:text-surface-400">
-              {action.detail}
-            </p>
+          <div key={action.title} className="flex items-center gap-2 rounded-lg border border-surface-200/80 bg-surface-50/75 px-3 py-2 dark:border-surface-800 dark:bg-surface-950/35">
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-xs font-semibold text-surface-900 dark:text-surface-100">
+                {action.title}
+              </h3>
+              <p className="truncate text-xs text-surface-400 dark:text-surface-500">
+                {action.detail}
+              </p>
+            </div>
             {action.action && action.actionLabel && (
               <button
                 onClick={action.action}
-                className="mt-auto inline-flex items-center gap-1.5 self-start rounded-xl px-3 py-2 pt-3 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
+                className="inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary-700 transition-colors hover:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-900/20"
               >
                 {action.actionLabel}
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3 w-3" />
               </button>
             )}
           </div>
@@ -791,29 +786,27 @@ function FileTypeBreakdown({
   };
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
-        <FileText className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+    <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+        <FileText className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Evidence profile
       </div>
-      <div className="mt-4 flex-1 space-y-3">
+      <div className="mt-2 flex-1 space-y-2">
         {entries.map(([type, count]) => (
-          <div key={type} className="rounded-xl border border-surface-200/80 bg-surface-50/75 p-4 dark:border-surface-800 dark:bg-surface-950/35">
-            <div className="flex items-center gap-2">
-              {iconMap[type] || iconMap.other}
-              <span className="min-w-0 flex-1 truncate text-sm font-medium capitalize text-surface-700 dark:text-surface-200" title={type}>
-                {type}
-              </span>
-              <span className="text-xs text-surface-400 dark:text-surface-500">
-                {count}
-              </span>
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-200 dark:bg-surface-800">
+          <div key={type} className="flex items-center gap-2">
+            {iconMap[type] || iconMap.other}
+            <span className="min-w-0 flex-1 truncate text-xs font-medium capitalize text-surface-700 dark:text-surface-200" title={type}>
+              {type}
+            </span>
+            <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-200 dark:bg-surface-800">
               <div
                 className={cn('h-full rounded-full', barMap[type] || barMap.other)}
                 style={{ width: `${(count / total) * 100}%` }}
               />
             </div>
+            <span className="w-5 text-right text-xs tabular-nums text-surface-400 dark:text-surface-500">
+              {count}
+            </span>
           </div>
         ))}
       </div>
@@ -865,30 +858,23 @@ function RecentActivity({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
-        <Clock className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+    <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+        <Clock className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Recent activity
       </div>
-      <div className="mt-4 flex-1 space-y-3">
+      <div className="mt-2 flex-1 divide-y divide-surface-100 dark:divide-surface-800">
         {items.map((item) => (
           <button
             key={item.id}
             onClick={item.onClick}
-            className="flex w-full flex-col gap-2 rounded-xl border border-surface-200/80 bg-surface-50/75 px-4 py-3 text-left transition-colors hover:border-primary-300 dark:border-surface-800 dark:bg-surface-950/35 dark:hover:border-primary-700 sm:flex-row sm:items-start"
+            className="flex w-full items-center gap-2 py-1.5 text-left transition-colors first:pt-0 last:pb-0 hover:bg-surface-50 dark:hover:bg-surface-800/40"
           >
-            <span className="flex min-w-0 flex-1 items-start gap-3">
-              <span className="mt-0.5 shrink-0">{item.icon}</span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-surface-400 dark:text-surface-500" title={item.kind}>
-                  {item.kind}
-                </span>
-                <span className="mt-1 block truncate text-sm font-medium text-surface-800 dark:text-surface-100" title={item.label}>
-                  {item.label}
-                </span>
-              </span>
+            <span className="shrink-0">{item.icon}</span>
+            <span className="min-w-0 flex-1 truncate text-xs font-medium text-surface-800 dark:text-surface-100" title={item.label}>
+              {item.label}
             </span>
-            <span className="pl-7 text-xs text-surface-400 dark:text-surface-500 sm:shrink-0 sm:pl-0">
+            <span className="shrink-0 text-[11px] text-surface-400 dark:text-surface-500">
               {item.meta}
             </span>
           </button>
@@ -912,16 +898,16 @@ function MatterDetailsCard({
   exhibitCount: number;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
-        <FolderOpen className="h-4 w-4 text-primary-500 dark:text-primary-400" />
+    <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+        <FolderOpen className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Matter details
       </div>
-      <div className="mt-4 space-y-2 text-sm text-surface-600 dark:text-surface-300">
+      <div className="mt-2 space-y-1 text-xs text-surface-600 dark:text-surface-300">
         <p>
           <span className="font-medium text-surface-500 dark:text-surface-400">Created:</span>{' '}
           {formatDate(project.created_at)}
-          <span className="mx-2 text-surface-300 dark:text-surface-600">&middot;</span>
+          <span className="mx-1.5 text-surface-300 dark:text-surface-600">&middot;</span>
           <span className="font-medium text-surface-500 dark:text-surface-400">Updated:</span>{' '}
           {formatRelativeDate(project.updated_at ?? project.created_at)}
         </p>
@@ -943,90 +929,18 @@ function SignalEmptyState({
   description: string;
 }) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-dashed border-surface-300 bg-white p-6 text-center shadow-sm dark:border-surface-700 dark:bg-surface-900">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-100 dark:bg-surface-800">
-        <FileText className="h-5 w-5 text-surface-400 dark:text-surface-500" />
-      </div>
-      <h3 className="mt-4 font-heading text-sm font-semibold text-surface-700 dark:text-surface-200">
+    <div className="flex h-full flex-col items-center justify-center rounded-xl border border-dashed border-surface-300 bg-white px-4 py-4 text-center dark:border-surface-700 dark:bg-surface-900">
+      <FileText className="h-4 w-4 text-surface-400 dark:text-surface-500" />
+      <h3 className="mt-2 text-xs font-semibold text-surface-700 dark:text-surface-200">
         {title}
       </h3>
-      <p className="mt-1.5 break-words text-xs leading-relaxed text-surface-500 dark:text-surface-400">
+      <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
         {description}
       </p>
     </div>
   );
 }
 
-function QuickActions() {
-  const selectedProjectId = useAppStore((s) => s.selectedProjectId);
-  const { isDemoMode } = useAuth();
-  const uploadFile = useUploadFile();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (!files || !selectedProjectId) return;
-
-      for (const file of Array.from(files)) {
-        if (file.size > MAX_FILE_SIZE) {
-          toast.error(`File too large: ${file.name}`);
-          continue;
-        }
-        try {
-          await uploadFile.mutateAsync({ file, projectId: selectedProjectId });
-          toast.success(`Uploaded ${file.name}`);
-        } catch {
-          toast.error(`Failed: ${file.name}`);
-        }
-      }
-      e.target.value = '';
-    },
-    [selectedProjectId, uploadFile]
-  );
-
-  const acceptStr = Object.keys(ACCEPTED_FILE_TYPES).join(',');
-
-  return (
-    <div className="rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept={acceptStr}
-        onChange={handleFileChange}
-        className="hidden"
-      />
-
-      <div className="flex items-center gap-2 text-sm font-medium text-surface-500 dark:text-surface-500">
-        <Upload className="h-4 w-4 text-primary-500 dark:text-primary-400" />
-        Quick actions
-      </div>
-
-      <button
-        onClick={() => {
-          if (!isDemoMode) fileInputRef.current?.click();
-        }}
-        className={cn(
-          'mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all',
-          isDemoMode
-            ? 'cursor-not-allowed border border-surface-200 bg-surface-100 text-surface-400 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-500'
-            : 'bg-surface-950 text-white hover:-translate-y-0.5 hover:bg-surface-800 dark:bg-white dark:text-surface-950 dark:hover:bg-surface-100'
-        )}
-        disabled={isDemoMode}
-      >
-        <Upload className="h-4 w-4" />
-        <span className="hidden sm:inline">{isDemoMode ? 'Uploads require sign-in' : 'Upload files'}</span>
-      </button>
-
-      {isDemoMode && (
-        <p className="mt-3 text-xs text-surface-400 dark:text-surface-500">
-          Demo mode: uploads disabled. Sign in to add your own files.
-        </p>
-      )}
-    </div>
-  );
-}
 
 /**
  * Case Analysis Card — AI-powered structured case theory generation.
@@ -1145,22 +1059,18 @@ Base your analysis ONLY on the documents provided. Do not fabricate facts. If in
   }, [analysis]);
 
   return (
-    <div className="rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+    <div className="rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
-            <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-surface-700 dark:text-surface-200">
-              Case Analysis
-            </h3>
-            <p className="text-xs text-surface-400 dark:text-surface-500">
-              {analyzedFileCount > 0 && analysis && !analysisError
-                ? `Analyzed ${analyzedFileCount} of ${fileCount} document${fileCount !== 1 ? 's' : ''}`
-                : `AI-powered assessment across ${fileCount} document${fileCount !== 1 ? 's' : ''}`}
-            </p>
-          </div>
+          <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+          <span className="text-xs font-semibold text-surface-700 dark:text-surface-200">
+            Case Analysis
+          </span>
+          <span className="text-[11px] text-surface-400 dark:text-surface-500">
+            {analyzedFileCount > 0 && analysis && !analysisError
+              ? `${analyzedFileCount}/${fileCount} docs`
+              : `${fileCount} doc${fileCount !== 1 ? 's' : ''}`}
+          </span>
         </div>
         <button
           onClick={analysis && !analysisError ? () => setExpanded(!expanded) : handleAnalyze}
@@ -1342,20 +1252,16 @@ function HighlightsSummaryCard({ projectId }: { projectId: string | null }) {
   };
 
   return (
-    <div className="rounded-2xl border border-surface-200/80 bg-white p-5 shadow-sm dark:border-surface-800 dark:bg-surface-900">
+    <div className="rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-yellow-100 dark:bg-yellow-900/30">
-            <Tag className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-surface-700 dark:text-surface-200">
-              Highlights
-            </h3>
-            <p className="text-xs text-surface-400 dark:text-surface-500">
-              {highlights.length} passage{highlights.length !== 1 ? 's' : ''} highlighted across your files
-            </p>
-          </div>
+          <Tag className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          <span className="text-xs font-semibold text-surface-700 dark:text-surface-200">
+            Highlights
+          </span>
+          <span className="text-[11px] text-surface-400 dark:text-surface-500">
+            {highlights.length} passage{highlights.length !== 1 ? 's' : ''}
+          </span>
         </div>
         <button
           onClick={handleCopyAll}

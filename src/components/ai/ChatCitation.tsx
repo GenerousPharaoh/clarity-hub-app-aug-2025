@@ -27,15 +27,23 @@ export function ChatCitation({ source }: ChatCitationProps) {
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
+  const setPendingViewerScrollTarget = useAppStore((s) => s.setPendingViewerScrollTarget);
 
   const IconComponent = typeIconMap[source.fileType || ''] || File;
 
   const handleClick = useCallback(() => {
-    // Open the source file in the right panel
     setSelectedFile(source.fileId);
     setRightPanel(true);
     setRightTab('viewer');
-  }, [source.fileId, setSelectedFile, setRightPanel, setRightTab]);
+    // Dispatch scroll target so the PDF viewer navigates to the right page + highlights text
+    setPendingViewerScrollTarget({
+      fileId: source.fileId,
+      pageNumber: source.pageNumber ?? null,
+      searchText: source.contentPreview
+        ? source.contentPreview.replace(/\s+/g, ' ').trim().slice(0, 60)
+        : null,
+    });
+  }, [source, setSelectedFile, setRightPanel, setRightTab, setPendingViewerScrollTarget]);
 
   return (
     <span
@@ -127,6 +135,7 @@ function SourceListItem({ source }: { source: ChatSource }) {
   const setSelectedFile = useAppStore((s) => s.setSelectedFile);
   const setRightPanel = useAppStore((s) => s.setRightPanel);
   const setRightTab = useAppStore((s) => s.setRightTab);
+  const setPendingViewerScrollTarget = useAppStore((s) => s.setPendingViewerScrollTarget);
   const IconComponent = typeIconMap[source.fileType || ''] || File;
 
   return (
@@ -136,6 +145,13 @@ function SourceListItem({ source }: { source: ChatSource }) {
         setSelectedFile(source.fileId);
         setRightPanel(true);
         setRightTab('viewer');
+        setPendingViewerScrollTarget({
+          fileId: source.fileId,
+          pageNumber: source.pageNumber ?? null,
+          searchText: source.contentPreview
+            ? source.contentPreview.replace(/\s+/g, ' ').trim().slice(0, 60)
+            : null,
+        });
       }}
       className={cn(
         'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left',

@@ -166,8 +166,38 @@ export function AnnotatablePDFViewer({
     [deleteAnnotation, fileId, projectId],
   );
 
-  // Selection is now handled via the selectionTip prop on PdfHighlighter
-  // (see SelectionTipFromContext component)
+  // Consume cross-panel scroll target (from citation click in AI chat)
+  const pendingScrollTarget = useAppStore((s) => s.pendingViewerScrollTarget);
+  const clearScrollTarget = useAppStore((s) => s.setPendingViewerScrollTarget);
+
+  useEffect(() => {
+    if (!pendingScrollTarget || pendingScrollTarget.fileId !== fileId) return;
+    clearScrollTarget(null);
+
+    // Navigate to page
+    const viewer = highlighterUtilsRef.current?.getViewer() as Record<string, unknown> | undefined;
+    if (viewer && pendingScrollTarget.pageNumber) {
+      (viewer as { currentPageNumber: number }).currentPageNumber = pendingScrollTarget.pageNumber;
+      setCurrentPage(pendingScrollTarget.pageNumber);
+    }
+
+    // Highlight text passage after page renders
+    if (pendingScrollTarget.searchText) {
+      const bus = viewer?.eventBus as { dispatch?: (name: string, data: Record<string, unknown>) => void } | undefined;
+      if (bus?.dispatch) {
+        setTimeout(() => {
+          bus.dispatch!('find', {
+            source: null, type: '', query: pendingScrollTarget.searchText,
+            highlightAll: true, caseSensitive: false, entireWord: false, findPrevious: false,
+          });
+          // Auto-clear highlight after 5 seconds
+          setTimeout(() => {
+            bus.dispatch!('find', { source: null, type: '', query: '', highlightAll: false });
+          }, 5000);
+        }, 400);
+      }
+    }
+  }, [pendingScrollTarget, fileId, clearScrollTarget]);
 
   const [highlightMode, setHighlightMode] = useState(false);
   const [rotation, setRotation] = useState(0);

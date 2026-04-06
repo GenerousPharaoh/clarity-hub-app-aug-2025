@@ -188,6 +188,9 @@ export interface UISlice {
   // Default center tab preference
   defaultCenterTab: CenterTab;
   setDefaultCenterTab: (tab: CenterTab) => void;
+  // Cross-panel: citation click → PDF viewer scroll to page + highlight
+  pendingViewerScrollTarget: { fileId: string; pageNumber: number | null; searchText: string | null } | null;
+  setPendingViewerScrollTarget: (target: { fileId: string; pageNumber: number | null; searchText: string | null } | null) => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -254,4 +257,6 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
     saveDefaultCenterTab(tab);
     set({ defaultCenterTab: tab });
   },
+  pendingViewerScrollTarget: null,
+  setPendingViewerScrollTarget: (target) => set({ pendingViewerScrollTarget: target }),
 });

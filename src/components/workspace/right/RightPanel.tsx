@@ -133,7 +133,7 @@ export function RightPanel() {
 
       {/* Content */}
       <div className="relative flex flex-1 flex-col overflow-hidden" role="tabpanel" id={`panel-${activeTab}`} aria-label={activeTab}>
-          <div key={activeTab} className="flex h-full flex-col animate-in fade-in-0 duration-150">
+          <div className="flex h-full flex-col">
             {activeTab === 'viewer' ? (
               <FileViewer />
             ) : (

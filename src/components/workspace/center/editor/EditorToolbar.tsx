@@ -403,7 +403,7 @@ export function EditorToolbar({ editor, onInsertLink, onInsertImage }: EditorToo
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.12 }}
-                className="fixed z-[60] max-h-[70vh] w-56 overflow-y-auto rounded-xl border border-surface-200 bg-white/95 py-1 shadow-xl ring-1 ring-surface-100 dark:border-surface-700 dark:bg-surface-800/95 dark:ring-surface-800"
+                className="fixed z-[9999] max-h-[70vh] w-56 overflow-y-auto rounded-xl border border-surface-200 bg-white py-1 shadow-xl dark:border-surface-700 dark:bg-surface-800"
                 style={{ top: dropdownPos.top, right: dropdownPos.right }}
               >
                 {overflowGroups.map((group, gi) => (

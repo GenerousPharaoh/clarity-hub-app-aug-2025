@@ -616,7 +616,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                     'dark:border-surface-700 dark:bg-surface-850 dark:shadow-surface-950/30'
                   )}
                 >
-                  {notes.length > 5 && (
+                  {notes.length > 2 && (
                     <div className="border-b border-surface-100 px-3 py-2 dark:border-surface-800">
                       <input
                         type="text"
@@ -628,7 +628,7 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
                       />
                     </div>
                   )}
-                  <div className="max-h-64 overflow-y-auto p-2">
+                  <div className="max-h-[50vh] overflow-y-auto p-2">
                     {filteredNotes.map((note) => (
                       <button
                         key={note.id}

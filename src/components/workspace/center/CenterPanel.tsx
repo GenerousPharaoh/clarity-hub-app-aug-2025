@@ -490,115 +490,44 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
   // ── Editor-first layout — always visible ────────────────
   return (
     <div className="flex h-full w-full min-w-0 flex-1 flex-col overflow-hidden">
-      {/* Header bar: note selector dropdown + actions */}
-      <div className="shrink-0 border-b border-surface-200/80 bg-white px-3 py-3 backdrop-blur dark:border-surface-800 dark:bg-surface-900 sm:px-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
-              <h2 className="text-sm font-semibold text-surface-900 dark:text-surface-100">
-                Documents
-              </h2>
-              <div className="flex flex-nowrap gap-2 overflow-hidden">
-                <span className="shrink-0 rounded-full border border-surface-200 bg-surface-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
-                  {noteCount} {noteCount === 1 ? 'doc' : 'docs'}
-                </span>
-                {activeNote && (
-                  <span className="min-w-0 truncate rounded-full border border-surface-200 bg-white px-3 py-1 text-sm font-medium text-surface-500 dark:border-surface-700 dark:bg-surface-900 dark:text-surface-400">
-                    Edited {formatRelativeDate(activeNote.last_modified ?? activeNote.created_at)}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 self-start xl:self-auto">
-              <button
-                onClick={handleCreate}
-                disabled={createNote.isPending}
-                className={cn(
-                  'inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium',
-                  'border-surface-200 bg-white text-surface-600 transition-all hover:-translate-y-0.5 hover:bg-surface-50',
-                  'dark:border-surface-700 dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700',
-                  'disabled:cursor-not-allowed disabled:opacity-50'
-                )}
-                title="Create document"
-              >
-                {createNote.isPending ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Plus className="h-3.5 w-3.5" />
-                )}
-                {!compact && 'New document'}
-              </button>
-
-              {activeNote && (
-                <ExportButton
-                  content={activeNote.content || ''}
-                  title={activeNote.title || 'Untitled'}
-                  type="note"
-                  className="rounded-xl border border-surface-200 bg-white px-3 py-2 hover:bg-surface-50 dark:border-surface-700 dark:bg-surface-800 dark:hover:bg-surface-700"
-                />
-              )}
-
-              {activeNote && (
-                <button
-                  onClick={() => setNoteToDelete(activeNote)}
-                  className={cn(
-                    'rounded-xl border border-transparent p-2 text-surface-400 transition-all',
-                    'hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-red-500',
-                    'dark:hover:border-red-900/40 dark:hover:bg-red-900/20 dark:hover:text-red-400'
-                  )}
-                  title="Delete note"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Note selector dropdown */}
-          <div className="relative min-w-0 max-w-full flex-1" ref={dropdownRef}>
-            <div
-              className={cn(
-                'flex h-11 w-full items-center rounded-2xl border',
-                'border-surface-200 bg-surface-50/80 text-sm font-medium text-surface-700 shadow-sm',
-                'transition-colors hover:border-surface-300 hover:bg-white',
-                'dark:border-surface-700 dark:bg-surface-800/70 dark:text-surface-200',
-                'dark:hover:border-surface-600 dark:hover:bg-surface-800'
-              )}
+      {/* Compact header: title input + actions in one row */}
+      <div className="flex shrink-0 items-center gap-2 border-b border-surface-200/80 bg-white px-3 py-2 dark:border-surface-800 dark:bg-surface-900">
+        {/* Note title + dropdown */}
+        <div className="relative min-w-0 flex-1" ref={dropdownRef}>
+          <div className="flex h-9 w-full items-center rounded-lg border border-surface-200 bg-surface-50 dark:border-surface-700 dark:bg-surface-800">
+            <input
+              type="text"
+              value={titleDraft}
+              onChange={(e) => {
+                setTitleDraft(e.target.value);
+                handleTitleChange(e.target.value);
+              }}
+              onBlur={commitTitleChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commitTitleChange();
+                  (e.target as HTMLInputElement).blur();
+                } else if (e.key === 'Escape') {
+                  e.preventDefault();
+                  resetTitleDraft();
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+              className="min-w-0 flex-1 bg-transparent px-2.5 text-sm font-medium text-surface-700 outline-none placeholder:text-surface-400 dark:text-surface-200 dark:placeholder:text-surface-500"
+              placeholder="Untitled"
+              aria-label="Document title"
+            />
+            <button
+              type="button"
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-200 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              title={`${noteCount} documents`}
+              aria-label="Open document list"
             >
-              <input
-                type="text"
-                value={titleDraft}
-                onChange={(e) => {
-                  setTitleDraft(e.target.value);
-                  handleTitleChange(e.target.value);
-                }}
-                onBlur={commitTitleChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    commitTitleChange();
-                    (e.target as HTMLInputElement).blur();
-                  } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    resetTitleDraft();
-                    (e.target as HTMLInputElement).blur();
-                  }
-                }}
-                className="min-w-0 flex-1 rounded-xl bg-transparent px-3 text-sm font-semibold text-surface-700 outline-none placeholder:text-surface-400 focus:ring-2 focus:ring-primary-500/20 dark:text-surface-200 dark:placeholder:text-surface-500"
-                placeholder="Untitled"
-                aria-label="Document title"
-              />
-              <button
-                type="button"
-                onClick={() => setDropdownOpen((prev) => !prev)}
-                className="mr-1.5 flex h-8 w-8 items-center justify-center rounded-xl text-surface-400 transition-colors hover:bg-surface-200 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
-                title="Document list"
-                aria-label="Open document list"
-              >
-                <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', dropdownOpen && 'rotate-180')} />
-              </button>
-            </div>
+              <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', dropdownOpen && 'rotate-180')} />
+            </button>
+          </div>
 
             {/* Dropdown list */}
             <AnimatePresence>
@@ -677,7 +606,33 @@ function NotesTab({ compact = false }: { compact?: boolean }) {
               )}
             </AnimatePresence>
           </div>
-        </div>
+
+        {/* Action buttons — inline with title */}
+        <button
+          onClick={handleCreate}
+          disabled={createNote.isPending}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+          title="New document"
+        >
+          {createNote.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+        </button>
+        {activeNote && (
+          <ExportButton
+            content={activeNote.content || ''}
+            title={activeNote.title || 'Untitled'}
+            type="note"
+            className="h-7 w-7 rounded-md p-0 [&_span]:hidden [&_svg]:h-3.5 [&_svg]:w-3.5"
+          />
+        )}
+        {activeNote && (
+          <button
+            onClick={() => setNoteToDelete(activeNote)}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+            title="Delete document"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Full-width editor — takes all remaining space */}

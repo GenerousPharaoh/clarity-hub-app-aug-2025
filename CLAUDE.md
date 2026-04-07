@@ -15,7 +15,7 @@ npm run typecheck    # TypeScript only
 
 **Stack:** React 19 + Vite + TypeScript + Tailwind CSS 4 + Supabase + TanStack Query + Zustand + Framer Motion
 
-**Deployment:** Vercel auto-deploy on push to `main`. API routes in `api/` directory as Vercel serverless functions.
+**Deployment:** Vercel auto-deploy on push to `main`. Production URL: `https://clarity-hub-app.vercel.app`. API routes in `api/` directory as Vercel serverless functions.
 
 **Layout:** Three resizable panels — Left (files), Center (overview/docs/exhibits/timeline/drafts), Right (viewer/AI chat). Width-adaptive layouts: compact (<1180px), standard, wide (>1480px). Each panel has ResizeObserver-based compact/ultraCompact modes.
 

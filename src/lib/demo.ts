@@ -267,7 +267,7 @@ export function isDemoModeEnabled(): boolean {
 
 export function enableDemoMode(): void {
   if (!canUseStorage()) return;
-  window.localStorage.setItem(DEMO_MODE_KEY, '1');
+  try { window.localStorage.setItem(DEMO_MODE_KEY, '1'); } catch { /* ignore */ }
 }
 
 export function disableDemoMode(): void {
@@ -286,13 +286,15 @@ export function readDemoState(): DemoState {
 
 export function writeDemoState(state: DemoState): void {
   if (!canUseStorage()) return;
-  window.localStorage.setItem(
-    DEMO_STATE_KEY,
-    JSON.stringify({
-      version: DEMO_STATE_VERSION,
-      state,
-    } satisfies StoredDemoState)
-  );
+  try {
+    window.localStorage.setItem(
+      DEMO_STATE_KEY,
+      JSON.stringify({
+        version: DEMO_STATE_VERSION,
+        state,
+      } satisfies StoredDemoState)
+    );
+  } catch { /* ignore QuotaExceededError */ }
 }
 
 export function ensureDemoState(): DemoState {

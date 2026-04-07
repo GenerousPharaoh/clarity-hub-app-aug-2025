@@ -49,12 +49,14 @@ export function readWorkspaceSession(): WorkspaceSession | null {
 
 export function clearWorkspaceSession(): void {
   if (!canUseStorage()) return;
-  window.localStorage.removeItem(WORKSPACE_SESSION_KEY);
+  try { window.localStorage.removeItem(WORKSPACE_SESSION_KEY); } catch { /* ignore */ }
 }
 
 function writeWorkspaceSession(session: WorkspaceSession): WorkspaceSession {
   if (!canUseStorage()) return session;
-  window.localStorage.setItem(WORKSPACE_SESSION_KEY, JSON.stringify(session));
+  try {
+    window.localStorage.setItem(WORKSPACE_SESSION_KEY, JSON.stringify(session));
+  } catch { /* QuotaExceededError or other storage failure — non-fatal */ }
   return session;
 }
 

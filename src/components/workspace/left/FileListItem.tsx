@@ -17,38 +17,35 @@ import type { FileRecord } from '@/types';
 
 // ── Extension badge colors ──────────────────────────────────────────
 function getExtStyle(ext: string): string {
+  // Muted, desaturated palette — professional, not neon
   switch (ext) {
     case 'pdf':
-      return 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400';
+      return 'bg-surface-100 text-red-500/80 dark:bg-surface-800 dark:text-red-400/80';
     case 'doc':
     case 'docx':
-      return 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400';
+      return 'bg-surface-100 text-blue-500/80 dark:bg-surface-800 dark:text-blue-400/80';
     case 'png':
     case 'jpg':
     case 'jpeg':
     case 'gif':
     case 'webp':
     case 'svg':
-      return 'bg-sky-500/10 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400';
+      return 'bg-surface-100 text-sky-500/80 dark:bg-surface-800 dark:text-sky-400/80';
     case 'mp3':
     case 'wav':
     case 'm4a':
     case 'ogg':
     case 'flac':
-      return 'bg-violet-500/10 text-violet-600 dark:bg-violet-500/20 dark:text-violet-400';
+      return 'bg-surface-100 text-violet-500/80 dark:bg-surface-800 dark:text-violet-400/80';
     case 'mp4':
     case 'mov':
     case 'webm':
     case 'avi':
-      return 'bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400';
+      return 'bg-surface-100 text-orange-500/80 dark:bg-surface-800 dark:text-orange-400/80';
     case 'csv':
     case 'xls':
     case 'xlsx':
-      return 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400';
-    case 'txt':
-    case 'md':
-    case 'rtf':
-      return 'bg-surface-500/10 text-surface-600 dark:bg-surface-500/15 dark:text-surface-400';
+      return 'bg-surface-100 text-emerald-500/80 dark:bg-surface-800 dark:text-emerald-400/80';
     default:
       return 'bg-surface-100 text-surface-500 dark:bg-surface-800 dark:text-surface-400';
   }
@@ -56,12 +53,12 @@ function getExtStyle(ext: string): string {
 
 // ── Document type accent text colors ────────────────────────────────
 const DOC_TYPE_TEXT: Record<string, string> = {
-  court: 'text-blue-600 dark:text-blue-400',
-  employment: 'text-amber-600 dark:text-amber-400',
-  financial: 'text-emerald-600 dark:text-emerald-400',
-  regulatory: 'text-violet-600 dark:text-violet-400',
-  correspondence: 'text-surface-500 dark:text-surface-400',
-  medical: 'text-rose-600 dark:text-rose-400',
+  court: 'text-blue-500/80 dark:text-blue-400/70',
+  employment: 'text-amber-500/80 dark:text-amber-400/70',
+  financial: 'text-emerald-500/80 dark:text-emerald-400/70',
+  regulatory: 'text-violet-500/80 dark:text-violet-400/70',
+  correspondence: 'text-surface-400 dark:text-surface-500',
+  medical: 'text-rose-500/80 dark:text-rose-400/70',
 };
 
 // ── Processing status ───────────────────────────────────────────────

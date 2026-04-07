@@ -119,16 +119,16 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
     }
   };
 
-  const accentGradients = [
-    'from-accent-600 via-accent-500 to-accent-400',
-    'from-primary-800 via-primary-700 to-accent-500',
-    'from-surface-800 via-surface-700 to-accent-600',
-    'from-accent-700 via-accent-600 to-accent-400',
-    'from-primary-700 via-accent-600 to-accent-400',
-    'from-surface-700 via-primary-700 to-accent-500',
+  // Muted solid accent colors — no gradients, no neon
+  const accentColors = [
+    'bg-primary-500',
+    'bg-accent-500',
+    'bg-surface-500',
+    'bg-primary-600',
+    'bg-accent-600',
+    'bg-surface-600',
   ];
-
-  const accent = accentGradients[index % accentGradients.length];
+  const accent = accentColors[index % accentColors.length];
   const status = getMatterStatus(fileCount);
   const updatedLabel = formatRelativeDate(project.updated_at ?? project.created_at);
   const goalType = project.goal_type ?? 'General matter';
@@ -165,17 +165,13 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
           isLastOpened && 'border-l-[3px] border-l-accent-500'
         )}
       >
-        <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', accent)} />
+        <div className={cn('absolute inset-x-0 top-0 h-0.5', accent)} />
 
         <div className="relative flex flex-1 flex-col">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 flex-1 items-start gap-3">
-              <div className={cn(
-                'mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
-                'bg-gradient-to-br text-white shadow-sm',
-                accent
-              )}>
-                <FolderOpen className="h-4.5 w-4.5" />
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-100 dark:bg-surface-800">
+                <FolderOpen className="h-4 w-4 text-surface-500 dark:text-surface-400" />
               </div>
 
               <div className="min-w-0">
@@ -186,11 +182,6 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
                   <span title={status.label} className={cn('max-w-full rounded-full border px-2 py-0.5 text-xs font-medium', status.chip)}>
                     {status.label}
                   </span>
-                  {isLastOpened && (
-                    <span className="max-w-full rounded-full border border-accent-200 bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 dark:border-accent-900/50 dark:bg-accent-950/30 dark:text-accent-300">
-                      Last opened
-                    </span>
-                  )}
                 </div>
 
                 <div className="mt-2">

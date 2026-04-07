@@ -39,48 +39,32 @@ export function ConsentBanner() {
         'shadow-[0_-4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.3)]',
       )}
     >
-      <div className="mx-auto flex max-w-3xl flex-col gap-4 px-5 py-5 sm:flex-row sm:items-start sm:gap-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/40">
-          <ShieldCheck className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+      <div className="mx-auto flex max-w-3xl items-center gap-4 px-5 py-4 sm:gap-5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/40">
+          <ShieldCheck className="h-4 w-4 text-primary-600 dark:text-primary-400" />
         </div>
 
         <div className="min-w-0 flex-1">
-          <h2 className="font-heading text-sm font-semibold text-surface-900 dark:text-surface-100">
-            Data processing disclosure
-          </h2>
+          <p className="text-xs leading-relaxed text-surface-600 dark:text-surface-400">
+            Your data is stored in Canada. AI features send content to third-party APIs (OpenAI, Gemini, Mistral) under enterprise agreements.
+            By continuing you consent to this processing.
+          </p>
+        </div>
 
-          <div className="mt-1.5 space-y-1.5 text-xs leading-relaxed text-surface-600 dark:text-surface-400">
-            <p>
-              Your files and data are stored on Supabase infrastructure in Canada
-              (AWS ca-central-1).
-            </p>
-            <p>
-              AI features send document content to third-party APIs (OpenAI,
-              Google Gemini, Mistral, Cohere, Voyage AI) with servers in the US
-              and EU. These providers operate under API/enterprise agreements and
-              do not use your data to train their models.
-            </p>
-            <p>
-              By continuing, you consent to this processing. You can disable AI
-              features at any time in Settings.
-            </p>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              onClick={handleAccept}
-              className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-            >
-              Accept &amp; Continue
-            </button>
-            <a
-              href="/privacy"
-              className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
-            >
-              Learn More
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <a
+            href="/privacy"
+            className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-surface-600 transition-colors hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-800"
+          >
+            Details
+            <ExternalLink className="h-3 w-3" />
+          </a>
+          <button
+            onClick={handleAccept}
+            className="rounded-lg bg-primary-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+          >
+            Accept
+          </button>
         </div>
       </div>
     </div>

@@ -543,8 +543,16 @@ async function extractImageText(blob: Blob, fileName: string): Promise<string> {
 
 /**
  * Transcribe audio/video using OpenAI Whisper.
+ * Whisper API has a hard 25 MB upload limit — skip gracefully for larger files.
  */
 async function transcribeAudio(blob: Blob, fileName: string): Promise<string> {
+  const WHISPER_MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+
+  if (blob.size > WHISPER_MAX_BYTES) {
+    const sizeMB = (blob.size / (1024 * 1024)).toFixed(1);
+    return `[Transcription skipped: file size (${sizeMB} MB) exceeds Whisper's 25 MB limit. Please compress or trim the file and re-upload.]`;
+  }
+
   const openai = getOpenAI();
 
   // Convert blob to File-like object for the API

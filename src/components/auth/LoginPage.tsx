@@ -126,7 +126,7 @@ export function LoginPage() {
             </div>
           )}
 
-          <div className="mt-10 space-y-3">
+          <div className="mt-6 space-y-3">
             <button
               onClick={handleSignIn}
               disabled={signingIn || enteringDemo}
@@ -183,7 +183,7 @@ export function LoginPage() {
             </button>
           </div>
 
-          <div className="mt-8 rounded-2xl border border-surface-200 bg-surface-50 p-5 dark:border-surface-800 dark:bg-surface-800/50">
+          <div className="mt-5 rounded-2xl border border-surface-200 bg-surface-50 p-5 dark:border-surface-800 dark:bg-surface-800/50">
             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-surface-500 dark:text-surface-400">
               What you get
             </p>

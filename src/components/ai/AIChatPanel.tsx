@@ -39,16 +39,16 @@ export function AIChatPanel() {
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
   const [showFilePicker, setShowFilePicker] = useState(false);
 
-  // Sync sidebar file selection into the multi-select
+  // Sync sidebar file selection into the multi-select (only if file exists)
   useEffect(() => {
-    if (selectedFileId) {
+    if (selectedFileId && files.some((f) => f.id === selectedFileId)) {
       setSelectedFileIds((prev) => {
         const next = new Set(prev);
         next.add(selectedFileId);
         return next;
       });
     }
-  }, [selectedFileId]);
+  }, [selectedFileId, files]);
 
   const selectedFiles = files.filter((f) => selectedFileIds.has(f.id));
 

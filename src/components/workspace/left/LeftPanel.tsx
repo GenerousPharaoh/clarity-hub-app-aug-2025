@@ -273,9 +273,11 @@ export function LeftPanel() {
     })();
   }, [selectedProjectId, selectedBatchFiles, perFileEstimates, processFile]);
 
-  // Clear search when the selected project changes
+  // Clear search when the selected project changes + cancel pending debounce
   useEffect(() => {
     setSearchQuery('');
+    setDebouncedQuery('');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
   }, [selectedProjectId, setSearchQuery]);
 
   // Debounced search: input updates immediately, filtering deferred by 150ms

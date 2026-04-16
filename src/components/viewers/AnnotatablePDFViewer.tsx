@@ -609,7 +609,6 @@ export function AnnotatablePDFViewer({
               createAnnotation={createAnnotation}
               onTotalPagesChange={setTotalPages}
               totalPages={totalPages}
-              highlightMode={highlightMode}
             />
           )}
         </PdfLoader>
@@ -658,7 +657,6 @@ function PdfHighlighterInner({
   createAnnotation,
   onTotalPagesChange,
   totalPages,
-  highlightMode,
 }: {
   pdfDocument: Parameters<NonNullable<Parameters<typeof PdfLoader>[0]['children']>>[0];
   scale: PdfScaleValue;
@@ -670,7 +668,6 @@ function PdfHighlighterInner({
   createAnnotation: ReturnType<typeof useCreateAnnotation>;
   onTotalPagesChange: (pages: number) => void;
   totalPages: number;
-  highlightMode: boolean;
 }) {
   // Set total pages on initial load
   useEffect(() => {

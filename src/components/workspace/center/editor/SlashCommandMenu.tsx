@@ -200,7 +200,7 @@ export function SlashCommandMenu({ editor, onInsertImage, onInsertLink, onInsert
         },
       },
     ],
-    [editor, onInsertImage, onInsertLink, setRightPanel, setRightTab]
+    [editor, onInsertImage, onInsertLink, onInsertExhibit, setRightPanel, setRightTab]
   );
 
   // Filter commands by query

@@ -565,7 +565,9 @@ IMPORTANT: Return ONLY the section content — no section heading (it will be ad
       }
     } catch (err) {
       console.error('Export failed:', err);
-      toast.error('Export failed');
+      toast.error('Export failed', {
+        description: err instanceof Error ? err.message : 'Check your browser permissions and try again.',
+      });
     } finally {
       setExporting(false);
     }

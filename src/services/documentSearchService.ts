@@ -46,7 +46,7 @@ async function rerankResults(
       },
       body: JSON.stringify({
         query,
-        documents: results.map((r) => ({ id: r.chunkId, content: r.content })),
+        documents: results.map((r) => ({ id: r.chunkId, content: r.content.slice(0, 500) })),
         topN,
       }),
     });

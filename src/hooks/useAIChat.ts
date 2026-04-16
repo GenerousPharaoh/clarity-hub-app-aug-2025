@@ -476,8 +476,20 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
         let sources: ChatSource[] = [];
         let legalContext = '';
 
+        // Build context-aware search query (helps with follow-up questions like "what about that?")
+        const recentUserMessages = messages
+          .filter((m) => m.role === 'user')
+          .slice(-2)
+          .map((m) => m.content.slice(0, 100));
+        const fileContextHint = fileContexts && fileContexts.length > 0
+          ? `[Context: ${fileContexts.map((f: { name: string }) => f.name).join(', ')}] `
+          : '';
+        const expandedQuery = recentUserMessages.length > 1
+          ? `${fileContextHint}${recentUserMessages.slice(0, -1).join(' ')} ${content.trim()}`
+          : `${fileContextHint}${content.trim()}`;
+
         const docSearchPromise = searchDocuments({
-          query: content.trim(),
+          query: expandedQuery.slice(0, 500),
           projectId,
           limit: chunkLimit,
         }).catch(() => [] as SearchResult[]);
@@ -495,9 +507,12 @@ export function useAIChat({ projectId }: UseAIChatOptions): UseAIChatReturn {
 
         // Build conversation history from cache (avoids stale closure)
         const currentMessages = queryClient.getQueryData<ChatMessage[]>(chatKey(projectId)) ?? [];
+        // Truncate history client-side to reduce payload (server truncates further)
+        const historyLimit = effort === 'quick' ? 4 : effort === 'deep' ? 16 : 8;
         const conversationHistory = currentMessages
           .filter((m) => m.content !== '__loading__')
-          .map((m) => ({ role: m.role, content: m.content }));
+          .slice(-historyLimit)
+          .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) }));
 
         // Combine: project summaries + selected file content + RAG search results
         const fullContext = [projectSummaries, enrichedContext || fileContextStr, documentContext]

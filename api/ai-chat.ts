@@ -100,9 +100,9 @@ function getGeminiModel() {
   geminiModel = genAI.getGenerativeModel({
     model: 'gemini-2.5-flash',
     generationConfig: {
-      temperature: 0.7,
+      temperature: 0.3,
       topK: 40,
-      topP: 0.95,
+      topP: 0.9,
       maxOutputTokens: 8192,
     },
   });
@@ -257,7 +257,7 @@ async function callGemini(params: {
     history,
     generationConfig: {
       maxOutputTokens: params.maxOutputTokens ?? 4096,
-      temperature: 0.8,
+      temperature: 0.3,
     },
   });
 
@@ -506,11 +506,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Run two searches: one on CanLII specifically, one broader across legal sources
       if (process.env.TAVILY_API_KEY) {
         const tavilyKey = process.env.TAVILY_API_KEY;
-        const allWebResults: Array<{ title: string; url: string; content: string }> = [];
 
-        // Search A: CanLII-specific search (most relevant for case law)
-        try {
-          const canliiSearch = await fetch('https://api.tavily.com/search', {
+        // Run both Tavily searches in parallel (saves 1-3s latency)
+        const [canliiResults, broadResults] = await Promise.allSettled([
+          // Search A: CanLII-specific (case law)
+          fetch('https://api.tavily.com/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -520,17 +520,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               max_results: 5,
               include_domains: ['canlii.org'],
             }),
-          });
-
-          if (canliiSearch.ok) {
-            const result = await canliiSearch.json();
-            allWebResults.push(...(result.results || []));
-          }
-        } catch { /* non-blocking */ }
-
-        // Search B: broader legal sources (legislation, tribunal guides, commentary)
-        try {
-          const broadSearch = await fetch('https://api.tavily.com/search', {
+          }).then((r) => r.ok ? r.json() : { results: [] }),
+          // Search B: broader legal sources
+          fetch('https://api.tavily.com/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -543,13 +535,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 'tribunalsontario.ca', 'scc-csc.ca', 'lso.ca',
               ],
             }),
-          });
+          }).then((r) => r.ok ? r.json() : { results: [] }),
+        ]);
 
-          if (broadSearch.ok) {
-            const result = await broadSearch.json();
-            allWebResults.push(...(result.results || []));
-          }
-        } catch { /* non-blocking */ }
+        const allWebResults: Array<{ title: string; url: string; content: string }> = [
+          ...(canliiResults.status === 'fulfilled' ? canliiResults.value.results || [] : []),
+          ...(broadResults.status === 'fulfilled' ? broadResults.value.results || [] : []),
+        ];
 
         // Deduplicate by URL
         const seen = new Set<string>();
@@ -665,12 +657,15 @@ high = strong evidence + settled law. medium = some gaps or unsettled law. low =
 
     // --- Generate follow-ups (non-blocking, best-effort, with short timeout) ---
     let followUps: string[] = [];
-    try {
-      const followUpPromise = generateFollowUps(query.trim(), responseText);
-      const followUpTimeout = new Promise<string[]>((resolve) => setTimeout(() => resolve([]), 10_000));
-      followUps = await Promise.race([followUpPromise, followUpTimeout]);
-    } catch {
-      // Non-critical
+    // Skip follow-up generation for quick effort (saves 2-5s latency)
+    if (effort !== 'quick') {
+      try {
+        const followUpPromise = generateFollowUps(query.trim(), responseText);
+        const followUpTimeout = new Promise<string[]>((resolve) => setTimeout(() => resolve([]), 8_000));
+        followUps = await Promise.race([followUpPromise, followUpTimeout]);
+      } catch {
+        // Non-critical
+      }
     }
 
     return res.status(200).json({

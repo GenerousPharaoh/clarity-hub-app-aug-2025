@@ -578,8 +578,15 @@ async function generateSummary(
 ): Promise<string> {
   const openai = getOpenAI();
 
-  // Truncate for summary generation
-  const truncated = text.slice(0, 12000);
+  // Head + tail strategy: capture both the introduction and conclusion/operative sections
+  const HEAD_SIZE = 8000;
+  const TAIL_SIZE = 4000;
+  let truncated: string;
+  if (text.length <= HEAD_SIZE + TAIL_SIZE) {
+    truncated = text;
+  } else {
+    truncated = text.slice(0, HEAD_SIZE) + '\n\n[... middle content omitted for brevity ...]\n\n' + text.slice(-TAIL_SIZE);
+  }
 
   const typeContext = documentType
     ? ` This document has been classified as a "${documentType.replace(/_/g, ' ')}".`

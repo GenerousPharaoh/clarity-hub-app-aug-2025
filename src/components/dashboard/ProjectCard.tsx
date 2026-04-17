@@ -3,14 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ChevronRight,
+  Download,
   FolderOpen,
+  Loader2,
   MoreVertical,
   Pencil,
   Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Project } from '@/types';
 import { cn, formatRelativeDate } from '@/lib/utils';
 import { useUpdateProject } from '@/hooks/useProjects';
+import { downloadProjectExport } from '@/services/projectExport';
 
 interface ProjectCardProps {
   project: Project;
@@ -48,8 +52,38 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(project.name);
+  const [exporting, setExporting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (exporting) return;
+      setMenuOpen(false);
+      setExporting(true);
+      const toastId = toast.loading('Preparing export…');
+      try {
+        await downloadProjectExport({
+          projectId: project.id,
+          projectName: project.name,
+          includeFileBinaries: true,
+          onProgress: (progress) => {
+            toast.loading(progress.message, { id: toastId });
+          },
+        });
+        toast.success('Export downloaded', { id: toastId });
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : 'Export failed',
+          { id: toastId }
+        );
+      } finally {
+        setExporting(false);
+      }
+    },
+    [exporting, project.id, project.name]
+  );
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -247,6 +281,21 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
                     <Pencil className="h-3.5 w-3.5" />
                     Rename
                   </button>
+                  <button
+                    role="menuitem"
+                    onClick={handleExport}
+                    disabled={exporting}
+                    title="Download a ZIP archive of this matter (files + JSON metadata)"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-surface-600 transition-colors hover:bg-surface-50 disabled:cursor-wait disabled:opacity-60 dark:text-surface-300 dark:hover:bg-surface-700"
+                  >
+                    {exporting ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Download className="h-3.5 w-3.5" />
+                    )}
+                    {exporting ? 'Exporting…' : 'Export matter'}
+                  </button>
+                  <div className="my-1 h-px bg-surface-100 dark:bg-surface-700" />
                   <button
                     role="menuitem"
                     onClick={handleDelete}

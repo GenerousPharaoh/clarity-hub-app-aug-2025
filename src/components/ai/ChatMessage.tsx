@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback, useState, type ReactNode } from 'react';
+import { memo, useMemo, useCallback, useState, useEffect, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -28,11 +28,51 @@ SyntaxHighlighter.registerLanguage('sql', sql);
 SyntaxHighlighter.registerLanguage('markdown', markdown);
 import { cn } from '@/lib/utils';
 import { parseStructuredResponse, type ConfidenceLevel } from '@/lib/parseStructuredResponse';
-import { User, Sparkles, AlertTriangle, RotateCcw, Copy, Check, Globe, ChevronDown } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  User,
+  Sparkles,
+  AlertTriangle,
+  RotateCcw,
+  Copy,
+  Check,
+  Globe,
+  ChevronDown,
+  Loader2,
+  ShieldAlert,
+  ShieldCheck,
+  ExternalLink,
+  X,
+} from 'lucide-react';
 import { ChatCitation, SourcesList } from './ChatCitation';
 import { FollowUpSuggestions } from './FollowUpSuggestions';
-import { useCitationVerification } from '@/hooks/useCitationVerification';
+import { useCitationVerification, type CitationVerification } from '@/hooks/useCitationVerification';
 import type { ChatMessage as ChatMessageType, ChatSource, WebSource } from '@/types';
+
+/** Pattern for neutral legal citations that CanLII can resolve — must match api/canlii-verify.ts */
+const NEUTRAL_CITE_PATTERN = /(\d{4})\s+(SCC|ONCA|ONSC|HRTO|CanLII|BCCA|ABCA)\s+(\d+)/gi;
+
+/** Statuses that should block "copy to draft" until the user explicitly acknowledges. */
+function isFlaggedStatus(status: CitationVerification['status']): boolean {
+  return status === 'not_found' || status === 'unverified' || status === 'error';
+}
+
+function normalizeCite(s: string): string {
+  return s.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function findVerification(
+  citation: string,
+  verifications: CitationVerification[] | undefined
+): CitationVerification | undefined {
+  if (!verifications) return undefined;
+  const key = normalizeCite(citation);
+  return verifications.find((v) => normalizeCite(v.citation) === key);
+}
+
+function canliiSearchUrl(citation: string): string {
+  return `https://www.canlii.org/en/#search/text=${encodeURIComponent(citation)}`;
+}
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -62,6 +102,116 @@ const EFFORT_BADGE_CONFIG: Record<string, { label: string; className: string }> 
 };
 
 /**
+ * Inline chip that wraps a neutral-citation reference in the message body
+ * with its CanLII verification status. The chip is the primary visual signal
+ * that a lawyer should not trust a citation at face value — verified chips
+ * link to CanLII; flagged chips route to a manual CanLII search.
+ */
+function LegalCitationChip({
+  citation,
+  verification,
+  isFetching,
+}: {
+  citation: string;
+  verification?: CitationVerification;
+  isFetching: boolean;
+}) {
+  // Pending (verification hasn't resolved yet OR is loading)
+  if (!verification && isFetching) {
+    return (
+      <span className="mx-0.5 inline-flex items-center gap-1 rounded-md border border-surface-200 bg-surface-50 px-1.5 py-0.5 text-sm font-medium leading-tight text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+        <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
+        <span>{citation}</span>
+      </span>
+    );
+  }
+
+  // Verified — link to the real CanLII doc
+  if (verification?.status === 'verified' && verification.canliiUrl) {
+    return (
+      <a
+        href={verification.canliiUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={verification.canliiTitle ? `${verification.canliiTitle}\nVerified on CanLII` : 'Verified on CanLII'}
+        className="mx-0.5 inline-flex items-center gap-1 rounded-md border border-green-200 bg-green-50 px-1.5 py-0.5 text-sm font-medium leading-tight text-green-700 no-underline transition-colors hover:border-green-300 hover:bg-green-100 dark:border-green-800/60 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50"
+      >
+        <Check className="h-3 w-3 shrink-0" aria-hidden="true" />
+        <span>{citation}</span>
+      </a>
+    );
+  }
+
+  // Not found in CanLII — treat as potential fabrication
+  if (verification?.status === 'not_found') {
+    return (
+      <a
+        href={canliiSearchUrl(citation)}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Not found in CanLII. Click to search manually. Do not cite without verification."
+        className="mx-0.5 inline-flex items-center gap-1 rounded-md border border-red-300 bg-red-50 px-1.5 py-0.5 text-sm font-semibold leading-tight text-red-700 no-underline transition-colors hover:bg-red-100 dark:border-red-800/60 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
+      >
+        <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />
+        <span className="line-through decoration-red-400/60 decoration-1">{citation}</span>
+      </a>
+    );
+  }
+
+  // Unverified / error (wrong format, legislation ref, CanLII error, etc.)
+  return (
+    <a
+      href={canliiSearchUrl(citation)}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={verification?.message ?? 'Could not auto-verify. Click to search CanLII manually.'}
+      className="mx-0.5 inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-sm font-medium leading-tight text-amber-700 no-underline transition-colors hover:bg-amber-100 dark:border-amber-800/60 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/50"
+    >
+      <AlertTriangle className="h-3 w-3 shrink-0" aria-hidden="true" />
+      <span>{citation}</span>
+    </a>
+  );
+}
+
+/**
+ * Wrap legal citation patterns in a text segment with LegalCitationChip.
+ * Runs AFTER the [Source N] / [Web N] wrapper so it never touches those tokens.
+ */
+function wrapLegalCitations(
+  text: string,
+  verifications: CitationVerification[] | undefined,
+  isFetching: boolean
+): ReactNode[] {
+  const parts: ReactNode[] = [];
+  const regex = new RegExp(NEUTRAL_CITE_PATTERN.source, 'gi');
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    const citation = match[0];
+    const verification = findVerification(citation, verifications);
+    parts.push(
+      <LegalCitationChip
+        key={`cite-${match.index}-${citation}`}
+        citation={citation}
+        verification={verification}
+        isFetching={isFetching}
+      />
+    );
+    lastIndex = match.index + citation.length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : [text];
+}
+
+/**
  * Inline web citation chip that renders [Web N] references as clickable links.
  */
 function WebCitationChip({ source }: { source: WebSource }) {
@@ -88,13 +238,23 @@ function WebCitationChip({ source }: { source: WebSource }) {
 }
 
 /**
- * Replace [Source N] and [Web N] patterns in text with interactive components.
- * Returns an array of string and ReactNode segments.
+ * Replace [Source N], [Web N], and neutral legal citations with interactive
+ * components. Legal citations get a CanLII verification badge so the reader
+ * can tell at a glance which cites are real, which are not-found, and which
+ * failed to auto-verify.
  */
-function renderWithCitations(text: string, sources?: ChatSource[], webSources?: WebSource[]): ReactNode[] {
+function renderWithCitations(
+  text: string,
+  sources?: ChatSource[],
+  webSources?: WebSource[],
+  verifications?: CitationVerification[],
+  isVerifying?: boolean
+): ReactNode[] {
   const hasSources = sources && sources.length > 0;
   const hasWebSources = webSources && webSources.length > 0;
-  if (!hasSources && !hasWebSources) return [text];
+  const hasVerifications = (verifications && verifications.length > 0) || !!isVerifying;
+
+  if (!hasSources && !hasWebSources && !hasVerifications) return [text];
 
   const parts: ReactNode[] = [];
   // Match both [Source N ...] and [Web N ...] patterns
@@ -102,14 +262,23 @@ function renderWithCitations(text: string, sources?: ChatSource[], webSources?: 
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
+  const appendText = (segment: string) => {
+    if (!segment) return;
+    // Second pass: wrap legal citations inside the segment, if verification is active
+    if (hasVerifications) {
+      parts.push(...wrapLegalCitations(segment, verifications, !!isVerifying));
+    } else {
+      parts.push(segment);
+    }
+  };
+
   while ((match = regex.exec(text)) !== null) {
-    // Add text before the match
+    // Text before the match
     if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
+      appendText(text.slice(lastIndex, match.index));
     }
 
     if (match[1]) {
-      // [Source N] match
       const sourceNum = parseInt(match[2], 10);
       const source = sources?.find((s) => s.sourceIndex === sourceNum);
       if (source) {
@@ -118,7 +287,6 @@ function renderWithCitations(text: string, sources?: ChatSource[], webSources?: 
         parts.push(match[0]);
       }
     } else if (match[3]) {
-      // [Web N] match
       const webNum = parseInt(match[4], 10);
       const webSource = webSources?.find((w) => w.index === webNum);
       if (webSource) {
@@ -131,9 +299,8 @@ function renderWithCitations(text: string, sources?: ChatSource[], webSources?: 
     lastIndex = match.index + match[0].length;
   }
 
-  // Add remaining text
   if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
+    appendText(text.slice(lastIndex));
   }
 
   return parts;
@@ -227,16 +394,22 @@ function CodeBlock({
 
 /**
  * Process React children from ReactMarkdown to replace [Source N] and [Web N] text nodes
- * with interactive citation components.
+ * with interactive citation components. Also wraps neutral legal citations in verification chips.
  */
-function processChildrenForCitations(children: ReactNode, sources: ChatSource[], webSources?: WebSource[]): ReactNode {
+function processChildrenForCitations(
+  children: ReactNode,
+  sources: ChatSource[],
+  webSources?: WebSource[],
+  verifications?: CitationVerification[],
+  isVerifying?: boolean
+): ReactNode {
   if (!children) return children;
 
   // Handle array of children
   if (Array.isArray(children)) {
     return children.map((child, i) => {
       if (typeof child === 'string') {
-        const parts = renderWithCitations(child, sources, webSources);
+        const parts = renderWithCitations(child, sources, webSources, verifications, isVerifying);
         return parts.length === 1 && typeof parts[0] === 'string'
           ? parts[0]
           : <span key={i}>{parts}</span>;
@@ -247,7 +420,7 @@ function processChildrenForCitations(children: ReactNode, sources: ChatSource[],
 
   // Handle single string child
   if (typeof children === 'string') {
-    const parts = renderWithCitations(children, sources, webSources);
+    const parts = renderWithCitations(children, sources, webSources, verifications, isVerifying);
     return parts.length === 1 && typeof parts[0] === 'string'
       ? parts[0]
       : <span>{parts}</span>;
@@ -324,6 +497,7 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   const isDark = useIsDark();
   const isError = !isUser && isErrorMessage(message.content);
   const [copied, setCopied] = useState(false);
+  const [copyGuardOpen, setCopyGuardOpen] = useState(false);
 
   const timestamp = useMemo(
     () => formatTimestamp(message.timestamp),
@@ -334,14 +508,6 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
     if (onRetry) onRetry(message.id);
   }, [onRetry, message.id]);
 
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(message.content);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* clipboard API may be unavailable */ }
-  }, [message.content]);
-
   // Parse structured response markers for assistant messages
   const structured = useMemo(
     () => (!isUser && !isErrorMessage(message.content))
@@ -351,10 +517,58 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   );
 
   // Async citation verification against CanLII
-  const { data: verificationResults } = useCitationVerification(
+  const { data: verificationResults, isFetching: isVerifying } = useCitationVerification(
     message.id,
     message.citations ?? []
   );
+
+  const hasCitationsToCheck = (message.citations?.length ?? 0) > 0;
+  const flaggedCitations = useMemo(
+    () => (verificationResults ?? []).filter((r) => isFlaggedStatus(r.status)),
+    [verificationResults]
+  );
+  const verifiedCount = (verificationResults ?? []).filter((r) => r.status === 'verified').length;
+  const showVerifyingBanner = hasCitationsToCheck && isVerifying && !verificationResults;
+  const showFlaggedBanner = !isVerifying && flaggedCitations.length > 0;
+
+  const writeToClipboard = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Clipboard unavailable in this browser');
+    }
+  }, []);
+
+  const performCopy = useCallback(
+    async (withDisclaimer: boolean) => {
+      let payload = message.content;
+      if (withDisclaimer && flaggedCitations.length > 0) {
+        const list = flaggedCitations.map((c) => c.citation).join('; ');
+        payload +=
+          `\n\n---\n[Clarity Hub warning] The following citations were NOT auto-verified against CanLII and may be inaccurate or fabricated: ${list}. ` +
+          `Verify each on CanLII before relying on this text.`;
+      }
+      await writeToClipboard(payload);
+      setCopyGuardOpen(false);
+    },
+    [message.content, flaggedCitations, writeToClipboard]
+  );
+
+  const handleCopy = useCallback(async () => {
+    // Hard gate — never copy while verification is in flight. A lawyer should
+    // not paste half-checked output into a draft.
+    if (hasCitationsToCheck && isVerifying) {
+      toast.info('Still verifying citations — one moment…');
+      return;
+    }
+    if (flaggedCitations.length > 0) {
+      setCopyGuardOpen(true);
+      return;
+    }
+    await performCopy(false);
+  }, [hasCitationsToCheck, isVerifying, flaggedCitations.length, performCopy]);
 
   // Content to render in the main ReactMarkdown block
   const displayContent = structured?.isStructured ? structured.answer : message.content;
@@ -439,26 +653,102 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                 : 'bg-white border border-translucent border-l-2 border-l-accent-400/30 dark:bg-surface-800 dark:border-l-accent-500/25'
             )}
           >
-            {/* Copy button — visible on hover */}
+            {/* Copy button — visible on hover. Reflects pending/flagged state so the
+                user can't accidentally copy half-checked output into a draft. */}
             {!isError && (
               <button
                 onClick={handleCopy}
+                disabled={showVerifyingBanner}
+                aria-label={
+                  showVerifyingBanner
+                    ? 'Verifying citations'
+                    : flaggedCitations.length > 0
+                      ? `Copy ${flaggedCitations.length} unverified citation${flaggedCitations.length === 1 ? '' : 's'} — review required`
+                      : 'Copy to clipboard'
+                }
                 className={cn(
                   'absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md transition-all',
-                  'opacity-0 group-hover/msg:opacity-100',
+                  'opacity-60 group-hover/msg:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
                   copied
-                    ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-surface-100 text-surface-400 hover:bg-surface-200 hover:text-surface-600 dark:bg-surface-700 dark:text-surface-500 dark:hover:bg-surface-600 dark:hover:text-surface-300'
+                    ? 'bg-green-100 text-green-600 focus-visible:ring-green-500/50 dark:bg-green-900/30 dark:text-green-400'
+                    : showVerifyingBanner
+                      ? 'cursor-wait bg-surface-100 text-surface-400 dark:bg-surface-700 dark:text-surface-500'
+                      : flaggedCitations.length > 0
+                        ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 focus-visible:ring-amber-500/50 dark:bg-amber-900/40 dark:text-amber-300'
+                        : 'bg-surface-100 text-surface-400 hover:bg-surface-200 hover:text-surface-600 focus-visible:ring-surface-400/50 dark:bg-surface-700 dark:text-surface-500 dark:hover:bg-surface-600 dark:hover:text-surface-300'
                 )}
-                title="Copy to clipboard"
+                title={
+                  showVerifyingBanner
+                    ? 'Verifying citations…'
+                    : flaggedCitations.length > 0
+                      ? `${flaggedCitations.length} citation${flaggedCitations.length === 1 ? '' : 's'} need review before copying`
+                      : 'Copy to clipboard'
+                }
               >
                 {copied ? (
                   <Check className="h-3.5 w-3.5" />
+                ) : showVerifyingBanner ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : flaggedCitations.length > 0 ? (
+                  <ShieldAlert className="h-3.5 w-3.5" />
                 ) : (
                   <Copy className="h-3.5 w-3.5" />
                 )}
               </button>
             )}
+
+            {/* Verification banner — pending */}
+            {!isError && showVerifyingBanner && (
+              <div
+                role="status"
+                className="mb-2 flex items-center gap-2 rounded-lg border border-surface-200/80 bg-surface-50/80 px-2.5 py-1.5 text-xs text-surface-600 dark:border-surface-700/80 dark:bg-surface-900/40 dark:text-surface-300"
+              >
+                <Loader2 className="h-3 w-3 shrink-0 animate-spin text-accent-500" aria-hidden="true" />
+                <span>
+                  Checking {message.citations?.length ?? 0} citation
+                  {(message.citations?.length ?? 0) === 1 ? '' : 's'} against CanLII — don&apos;t
+                  copy this into a draft yet.
+                </span>
+              </div>
+            )}
+
+            {/* Verification banner — flagged */}
+            {!isError && showFlaggedBanner && (
+              <div
+                role="alert"
+                className="mb-2 rounded-lg border border-amber-300/80 bg-amber-50 p-2.5 text-xs text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-200"
+              >
+                <div className="flex items-start gap-2">
+                  <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold leading-snug">
+                      {flaggedCitations.length} of {flaggedCitations.length + verifiedCount} citation
+                      {flaggedCitations.length + verifiedCount === 1 ? '' : 's'} could not be verified.
+                    </p>
+                    <p className="mt-0.5 leading-snug text-amber-700/90 dark:text-amber-300/90">
+                      Review each on CanLII before quoting or filing. AI-generated citations can be fabricated.
+                    </p>
+                    <ul className="mt-1.5 flex flex-wrap gap-1">
+                      {flaggedCitations.map((c) => (
+                        <li key={c.citation}>
+                          <a
+                            href={canliiSearchUrl(c.citation)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={c.message ?? 'Search CanLII manually'}
+                            className="inline-flex items-center gap-1 rounded border border-amber-300 bg-white/60 px-1.5 py-0.5 font-medium text-amber-800 transition-colors hover:bg-white dark:border-amber-700/60 dark:bg-amber-950/50 dark:text-amber-200 dark:hover:bg-amber-900/40"
+                          >
+                            <ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
+                            {c.citation}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div
               className={cn(
                 'prose-chat min-w-0 text-[13px] leading-relaxed break-words',
@@ -494,13 +784,40 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                     );
                   },
                   p: ({ children }) => {
-                    // Process children to replace [Source N] and [Web N] text with citation chips
-                    const hasCitations = (message.sources && message.sources.length > 0) || (message.webSources && message.webSources.length > 0);
+                    // Process children to replace [Source N], [Web N], and neutral legal citations with chips
+                    const hasCitations =
+                      (message.sources && message.sources.length > 0) ||
+                      (message.webSources && message.webSources.length > 0) ||
+                      hasCitationsToCheck;
                     if (hasCitations) {
-                      const processed = processChildrenForCitations(children, message.sources ?? [], message.webSources);
+                      const processed = processChildrenForCitations(
+                        children,
+                        message.sources ?? [],
+                        message.webSources,
+                        verificationResults,
+                        isVerifying
+                      );
                       return <p className="mb-2 last:mb-0">{processed}</p>;
                     }
                     return <p className="mb-2 last:mb-0">{children}</p>;
+                  },
+                  li: ({ children }) => {
+                    // Same treatment inside list items (many AI answers bullet their authorities)
+                    const hasCitations =
+                      (message.sources && message.sources.length > 0) ||
+                      (message.webSources && message.webSources.length > 0) ||
+                      hasCitationsToCheck;
+                    if (hasCitations) {
+                      const processed = processChildrenForCitations(
+                        children,
+                        message.sources ?? [],
+                        message.webSources,
+                        verificationResults,
+                        isVerifying
+                      );
+                      return <li className="text-[13px]">{processed}</li>;
+                    }
+                    return <li className="text-[13px]">{children}</li>;
                   },
                   ul: ({ children }) => (
                     <ul className="mb-2 ml-4 list-disc space-y-1 last:mb-0">{children}</ul>
@@ -508,7 +825,6 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                   ol: ({ children }) => (
                     <ol className="mb-2 ml-4 list-decimal space-y-1 last:mb-0">{children}</ol>
                   ),
-                  li: ({ children }) => <li className="text-[13px]">{children}</li>,
                   h1: ({ children }) => (
                     <h1 className="mb-2 mt-3 font-heading text-base font-bold first:mt-0">
                       {children}
@@ -631,9 +947,156 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
           )}
         </div>
       </div>
+
+      {/* Hard gate on copy when any citation is flagged — the lawyer must
+          explicitly acknowledge before clipboard is written, and the pasted
+          text carries a warning footer. */}
+      <CopyGuardDialog
+        open={copyGuardOpen}
+        flagged={flaggedCitations}
+        onCancel={() => setCopyGuardOpen(false)}
+        onCopyWithDisclaimer={() => performCopy(true)}
+        onCopyAnyway={() => performCopy(false)}
+      />
     </div>
   );
 });
+
+/**
+ * Hard-gate dialog shown when a lawyer tries to copy AI output that contains
+ * flagged citations. Requires explicit acknowledgment and offers a footer
+ * disclaimer that travels with the text.
+ */
+function CopyGuardDialog({
+  open,
+  flagged,
+  onCancel,
+  onCopyWithDisclaimer,
+  onCopyAnyway,
+}: {
+  open: boolean;
+  flagged: CitationVerification[];
+  onCancel: () => void;
+  onCopyWithDisclaimer: () => void;
+  onCopyAnyway: () => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const { body } = document;
+    const prev = body.style.overflow;
+    body.style.overflow = 'hidden';
+    return () => {
+      body.style.overflow = prev;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, onCancel]);
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-40 bg-surface-950/40 backdrop-blur-sm dark:bg-surface-950/60"
+        onClick={onCancel}
+      />
+      <div
+        role="alertdialog"
+        aria-labelledby="copy-guard-title"
+        aria-describedby="copy-guard-desc"
+        className={cn(
+          'fixed left-1/2 top-1/2 z-50 w-[460px] max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2',
+          'rounded-xl border border-surface-200 bg-white p-5 shadow-overlay',
+          'dark:border-surface-700 dark:bg-surface-800',
+          'animate-in fade-in-0 zoom-in-95 duration-150'
+        )}
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+            <ShieldAlert className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3
+                id="copy-guard-title"
+                className="font-heading text-sm font-semibold text-surface-800 dark:text-surface-100"
+              >
+                {flagged.length} citation{flagged.length === 1 ? '' : 's'} not auto-verified
+              </h3>
+              <button
+                onClick={onCancel}
+                aria-label="Close"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-700 dark:hover:text-surface-300"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <p
+              id="copy-guard-desc"
+              className="mt-1.5 text-xs leading-relaxed text-surface-500 dark:text-surface-400"
+            >
+              AI-generated case citations are sometimes fabricated. Verify each of these on CanLII
+              before pasting this text into a factum, brief, or court filing.
+            </p>
+
+            <ul className="mt-3 max-h-40 space-y-1 overflow-y-auto rounded-lg border border-surface-100 bg-surface-50/60 p-2 dark:border-surface-700 dark:bg-surface-900/40">
+              {flagged.map((c) => (
+                <li
+                  key={c.citation}
+                  className="flex items-center justify-between gap-2 text-xs"
+                >
+                  <span className="min-w-0 truncate font-mono text-amber-700 dark:text-amber-300" title={c.citation}>
+                    {c.citation}
+                  </span>
+                  <a
+                    href={canliiSearchUrl(c.citation)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-xs font-medium text-amber-700 shadow-sm transition-colors hover:bg-amber-50 dark:bg-surface-800 dark:text-amber-300 dark:hover:bg-amber-900/30"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    CanLII
+                  </a>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 flex flex-col gap-2">
+              <button
+                onClick={onCopyWithDisclaimer}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-primary-500/20 transition-all hover:bg-primary-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 focus-visible:ring-offset-2 active:scale-[0.98] dark:focus-visible:ring-offset-surface-800"
+              >
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Copy with unverified-citation warning
+              </button>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={onCancel}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-surface-500 transition-all hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-400/40 active:scale-[0.98] dark:text-surface-400 dark:hover:bg-surface-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={onCopyAnyway}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-surface-500 transition-all hover:bg-surface-100 hover:text-surface-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-400/40 active:scale-[0.98] dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-200"
+                >
+                  Copy without warning
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
 
 /**
  * Summary line showing CanLII citation verification results.

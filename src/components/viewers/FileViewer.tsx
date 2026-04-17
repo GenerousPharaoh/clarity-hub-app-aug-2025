@@ -9,6 +9,7 @@ import { VideoViewer } from './VideoViewer';
 import { TextViewer } from './TextViewer';
 import { DocumentViewer } from './DocumentViewer';
 import { EmptyViewer } from './EmptyViewer';
+import { PDFLoadingSkeleton } from './PDFLoadingSkeleton';
 import { saveWorkspaceFile } from '@/lib/workspaceSession';
 
 // Lazy-load the annotatable PDF viewer — heavy dependency (pdfjs + highlighter)
@@ -131,10 +132,14 @@ export function FileViewer() {
     );
   }
 
-  // Loading URL — minimal spinner (no layout-shifting skeleton)
+  // Loading URL — use the PDF skeleton for PDFs so the hand-off to
+  // AnnotatablePDFViewer is visually continuous (no grey flash).
   if (isLoading) {
+    if (fileType === 'pdf') {
+      return <PDFLoadingSkeleton showToolbar message="Fetching secure URL…" />;
+    }
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center bg-surface-50 dark:bg-surface-950">
         <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
       </div>
     );
@@ -170,7 +175,11 @@ export function FileViewer() {
   switch (fileType) {
     case 'pdf':
       return (
-        <Suspense fallback={null}>
+        <Suspense
+          fallback={
+            <PDFLoadingSkeleton showToolbar message="Loading PDF viewer…" />
+          }
+        >
           <AnnotatablePDFViewer
             url={fileUrl}
             fileName={selectedFile.name}

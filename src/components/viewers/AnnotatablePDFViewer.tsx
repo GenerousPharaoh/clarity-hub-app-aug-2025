@@ -60,6 +60,7 @@ import {
 } from '@/types/annotations';
 import { useCreateExhibit, useExhibits, getNextExhibitId } from '@/hooks/useExhibits';
 import { AnnotationSidebar } from './AnnotationSidebar';
+import { PDFLoadingSkeleton } from './PDFLoadingSkeleton';
 
 // Required CSS for react-pdf-highlighter-extended-extended + pdfjs
 import 'react-pdf-highlighter-extended-extended/dist/esm/style/pdf_viewer.css';
@@ -577,12 +578,12 @@ export function AnnotatablePDFViewer({
         </div>
       )}
 
-      {/* PDF viewer area */}
-      <div className="relative flex-1 overflow-auto">
+      {/* PDF viewer area — bg matches the skeleton so worker parse doesn't flash */}
+      <div className="relative flex-1 overflow-auto bg-surface-100 dark:bg-surface-950">
         <PdfLoader
           document={url}
           workerSrc={PDF_WORKER_URL}
-          beforeLoad={() => null}
+          beforeLoad={() => <PDFLoadingSkeleton message="Parsing PDF…" />}
           errorMessage={(error) => (
             <div className="flex h-full flex-col items-center justify-center px-8 text-center">
               <div className="w-full max-w-sm rounded-2xl border border-red-300 bg-red-50 p-6 dark:border-red-800 dark:bg-red-950/40">

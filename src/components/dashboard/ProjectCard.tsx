@@ -265,7 +265,15 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
             </div>
           </div>
 
-          <p title={project.description || ""} className="mt-3 line-clamp-2 text-sm leading-relaxed text-surface-600 [overflow-wrap:anywhere] dark:text-surface-400">
+          <p
+            title={project.description || ''}
+            className={cn(
+              'mt-3 line-clamp-2 text-sm leading-relaxed [overflow-wrap:anywhere]',
+              project.description
+                ? 'text-surface-600 dark:text-surface-400'
+                : 'italic text-surface-400 dark:text-surface-500'
+            )}
+          >
             {project.description || 'No description yet'}
           </p>
 
@@ -277,7 +285,7 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
               <span className="text-surface-300 dark:text-surface-600">&middot;</span>
               <span>{updatedLabel}</span>
             </div>
-            <span className="inline-flex items-center gap-1 rounded-lg bg-surface-100 px-2.5 py-1 text-xs font-semibold text-surface-600 transition-all group-hover:bg-accent-500 group-hover:text-white dark:bg-surface-800 dark:text-surface-300 dark:group-hover:bg-accent-500 dark:group-hover:text-white">
+            <span className="inline-flex items-center gap-1 rounded-lg bg-surface-100 px-2.5 py-1 text-xs font-semibold text-surface-600 shadow-sm transition-all group-hover:bg-accent-500 group-hover:text-white group-hover:shadow-md group-hover:shadow-accent-500/20 dark:bg-surface-800 dark:text-surface-300 dark:group-hover:bg-accent-500 dark:group-hover:text-white">
               Open
               <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>

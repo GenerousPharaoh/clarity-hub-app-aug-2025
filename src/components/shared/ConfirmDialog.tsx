@@ -33,6 +33,18 @@ export function ConfirmDialog({
     }
   }, [open]);
 
+  // Lock body scroll while the dialog is open so backdrop clicks don't scroll
+  // the page underneath and gestures don't bleed through the modal.
+  useEffect(() => {
+    if (!open) return;
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    body.style.overflow = 'hidden';
+    return () => {
+      body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -122,17 +134,17 @@ export function ConfirmDialog({
               <button
                 ref={cancelRef}
                 onClick={onCancel}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-surface-500 transition-all hover:-translate-y-0.5 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-surface-500 transition-all hover:bg-surface-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-400/40 active:scale-[0.98] dark:text-surface-400 dark:hover:bg-surface-700 dark:focus-visible:ring-surface-500/40"
               >
                 {cancelLabel}
               </button>
               <button
                 onClick={onConfirm}
                 className={cn(
-                  'rounded-lg px-4 py-1.5 text-sm font-medium text-white transition-colors',
+                  'rounded-lg px-4 py-1.5 text-sm font-medium text-white transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-800',
                   isDanger
-                    ? 'bg-red-600 shadow-sm shadow-red-500/20 hover:bg-red-700 focus:ring-2 focus:ring-red-500/20 dark:bg-red-600 dark:hover:bg-red-500'
-                    : 'bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500/20'
+                    ? 'bg-red-600 shadow-sm shadow-red-500/20 hover:bg-red-700 hover:shadow-md focus-visible:ring-red-500/60 dark:bg-red-600 dark:hover:bg-red-500'
+                    : 'bg-primary-600 shadow-sm shadow-primary-500/20 hover:bg-primary-700 hover:shadow-md focus-visible:ring-primary-500/60'
                 )}
               >
                 {confirmLabel}

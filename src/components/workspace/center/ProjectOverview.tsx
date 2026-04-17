@@ -835,7 +835,7 @@ function NextStepsCard({
 }) {
   return (
     <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-surface-500 dark:text-surface-400">
         <Sparkles className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Next steps
       </div>
@@ -905,7 +905,7 @@ function FileTypeBreakdown({
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-surface-500 dark:text-surface-400">
         <FileText className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Evidence profile
       </div>
@@ -977,7 +977,7 @@ function RecentActivity({
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-surface-500 dark:text-surface-400">
         <Clock className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Recent activity
       </div>
@@ -1017,7 +1017,7 @@ function MatterDetailsCard({
 }) {
   return (
     <div className="flex h-full flex-col rounded-xl border border-surface-200/80 bg-white px-4 py-3 shadow-sm dark:border-surface-800 dark:bg-surface-900">
-      <div className="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-500">
+      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-surface-500 dark:text-surface-400">
         <FolderOpen className="h-3.5 w-3.5 text-primary-500 dark:text-primary-400" />
         Matter details
       </div>

@@ -311,10 +311,10 @@ export function TimelineTab() {
   if (isError) {
     return (
       <div className="flex h-full w-full min-w-0 flex-1 flex-col items-center justify-center px-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-950/30">
-          <AlertCircle className="h-5 w-5 text-red-400" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-100 shadow-sm dark:bg-red-950/60">
+          <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400" />
         </div>
-        <h3 className="mt-3 font-heading text-sm font-semibold text-red-700 dark:text-red-300">
+        <h3 className="mt-3 font-heading text-sm font-bold text-red-700 dark:text-red-300">
           Failed to load timeline
         </h3>
         <p className="mt-1 max-w-xs text-center text-xs leading-relaxed text-red-600/80 dark:text-red-400/80">
@@ -322,7 +322,7 @@ export function TimelineTab() {
         </p>
         <button
           onClick={() => refetch()}
-          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800/50 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/60"
+          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 shadow-sm transition-all hover:bg-red-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 active:scale-[0.98] dark:border-red-800/70 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/70"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Retry

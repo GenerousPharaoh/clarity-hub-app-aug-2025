@@ -269,10 +269,13 @@ export function AIChatPanel() {
           </div>
         ) : !aiEnabled && isEmpty ? (
           <div className="flex h-full flex-col">
-            {/* AI disabled notice */}
+            {/* AI disabled notice — privacy-first, distinct from welcome */}
             <div className={cn('flex flex-1 flex-col items-center justify-center pb-4', narrow ? 'px-3' : 'px-6')}>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-900/30">
-                <ShieldOff className="h-6 w-6 text-amber-500 dark:text-amber-400" />
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-200/70 bg-amber-50 shadow-sm dark:border-amber-900/50 dark:bg-amber-950/30">
+                <ShieldOff className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white shadow-sm">
+                  !
+                </span>
               </div>
               <h3 className="mt-4 font-heading text-base font-bold text-surface-800 dark:text-surface-100">
                 AI Features Disabled
@@ -282,7 +285,7 @@ export function AIChatPanel() {
               </p>
               <a
                 href="/settings"
-                className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-4 py-2 text-sm font-medium text-primary-700 shadow-sm transition-all hover:bg-primary-100 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 active:scale-[0.98] dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300 dark:hover:bg-primary-900/50"
               >
                 Open Settings
               </a>
@@ -464,11 +467,12 @@ export function AIChatPanel() {
         <div className="mb-2 flex items-center gap-1">
           <button
             onClick={() => setUseDeepThinking(false)}
+            aria-pressed={!useDeepThinking}
             className={cn(
-              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 active:scale-[0.97]',
               !useDeepThinking
-                ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+                ? 'border-primary-200 bg-primary-50 font-semibold text-primary-700 shadow-sm dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-200'
+                : 'border-transparent font-medium text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-200'
             )}
             title="Quick, balanced response"
           >
@@ -477,11 +481,12 @@ export function AIChatPanel() {
           </button>
           <button
             onClick={() => setUseDeepThinking(true)}
+            aria-pressed={useDeepThinking}
             className={cn(
-              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 active:scale-[0.97]',
               useDeepThinking
-                ? 'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
-                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+                ? 'border-primary-200 bg-primary-50 font-semibold text-primary-700 shadow-sm dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-200'
+                : 'border-transparent font-medium text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-200'
             )}
             title="Deep legal reasoning with extended thinking"
           >
@@ -493,11 +498,12 @@ export function AIChatPanel() {
 
           <button
             onClick={() => setUseWebSearch(!useWebSearch)}
+            aria-pressed={useWebSearch}
             className={cn(
-              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 active:scale-[0.97]',
               useWebSearch
-                ? 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+                ? 'border-blue-200 bg-blue-50 font-semibold text-blue-700 shadow-sm dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-200'
+                : 'border-transparent font-medium text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-200'
             )}
             title="Search live legal sources (CanLII, Ontario.ca, tribunals)"
           >
@@ -509,11 +515,12 @@ export function AIChatPanel() {
 
           <button
             onClick={() => setShowTaskLibrary(!showTaskLibrary)}
+            aria-pressed={showTaskLibrary}
             className={cn(
-              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all',
+              'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 active:scale-[0.97]',
               showTaskLibrary
-                ? 'border-accent-200 bg-accent-50 text-accent-700 dark:border-accent-700 dark:bg-accent-900/30 dark:text-accent-300'
-                : 'border-transparent text-surface-500 hover:bg-surface-100 dark:text-surface-400 dark:hover:bg-surface-700'
+                ? 'border-accent-200 bg-accent-50 font-semibold text-accent-700 shadow-sm dark:border-accent-700 dark:bg-accent-900/30 dark:text-accent-200'
+                : 'border-transparent font-medium text-surface-500 hover:bg-surface-100 hover:text-surface-700 dark:text-surface-400 dark:hover:bg-surface-700 dark:hover:text-surface-200'
             )}
             title="Open task library"
           >
@@ -549,7 +556,7 @@ export function AIChatPanel() {
           className={cn(
             'flex items-end gap-2 rounded-2xl border p-3 transition-all',
             'border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800',
-            'focus-within:border-accent-400 focus-within:ring-2 focus-within:ring-accent-100 focus-within:shadow-md dark:focus-within:border-accent-500 dark:focus-within:ring-accent-900/30'
+            'focus-within:border-accent-400 focus-within:ring-2 focus-within:ring-accent-100 focus-within:shadow-md dark:focus-within:border-accent-500 dark:focus-within:ring-accent-900/50'
           )}
         >
           <textarea

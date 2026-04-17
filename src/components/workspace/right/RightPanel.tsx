@@ -139,8 +139,11 @@ export function RightPanel() {
             ) : (
               <Suspense
                 fallback={
-                  <div className="flex h-full items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-surface-300 dark:text-surface-600" />
+                  <div className="flex h-full flex-col items-center justify-center gap-3">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary-400 dark:text-primary-500" />
+                    <p className="text-xs text-surface-500 dark:text-surface-400">
+                      Loading assistant…
+                    </p>
                   </div>
                 }
               >
@@ -195,7 +198,7 @@ function TabButton({
       {active && (
         <motion.span
           layoutId="right-tab-indicator"
-          className="absolute inset-0 -z-10 rounded-md bg-white shadow-sm dark:bg-surface-700"
+          className="absolute inset-0 -z-10 rounded-md bg-white shadow-sm ring-1 ring-surface-200/60 dark:bg-surface-700 dark:ring-surface-600/60"
           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         />
       )}

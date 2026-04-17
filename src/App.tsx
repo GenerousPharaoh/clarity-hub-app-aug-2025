@@ -5,8 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { LoginPage } from './components/auth/LoginPage';
 import { AuthCallback } from './components/auth/AuthCallback';
-import { PrivacyPage } from './components/legal/PrivacyPage';
-import { TermsPage } from './components/legal/TermsPage';
+import { LegalPage } from './components/legal/LegalPage';
 import { AppShell } from './components/layout/AppShell';
 import { ErrorBoundary } from './components/shared/ErrorBoundary';
 import useAppStore from './store';
@@ -106,8 +105,10 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<LegalPage defaultSlug="privacy" />} />
+            <Route path="/terms" element={<LegalPage defaultSlug="terms" />} />
+            <Route path="/legal" element={<LegalPage defaultSlug="trust" />} />
+            <Route path="/legal/:slug" element={<LegalPage />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<AppShell />}>

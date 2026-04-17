@@ -1,10 +1,12 @@
 import type { StateCreator } from 'zustand';
 import type { CenterTab } from './panelSlice';
 import { AI_ENABLED_KEY, DENSITY_KEY } from '../../lib/constants';
+import { logAuditEvent } from '../../services/auditLog';
 
 export type DisplayDensity = 'compact' | 'comfortable' | 'spacious';
 
 const PROCESS_ON_UPLOAD_KEY = 'clarity-hub-process-on-upload';
+const AI_PROCESSING_CONSENT_KEY = 'clarity-hub-ai-processing-consent-v1';
 const PINNED_FILES_KEY = 'clarity-hub-pinned-files';
 const RECENT_FILES_KEY = 'clarity-hub-recent-files';
 const RECENT_FILES_MAX = 10;
@@ -28,6 +30,31 @@ function saveProcessOnUpload(enabled: boolean) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(PROCESS_ON_UPLOAD_KEY, enabled ? '1' : '0');
+  } catch {
+    // ignore persistence failures
+  }
+}
+
+function loadAIProcessingConsent(): { acceptedAt: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem(AI_PROCESSING_CONSENT_KEY);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as { acceptedAt?: string };
+    return parsed.acceptedAt ? { acceptedAt: parsed.acceptedAt } : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveAIProcessingConsent(value: { acceptedAt: string } | null) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (value) {
+      localStorage.setItem(AI_PROCESSING_CONSENT_KEY, JSON.stringify(value));
+    } else {
+      localStorage.removeItem(AI_PROCESSING_CONSENT_KEY);
+    }
   } catch {
     // ignore persistence failures
   }
@@ -191,6 +218,15 @@ export interface UISlice {
   // Cross-panel: citation click → PDF viewer scroll to page + highlight
   pendingViewerScrollTarget: { fileId: string; pageNumber: number | null; searchText: string | null } | null;
   setPendingViewerScrollTarget: (target: { fileId: string; pageNumber: number | null; searchText: string | null } | null) => void;
+  // AI-processing consent — required before first real (non-demo) upload so
+  // a user can't accidentally transmit privileged material to third-party
+  // sub-processors without explicit acknowledgment.
+  aiProcessingConsent: { acceptedAt: string } | null;
+  aiProcessingConsentPending: boolean;
+  requestAIProcessingConsent: () => Promise<boolean>;
+  acceptAIProcessingConsent: () => void;
+  declineAIProcessingConsent: () => void;
+  resetAIProcessingConsent: () => void;
 }
 
 export const createUISlice: StateCreator<UISlice> = (set) => ({
@@ -259,4 +295,47 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   },
   pendingViewerScrollTarget: null,
   setPendingViewerScrollTarget: (target) => set({ pendingViewerScrollTarget: target }),
+  aiProcessingConsent: loadAIProcessingConsent(),
+  aiProcessingConsentPending: false,
+  requestAIProcessingConsent: () =>
+    new Promise<boolean>((resolve) => {
+      // If already accepted, resolve immediately. Otherwise open the dialog
+      // and stash the resolver so the dialog can call back on user action.
+      set((state) => {
+        if (state.aiProcessingConsent) {
+          queueMicrotask(() => resolve(true));
+          return {};
+        }
+        // Stash the resolver on the store so the dialog component can find it
+        (state as unknown as { _aiConsentResolver?: (v: boolean) => void })._aiConsentResolver = resolve;
+        return { aiProcessingConsentPending: true };
+      });
+    }),
+  acceptAIProcessingConsent: () => {
+    const consent = { acceptedAt: new Date().toISOString() };
+    saveAIProcessingConsent(consent);
+    set((state) => {
+      const resolver = (state as unknown as { _aiConsentResolver?: (v: boolean) => void })._aiConsentResolver;
+      if (resolver) {
+        resolver(true);
+        (state as unknown as { _aiConsentResolver?: (v: boolean) => void })._aiConsentResolver = undefined;
+      }
+      return { aiProcessingConsent: consent, aiProcessingConsentPending: false };
+    });
+    void logAuditEvent({ action: 'consent.accept' });
+  },
+  declineAIProcessingConsent: () =>
+    set((state) => {
+      const resolver = (state as unknown as { _aiConsentResolver?: (v: boolean) => void })._aiConsentResolver;
+      if (resolver) {
+        resolver(false);
+        (state as unknown as { _aiConsentResolver?: (v: boolean) => void })._aiConsentResolver = undefined;
+      }
+      return { aiProcessingConsentPending: false };
+    }),
+  resetAIProcessingConsent: () => {
+    saveAIProcessingConsent(null);
+    set({ aiProcessingConsent: null });
+    void logAuditEvent({ action: 'consent.revoke' });
+  },
 });

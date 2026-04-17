@@ -15,6 +15,7 @@ import type { Project } from '@/types';
 import { cn, formatRelativeDate } from '@/lib/utils';
 import { useUpdateProject } from '@/hooks/useProjects';
 import { downloadProjectExport } from '@/services/projectExport';
+import { logAuditEvent } from '@/services/auditLog';
 
 interface ProjectCardProps {
   project: Project;
@@ -73,6 +74,12 @@ export function ProjectCard({ project, fileCount, index, onDelete, isLastOpened 
           },
         });
         toast.success('Export downloaded', { id: toastId });
+        void logAuditEvent({
+          action: 'project.export',
+          projectId: project.id,
+          targetType: 'project',
+          targetId: project.id,
+        });
       } catch (err) {
         toast.error(
           err instanceof Error ? err.message : 'Export failed',

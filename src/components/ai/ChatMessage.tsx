@@ -48,6 +48,7 @@ import { ChatCitation, SourcesList } from './ChatCitation';
 import { FollowUpSuggestions } from './FollowUpSuggestions';
 import { useCitationVerification, type CitationVerification } from '@/hooks/useCitationVerification';
 import { CITATION_PATTERNS } from '@/services/aiRouter';
+import { logAuditEvent } from '@/services/auditLog';
 import type { ChatMessage as ChatMessageType, ChatSource, WebSource } from '@/types';
 
 function normalizeCite(s: string): string {
@@ -639,8 +640,23 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
       }
       await writeToClipboard(payload);
       setCopyGuardOpen(false);
+
+      // Log the copy so firm auditors can trace how AI output left the app.
+      // Flagged copies are especially important for post-incident review
+      // (Mata v. Avianca-style sanctioned-citation disasters).
+      void logAuditEvent({
+        action: flaggedCitations.length > 0 ? 'chat.copy_flagged' : 'chat.copy_clean',
+        targetType: 'chat_message',
+        targetId: message.id,
+        metadata: {
+          citations_total: message.citations?.length ?? 0,
+          citations_flagged: flaggedCitations.length,
+          flagged_citations: flaggedCitations.map((c) => c.citation),
+          disclaimer_included: withDisclaimer,
+        },
+      });
     },
-    [message.content, flaggedCitations, writeToClipboard]
+    [message.content, message.id, message.citations, flaggedCitations, writeToClipboard]
   );
 
   const handleCopy = useCallback(async () => {

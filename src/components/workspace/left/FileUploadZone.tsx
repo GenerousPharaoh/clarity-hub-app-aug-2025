@@ -20,6 +20,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
   const { isDemoMode } = useAuth();
   const processOnUpload = useAppStore((s) => s.processOnUpload);
   const aiEnabled = useAppStore((s) => s.aiEnabled);
+  const requestAIProcessingConsent = useAppStore((s) => s.requestAIProcessingConsent);
   const [uploadingFile, setUploadingFile] = useState<string | null>(null);
 
   const onDrop = useCallback(
@@ -29,6 +30,18 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         toast.error(`Rejected: ${rejection.file.name}`, {
           description: reasons,
         });
+      }
+
+      if (acceptedFiles.length === 0) return;
+
+      // First-run gate: before we send any file to third-party sub-processors,
+      // require explicit acknowledgment. No-op on subsequent uploads.
+      if (!isDemoMode) {
+        const consented = await requestAIProcessingConsent();
+        if (!consented) {
+          toast.info('Upload cancelled — consent required for AI processing.');
+          return;
+        }
       }
 
       for (const file of acceptedFiles) {
@@ -68,7 +81,7 @@ export function FileUploadZone({ projectId }: FileUploadZoneProps) {
         }
       }
     },
-    [processFile, processOnUpload, aiEnabled, projectId, uploadFile]
+    [processFile, processOnUpload, aiEnabled, projectId, uploadFile, isDemoMode, requestAIProcessingConsent]
   );
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({

@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { Header } from './Header';
 import { CommandPalette } from '@/components/shared/CommandPalette';
 import { ConsentBanner } from '@/components/shared/ConsentBanner';
+import { AIProcessingConsentDialog } from '@/components/shared/AIProcessingConsentDialog';
 import { useProjects } from '@/hooks/useProjects';
 import useAppStore from '@/store';
 
@@ -46,6 +47,7 @@ export function AppShell() {
         onClose={() => setShowCommandPalette(false)}
       />
       <ConsentBanner />
+      <AIProcessingConsentDialog />
     </div>
   );
 }

@@ -655,6 +655,9 @@ export function SettingsPage() {
               </button>
             </div>
 
+            {/* Cross-border consent state */}
+            <AIProcessingConsentControl />
+
             {/* Cross-border notice */}
             <p className="text-xs leading-relaxed text-surface-500 dark:text-surface-400">
               Your data may be processed outside Canada. By using AI features,
@@ -772,6 +775,47 @@ export function SettingsPage() {
           </div>
         </section>
 
+        {/* ── Legal & Trust ─────────────────────────────────── */}
+        <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
+          <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
+            <h2 className="font-heading text-base font-bold text-surface-900 dark:text-surface-100">
+              Legal &amp; Trust
+            </h2>
+            <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+              Terms, privacy, sub-processor list, and the firm-facing Data
+              Processing Addendum. All documents read from the same source
+              of truth in the repository.
+            </p>
+          </div>
+
+          <div className="grid gap-2 p-4 sm:grid-cols-2">
+            {[
+              { slug: 'trust', label: 'Trust statement', blurb: 'Where data lives, sub-processors, retention' },
+              { slug: 'privacy', label: 'Privacy notice', blurb: 'PIPEDA-aligned personal-information handling' },
+              { slug: 'terms', label: 'Terms of Service', blurb: 'The contract that governs use' },
+              { slug: 'dpa', label: 'Data Processing Addendum', blurb: 'For firm + enterprise customers' },
+              { slug: 'security', label: 'Security policy', blurb: 'Controls in place and vulnerability disclosure' },
+              { slug: 'sla', label: 'Service levels', blurb: 'Availability and support commitments' },
+            ].map((doc) => (
+              <a
+                key={doc.slug}
+                href={`/legal/${doc.slug}`}
+                className="group flex items-start gap-2 rounded-xl border border-surface-200/80 bg-surface-50/60 px-3 py-2.5 text-left transition-all hover:-translate-y-0.5 hover:border-primary-200 hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 focus-visible:ring-offset-2 dark:border-surface-700 dark:bg-surface-950/40 dark:hover:border-primary-800/50 dark:hover:bg-surface-800 dark:focus-visible:ring-offset-surface-900"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-surface-800 dark:text-surface-100">
+                    {doc.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-surface-500 dark:text-surface-400">
+                    {doc.blurb}
+                  </p>
+                </div>
+                <ExternalLink className="mt-1 h-3.5 w-3.5 shrink-0 text-surface-300 transition-colors group-hover:text-primary-500 dark:text-surface-600 dark:group-hover:text-primary-400" />
+              </a>
+            ))}
+          </div>
+        </section>
+
         {/* ── About ─────────────────────────────────────────── */}
         <section className="overflow-hidden rounded-2xl border border-surface-200 bg-white dark:border-surface-700 dark:bg-surface-800">
           <div className="border-b border-surface-200 px-6 py-4 dark:border-surface-700">
@@ -860,5 +904,37 @@ export function SettingsPage() {
         onCancel={() => setShowDeleteConfirm(false)}
       />
     </FadeIn>
+  );
+}
+
+/**
+ * Surfaces the user's AI-processing consent status and lets them revoke it.
+ * Revoking means the next upload will re-prompt the consent dialog.
+ */
+function AIProcessingConsentControl() {
+  const consent = useAppStore((s) => s.aiProcessingConsent);
+  const reset = useAppStore((s) => s.resetAIProcessingConsent);
+
+  return (
+    <div className="flex items-start justify-between gap-4 rounded-lg border border-surface-200 bg-surface-50 p-4 dark:border-surface-700 dark:bg-surface-800/60">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-surface-700 dark:text-surface-300">
+          Third-party AI processing consent
+        </p>
+        <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
+          {consent
+            ? `Acknowledged on ${new Date(consent.acceptedAt).toLocaleDateString()}. Revoke to re-prompt before the next upload.`
+            : 'Not yet acknowledged. You will be prompted before your first file upload.'}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={reset}
+        disabled={!consent}
+        className="shrink-0 rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-xs font-medium text-surface-600 shadow-sm transition-all hover:-translate-y-0.5 hover:text-surface-800 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-400/40 focus-visible:ring-offset-2 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm dark:border-surface-700 dark:bg-surface-900 dark:text-surface-300 dark:hover:text-surface-100 dark:focus-visible:ring-offset-surface-900"
+      >
+        Revoke
+      </button>
+    </div>
   );
 }

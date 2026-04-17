@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import useAppStore from '@/store';
 import type { FileRecord } from '@/types';
 import { uploadFile as uploadToStorage, deleteFile as deleteFromStorage } from '@/services/storageService';
+import { logAuditEvent } from '@/services/auditLog';
 import { deleteDemoFile, getDemoFiles } from '@/lib/demo';
 
 export const FILES_KEY = 'files';
@@ -116,6 +117,13 @@ export function useUploadFile() {
       queryClient.invalidateQueries({
         queryKey: filesQueryKey(fileRecord.project_id),
       });
+      void logAuditEvent({
+        action: 'file.upload',
+        projectId: fileRecord.project_id,
+        targetType: 'file',
+        targetId: fileRecord.id,
+        metadata: { name: fileRecord.name, file_type: fileRecord.file_type },
+      });
     },
   });
 }
@@ -181,6 +189,15 @@ export function useDeleteFile() {
     onSettled: (_data, _error, file) => {
       queryClient.invalidateQueries({
         queryKey: filesQueryKey(file.project_id),
+      });
+    },
+    onSuccess: (file) => {
+      void logAuditEvent({
+        action: 'file.delete',
+        projectId: file.project_id,
+        targetType: 'file',
+        targetId: file.id,
+        metadata: { name: file.name },
       });
     },
   });

@@ -766,6 +766,7 @@ function AnchorCard({
 /** Compact single-line upload bar replacing the old MatterStageCard + QuickActions */
 function UploadBar() {
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const requestAIProcessingConsent = useAppStore((s) => s.requestAIProcessingConsent);
   const { isDemoMode } = useAuth();
   const uploadFile = useUploadFile();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -774,6 +775,16 @@ function UploadBar() {
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
       if (!files || !selectedProjectId) return;
+
+      // First-run gate: same consent flow as the drag-drop zone.
+      if (!isDemoMode) {
+        const consented = await requestAIProcessingConsent();
+        if (!consented) {
+          toast.info('Upload cancelled — consent required for AI processing.');
+          e.target.value = '';
+          return;
+        }
+      }
 
       for (const file of Array.from(files)) {
         if (file.size > MAX_FILE_SIZE) {
@@ -789,7 +800,7 @@ function UploadBar() {
       }
       e.target.value = '';
     },
-    [selectedProjectId, uploadFile]
+    [selectedProjectId, uploadFile, isDemoMode, requestAIProcessingConsent]
   );
 
   const acceptStr = Object.keys(ACCEPTED_FILE_TYPES).join(',');

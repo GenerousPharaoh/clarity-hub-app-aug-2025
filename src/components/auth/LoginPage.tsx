@@ -196,6 +196,26 @@ export function LoginPage() {
               <CheckItem>Exhibit book compilation with table of contents</CheckItem>
             </div>
           </div>
+
+          {/* Legal footer — visible even before sign-in so a firm evaluator
+              can read the terms and trust statement without creating an account */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-surface-400 dark:text-surface-500">
+            <a href="/legal/trust" className="rounded-sm transition-colors hover:text-surface-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:ring-offset-2 dark:hover:text-surface-200">
+              Trust
+            </a>
+            <span aria-hidden="true" className="text-surface-300 dark:text-surface-700">&middot;</span>
+            <a href="/legal/privacy" className="rounded-sm transition-colors hover:text-surface-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:ring-offset-2 dark:hover:text-surface-200">
+              Privacy
+            </a>
+            <span aria-hidden="true" className="text-surface-300 dark:text-surface-700">&middot;</span>
+            <a href="/legal/terms" className="rounded-sm transition-colors hover:text-surface-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:ring-offset-2 dark:hover:text-surface-200">
+              Terms
+            </a>
+            <span aria-hidden="true" className="text-surface-300 dark:text-surface-700">&middot;</span>
+            <a href="/legal/security" className="rounded-sm transition-colors hover:text-surface-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:ring-offset-2 dark:hover:text-surface-200">
+              Security
+            </a>
+          </div>
         </div>
       </div>
     </div>

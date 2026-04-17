@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import useAppStore from '@/store';
 import type { Project } from '@/types';
 import type { TablesInsert } from '@/types/database';
+import { logAuditEvent } from '@/services/auditLog';
 import {
   createDemoProject,
   deleteDemoProject,
@@ -126,6 +127,13 @@ export function useCreateProject() {
     onSuccess: (project) => {
       addProject(project);
       queryClient.invalidateQueries({ queryKey: PROJECTS_KEY });
+      void logAuditEvent({
+        action: 'project.create',
+        projectId: project.id,
+        targetType: 'project',
+        targetId: project.id,
+        metadata: { name: project.name },
+      });
     },
   });
 }
@@ -246,6 +254,12 @@ export function useDeleteProject() {
     onSuccess: (projectId) => {
       removeProject(projectId);
       queryClient.invalidateQueries({ queryKey: PROJECTS_KEY });
+      void logAuditEvent({
+        action: 'project.delete',
+        projectId,
+        targetType: 'project',
+        targetId: projectId,
+      });
     },
   });
 }

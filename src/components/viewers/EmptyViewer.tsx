@@ -52,7 +52,7 @@ export function EmptyViewer({ fileName, filePath }: EmptyViewerProps) {
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-surface-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-surface-700 disabled:opacity-50 dark:bg-white dark:text-surface-900 dark:hover:bg-surface-200"
+          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-primary-500/20 transition-all hover:bg-primary-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 focus-visible:ring-offset-2 active:scale-[0.98] disabled:opacity-50 disabled:hover:bg-primary-600 disabled:hover:shadow-sm dark:bg-primary-500 dark:hover:bg-primary-400 dark:focus-visible:ring-offset-surface-900"
         >
           <Download className="h-3.5 w-3.5" />
           {downloading ? 'Downloading...' : 'Download file'}

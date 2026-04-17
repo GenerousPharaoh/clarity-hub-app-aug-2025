@@ -166,7 +166,7 @@ export function TipTapEditor({
 
         {/* Paper canvas */}
         <div className="mx-auto w-full max-w-[1080px] px-3 py-4 md:px-6 md:py-8">
-          <div className="relative overflow-hidden rounded-2xl border border-surface-200/90 bg-white shadow-[0_24px_56px_-36px_rgba(15,23,42,0.5)] ring-1 ring-white/80 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/45">
+          <div className="relative overflow-hidden rounded-2xl border border-surface-200/90 bg-white shadow-[0_24px_56px_-36px_rgba(15,23,42,0.5)] ring-1 ring-white/80 transition-shadow focus-within:border-accent-300/80 focus-within:shadow-[0_32px_64px_-32px_rgba(165,116,63,0.25)] focus-within:ring-accent-200/60 dark:border-surface-700/80 dark:bg-surface-900 dark:ring-surface-800/45 dark:focus-within:border-accent-500/60 dark:focus-within:ring-accent-800/40">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-primary-50/60 to-transparent dark:from-primary-900/20" />
             <div className="h-4 md:h-5" />
 
@@ -188,17 +188,18 @@ export function TipTapEditor({
         </div>
         <div
           className={cn(
-            'flex items-center gap-1.5 text-xs font-medium tabular-nums transition-all duration-300',
+            'flex items-center gap-1.5 text-xs font-medium tabular-nums transition-all duration-300 ease-out',
             saveStatus === 'idle' && 'text-surface-300 dark:text-surface-600',
             saveStatus === 'saving' && 'text-surface-400 dark:text-surface-500',
             saveStatus === 'saved' && 'text-green-500 dark:text-green-400',
             saveStatus === 'error' && 'text-red-500 dark:text-red-400'
           )}
+          aria-live="polite"
         >
           {saveStatus === 'idle' && <span className="h-1.5 w-1.5 rounded-full bg-surface-300 dark:bg-surface-600" />}
           {saveStatus === 'saving' && <Loader2 className="h-3 w-3 animate-spin" />}
-          {saveStatus === 'saved' && <Check className="h-3 w-3" />}
-          {saveStatus === 'error' && <AlertCircle className="h-3 w-3" />}
+          {saveStatus === 'saved' && <Check className="h-3 w-3 animate-in zoom-in-50 duration-200" />}
+          {saveStatus === 'error' && <AlertCircle className="h-3 w-3 animate-in zoom-in-50 duration-200" />}
           {saveStatus === 'idle' && 'Saved'}
           {saveStatus === 'saving' && 'Saving...'}
           {saveStatus === 'saved' && 'Saved'}

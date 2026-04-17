@@ -43,8 +43,11 @@ export function Header() {
     >
       {/* Left */}
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-        <Link to="/" className="group flex shrink-0 items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-surface-900 transition-all group-hover:scale-105 sm:h-8 sm:w-8 sm:rounded-lg dark:bg-white">
+        <Link
+          to="/"
+          className="group flex shrink-0 items-center gap-2.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-500/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-950"
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-surface-900 transition-all group-hover:scale-105 group-active:scale-95 sm:h-8 sm:w-8 sm:rounded-lg dark:bg-white">
             <Scale className="h-3.5 w-3.5 text-white sm:h-4 sm:w-4 dark:text-surface-900" />
           </div>
           {!isWorkspace && (
@@ -67,8 +70,9 @@ export function Header() {
               to="/"
               className={cn(
                 'flex shrink-0 items-center gap-1 rounded-md px-2 py-2 sm:px-1.5 sm:py-1',
-                'font-medium text-surface-500',
+                'font-medium text-surface-500 outline-none',
                 'transition-all hover:bg-surface-100 hover:text-surface-600',
+                'focus-visible:ring-2 focus-visible:ring-primary-500/40 focus-visible:ring-offset-1',
                 'dark:hover:bg-surface-800 dark:hover:text-surface-300'
               )}
             >

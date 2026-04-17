@@ -137,9 +137,10 @@ export function LoginPage() {
                 'shadow-lg shadow-surface-950/10 transition-all duration-200',
                 'hover:shadow-xl hover:shadow-surface-950/20 hover:-translate-y-0.5',
                 'active:scale-[0.98] active:shadow-md',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-950/80 focus-visible:ring-offset-2',
                 'disabled:opacity-60 disabled:cursor-not-allowed',
                 'dark:bg-white dark:text-surface-950 dark:shadow-white/5',
-                'dark:hover:shadow-white/10'
+                'dark:hover:shadow-white/10 dark:focus-visible:ring-white/80 dark:focus-visible:ring-offset-surface-900'
               )}
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -161,9 +162,10 @@ export function LoginPage() {
                 'transition-all duration-200',
                 'hover:border-accent-400 hover:text-accent-700 hover:bg-accent-50/50',
                 'active:scale-[0.98]',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60 focus-visible:ring-offset-2',
                 'disabled:cursor-not-allowed disabled:opacity-60',
                 'dark:border-surface-700 dark:text-surface-300',
-                'dark:hover:border-accent-500 dark:hover:text-accent-300'
+                'dark:hover:border-accent-500 dark:hover:text-accent-300 dark:focus-visible:ring-offset-surface-900'
               )}
             >
               {enteringDemo ? (

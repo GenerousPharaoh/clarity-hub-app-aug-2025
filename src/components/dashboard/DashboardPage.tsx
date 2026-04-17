@@ -164,7 +164,7 @@ export function DashboardPage() {
           </div>
           <button
             onClick={() => setDialogOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-md dark:bg-primary-500 dark:hover:bg-primary-400"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary-500/20 transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.98] dark:bg-primary-500 dark:hover:bg-primary-400 dark:focus-visible:ring-offset-surface-950"
           >
             <Plus className="h-4 w-4" />
             New matter
@@ -183,12 +183,12 @@ export function DashboardPage() {
                 className="w-52 rounded-xl border border-surface-200 bg-white py-2.5 pl-9 pr-3 text-sm text-surface-700 outline-none transition-all focus:border-accent-500 focus:ring-2 focus:ring-accent-500/15 focus:w-64 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-100 dark:focus:border-accent-400 dark:focus:ring-accent-400/20"
               />
             </div>
-            <div className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-surface-50 px-2.5 py-2 text-xs text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400">
+            <div className="inline-flex items-center gap-1.5 rounded-xl border border-surface-200 bg-surface-50 px-2.5 py-2 text-xs text-surface-500 transition-colors hover:border-surface-300 hover:bg-white focus-within:border-accent-400 focus-within:ring-2 focus-within:ring-accent-500/15 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400 dark:hover:border-surface-600 dark:hover:bg-surface-700/60 dark:focus-within:border-accent-500 dark:focus-within:ring-accent-400/20">
               <ArrowUpDown className="h-3.5 w-3.5" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'recent' | 'name' | 'files')}
-                className="bg-transparent font-medium outline-none dark:text-surface-300 [&_option]:dark:bg-surface-800 [&_option]:dark:text-surface-200"
+                className="cursor-pointer bg-transparent font-medium outline-none dark:text-surface-300 [&_option]:dark:bg-surface-800 [&_option]:dark:text-surface-200"
               >
                 <option value="recent">Recent</option>
                 <option value="name">Name</option>
@@ -239,7 +239,7 @@ export function DashboardPage() {
                   <p className="text-xs text-surface-400 mt-1 mb-3">A matter is a case or legal issue you&apos;re working on.</p>
                   <button
                     onClick={() => setDialogOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-primary-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary-500/20 transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-xl dark:bg-primary-500 dark:hover:bg-primary-400"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-primary-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary-500/20 transition-all hover:-translate-y-0.5 hover:bg-primary-700 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.98] dark:bg-primary-500 dark:hover:bg-primary-400 dark:focus-visible:ring-offset-surface-950"
                   >
                     <Plus className="h-4 w-4" />
                     New matter

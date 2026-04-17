@@ -58,21 +58,35 @@ const DEEP_REASONING_SIGNALS = [
 // ============================================================
 
 /**
+ * Patterns for every kind of Canadian legal citation the app recognizes.
+ * Kept in sync with api/canlii-verify.ts so a citation the verifier can
+ * handle is also the citation the extractor surfaces for verification.
+ *
+ * Order matters for inline chip wrapping: more specific patterns first so
+ * a neutral cite isn't chewed by a broader match.
+ */
+export const CITATION_PATTERNS: RegExp[] = [
+  // Neutral citations: "2024 ONCA 123", "2024 HRTO 456", "2024 ONSCDC 12"
+  /\d{4}\s+(?:SCC|ONCA|ONSC|ONSCDC|HRTO|BCCA|ABCA|CanLII)\s+\d+/g,
+  // Case reports (older format): "[2024] 1 SCR 123", "[2024] OJ No 456"
+  /\[\d{4}\]\s+\d+\s+(?:SCR|OR|OJ)\s+(?:No\s+)?\d+/g,
+  // Statute citations: "ESA, 2000, S.O. 2000, c. 41", "R.S.O. 1990, c. O.37"
+  /(?:R\.S\.O\.|S\.O\.|R\.S\.C\.)\s+\d{4},\s+c\.\s+[\w.-]+/g,
+  // Ontario regulations: "O. Reg. 285/01"
+  /O\.\s*Reg\.\s*\d+\/\d+/g,
+];
+
+/**
  * Extract Canadian legal citations from AI response text.
  * Shared by both GPT and Gemini code paths.
  */
 export function extractCitations(text: string): string[] {
   const citations: string[] = [];
 
-  const patterns = [
-    /\d{4}\s+(?:SCC|ONCA|ONSC|BCCA|ABCA|CanLII)\s+\d+/g,
-    /\[\d{4}\]\s+\d+\s+(?:SCR|OR|OJ)\s+(?:No\s+)?\d+/g,
-    /(?:R\.S\.O\.|S\.O\.|R\.S\.C\.)\s+\d{4},\s+c\.\s+[\w.-]+/g,
-    /O\.\s*Reg\.\s*\d+\/\d+/g,
-  ];
-
-  for (const pattern of patterns) {
-    const matches = text.match(pattern);
+  for (const pattern of CITATION_PATTERNS) {
+    // RegExp with /g is stateful across calls; use a fresh RegExp per invocation.
+    const fresh = new RegExp(pattern.source, pattern.flags);
+    const matches = text.match(fresh);
     if (matches) citations.push(...matches);
   }
 

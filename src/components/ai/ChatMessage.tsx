@@ -47,15 +47,8 @@ import {
 import { ChatCitation, SourcesList } from './ChatCitation';
 import { FollowUpSuggestions } from './FollowUpSuggestions';
 import { useCitationVerification, type CitationVerification } from '@/hooks/useCitationVerification';
+import { CITATION_PATTERNS } from '@/services/aiRouter';
 import type { ChatMessage as ChatMessageType, ChatSource, WebSource } from '@/types';
-
-/** Pattern for neutral legal citations that CanLII can resolve — must match api/canlii-verify.ts */
-const NEUTRAL_CITE_PATTERN = /(\d{4})\s+(SCC|ONCA|ONSC|HRTO|CanLII|BCCA|ABCA)\s+(\d+)/gi;
-
-/** Statuses that should block "copy to draft" until the user explicitly acknowledges. */
-function isFlaggedStatus(status: CitationVerification['status']): boolean {
-  return status === 'not_found' || status === 'unverified' || status === 'error';
-}
 
 function normalizeCite(s: string): string {
   return s.replace(/\s+/g, ' ').trim().toLowerCase();
@@ -175,6 +168,11 @@ function LegalCitationChip({
 
 /**
  * Wrap legal citation patterns in a text segment with LegalCitationChip.
+ * Runs every citation pattern the extractor knows about (neutral cites,
+ * case reports, statutes, regulations) so nothing in the text slips past
+ * the visual verification badge — not even citations the server-side
+ * extractor missed.
+ *
  * Runs AFTER the [Source N] / [Web N] wrapper so it never touches those tokens.
  */
 function wrapLegalCitations(
@@ -182,33 +180,48 @@ function wrapLegalCitations(
   verifications: CitationVerification[] | undefined,
   isFetching: boolean
 ): ReactNode[] {
-  const parts: ReactNode[] = [];
-  const regex = new RegExp(NEUTRAL_CITE_PATTERN.source, 'gi');
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
+  // Collect every match across every citation pattern, then sort by offset so
+  // non-overlapping regions can be stitched together in one pass.
+  type Match = { start: number; end: number; text: string };
+  const matches: Match[] = [];
 
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index));
+  for (const pattern of CITATION_PATTERNS) {
+    const fresh = new RegExp(pattern.source, pattern.flags);
+    let m: RegExpExecArray | null;
+    while ((m = fresh.exec(text)) !== null) {
+      matches.push({ start: m.index, end: m.index + m[0].length, text: m[0] });
     }
-    const citation = match[0];
-    const verification = findVerification(citation, verifications);
+  }
+
+  if (matches.length === 0) return [text];
+
+  matches.sort((a, b) => a.start - b.start);
+
+  // Drop overlaps — if two patterns both claim the same span, keep the first.
+  const deduped: Match[] = [];
+  for (const m of matches) {
+    const last = deduped[deduped.length - 1];
+    if (!last || m.start >= last.end) deduped.push(m);
+  }
+
+  const parts: ReactNode[] = [];
+  let cursor = 0;
+  for (const m of deduped) {
+    if (m.start > cursor) parts.push(text.slice(cursor, m.start));
+    const verification = findVerification(m.text, verifications);
     parts.push(
       <LegalCitationChip
-        key={`cite-${match.index}-${citation}`}
-        citation={citation}
+        key={`cite-${m.start}-${m.text}`}
+        citation={m.text}
         verification={verification}
         isFetching={isFetching}
       />
     );
-    lastIndex = match.index + citation.length;
+    cursor = m.end;
   }
+  if (cursor < text.length) parts.push(text.slice(cursor));
 
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex));
-  }
-
-  return parts.length > 0 ? parts : [text];
+  return parts;
 }
 
 /**
@@ -455,9 +468,24 @@ function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
 
 /**
  * A collapsible section with a small toggle button and bordered content area.
+ * When the section contains legal citations, they're wrapped with verification
+ * chips the same way the main answer is — so the "Show reasoning" and "Sources
+ * cited" expanders never hide unverified citations behind a collapsed panel.
  */
-function CollapsibleSection({ label, content }: { label: string; content: string }) {
+function CollapsibleSection({
+  label,
+  content,
+  verifications,
+  isVerifying,
+}: {
+  label: string;
+  content: string;
+  verifications?: CitationVerification[];
+  isVerifying?: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
+
+  const hasCitations = (verifications && verifications.length > 0) || !!isVerifying;
 
   return (
     <div className="mt-2">
@@ -477,7 +505,25 @@ function CollapsibleSection({ label, content }: { label: string; content: string
       {expanded && (
         <div className="mt-1 rounded-lg border border-surface-100 dark:border-surface-700 px-3 py-2">
           <div className="prose-chat min-w-0 text-[13px] leading-relaxed break-words text-surface-700 dark:text-surface-200">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={
+                hasCitations
+                  ? {
+                      p: ({ children }) => (
+                        <p className="mb-2 last:mb-0">
+                          {processChildrenForCitations(children, [], undefined, verifications, isVerifying)}
+                        </p>
+                      ),
+                      li: ({ children }) => (
+                        <li className="text-[13px]">
+                          {processChildrenForCitations(children, [], undefined, verifications, isVerifying)}
+                        </li>
+                      ),
+                    }
+                  : undefined
+              }
+            >
               {content}
             </ReactMarkdown>
           </div>
@@ -517,16 +563,57 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
   );
 
   // Async citation verification against CanLII
-  const { data: verificationResults, isFetching: isVerifying } = useCitationVerification(
-    message.id,
-    message.citations ?? []
-  );
+  const {
+    data: verificationResults,
+    isFetching: isVerifying,
+    isError: verificationErrored,
+    refetch: retryVerification,
+  } = useCitationVerification(message.id, message.citations ?? []);
 
   const hasCitationsToCheck = (message.citations?.length ?? 0) > 0;
-  const flaggedCitations = useMemo(
-    () => (verificationResults ?? []).filter((r) => isFlaggedStatus(r.status)),
-    [verificationResults]
-  );
+
+  // A citation is flagged unless CanLII has positively verified it. That
+  // definition catches three failure modes the old code missed:
+  //   (1) verification returned status: 'not_found' / 'unverified' / 'error'
+  //   (2) the citation exceeded the 15-cite batch cap and never reached the
+  //       verifier at all — message.citations contains it, verifications does not
+  //   (3) the verifier couldn't parse the citation format
+  // Anything that isn't a green check is treated as "needs human review."
+  const flaggedCitations = useMemo<CitationVerification[]>(() => {
+    if (!message.citations || message.citations.length === 0) return [];
+
+    // Fail-closed: if the verifier itself errored (CanLII down, network blip,
+    // rate limit), every citation is flagged until retry succeeds.
+    if (verificationErrored && !verificationResults) {
+      return message.citations.map((c) => ({
+        citation: c,
+        status: 'error' as const,
+        message: 'Verification service unavailable',
+      }));
+    }
+
+    if (!verificationResults) return [];
+
+    const verifiedKeys = new Set(
+      verificationResults
+        .filter((r) => r.status === 'verified')
+        .map((r) => normalizeCite(r.citation))
+    );
+    const resultsByKey = new Map(
+      verificationResults.map((r) => [normalizeCite(r.citation), r])
+    );
+    return message.citations
+      .filter((c) => !verifiedKeys.has(normalizeCite(c)))
+      .map(
+        (c) =>
+          resultsByKey.get(normalizeCite(c)) ?? {
+            citation: c,
+            status: 'unverified' as const,
+            message: 'Not auto-checked (CanLII batch cap reached)',
+          }
+      );
+  }, [message.citations, verificationResults, verificationErrored]);
+
   const verifiedCount = (verificationResults ?? []).filter((r) => r.status === 'verified').length;
   const showVerifyingBanner = hasCitationsToCheck && isVerifying && !verificationResults;
   const showFlaggedBanner = !isVerifying && flaggedCitations.length > 0;
@@ -709,6 +796,33 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                   {(message.citations?.length ?? 0) === 1 ? '' : 's'} against CanLII — don&apos;t
                   copy this into a draft yet.
                 </span>
+              </div>
+            )}
+
+            {/* Verification banner — verifier itself errored (network / CanLII down).
+                Fail-closed: treat unknown as unsafe and offer a retry. */}
+            {!isError && hasCitationsToCheck && verificationErrored && !isVerifying && (
+              <div
+                role="alert"
+                className="mb-2 flex items-start gap-2 rounded-lg border border-red-200/80 bg-red-50 px-2.5 py-1.5 text-xs text-red-700 dark:border-red-800/60 dark:bg-red-950/30 dark:text-red-300"
+              >
+                <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold leading-snug">
+                    Citation check unavailable.
+                  </p>
+                  <p className="mt-0.5 leading-snug text-red-600/90 dark:text-red-300/90">
+                    CanLII lookup failed. Every citation in this response is unverified —
+                    check each one manually before use.
+                  </p>
+                  <button
+                    onClick={() => retryVerification()}
+                    className="mt-1 inline-flex items-center gap-1 rounded-md bg-white px-1.5 py-0.5 text-xs font-medium text-red-700 shadow-sm transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40 dark:bg-red-950/50 dark:text-red-200 dark:hover:bg-red-900/40"
+                  >
+                    <RotateCcw className="h-2.5 w-2.5" />
+                    Retry
+                  </button>
+                </div>
               </div>
             )}
 
@@ -896,10 +1010,20 @@ export const ChatMessageComponent = memo(function ChatMessageComponent({
                   <ConfidenceBadge level={structured.confidence} />
                 )}
                 {structured.reasoning && (
-                  <CollapsibleSection label="Show reasoning" content={structured.reasoning} />
+                  <CollapsibleSection
+                    label="Show reasoning"
+                    content={structured.reasoning}
+                    verifications={verificationResults}
+                    isVerifying={isVerifying}
+                  />
                 )}
                 {structured.sources && (
-                  <CollapsibleSection label="Sources cited" content={structured.sources} />
+                  <CollapsibleSection
+                    label="Sources cited"
+                    content={structured.sources}
+                    verifications={verificationResults}
+                    isVerifying={isVerifying}
+                  />
                 )}
               </div>
             )}

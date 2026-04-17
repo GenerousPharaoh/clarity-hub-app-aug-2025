@@ -124,8 +124,10 @@ function getServiceClient() {
 
 function extractCitations(text: string): string[] {
   const citations: string[] = [];
+  // Must stay in sync with CITATION_PATTERNS in src/services/aiRouter.ts —
+  // any pattern CanLII can verify should be extractable by the server too.
   const patterns = [
-    /\d{4}\s+(?:SCC|ONCA|ONSC|BCCA|ABCA|CanLII)\s+\d+/g,
+    /\d{4}\s+(?:SCC|ONCA|ONSC|ONSCDC|HRTO|BCCA|ABCA|CanLII)\s+\d+/g,
     /\[\d{4}\]\s+\d+\s+(?:SCR|OR|OJ)\s+(?:No\s+)?\d+/g,
     /(?:R\.S\.O\.|S\.O\.|R\.S\.C\.)\s+\d{4},\s+c\.\s+[\w.-]+/g,
     /O\.\s*Reg\.\s*\d+\/\d+/g,

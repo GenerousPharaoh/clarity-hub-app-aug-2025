@@ -363,6 +363,9 @@ export type Database = {
       }
       projects: {
         Row: {
+          case_analysis: string | null
+          case_analysis_at: string | null
+          case_analysis_file_count: number | null
           created_at: string | null
           description: string | null
           goal_type: string | null
@@ -372,6 +375,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          case_analysis?: string | null
+          case_analysis_at?: string | null
+          case_analysis_file_count?: number | null
           created_at?: string | null
           description?: string | null
           goal_type?: string | null
@@ -381,6 +387,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          case_analysis?: string | null
+          case_analysis_at?: string | null
+          case_analysis_file_count?: number | null
           created_at?: string | null
           description?: string | null
           goal_type?: string | null

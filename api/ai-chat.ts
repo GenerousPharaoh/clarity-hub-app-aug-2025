@@ -138,6 +138,37 @@ function extractCitations(text: string): string[] {
 }
 
 // ============================================================
+// Shared system prompt — used by both GPT and Gemini so routing
+// doesn't change answer quality.
+// ============================================================
+
+const LEGAL_SYSTEM_PROMPT = `You are a legal research assistant specializing in Ontario employment law. You have knowledge of the Employment Standards Act, 2000, the Human Rights Code, the common law of wrongful dismissal, and Ontario Rules of Civil Procedure.
+
+CITATION RULES:
+- Always cite cases with neutral citations (e.g., 2024 ONSC 1234).
+- Never fabricate case citations. If you don't know a case, say so.
+- ONLY cite cases and legislation that exist in the provided legal context. If the context doesn't contain relevant authority, say so explicitly.
+- Distinguish between binding authority (SCC, ONCA) and persuasive authority (trial decisions, other provinces).
+- Always identify the current status of principles (active, modified, overruled).
+
+TERMINATION ANALYSIS:
+- When analyzing termination, consider: Bardal factors (age, length of service, character of employment, availability of similar employment), ESA minimums, any contractual termination clause and its enforceability after Waksdale.
+
+COSTS:
+- When discussing costs, reference the Ontario costs grid and partial/substantial indemnity scales.
+
+GENERAL RULES:
+- When uncertain, clearly state "I am not certain about this" rather than guessing.
+- Flag any areas where the law is unsettled or evolving.
+
+When analyzing legal issues:
+1. Identify the applicable legal framework (statute + common law)
+2. State the governing legal test or principle with its source
+3. Apply the test to the specific facts
+4. Note any counterarguments or risks
+5. Provide a practical recommendation`;
+
+// ============================================================
 // Effort configuration (mirrors client-side EFFORT_CONFIG)
 // ============================================================
 
@@ -169,35 +200,9 @@ async function callGPT(params: {
   const openai = getOpenAI();
   if (!openai) throw new Error('OpenAI not configured server-side');
 
-  const systemPrompt = `You are a legal research assistant specializing in Ontario employment law. You have knowledge of the Employment Standards Act, 2000, the Human Rights Code, the common law of wrongful dismissal, and Ontario Rules of Civil Procedure.
-
-CITATION RULES:
-- Always cite cases with neutral citations (e.g., 2024 ONSC 1234).
-- Never fabricate case citations. If you don't know a case, say so.
-- ONLY cite cases and legislation that exist in the provided legal context. If the context doesn't contain relevant authority, say so explicitly.
-- Distinguish between binding authority (SCC, ONCA) and persuasive authority (trial decisions, other provinces).
-- Always identify the current status of principles (active, modified, overruled).
-
-TERMINATION ANALYSIS:
-- When analyzing termination, consider: Bardal factors (age, length of service, character of employment, availability of similar employment), ESA minimums, any contractual termination clause and its enforceability after Waksdale.
-
-COSTS:
-- When discussing costs, reference the Ontario costs grid and partial/substantial indemnity scales.
-
-GENERAL RULES:
-- When uncertain, clearly state "I am not certain about this" rather than guessing.
-- Flag any areas where the law is unsettled or evolving.
-
-When analyzing legal issues:
-1. Identify the applicable legal framework (statute + common law)
-2. State the governing legal test or principle with its source
-3. Apply the test to the specific facts
-4. Note any counterarguments or risks
-5. Provide a practical recommendation`;
-
   const fullSystemPrompt = params.responseFormatInstruction
-    ? systemPrompt + '\n\n' + params.responseFormatInstruction
-    : systemPrompt;
+    ? LEGAL_SYSTEM_PROMPT + '\n\n' + params.responseFormatInstruction
+    : LEGAL_SYSTEM_PROMPT;
 
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: 'system', content: fullSystemPrompt },
@@ -245,51 +250,44 @@ async function callGemini(params: {
   maxOutputTokens?: number;
   responseFormatInstruction?: string;
 }): Promise<{ content: string; citations: string[] }> {
-  const model = getGeminiModel();
-  if (!model) throw new Error('Gemini not configured server-side');
+  const genAIKey = process.env.GEMINI_API_KEY;
+  if (!genAIKey) throw new Error('Gemini not configured server-side');
+
+  // Build a model with systemInstruction so Gemini gets the full system prompt
+  // in its canonical slot — not buried inside a user turn.
+  const fullSystemInstruction = params.responseFormatInstruction
+    ? LEGAL_SYSTEM_PROMPT + '\n\n' + params.responseFormatInstruction
+    : LEGAL_SYSTEM_PROMPT;
+
+  const genAI = new GoogleGenerativeAI(genAIKey);
+  const modelWithSystem = genAI.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    systemInstruction: fullSystemInstruction,
+    generationConfig: {
+      temperature: 0.3,
+      topK: 40,
+      topP: 0.9,
+      maxOutputTokens: params.maxOutputTokens ?? 4096,
+    },
+  });
 
   const history = (params.conversationHistory ?? []).slice(-10).map((msg) => ({
     role: msg.role === 'user' ? 'user' : ('model' as const),
     parts: [{ text: msg.content }],
   }));
 
-  const chat = model.startChat({
-    history,
-    generationConfig: {
-      maxOutputTokens: params.maxOutputTokens ?? 4096,
-      temperature: 0.3,
-    },
-  });
+  const chat = modelWithSystem.startChat({ history });
 
-  const contextParts: string[] = [];
-  if (params.legalContext) contextParts.push(params.legalContext);
-  if (params.caseContext) contextParts.push(params.caseContext);
+  let userContent = '';
+  if (params.legalContext) {
+    userContent += `--- LEGAL KNOWLEDGE BASE ---\n${params.legalContext}\n\n`;
+  }
+  if (params.caseContext) {
+    userContent += `--- CASE FILE CONTEXT ---\n${params.caseContext}\n\n`;
+  }
+  userContent += `--- QUESTION ---\n${params.query}`;
 
-  const formatBlock = params.responseFormatInstruction
-    ? '\n\n' + params.responseFormatInstruction
-    : '';
-
-  const contextPrompt = `
-You are a legal research assistant specializing in Ontario employment law. You have knowledge of the Employment Standards Act, 2000, the Human Rights Code, the common law of wrongful dismissal, and Ontario Rules of Civil Procedure.
-
-Always cite cases with neutral citations (e.g., 2024 ONSC 1234). Never fabricate case citations. If you don't know a case, say so.
-When analyzing termination, consider: Bardal factors (age, length of service, character of employment, availability of similar employment), ESA minimums, any contractual termination clause and its enforceability after Waksdale.
-When discussing costs, reference the Ontario costs grid and partial/substantial indemnity scales.${formatBlock}
-
-Here's the relevant context:
-
-${contextParts.join('\n\n')}
-
-User Question: ${params.query}
-
-Provide a detailed, legally-informed response focusing on:
-1. Direct answer to the question
-2. Relevant legal considerations under Ontario law
-3. Citations to the provided documents and case law (neutral citations only)
-4. Practical next steps if applicable
-`;
-
-  const result = await chat.sendMessage(contextPrompt);
+  const result = await chat.sendMessage(userContent);
   const response = await result.response;
   const content = response.text();
 

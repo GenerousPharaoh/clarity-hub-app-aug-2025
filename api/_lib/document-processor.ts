@@ -188,8 +188,8 @@ export async function processFile(
 
     // 3. Extract text based on file type
     const fileType = file.file_type || detectFileType(file.name);
-    const extractedText = await extractText(fileData, fileType, file.name);
-    const sanitizedExtractedText = sanitizeTextForStorage(extractedText);
+    const extraction = await extractText(fileData, fileType, file.name);
+    const sanitizedExtractedText = sanitizeTextForStorage(extraction.text);
 
     if (!sanitizedExtractedText.trim().length) {
       const { error: emptyResultError } = await supabase
@@ -273,8 +273,17 @@ export async function processFile(
       console.error('Timeline extraction failed (non-fatal):', timelineError);
     }
 
-    // 7. Chunk text hierarchically
-    const chunks = chunkText(sanitizedExtractedText)
+    // 7. Chunk text hierarchically — feed structural signals from OCR when available
+    //    so retrieval can use section headings + page numbers
+    const chunkerOptions =
+      extraction.pageBreaks && extraction.sectionHeadings
+        ? {
+            pageBreaks: extraction.pageBreaks,
+            sectionHeadings: extraction.sectionHeadings,
+          }
+        : undefined;
+
+    const chunks = chunkText(sanitizedExtractedText, chunkerOptions)
       .map((chunk) => ({
         ...chunk,
         content: sanitizeTextForStorage(chunk.content),
@@ -430,14 +439,22 @@ export async function processFile(
   }
 }
 
+interface ExtractionResult {
+  text: string;
+  pageBreaks?: number[];
+  sectionHeadings?: Array<{ heading: string; offset: number }>;
+}
+
 /**
- * Extract text content from a file blob based on type.
+ * Extract text content from a file blob based on type. Returns the text
+ * plus any structural metadata (page boundaries, section headings) the
+ * extractor was able to recover — used by the chunker to improve retrieval.
  */
 async function extractText(
   blob: Blob,
   fileType: string,
   fileName: string
-): Promise<string> {
+): Promise<ExtractionResult> {
   switch (fileType) {
     case 'pdf':
       return extractPdfText(blob);
@@ -445,16 +462,15 @@ async function extractText(
       return extractImageText(blob, fileName);
     case 'audio':
     case 'video':
-      return transcribeAudio(blob, fileName);
+      return { text: await transcribeAudio(blob, fileName) };
     case 'text':
     case 'document':
-      return blob.text();
+      return { text: await blob.text() };
     default:
-      // Try text extraction as fallback
       try {
-        return await blob.text();
+        return { text: await blob.text() };
       } catch {
-        return '';
+        return { text: '' };
       }
   }
 }
@@ -464,12 +480,18 @@ async function extractText(
  * Primary: Mistral OCR (structured markdown with tables/headers preserved)
  * Fallback: pdf-parse → GPT-4.1 vision OCR
  */
-async function extractPdfText(blob: Blob): Promise<string> {
+async function extractPdfText(blob: Blob): Promise<ExtractionResult> {
   // Try Mistral OCR first (best quality — preserves structure, tables, headers)
   if (process.env.MISTRAL_API_KEY) {
     try {
-      const text = await extractWithMistralOCR(blob, 'document.pdf');
-      if (text.trim().length > 0) return text;
+      const ocr = await extractWithMistralOCR(blob, 'document.pdf');
+      if (ocr.text.trim().length > 0) {
+        return {
+          text: ocr.text,
+          pageBreaks: ocr.pageBreaks,
+          sectionHeadings: ocr.sectionHeadings,
+        };
+      }
     } catch (error) {
       console.error('Mistral OCR failed for PDF, falling back to pdf-parse:', error);
     }
@@ -483,7 +505,7 @@ async function extractPdfText(blob: Blob): Promise<string> {
 
     try {
       const result = await parser.getText();
-      return result.text || '';
+      return { text: result.text || '' };
     } finally {
       await parser.destroy();
     }
@@ -499,12 +521,18 @@ async function extractPdfText(blob: Blob): Promise<string> {
  * Primary: Mistral OCR (handles scanned docs, photos of text)
  * Fallback: GPT-4.1 vision OCR
  */
-async function extractImageText(blob: Blob, fileName: string): Promise<string> {
+async function extractImageText(blob: Blob, fileName: string): Promise<ExtractionResult> {
   // Try Mistral OCR first
   if (process.env.MISTRAL_API_KEY) {
     try {
-      const text = await extractWithMistralOCR(blob, fileName);
-      if (text.trim().length > 0) return text;
+      const ocr = await extractWithMistralOCR(blob, fileName);
+      if (ocr.text.trim().length > 0) {
+        return {
+          text: ocr.text,
+          pageBreaks: ocr.pageBreaks,
+          sectionHeadings: ocr.sectionHeadings,
+        };
+      }
     } catch (error) {
       console.error('Mistral OCR failed for image, falling back to GPT-4.1 vision:', error);
     }
@@ -538,7 +566,7 @@ async function extractImageText(blob: Blob, fileName: string): Promise<string> {
     max_tokens: 4096,
   });
 
-  return response.choices[0]?.message?.content || '';
+  return { text: response.choices[0]?.message?.content || '' };
 }
 
 /**

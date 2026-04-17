@@ -113,9 +113,47 @@ async function ocrWithImageUrl(
   return response.json();
 }
 
+export interface OCRResult {
+  text: string;
+  pageBreaks: number[]; // character offsets where each page starts
+  sectionHeadings: Array<{ heading: string; offset: number }>; // markdown headings with offsets
+}
+
+/**
+ * Extract headings (e.g. `# Foo`, `## Bar`) from a markdown string.
+ * Returns each heading's text and character offset within the string.
+ */
+function extractMarkdownHeadings(
+  markdown: string,
+  baseOffset: number
+): Array<{ heading: string; offset: number }> {
+  const headings: Array<{ heading: string; offset: number }> = [];
+  const lines = markdown.split('\n');
+  let offset = 0;
+
+  for (const line of lines) {
+    // Match ATX-style headings: `#`, `##`, `###`, up to `######`
+    const match = line.match(/^(#{1,6})\s+(.+?)\s*#*\s*$/);
+    if (match) {
+      const text = match[2].trim();
+      if (text.length > 0 && text.length < 200) {
+        headings.push({
+          heading: text,
+          offset: baseOffset + offset,
+        });
+      }
+    }
+    // +1 accounts for the newline removed by split
+    offset += line.length + 1;
+  }
+
+  return headings;
+}
+
 /**
  * Extract text from a PDF or image using Mistral OCR.
- * Returns structured markdown with page boundaries preserved.
+ * Returns structured markdown with page boundaries preserved, plus
+ * page-break offsets and section-heading offsets to feed the chunker.
  *
  * - PDFs: uploaded via Files API, then processed with file reference
  * - Images: sent directly as base64 data URI
@@ -123,7 +161,7 @@ async function ocrWithImageUrl(
 export async function extractWithMistralOCR(
   blob: Blob,
   fileName: string
-): Promise<string> {
+): Promise<OCRResult> {
   const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) {
     throw new Error('MISTRAL_API_KEY not configured');
@@ -136,11 +174,9 @@ export async function extractWithMistralOCR(
   let result: MistralOCRResponse;
 
   if (isPdf) {
-    // PDFs must be uploaded first, then referenced by file_id
     const fileId = await uploadToMistral(blob, fileName, apiKey);
     result = await ocrWithFileId(fileId, apiKey);
   } else {
-    // Images can use inline base64 data URI
     const buffer = Buffer.from(await blob.arrayBuffer());
     const base64 = buffer.toString('base64');
     const mimeType = blob.type || guessMimeType(fileName);
@@ -149,17 +185,37 @@ export async function extractWithMistralOCR(
   }
 
   if (!result.pages || result.pages.length === 0) {
-    return '';
+    return { text: '', pageBreaks: [], sectionHeadings: [] };
   }
 
-  // Concatenate all pages with page markers for the chunker
-  return result.pages
-    .map((page) => {
-      const pageMarker = `\n\n--- Page ${page.index + 1} ---\n\n`;
-      return pageMarker + (page.markdown || '').trim();
-    })
-    .join('')
-    .trim();
+  let combined = '';
+  const pageBreaks: number[] = [];
+  const sectionHeadings: Array<{ heading: string; offset: number }> = [];
+
+  for (const page of result.pages) {
+    const pageMarker = `\n\n--- Page ${page.index + 1} ---\n\n`;
+    // The page content starts after the marker
+    const markerStart = combined.length;
+    combined += pageMarker;
+    const contentStart = combined.length;
+
+    const pageMarkdown = (page.markdown || '').trim();
+    combined += pageMarkdown;
+
+    // Page break offset is where the page's actual content begins
+    // (after the marker). For the first page, ignore the leading empty prefix.
+    pageBreaks.push(markerStart === 0 ? 0 : contentStart);
+
+    // Extract headings from this page with the correct global offset
+    const pageHeadings = extractMarkdownHeadings(pageMarkdown, contentStart);
+    sectionHeadings.push(...pageHeadings);
+  }
+
+  return {
+    text: combined.trim(),
+    pageBreaks,
+    sectionHeadings,
+  };
 }
 
 function guessMimeType(fileName: string): string {

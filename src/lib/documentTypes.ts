@@ -176,3 +176,102 @@ export function getGroupedDocumentTypes(): Array<{
     types: getDocumentTypesByCategory(categoryKey),
   }));
 }
+
+/**
+ * Legal-significance score for a document type. Higher = more important to
+ * lead with when building AI context for case analysis, brief drafting, etc.
+ *
+ * The ordering reflects what a litigator would reach for first: operative
+ * orders and filings > sworn statements and pleadings > key contracts and
+ * termination docs > discovery > correspondence and background.
+ *
+ * Unknown/other types fall to the bottom but still rank above unclassified.
+ */
+const LEGAL_SIGNIFICANCE: Record<string, number> = {
+  // Operative / dispositive
+  judgment: 100,
+  reasons_for_decision: 98,
+  court_order: 96,
+  endorsement: 92,
+  regulatory_decision: 90,
+
+  // Foundational filings
+  statement_of_claim: 88,
+  statement_of_defence: 86,
+  counterclaim: 84,
+  reply: 80,
+  notice_of_motion: 78,
+  notice_of_application: 78,
+  factum: 76,
+  hrto_application: 88,
+  hrto_response: 84,
+
+  // Key employment documents (Ontario focus)
+  termination_letter: 92,
+  employment_contract: 90,
+  settlement_agreement: 88,
+  release: 84,
+  offer_to_settle: 80,
+  demand_letter: 78,
+  severance_package: 78,
+  offer_letter: 70,
+  resignation_letter: 68,
+  disciplinary_notice: 66,
+  performance_review: 60,
+  employment_policy: 58,
+  job_description: 50,
+
+  // Sworn / discovery
+  affidavit: 82,
+  sworn_statement: 78,
+  statutory_declaration: 74,
+  examination_transcript: 76,
+  expert_report: 74,
+  witness_statement: 72,
+  investigation_report: 70,
+  professional_complaint: 68,
+
+  // Medical (often tied to damages / disability claims)
+  ime_report: 72,
+  medical_report: 66,
+  disability_claim: 64,
+  medical_record: 60,
+  treatment_record: 56,
+
+  // Financial (damages)
+  financial_statement: 60,
+  roe: 58,
+  t4_slip: 50,
+  pay_stub: 48,
+  tax_return: 48,
+  bank_statement: 40,
+  invoice: 36,
+  expense_report: 34,
+
+  // Correspondence / background
+  legal_correspondence: 44,
+  internal_memo: 36,
+  email: 32,
+  text_message: 28,
+  letter: 34,
+
+  // Reference material
+  legislation: 40,
+  case_law: 40,
+
+  // Generic
+  contract: 50,
+  corporate_record: 36,
+  photograph: 30,
+  other: 10,
+};
+
+/**
+ * Get the legal-significance score for a document type. Used to sort
+ * documents when building AI context so the model sees the most
+ * load-bearing evidence first.
+ */
+export function getLegalSignificance(documentType: string | null | undefined): number {
+  if (!documentType) return 0;
+  return LEGAL_SIGNIFICANCE[documentType] ?? 10;
+}

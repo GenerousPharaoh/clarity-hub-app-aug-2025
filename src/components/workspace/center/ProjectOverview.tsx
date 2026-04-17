@@ -150,18 +150,126 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
       action?: () => void;
     }> = [];
 
+    // Empty state short-circuit
     if (fileCount === 0) {
       items.push({
         title: 'Attach source evidence',
         detail: 'Upload key records first.',
       });
-    } else if (processedCount < fileCount) {
+      if (noteCount === 0) {
+        items.push({
+          title: 'Create a strategy note',
+          detail: 'Capture issues while building the record.',
+          actionLabel: 'Open documents',
+          action: onSwitchTab ? () => onSwitchTab('editor') : undefined,
+        });
+      }
+      return items.slice(0, 3);
+    }
+
+    // Still-processing files are the most urgent blocker for any AI work
+    if (processedCount < fileCount) {
       items.push({
         title: 'Finish AI preparation',
-        detail: `${fileCount - processedCount} file${fileCount - processedCount === 1 ? '' : 's'} still need processing.`,
+        detail: `${fileCount - processedCount} file${fileCount - processedCount === 1 ? '' : 's'} still processing.`,
       });
     }
 
+    // Build a set of classified document types for gap detection
+    const types = new Set<string>();
+    let unclassified = 0;
+    for (const f of projectFiles) {
+      if (f.document_type && f.document_type !== 'other') {
+        types.add(f.document_type);
+      } else if (f.processing_status === 'completed') {
+        unclassified++;
+      }
+    }
+
+    // Infer matter type from the documents that are actually present
+    const isEmployment =
+      types.has('termination_letter') ||
+      types.has('employment_contract') ||
+      types.has('resignation_letter') ||
+      types.has('offer_letter') ||
+      types.has('severance_package') ||
+      types.has('roe');
+
+    const isLitigation =
+      types.has('statement_of_claim') ||
+      types.has('statement_of_defence') ||
+      types.has('notice_of_motion') ||
+      types.has('factum');
+
+    const isHRTO = types.has('hrto_application') || types.has('hrto_response');
+
+    // Evidence-gap recommendations — only surface gaps that fit the matter
+    if (isEmployment) {
+      if (!types.has('termination_letter') && !types.has('resignation_letter')) {
+        items.push({
+          title: 'Add the termination or resignation letter',
+          detail: 'End-of-employment document anchors the wrongful-dismissal analysis.',
+          actionLabel: 'Upload file',
+          action: onSwitchTab ? () => onSwitchTab('overview') : undefined,
+        });
+      }
+      if (!types.has('employment_contract') && !types.has('offer_letter')) {
+        items.push({
+          title: 'Upload the employment contract',
+          detail: 'Needed to assess termination clause enforceability post-Waksdale.',
+          actionLabel: 'Upload file',
+          action: onSwitchTab ? () => onSwitchTab('overview') : undefined,
+        });
+      }
+      if (!types.has('pay_stub') && !types.has('t4_slip') && !types.has('roe')) {
+        items.push({
+          title: 'Add compensation records',
+          detail: 'Pay stubs, T4s, or ROE quantify Bardal damages.',
+          actionLabel: 'Upload file',
+          action: onSwitchTab ? () => onSwitchTab('overview') : undefined,
+        });
+      }
+    }
+
+    if (isLitigation) {
+      if (types.has('statement_of_claim') && !types.has('statement_of_defence')) {
+        items.push({
+          title: 'Upload the statement of defence',
+          detail: 'Both pleadings are needed to frame the issues in dispute.',
+          actionLabel: 'Upload file',
+          action: onSwitchTab ? () => onSwitchTab('overview') : undefined,
+        });
+      }
+      if (!types.has('affidavit') && !types.has('sworn_statement')) {
+        items.push({
+          title: 'Add the supporting affidavit',
+          detail: 'Sworn evidence is required for motion or trial records.',
+          actionLabel: 'Upload file',
+          action: onSwitchTab ? () => onSwitchTab('overview') : undefined,
+        });
+      }
+    }
+
+    if (isHRTO && !types.has('investigation_report') && !types.has('professional_complaint')) {
+      items.push({
+        title: 'Add the investigation report or complaint',
+        detail: 'Underlying complaint record strengthens the Code section 34 narrative.',
+        actionLabel: 'Upload file',
+        action: onSwitchTab ? () => onSwitchTab('overview') : undefined,
+      });
+    }
+
+    if (unclassified >= 3) {
+      items.push({
+        title: `Classify ${unclassified} unlabeled file${unclassified === 1 ? '' : 's'}`,
+        detail: 'Labeling unlocks smarter filtering, exhibits, and case analysis.',
+        actionLabel: 'Open files',
+        action: onSwitchTab ? () => onSwitchTab('overview') : undefined,
+      });
+    }
+
+    // Workflow recommendations — fall back to these if the evidence gaps
+    // haven't filled the slot already.
     if (noteCount === 0) {
       items.push({
         title: 'Create a strategy note',
@@ -169,33 +277,38 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
         actionLabel: 'Open documents',
         action: onSwitchTab ? () => onSwitchTab('editor') : undefined,
       });
-    } else {
-      items.push({
-        title: 'Refine the working draft',
-        detail: `${noteCount} doc${noteCount === 1 ? '' : 's'} exist. Tighten into briefing.`,
-        actionLabel: 'Review documents',
-        action: onSwitchTab ? () => onSwitchTab('editor') : undefined,
-      });
     }
 
-    if (exhibitCount === 0) {
+    if (exhibitCount === 0 && processedCount >= 2) {
       items.push({
         title: 'Promote the best records to exhibits',
         detail: 'Mark strongest records as exhibits.',
         actionLabel: 'Open exhibits',
         action: onSwitchTab ? () => onSwitchTab('exhibits') : undefined,
       });
-    } else {
+    }
+
+    if (timelineCount === 0 && processedCount >= 2) {
       items.push({
-        title: 'Stress-test exhibit coverage',
-        detail: `${exhibitCount} exhibit${exhibitCount === 1 ? '' : 's'} marked. Check coverage.`,
-        actionLabel: 'Review exhibits',
-        action: onSwitchTab ? () => onSwitchTab('exhibits') : undefined,
+        title: 'Review the extracted timeline',
+        detail: 'Verify AI-extracted events and fill in gaps.',
+        actionLabel: 'Open timeline',
+        action: onSwitchTab ? () => onSwitchTab('timeline') : undefined,
+      });
+    }
+
+    // Fallback if nothing more specific to suggest
+    if (items.length === 0) {
+      items.push({
+        title: 'Refine the working draft',
+        detail: `${noteCount} doc${noteCount === 1 ? '' : 's'} drafted. Tighten into briefing.`,
+        actionLabel: 'Review documents',
+        action: onSwitchTab ? () => onSwitchTab('editor') : undefined,
       });
     }
 
     return items.slice(0, 3);
-  }, [exhibitCount, fileCount, noteCount, onSwitchTab, processedCount]);
+  }, [exhibitCount, fileCount, noteCount, onSwitchTab, processedCount, projectFiles, timelineCount]);
 
   const navigate = useNavigate();
 
@@ -364,7 +477,12 @@ export function ProjectOverview({ onSwitchTab }: ProjectOverviewProps = {}) {
 
         {/* Case Analysis */}
         {processedCount >= 2 && (
-          <CaseAnalysisCard projectId={selectedProjectId} fileCount={processedCount} />
+          <CaseAnalysisCard
+            projectId={selectedProjectId}
+            fileCount={processedCount}
+            cachedAnalysis={project.case_analysis ?? null}
+            cachedFileCount={project.case_analysis_file_count ?? 0}
+          />
         )}
 
         {/* Highlights Summary */}
@@ -945,20 +1063,35 @@ function SignalEmptyState({
 /**
  * Case Analysis Card — AI-powered structured case theory generation.
  * Analyzes all processed files to produce a comprehensive case assessment.
+ *
+ * Persists the most recent analysis on the project row so navigating away
+ * and back doesn't trigger an expensive re-run.
  */
 function CaseAnalysisCard({
   projectId,
   fileCount,
+  cachedAnalysis,
+  cachedFileCount,
 }: {
   projectId: string | null;
   fileCount: number;
+  cachedAnalysis: string | null;
+  cachedFileCount: number;
 }) {
-  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<string | null>(cachedAnalysis);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [analyzedFileCount, setAnalyzedFileCount] = useState<number>(0);
+  const [analyzedFileCount, setAnalyzedFileCount] = useState<number>(cachedFileCount);
+
+  // Sync when the cached value changes (switching projects, refetch)
+  useEffect(() => {
+    setAnalysis(cachedAnalysis);
+    setAnalyzedFileCount(cachedFileCount);
+    setAnalysisError(false);
+    setExpanded(false);
+  }, [cachedAnalysis, cachedFileCount, projectId]);
 
   // Detect if analysis is stale (more files now than when last analyzed)
   const isStale = analysis && !analysisError && analyzedFileCount > 0 && fileCount > analyzedFileCount;
@@ -971,21 +1104,33 @@ function CaseAnalysisCard({
 
     try {
       const { supabase } = await import('@/lib/supabase');
+      const { getLegalSignificance } = await import('@/lib/documentTypes');
 
       // Fetch all processed files with summaries and extracted text
-      const { data: files } = await supabase
+      const { data: rawFiles } = await supabase
         .from('files')
         .select('name, file_type, document_type, ai_summary, extracted_text')
         .eq('project_id', projectId)
         .eq('processing_status', 'completed')
         .is('is_deleted', false);
 
-      if (!files || files.length === 0) {
+      if (!rawFiles || rawFiles.length === 0) {
         setAnalysis('No processed files available for analysis.');
         return;
       }
 
-      // Build evidence summary — use ai_summary for all files, full text only for top 3
+      // Sort by legal significance: the first 3 slots (which get full
+      // extracted text instead of just the summary) should be the most
+      // load-bearing documents — termination letters, court orders,
+      // statements of claim, etc. — rather than whatever came back first
+      // from Supabase.
+      const files = [...rawFiles].sort(
+        (a, b) =>
+          getLegalSignificance(b.document_type) - getLegalSignificance(a.document_type)
+      );
+
+      // Build evidence summary — use full text for the top 3 most significant
+      // documents, AI summary only for the rest to keep the prompt manageable.
       const evidenceSummary = files.map((f, i) => {
         const docType = f.document_type ? ` [${f.document_type.replace(/_/g, ' ')}]` : '';
         const text = i < 3 && f.extracted_text
@@ -1039,9 +1184,42 @@ Base your analysis ONLY on the documents provided. Do not fabricate facts. If in
       if (!response.ok) throw new Error('Analysis request failed');
 
       const result = await response.json();
+      const now = new Date().toISOString();
       setAnalysis(result.response);
       setAnalyzedFileCount(files.length);
       setExpanded(true);
+
+      // Persist to the project row so a navigation away + back doesn't
+      // require re-running a multi-second, multi-dollar deep analysis.
+      try {
+        await supabase
+          .from('projects')
+          .update({
+            case_analysis: result.response,
+            case_analysis_at: now,
+            case_analysis_file_count: files.length,
+          })
+          .eq('id', projectId);
+
+        // Mirror the change into the Zustand store so the prop feeding this
+        // component reflects the cached value without waiting for a refetch.
+        const store = useAppStore.getState();
+        store.setProjects(
+          store.projects.map((p) =>
+            p.id === projectId
+              ? {
+                  ...p,
+                  case_analysis: result.response,
+                  case_analysis_at: now,
+                  case_analysis_file_count: files.length,
+                }
+              : p
+          )
+        );
+      } catch (persistErr) {
+        // Non-fatal — user still sees the result in memory for this session.
+        console.warn('Failed to persist case analysis:', persistErr);
+      }
     } catch (err) {
       setAnalysisError(true);
       setAnalysis(err instanceof Error ? err.message : 'Unknown error');

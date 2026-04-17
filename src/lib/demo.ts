@@ -72,6 +72,9 @@ function createSeedState(): DemoState {
         goal_type: 'Employment',
         created_at: '2026-02-18T14:10:00.000Z',
         updated_at: '2026-03-04T16:45:00.000Z',
+        case_analysis: null,
+        case_analysis_at: null,
+        case_analysis_file_count: null,
       },
       {
         id: 'demo-project-north-shore',
@@ -82,6 +85,9 @@ function createSeedState(): DemoState {
         goal_type: 'Accommodation',
         created_at: '2026-02-11T10:20:00.000Z',
         updated_at: '2026-03-03T12:30:00.000Z',
+        case_analysis: null,
+        case_analysis_at: null,
+        case_analysis_file_count: null,
       },
     ],
     files: [
@@ -363,6 +369,9 @@ export function createDemoProject(input: {
       goal_type: input.goalType?.trim() || null,
       created_at: now,
       updated_at: now,
+      case_analysis: null,
+      case_analysis_at: null,
+      case_analysis_file_count: null,
     };
 
     state.projects.unshift(project);
